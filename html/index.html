@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="custom radio file creator.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-control" content="public">
+  <title>radio.txt creator</title>
+  <link rel="stylesheet" href="./css/reset.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link defer
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="./css/base.css">
+</head>
+
+<body>
+  <button id="add_button" class="fab" type="button" title="add station">
+    <svg viewBox="0 0 24 24">
+      <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+    </svg>
+  </button>
+  <div class="card">
+    <h1>radio.txt creator</h1>
+    <p><span id="count">0</span> stations selected</p>
+    <div class="form-group">
+      <input placeholder="Filter by genre:" type="text" id="filter" name="filter">
+      <label for="filter">Filter by genre:</label>
+    </div>
+    <br/>
+    <button class="button close" type="button" id="download" disabled title="download text file">
+      <svg viewBox="0 -960 960 960">
+        <path fill="currentColor"
+          d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+      </svg>
+      <span>download</span>
+    </button>
+  </div>
+  <p><span id='station-count'>0</span> results</p>
+  <ul id="stations"></ul>
+  <div class="player">
+    <span id="name">station name</span>
+    <div class="small-button">
+      <svg viewBox="0 -960 960 960" id="play-button">
+        <path fill="currentColor"
+          d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z" />
+      </svg>
+    </div>
+  </div>
+  <dialog id='greeting'>
+    <h1>radio.txt creator</h1>
+    <p>
+      A website for creating a custom radio text file for use with <a
+        href="https://store.hiby.com/collections/music-player">Hiby</a> digital
+      audio players.
+    </p>
+    <p>
+      To use the site filter stations by genre (ie. hiphop, jazz) then select (left click: select, right click: play)
+      all the stations you would like included in your radio.txt. When you are happy with your list press download
+      and save the text file to the root directory of the storage for your Hiby player.
+    </p>
+    <button class="button close" type="button" autofocus>
+      <svg viewBox="0 0 24 24">
+        <path fill="currentColor"
+          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+      </svg>
+      <span>close</span>
+    </button>
+  </dialog>
+  <dialog id="add">
+    <div>
+      <h1>add station</h1>
+      <p>feature to come soon</p>
+      <div class="form-group">
+        <input disabled placeholder="Station name:" type="text" id="station-name" name="station-name">
+        <label for="station-name">Station name:</label>
+      </div>
+      <div class="form-group">
+        <input disabled placeholder="Station URL:" type="url" id="station-url" name="station-url">
+        <label for="station-url">Station URL:</label>
+      </div>
+    </div>
+    <button class="button" type="button" disabled>
+      <svg viewBox="0 0 24 24">
+        <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+      </svg>
+      <span>add</span>
+    </button>
+    <button class="button close" type="button" autofocus>
+      <svg viewBox="0 0 24 24">
+        <path fill="currentColor"
+          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+      </svg>
+      <span>close</span>
+    </button>
+  </dialog>
+  <script async src="./js/main.js"></script>
+</body>
+
+</html>

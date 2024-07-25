@@ -1,0 +1,21 @@
+{
+  "name": "customradio",
+  "version": "1.0.0",
+  "description": "build custion radio.txt from for use on hiby audio players",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dough10",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "compression": "^1.7.4",
+    "express": "^4.19.2",
+    "express-validator": "^7.1.0",
+    "mongodb": "^6.8.0",
+    "node-schedule": "^2.1.1",
+    "validator": "^13.12.0"
+  }
+}
