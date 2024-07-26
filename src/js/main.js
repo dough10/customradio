@@ -164,9 +164,9 @@ setInterval(_ => {
 }, 500);
 
 
-function selectEl(ev) {
+function toggleSelect(ev) {
   const dlButton = document.querySelector('#download');
-  const el = ev.target;
+  const el = ev.target.parentElement;
   el.toggleAttribute('selected')
   const all = el.parentNode.querySelectorAll('li[selected]');
   const count = document.querySelector('#count');
@@ -195,20 +195,18 @@ function stamp() {
  * @returns {void}
  */
 async function dlTxt() {
-  const dlButton = document.querySelector('#download');
-  if (dlButton.hasAttribute('disabled')) return;
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
-  const selected = elements.map(el => {
+  const str = elements.map(el => {
     return {
-      name: el.textContent,
+      name: el.title,
       url: el.dataset.url
     };
-  }).sort((a, b) => a.name.localeCompare(b.name));
-  const str = selected.map(el => `${el.name}, ${el.url}`);
-  const blob = new Blob([
-    `${stamp()}${str.join('\n')}`
-  ], {
+  })
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map(el => `${el.name}, ${el.url}`).join('\n');
+
+  const blob = new Blob([`${stamp()}${str}`], {
     type: 'text/plain'
   });
   const filename = 'radio.txt';
@@ -237,16 +235,102 @@ function reset() {
 }
 
 
-function context(ev) {
+function playStream(ev) {
   ev.preventDefault();
+  const el = ev.target.parentElement;
   const miniPlayer = document.querySelector('.player');
   if (!miniPlayer.hasAttribute('playing')) {
     miniPlayer.toggleAttribute('playing');
   }
-  document.querySelector('#name').textContent = ev.target.textContent;
-  player.src = ev.target.dataset.url;
+  document.querySelector('#name').textContent = el.title;
+  player.src = el.dataset.url;
   player.load();
   player.play();
+}
+
+/**
+ * creates an SVG icon 
+ * 
+ * 
+ * @param {String} viewbox
+ * @param {String} d
+ * 
+ * @returns {HTMLElement} SVG element with nested path
+ */
+function svgIcon(viewbox, d) {
+  const path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+  path.setAttribute("d", d);
+  path.setAttribute('fill', 'currentColor');
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+  svg.appendChild(path);
+  svg.setAttribute('viewBox', viewbox);
+
+  return svg;
+}
+
+/**
+ * creates a HTML button with svg icon 
+ * 
+ * @function
+ * 
+ * @param {String} viewbox
+ * @param {String} d
+ * 
+ * @returns {HTMLElement} button
+ */
+function createSmallButton({ viewbox, d, cssClass, func }) {
+  const button = document.createElement('button');
+  button.classList.add(cssClass);
+  button.classList.add('small-button');
+  button.appendChild(svgIcon(viewbox, d));
+  button.addEventListener('click', func);
+  return button;
+}
+
+/**
+ * creates a list element for a online radio station
+ * 
+ * @function
+ * 
+ * @param {Object}
+ * @param {String} name 
+ * @param {String} url
+ * @param {String} genre
+ * 
+ * @returns {HTMLElement} li element
+ */
+function createStationElement({ name, url, genre }) {
+  const buttonData = [
+    {
+      viewbox: '0 -960 960 960',
+      d: 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z',
+      cssClass: 'play',
+      func: playStream
+    },
+    {
+      viewbox: '0 0 24 24',
+      d: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',
+      cssClass: 'add',
+      func: toggleSelect
+    },
+    {
+      viewbox: '0 -960 960 960',
+      d:'M200-440v-80h560v80H200Z',
+      cssClass: 'remove',
+      func: toggleSelect
+    }
+  ];
+
+  const span = document.createElement('span');
+  span.textContent = name;
+  const buttons = buttonData.map(createSmallButton);
+  const li = document.createElement('li');
+  li.title = name;
+  li.dataset.url = url;
+  li.dataset.genre = genre;
+  [span, ...buttons].forEach(el => li.appendChild(el));
+  return li;
 }
 
 /**
@@ -261,21 +345,16 @@ function context(ev) {
  */
 function lazyLoadOnScroll(list, scrollEl) {
   let ndx = 0;
-  let pullNumber = 25;
+  let pullNumber = 20;
   let loading = false;
   function load() {
     if (loading || ndx >= list.length) return;
     loading = true;
-    const slices = list.slice(ndx, ndx + pullNumber);
     const fragment = document.createDocumentFragment();
+    const slices = list.slice(ndx, ndx + pullNumber);
     slices.forEach(slice => {
-      const el = document.createElement('li');
-      el.textContent = slice.name.replace(/,/g, '');
-      el.dataset.url = slice.url;
-      el.dataset.genre = slice.genre;
-      el.addEventListener('click', selectEl);
-      el.addEventListener('contextmenu', context);
-      fragment.appendChild(el);
+      slice.name = slice.name.replace(/,/g, '');
+      fragment.appendChild(createStationElement(slice));
     });
     scrollEl.appendChild(fragment);
     ndx += pullNumber;
@@ -309,10 +388,10 @@ async function filterChanged(ev) {
     const container = document.querySelector('#stations');
     const selectedElements = Array.from(container.querySelectorAll('li[selected]'));
     const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
+    const list = stations.filter(station => !selectedUrls.has(station.url));
+    
     container.innerHTML = '';
     selectedElements.forEach(el => container.appendChild(el));
-    const notSelected = stations.filter(station => !selectedUrls.has(station.url));
-    const list = notSelected.sort((a, b) => a.name.localeCompare(b.name));
     lazyLoadOnScroll(list, container);
     container.scrollTop = 0;
   } catch (error) {
