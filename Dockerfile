@@ -4,14 +4,15 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
+COPY . .
+
 ENV TZ="America/Chicago"
 
 RUN date
 RUN npm install
 RUN apt-get update
 RUN apt-get install nano -y
-
-COPY . .
+RUN npx webpack
 
 EXPOSE 3000/tcp
 

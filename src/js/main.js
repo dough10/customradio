@@ -1,6 +1,7 @@
-const player = new Audio();
+import '../css/reset.css';
+import '../css/base.css';
 
-const selected = [];
+const player = new Audio();
 
 let pauseTimer = 0;
 
