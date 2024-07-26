@@ -107,7 +107,7 @@ app.get('/stations', [
     },
     {
       projection: { _id: 0, name: 1, url: 1 , genre: 1}
-    }).toArray()
+    }).sort({ name: 1 }).toArray()
     log(`${req.ip} -> /stations?genres=${genres.join(',')}, ${stations.length} stations returned`);
     res.json(stations);
   } catch(err) {
