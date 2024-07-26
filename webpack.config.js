@@ -7,44 +7,44 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
   mode: 'production',
-  entry: './src/js/main.js', // Entry point for JavaScript
+  entry: './src/js/main.js',
   output: {
-    filename: 'bundle.min.js', // Output JavaScript file
-    path: path.resolve(__dirname, 'html'), // Output directory
+    filename: 'bundle.min.js',
+    path: path.resolve(__dirname, 'html'),
   },
   module: {
     rules: [
       {
-        test: /\.css$/, // Apply to .css files
+        test: /\.css$/,
         use: [
-          MiniCssExtractPlugin.loader, // Extract CSS into a separate file
-          'css-loader', // Process CSS files
+          MiniCssExtractPlugin.loader,
+          'css-loader',
         ],
       },
       {
-        test: /\.js$/, // Apply to .js files
-        exclude: /node_modules/, // Exclude node_modules directory
+        test: /\.js$/,
+        exclude: /node_modules/, 
         use: {
-          loader: 'babel-loader', // Transpile JavaScript files
+          loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env'], // Use Babel preset for JavaScript
+            presets: ['@babel/preset-env'],
           },
         },
       },
     ],
   },
   optimization: {
-    minimize: true, // Minify the output files
+    minimize: true, 
     minimizer: [
-      new TerserPlugin(), // Minify JavaScript
-      new CssMinimizerPlugin(), // Minify CSS
+      new TerserPlugin(),
+      new CssMinimizerPlugin(), 
     ],
   },
   plugins: [
-    new CleanWebpackPlugin(), // Clean the output directory before each build
+    new CleanWebpackPlugin(), 
     new HtmlWebpackPlugin({
-      template: './src/index.html', // Template HTML file
-      inject: 'body', // Inject script tags into the body of the HTML
+      template: './src/index.html', 
+      inject: 'body', 
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -54,7 +54,7 @@ module.exports = {
       },
     }),
     new MiniCssExtractPlugin({
-      filename: 'styles.min.css', // Output CSS file
+      filename: 'styles.min.css', 
     }),
   ],
 };
