@@ -514,11 +514,11 @@ player.onpause = _ => {
 player.ontimeupdate = async _ => {
   const last = document.querySelector('#stations>li[playing]');
   if (last) last.removeAttribute('playing');
+  console.log(`[data-url="${player.src}"]`);
   const playing = document.querySelector(`[data-url="${player.src}"]`);
   if (playing && !playing.hasAttribute('playing')) {
     playing.toggleAttribute('playing');
   }
-  // console.log(player.currentTime, player.duration);
 };
 
 
