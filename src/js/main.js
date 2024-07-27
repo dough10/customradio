@@ -163,7 +163,13 @@ setInterval(_ => {
   _toastCache.splice(0, 1);
 }, 500);
 
-
+/**
+ * toggles selected attribute
+ * 
+ * @param {Event} ev
+ * 
+ * @returns {void} 
+ */
 function toggleSelect(ev) {
   const dlButton = document.querySelector('#download');
   const el = ev.target.parentElement;
@@ -203,8 +209,8 @@ async function dlTxt() {
       url: el.dataset.url
     };
   })
-  .sort((a, b) => a.name.localeCompare(b.name))
-  .map(el => `${el.name}, ${el.url}`).join('\n');
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(el => `${el.name}, ${el.url}`).join('\n');
 
   const blob = new Blob([`${stamp()}${str}`], {
     type: 'text/plain'
@@ -234,7 +240,15 @@ function reset() {
   elements.forEach(el => el.removeAttribute('selected'));
 }
 
-
+/**
+ * plays stream when button is clicked
+ * 
+ * @function
+ * 
+ * @param {Event} ev
+ * 
+ * @returns {void} 
+ */
 function playStream(ev) {
   ev.preventDefault();
   const el = ev.target.parentElement;
@@ -243,6 +257,7 @@ function playStream(ev) {
     miniPlayer.toggleAttribute('playing');
   }
   document.querySelector('#name').textContent = el.title;
+  new Toast(`Playing ${el.title}`);
   player.src = el.dataset.url;
   player.load();
   player.play();
@@ -251,21 +266,21 @@ function playStream(ev) {
 /**
  * creates an SVG icon 
  * 
+ * @function
  * 
- * @param {String} viewbox
- * @param {String} d
+ * @param {Object} icon - Object containing SVG attributes.
+ * @param {String} icon.viewbox - The viewBox attribute for the SVG element.
+ * @param {String} icon.d - The path data for the SVG path element.
  * 
  * @returns {HTMLElement} SVG element with nested path
  */
-function svgIcon(viewbox, d) {
+function svgIcon({ viewbox, d }) {
   const path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
   path.setAttribute("d", d);
-  path.setAttribute('fill', 'currentColor');
-
   const svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
-  svg.appendChild(path);
+  svg.setAttribute('fill', 'currentColor');
   svg.setAttribute('viewBox', viewbox);
-
+  svg.appendChild(path);
   return svg;
 }
 
@@ -274,16 +289,19 @@ function svgIcon(viewbox, d) {
  * 
  * @function
  * 
- * @param {String} viewbox
- * @param {String} d
+ * @param {Object} buttonData - Object containing button details.
+ * @param {Object} buttonData.icon - Object containing SVG attributes.
+ * @param {String} buttonData.icon.viewbox - The viewBox attribute for the SVG element.
+ * @param {String} buttonData.icon.d - The path data for the SVG path element.
+ * @param {String} buttonData.cssClass - The CSS class to be added to the button.
+ * @param {Function} buttonData.func - The function to be called on button click.
  * 
  * @returns {HTMLElement} button
  */
-function createSmallButton({ viewbox, d, cssClass, func }) {
+function createSmallButton({ icon, cssClass, func }) {
   const button = document.createElement('button');
-  button.classList.add(cssClass);
-  button.classList.add('small-button');
-  button.appendChild(svgIcon(viewbox, d));
+  button.classList.add('small-button', cssClass);
+  button.appendChild(svgIcon(icon));
   button.addEventListener('click', func);
   return button;
 }
@@ -293,39 +311,45 @@ function createSmallButton({ viewbox, d, cssClass, func }) {
  * 
  * @function
  * 
- * @param {Object}
- * @param {String} name 
- * @param {String} url
- * @param {String} genre
+ * @param {Object} station - Object containing station details.
+ * @param {String} station.name - The name of the station.
+ * @param {String} station.url - The URL of the station.
+ * @param {String} station.genre - The genre of the station.
  * 
  * @returns {HTMLElement} li element
  */
 function createStationElement({ name, url, genre }) {
   const buttonData = [
     {
-      viewbox: '0 -960 960 960',
-      d: 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z',
+      icon: {
+        viewbox: '0 -960 960 960',
+        d: 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z'
+      },
       cssClass: 'play',
       func: playStream
-    },
-    {
-      viewbox: '0 0 24 24',
-      d: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',
+    }, {
+      icon: {
+        viewbox: '0 0 24 24',
+        d: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'
+      },
       cssClass: 'add',
       func: toggleSelect
-    },
-    {
-      viewbox: '0 -960 960 960',
-      d:'M200-440v-80h560v80H200Z',
+    }, {
+      icon: {
+        viewbox: '0 -960 960 960',
+        d: 'M200-440v-80h560v80H200Z'
+      },
       cssClass: 'remove',
       func: toggleSelect
     }
   ];
 
   const span = document.createElement('span');
-  span.textContent = name;
   const buttons = buttonData.map(createSmallButton);
   const li = document.createElement('li');
+
+  span.textContent = name;
+
   li.title = name;
   li.dataset.url = url;
   li.dataset.genre = genre;
@@ -384,12 +408,11 @@ async function filterChanged(ev) {
       return;
     }
     const stations = await res.json();
-    document.querySelector('#station-count').textContent = stations.length;
     const container = document.querySelector('#stations');
     const selectedElements = Array.from(container.querySelectorAll('li[selected]'));
     const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
     const list = stations.filter(station => !selectedUrls.has(station.url));
-    
+    document.querySelector('#station-count').textContent = stations.length;
     container.innerHTML = '';
     selectedElements.forEach(el => container.appendChild(el));
     lazyLoadOnScroll(list, container);
@@ -452,6 +475,19 @@ player.onplaying = _ => {
 };
 
 /**
+ * clears interface of playing stream
+ * 
+ * @function
+ * 
+ * @returns {void}
+ */
+function clearPlaying() {
+  document.querySelector('.player').removeAttribute('playing');
+  const all = document.querySelectorAll('#stations>li');
+  all.forEach(el => el.removeAttribute('playing'));
+}
+
+/**
  * audio paused callback
  * 
  * @function
@@ -461,13 +497,28 @@ player.onplaying = _ => {
  * @returns {void}
  */
 player.onpause = _ => {
-  pauseTimer = setTimeout(_ => {
-    document.querySelector('.player').removeAttribute('playing');
-  }, 30000);
+  pauseTimer = setTimeout(clearPlaying, 10000);
   const icon = document.querySelector('.player>.small-button>svg>path');
   if (!icon) return;
   icon.parentElement.classList.remove('spin');
   icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
+};
+
+/**
+ * player.currentTime updated
+ * 
+ * @param {void} _
+ * 
+ * @returns {void} 
+ */
+player.ontimeupdate = async _ => {
+  const last = document.querySelector('#stations>li[playing]');
+  if (last) last.removeAttribute('playing');
+  const playing = document.querySelector(`[data-url="${player.src}"]`);
+  if (playing && !playing.hasAttribute('playing')) {
+    playing.toggleAttribute('playing');
+  }
+  // console.log(player.currentTime, player.duration);
 };
 
 
