@@ -363,16 +363,16 @@ function createStationElement({ name, url, genre }) {
  * @function
  * 
  * @param {Array} list 
- * @param {HTMLElement} scrollEl
+ * @param {HTMLElement} container
  * 
  * @returns {void} 
  */
-function lazyLoadOnScroll(list, scrollEl) {
+function lazyLoadOnScroll(list, container) {
   let ndx = 0;
   let pullNumber = 20;
   let loading = false;
   let lastTop = 0;
-  const parent = scrollEl.parentElement;
+  const parent = container.parentElement;
   const toTop = document.querySelector('.to-top');
   function load() {
     if (loading || ndx >= list.length) return;
@@ -383,7 +383,7 @@ function lazyLoadOnScroll(list, scrollEl) {
       slice.name = slice.name.replace(/,/g, '');
       fragment.appendChild(createStationElement(slice));
     });
-    scrollEl.appendChild(fragment);
+    container.appendChild(fragment);
     ndx += pullNumber;
     loading = false;
   }
