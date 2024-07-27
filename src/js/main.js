@@ -371,6 +371,9 @@ function lazyLoadOnScroll(list, scrollEl) {
   let ndx = 0;
   let pullNumber = 20;
   let loading = false;
+  let lastTop = 0;
+  const parent = scrollEl.parentElement;
+  const toTop = document.querySelector('.to-top');
   function load() {
     if (loading || ndx >= list.length) return;
     loading = true;
@@ -384,8 +387,16 @@ function lazyLoadOnScroll(list, scrollEl) {
     ndx += pullNumber;
     loading = false;
   }
-  scrollEl.onscroll = _ => {
-    if (scrollEl.scrollTop / (scrollEl.scrollHeight - scrollEl.clientHeight) >= 0.9) {
+  parent.onscroll = _ => {
+    if (parent.scrollTop < lastTop) {
+      toTop.classList.add('hidden');
+    } else if (parent.scrollTop > 0) {
+      toTop.classList.remove('hidden');
+    } else {
+      toTop.classList.add('hidden');
+    }
+    lastTop = parent.scrollTop;
+    if (parent.scrollTop / (parent.scrollHeight - parent.clientHeight) >= 0.9) {
       load();
     }
   };
@@ -412,9 +423,11 @@ async function filterChanged(ev) {
     const selectedElements = Array.from(container.querySelectorAll('li[selected]'));
     const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
     const list = stations.filter(station => !selectedUrls.has(station.url));
+    const fragment = document.createDocumentFragment();
     document.querySelector('#station-count').textContent = stations.length;
     container.innerHTML = '';
-    selectedElements.forEach(el => container.appendChild(el));
+    selectedElements.forEach(el => fragment.appendChild(el));
+    container.appendChild(fragment);
     lazyLoadOnScroll(list, container);
     container.scrollTop = 0;
   } catch (error) {
@@ -514,7 +527,7 @@ player.onpause = _ => {
 player.ontimeupdate = async _ => {
   const last = document.querySelector('#stations>li[playing]');
   if (last) last.removeAttribute('playing');
-  console.log(`[data-url="${player.src}"]`);
+  // console.log(`[data-url="${player.src}"]`);
   const playing = document.querySelector(`[data-url="${player.src}"]`);
   if (playing && !playing.hasAttribute('playing')) {
     playing.toggleAttribute('playing');
@@ -540,6 +553,14 @@ window.onload = async _ => {
 
   document.querySelector('body').appendChild(player);
   document.querySelector('.player>.small-button').addEventListener('click', togglePlay);
+
+  const wrapper = document.querySelector('.wrapper');
+  const toTop = document.querySelector('.to-top');
+
+  toTop.addEventListener('click', _ => wrapper.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  }));
 
   await sleep(100);
   document.querySelector('#greeting').showModal();

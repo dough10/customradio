@@ -20,25 +20,29 @@
       <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
     </svg>
   </button>
-  <div class="card">
-    <div>
-      <h1>radio.txt creator</h1>
-      <p><span id="count">0</span> stations selected</p>
-      <div class="form-group">
-        <input placeholder="Filter by genre:" type="text" id="filter" name="filter">
-        <label for="filter">Filter by genre:</label>
+  <div class="wrapper">
+    <header>
+      <div class="card">
+        <div>
+          <h1>radio.txt creator</h1>
+          <p><span id="count">0</span> stations selected</p>
+          <div class="form-group">
+            <input placeholder="Filter by genre:" type="text" id="filter" name="filter">
+            <label for="filter">Filter by genre:</label>
+          </div>
+        </div>
+        <button class="button close" type="button" id="download" disabled title="download text file">
+          <svg viewBox="0 -960 960 960">
+            <path fill="currentColor"
+              d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+          </svg>
+          <span>download</span>
+        </button>
       </div>
-    </div>
-    <button class="button close" type="button" id="download" disabled title="download text file">
-      <svg viewBox="0 -960 960 960">
-        <path fill="currentColor"
-          d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
-      </svg>
-      <span>download</span>
-    </button>
+      <p><span id='station-count'>0</span> results</p>
+    </header>
+    <ul id="stations"></ul>
   </div>
-  <p><span id='station-count'>0</span> results</p>
-  <ul id="stations"></ul>
   <div class="player">
     <span id="name">station name</span>
     <div class="small-button">
@@ -47,6 +51,11 @@
           d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z" />
       </svg>
     </div>
+  </div>
+  <div class="to-top small-button hidden">
+    <svg viewBox="0 0 24 24">
+      <path fill="currentColor" d="M15,20H9V12H4.16L12,4.16L19.84,12H15V20Z" />
+    </svg>
   </div>
   <dialog id='greeting'>
     <h1>radio.txt creator</h1>
