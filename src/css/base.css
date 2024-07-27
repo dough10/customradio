@@ -103,6 +103,7 @@ a {
   flex-direction: row;
   border: none;
   overflow: visible;
+  outline: inherit;
 }
 
 .button:after {
@@ -271,6 +272,7 @@ svg {
   -webkit-tap-highlight-color: transparent;
   box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
   z-index: 2;
+  outline: inherit;
 }
 
 .fab>* {
@@ -558,7 +560,10 @@ input:focus {
   border-radius: 50%;
   transform: translate3d(0, 0, 0);
   border: none;
-  background: transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  outline: inherit;
 }
 
 .small-button[disabled] {
