@@ -191,7 +191,7 @@ svg {
 }
 
 #stations>li {
-  margin:auto;
+  margin: auto;
   max-width: 500px;
   padding: 0.5em;
   display: flex;
@@ -226,8 +226,21 @@ svg {
   display: none;
 }
 
+#stations>li[playing] {
+  background: rgba(var(--pop-rgb), 0.4);
+}
+
+#stations>li[playing]>.play {
+  display: none;
+}
+
 #stations>li[selected]>.remove {
   display: block;
+}
+
+#stations>li[selected][playing] {
+  background: var(--pop-color);
+  color: var(--contrast-color)
 }
 
 #stations>li[selected]>.add {
