@@ -304,11 +304,14 @@ function svgIcon({ viewbox, d }) {
  * @param {String} buttonData.icon.d - The path data for the SVG path element.
  * @param {String} buttonData.cssClass - The CSS class to be added to the button.
  * @param {Function} buttonData.func - The function to be called on button click.
+ * @param {String} buttonData.title - The button's title.
  * 
  * @returns {HTMLElement} button
  */
-function createSmallButton({ icon, cssClass, func }) {
+function createSmallButton({ icon, cssClass, func, title }) {
   const button = document.createElement('button');
+  button.title = title;
+  button.type = 'button';
   button.classList.add('small-button', cssClass);
   button.appendChild(svgIcon(icon));
   button.addEventListener('click', func);
@@ -335,21 +338,24 @@ function createStationElement({ name, url, genre }) {
         d: 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z'
       },
       cssClass: 'play',
-      func: playStream
+      func: playStream,
+      title: 'Play Stream'
     }, {
       icon: {
         viewbox: '0 0 24 24',
         d: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'
       },
       cssClass: 'add',
-      func: toggleSelect
+      func: toggleSelect,
+      title: 'Add to file'
     }, {
       icon: {
         viewbox: '0 -960 960 960',
         d: 'M200-440v-80h560v80H200Z'
       },
       cssClass: 'remove',
-      func: toggleSelect
+      func: toggleSelect,
+      title: 'Remove from file'
     }
   ];
 
