@@ -451,13 +451,17 @@ dialog[open] {
   pointer-events: all;
 }
 
-::backdrop {
+dialog::backdrop {
   z-index: 1;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
+  /* animation: hide-it var(--animate-200, 200ms) linear forwards; */
 }
 
+/* dialog[open]::backdrop {
+  animation: show-it var(--animate-200, 200ms) linear forwards;
+} */
 
 .form-group {
   position: relative;
@@ -594,16 +598,16 @@ input:focus {
   bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  animation: show-it var(--animate-150, 150ms) linear;
-  opacity: 1;
-  display: block;
+  animation: show-it var(--animate-150, 150ms) linear forwards;
   transition: transform var(--animate-150, 150ms) linear;
 }
 
 .hidden {
-  animation: hide-it var(--animate-150, 150ms) linear;
-  opacity: 0;
-  display: none;
+  animation: hide-it var(--animate-150, 150ms) linear forwards;
+}
+
+.player[playing]~.to-top {
+  transform: translateY(-70px) translateX(-50%);
 }
 
 @keyframes hide-it {
@@ -628,8 +632,4 @@ input:focus {
     display: block;
     opacity: 1
   }
-}
-
-.player[playing]~.to-top {
-  transform: translateY(-70px) translateX(-50%);
 }

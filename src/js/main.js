@@ -433,12 +433,12 @@ async function filterChanged(ev) {
     const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
     const list = stations.filter(station => !selectedUrls.has(station.url));
     const fragment = document.createDocumentFragment();
-    document.querySelector('#station-count').textContent = stations.length;
-    container.innerHTML = '';
     selectedElements.forEach(el => fragment.appendChild(el));
+    container.innerHTML = '';
+    container.scrollTop = 0;
     container.appendChild(fragment);
     lazyLoadOnScroll(list, container);
-    container.scrollTop = 0;
+    document.querySelector('#station-count').textContent = stations.length;
   } catch (error) {
     console.error('Error fetching stations:', error);
     new Toast('Error fetching stations:', error);
