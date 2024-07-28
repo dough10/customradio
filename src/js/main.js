@@ -339,7 +339,7 @@ function createStationElement({ name, url, genre }) {
       },
       cssClass: 'play',
       func: playStream,
-      title: 'Play Stream'
+      title: 'Play stream'
     }, {
       icon: {
         viewbox: '0 0 24 24',
@@ -384,7 +384,7 @@ function createStationElement({ name, url, genre }) {
  */
 function lazyLoadOnScroll(list, container) {
   let ndx = 0;
-  let pullNumber = 20;
+  let pullNumber = Math.round(window.innerHeight / 58);
   let loading = false;
   let lastTop = 0;
   function load() {
@@ -400,6 +400,13 @@ function lazyLoadOnScroll(list, container) {
     ndx += pullNumber;
     loading = false;
   }
+  window.addEventListener('resize', _ => {
+    const adjusted = Math.round(window.innerHeight / 58);
+    if (adjusted > pullNumber) {
+      pullNumber = adjusted - pullNumber;
+      load();
+    }
+  });
   const parent = container.parentElement;
   const toTop = document.querySelector('.to-top');
   parent.onscroll = _ => {
