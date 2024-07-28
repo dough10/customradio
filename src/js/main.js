@@ -147,6 +147,9 @@ class Toast {
   }
 }
 
+/**
+ * infinite loop to look if cached toast messages to be displayed
+ */
 setInterval(_ => {
   if (!_toastCache.length) {
     return;
@@ -186,7 +189,13 @@ function toggleSelect(ev) {
   }
 }
 
-
+/**
+ * tag file with date and origin
+ * 
+ * @function
+ * 
+ * @returns {String}
+ */
 function stamp() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
@@ -344,12 +353,12 @@ function createStationElement({ name, url, genre }) {
     }
   ];
 
-  const span = document.createElement('span');
   const buttons = buttonData.map(createSmallButton);
-  const li = document.createElement('li');
-
+  
+  const span = document.createElement('span');
   span.textContent = name;
-
+  
+  const li = document.createElement('li');
   li.title = name;
   li.dataset.url = url;
   li.dataset.genre = genre;
@@ -372,13 +381,11 @@ function lazyLoadOnScroll(list, container) {
   let pullNumber = 20;
   let loading = false;
   let lastTop = 0;
-  const parent = container.parentElement;
-  const toTop = document.querySelector('.to-top');
   function load() {
     if (loading || ndx >= list.length) return;
     loading = true;
-    const fragment = document.createDocumentFragment();
     const slices = list.slice(ndx, ndx + pullNumber);
+    const fragment = document.createDocumentFragment();
     slices.forEach(slice => {
       slice.name = slice.name.replace(/,/g, '');
       fragment.appendChild(createStationElement(slice));
@@ -387,6 +394,8 @@ function lazyLoadOnScroll(list, container) {
     ndx += pullNumber;
     loading = false;
   }
+  const parent = container.parentElement;
+  const toTop = document.querySelector('.to-top');
   parent.onscroll = _ => {
     if (parent.scrollTop < lastTop) {
       toTop.classList.add('hidden');
