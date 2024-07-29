@@ -182,11 +182,11 @@ function toggleSelect(ev) {
   count.textContent = all.length;
   if (all.length) {
     dlButton.removeAttribute('disabled');
-    if (_paq) _paq.push(['trackEvent', 'Button', 'Click', 'Remove from file', el.dataset.url])
+    if (_paq) _paq.push(['trackEvent', 'Button', 'Remove from file', el.dataset.url])
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
-      if (_paq) _paq.push(['trackEvent', 'Button', 'Click', 'Add to file', el.dataset.url]);
+      if (_paq) _paq.push(['trackEvent', 'Button', 'Add to file', el.dataset.url]);
     }
   }
 }
@@ -273,7 +273,7 @@ function playStream(ev) {
   player.src = el.dataset.url;
   player.load();
   player.play();
-  if (_paq) _paq.push(['trackEvent', 'Button', 'Click', 'Play stream', el.dataset.url]);
+  if (_paq) _paq.push(['trackEvent', 'Button', 'Play stream', el.dataset.url]);
 }
 
 /**
