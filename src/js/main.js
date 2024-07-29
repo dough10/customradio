@@ -182,9 +182,11 @@ function toggleSelect(ev) {
   count.textContent = all.length;
   if (all.length) {
     dlButton.removeAttribute('disabled');
+    if (_paq) _paq.push(['trackEvent', 'Button', 'Click', 'Remove from file', el.dataset.url])
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
+      if (_paq) _paq.push(['trackEvent', 'Button', 'Click', 'Add to file', el.dataset.url]);
     }
   }
 }
@@ -210,6 +212,7 @@ function stamp() {
  * @returns {void}
  */
 async function dlTxt() {
+  if (_paq) _paq.push(['trackLink', 'radio.txt', 'download']);
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
   const str = elements.map(el => {
@@ -218,8 +221,8 @@ async function dlTxt() {
       url: el.dataset.url
     };
   })
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(el => `${el.name}, ${el.url}`).join('\n');
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map(el => `${el.name}, ${el.url}`).join('\n');
 
   const blob = new Blob([`${stamp()}${str}`], {
     type: 'text/plain'
@@ -260,6 +263,7 @@ function reset() {
  */
 function playStream(ev) {
   ev.preventDefault();
+  if (_paq) _paq.push(['trackEvent', 'Button', 'Click', 'Play stream', el.dataset.url]);
   const el = ev.target.parentElement;
   const miniPlayer = document.querySelector('.player');
   if (!miniPlayer.hasAttribute('playing')) {
@@ -365,10 +369,10 @@ function createStationElement({ name, url, genre }) {
   });
 
   const buttons = buttonData.map(createSmallButton);
-  
+
   const span = document.createElement('span');
   span.textContent = name;
-  
+
   const li = document.createElement('li');
   li.title = name;
   li.dataset.url = url;
@@ -406,6 +410,7 @@ function lazyLoadOnScroll(list, container) {
     loading = false;
   }
   window.addEventListener('resize', _ => {
+    if (_paq) _paq.push(['setCustomDimension', 1, `${window.innerWidth}x${window.innerHeight}`]);
     const adjusted = Math.round(window.innerHeight / 58);
     if (adjusted > pullNumber) {
       pullNumber = adjusted - pullNumber;
@@ -458,6 +463,7 @@ async function filterChanged(ev) {
     lazyLoadOnScroll(list, container);
     document.querySelector('#station-count').textContent = stations.length;
   } catch (error) {
+    if (_paq) _paq.push(['trackEvent', 'Fetch Error', 'Error', error]);
     console.error('Error fetching stations:', error);
     new Toast('Error fetching stations:', error);
   }
@@ -554,7 +560,7 @@ player.onpause = _ => {
 player.ontimeupdate = async _ => {
   const last = document.querySelector('#stations>li[playing]');
   if (last) last.removeAttribute('playing');
-  const selector  = `li[data-url="${player.src}"]`;
+  const selector = `li[data-url="${player.src}"]`;
   const playing = document.querySelector(selector);
   if (!playing) console.log(playing, selector);
   if (playing && !playing.hasAttribute('playing')) {
@@ -564,6 +570,7 @@ player.ontimeupdate = async _ => {
 
 
 window.onload = async _ => {
+  if (_paq) _paq.push(['setCustomDimension', 1, `${window.innerWidth}x${window.innerHeight}`]);
   document.querySelectorAll('dialog>.close').forEach(el => {
     el.addEventListener('click', _ => el.parentElement.close());
   });
@@ -592,4 +599,16 @@ window.onload = async _ => {
 
   await sleep(100);
   document.querySelector('#greeting').showModal();
+};
+
+function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
+  console.error(error);
+  var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
+  if (_paq) _paq.push(['trackEvent', 'JavaScript Error', 'Error', errorMessage]);
+}
+
+// Attach the function to the global error handler
+window.onerror = function(message, url, lineNumber, columnNumber, error) {
+  reportErrorToMatomo(message, url, lineNumber, columnNumber, error);
+  return true;
 };
