@@ -412,7 +412,7 @@ function lazyLoadOnScroll(list, container) {
   window.addEventListener('resize', _ => {
     const adjusted = Math.round(window.innerHeight / 58);
     if (adjusted > pullNumber) {
-      pullNumber = adjusted - pullNumber;
+      pullNumber = adjusted;
       load();
     }
   });
