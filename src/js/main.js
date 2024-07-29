@@ -263,7 +263,6 @@ function reset() {
  */
 function playStream(ev) {
   ev.preventDefault();
-  if (_paq) _paq.push(['trackEvent', 'Button', 'Click', 'Play stream', el.dataset.url]);
   const el = ev.target.parentElement;
   const miniPlayer = document.querySelector('.player');
   if (!miniPlayer.hasAttribute('playing')) {
@@ -274,6 +273,7 @@ function playStream(ev) {
   player.src = el.dataset.url;
   player.load();
   player.play();
+  if (_paq) _paq.push(['trackEvent', 'Button', 'Click', 'Play stream', el.dataset.url]);
 }
 
 /**
