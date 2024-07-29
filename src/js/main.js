@@ -410,7 +410,6 @@ function lazyLoadOnScroll(list, container) {
     loading = false;
   }
   window.addEventListener('resize', _ => {
-    if (_paq) _paq.push(['setCustomDimension', 1, `${window.innerWidth}x${window.innerHeight}`]);
     const adjusted = Math.round(window.innerHeight / 58);
     if (adjusted > pullNumber) {
       pullNumber = adjusted - pullNumber;
@@ -570,7 +569,6 @@ player.ontimeupdate = async _ => {
 
 
 window.onload = async _ => {
-  if (_paq) _paq.push(['setCustomDimension', 1, `${window.innerWidth}x${window.innerHeight}`]);
   document.querySelectorAll('dialog>.close').forEach(el => {
     el.addEventListener('click', _ => el.parentElement.close());
   });
