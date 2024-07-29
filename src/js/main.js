@@ -359,6 +359,11 @@ function createStationElement({ name, url, genre }) {
     }
   ];
 
+  // remove default port numbers
+  [':80/', ':443/'].forEach(port => {
+    url = url.replace(port, '/');
+  });
+
   const buttons = buttonData.map(createSmallButton);
   
   const span = document.createElement('span');
@@ -549,8 +554,9 @@ player.onpause = _ => {
 player.ontimeupdate = async _ => {
   const last = document.querySelector('#stations>li[playing]');
   if (last) last.removeAttribute('playing');
-  // console.log(`[data-url="${player.src}"]`);
-  const playing = document.querySelector(`[data-url="${player.src}"]`);
+  const selector  = `li[data-url="${player.src}"]`;
+  const playing = document.querySelector(selector);
+  if (!playing) console.log(playing, selector);
   if (playing && !playing.hasAttribute('playing')) {
     playing.toggleAttribute('playing');
   }
