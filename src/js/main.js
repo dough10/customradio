@@ -427,7 +427,7 @@ function lazyLoadOnScroll(list, container) {
       toTop.classList.add('hidden');
     }
     lastTop = parent.scrollTop;
-    if (parent.scrollTop / (parent.scrollHeight - parent.clientHeight) >= 0.9) {
+    if (parent.scrollTop / (parent.scrollHeight - parent.clientHeight) >= 0.8) {
       load();
     }
   };
