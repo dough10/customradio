@@ -212,7 +212,6 @@ function stamp() {
  * @returns {void}
  */
 async function dlTxt() {
-  if (_paq) _paq.push(['trackLink', 'radio.txt', 'download']);
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
   const str = elements.map(el => {
@@ -223,7 +222,7 @@ async function dlTxt() {
   })
   .sort((a, b) => a.name.localeCompare(b.name))
   .map(el => `${el.name}, ${el.url}`).join('\n');
-
+  
   const blob = new Blob([`${stamp()}${str}`], {
     type: 'text/plain'
   });
@@ -231,12 +230,13 @@ async function dlTxt() {
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = filename;
-
+  
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-
+  
   URL.revokeObjectURL(link.href);
+  if (_paq) _paq.push(['trackLink', 'radio.txt', 'download']);
 }
 
 /**
@@ -562,9 +562,12 @@ player.ontimeupdate = async _ => {
   if (last) last.removeAttribute('playing');
   const selector = `li[data-url="${player.src}"]`;
   const playing = document.querySelector(selector);
-  if (!playing) console.log(playing, selector);
   if (playing && !playing.hasAttribute('playing')) {
     playing.toggleAttribute('playing');
+    document.querySelector('#name').addEventListener('click', _ => playing.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'start' 
+    }));
   }
 };
 
