@@ -461,6 +461,7 @@ async function filterChanged(ev) {
     container.appendChild(fragment);
     lazyLoadOnScroll(list, container);
     document.querySelector('#station-count').textContent = stations.length;
+    if (_paq) _paq.push(['trackEvent', 'Filter', 'Genre', ev.target.value]);
   } catch (error) {
     if (_paq) _paq.push(['trackEvent', 'Fetch Error', 'Error', error]);
     console.error('Error fetching stations:', error);
