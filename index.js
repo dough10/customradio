@@ -98,7 +98,7 @@ app.get('/stations', [
 
   try {
     const genres = req.query.genres.split(',');
-    const stations = await db.find(    {
+    const stations = await db.find({
       'content-type': 'audio/mpeg',
       online: true,
       genre: { 
