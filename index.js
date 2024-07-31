@@ -14,6 +14,7 @@ const schedule = require('node-schedule');
 const config = require('./db.json');
 const app = express();
 const axios = require('axios');
+const { createCanvas } = require('canvas');
 
 app.use(compression());
 app.use(express.json());
@@ -198,6 +199,38 @@ app.post('/add', [
       error: 'Failed to add station (╬ Ò﹏Ó)'
     });
   }
+});
+
+
+app.get('/art', (req, res) => {
+  
+  const text = req.query.text || 'Hello, World!';
+  const width = 400;
+  const height = 400;
+
+  log(`${req.ip} -> /art ${text}, ${height}x${width}`);
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.font = '48px sans-serif';
+  ctx.fillStyle = '#000000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  ctx.fillText(text, width / 2, height / 2);
+
+  res.setHeader('Content-Type', 'image/jpg');
+  canvas.toBuffer((err, buf) => {
+    if (err) {
+      console.error('Error creating image buffer:', err);
+      res.status(500).send('Error generating image');
+      return;
+    }
+    res.send(buf);
+  }, 'image/jpeg');
 });
 
 
