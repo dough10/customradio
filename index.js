@@ -42,6 +42,11 @@ function plural(num) {
 }
 
 
+function queryString(value) {
+  return (value.length === 0) ? '' : `?genres=${value}`;
+}
+
+
 async function connectToDb(url) {
   const client = new MongoClient(url);
   try {
@@ -147,7 +152,7 @@ app.get('/stations', [
     }).sort({
       name: 1
     }).toArray()
-    log(`${req.ip} -> /stations?genres=${genres.join(',')}, ${stations.length} stations returned`);
+    log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned`);
     res.json(stations);
   } catch (err) {
     console.error('(╬ Ò﹏Ó) Error fetching stations:', err);
