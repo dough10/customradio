@@ -135,7 +135,7 @@ app.get('/stations', [
       genre: {
         $in: genres.map(genre => new RegExp(genre, 'i'))
       },
-      bitrate: { $exists: true, $ne: null }
+      bitrate: { $exists: true, $ne: null || 'Quality' }
     }, {
       projection: {
         _id: 0,

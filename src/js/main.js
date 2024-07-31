@@ -269,6 +269,7 @@ function playStream(ev) {
     miniPlayer.toggleAttribute('playing');
   }
   document.querySelector('#name').textContent = el.title;
+  document.querySelector('#bitrate').textContent = `${el.dataset.bitrate}kbps`;
   new Toast(`Playing ${el.title}`, 1);
   player.src = el.dataset.url;
   player.load();
