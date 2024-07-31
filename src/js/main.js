@@ -440,6 +440,17 @@ function lazyLoadOnScroll(list, container) {
 }
 
 /**
+ * add query string based on length of input value 
+ * 
+ * @param {String} value
+ * 
+ * @returns {String}
+ */
+function queryString(value) {
+  return (value.length === 0) ? '' : `?genres=${value}`;
+}
+
+/**
  * filter db request by user entered genres
  * 
  * @function
@@ -450,7 +461,7 @@ function lazyLoadOnScroll(list, container) {
  */
 async function filterChanged(ev) {
   try {
-    const res = await fetch(`${window.location.origin}/stations?genres=${ev.target.value}`);
+    const res = await fetch(`${window.location.origin}/stations${queryString(ev.target.value)}`);
     if (res.status !== 200) {
       return;
     }
