@@ -585,13 +585,12 @@ player.ontimeupdate = async _ => {
   if (last) last.removeAttribute('playing');
   const selector = `li[data-url="${player.src}"]`;
   const playing = document.querySelector(selector);
-  if (playing && !playing.hasAttribute('playing')) {
-    playing.toggleAttribute('playing');
-    document.querySelector('#name').addEventListener('click', _ => playing.scrollIntoView({ 
-      behavior: 'smooth', 
-      block: 'start' 
-    }));
-  }
+  if (!playing || playing.hasAttribute('playing')) return;
+  playing.toggleAttribute('playing');
+  document.querySelector('#name').addEventListener('click', _ => playing.scrollIntoView({ 
+    behavior: 'smooth', 
+    block: 'start' 
+  }));
 };
 
 
