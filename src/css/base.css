@@ -237,6 +237,7 @@ svg {
   max-height: 32px;
   min-height: 32px;
   min-width: 62px;
+  transition: background-color var(--animate-500, 500ms) linear;
 }
 
 #stations>li[playing]>div {
