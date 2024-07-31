@@ -330,11 +330,11 @@ function createSmallButton({ icon, cssClass, func, title }) {
  * @param {Object} station - Object containing station details.
  * @param {String} station.name - The name of the station.
  * @param {String} station.url - The URL of the station.
- * @param {String} station.genre - The genre of the station.
+ * @param {String} station.bitrate - The genre of the station.
  * 
  * @returns {HTMLElement} li element
  */
-function createStationElement({ name, url, genre }) {
+function createStationElement({ name, url, bitrate }) {
   const buttonData = [
     {
       icon: {
@@ -368,16 +368,21 @@ function createStationElement({ name, url, genre }) {
     url = url.replace(port, '/');
   });
 
+  if (bitrate.length > 3) bitrate = bitrate.split(',')[0];
+  
   const buttons = buttonData.map(createSmallButton);
-
+  
   const span = document.createElement('span');
   span.textContent = name;
-
+  
+  const div = document.createElement('div');
+  div.textContent = `${bitrate}kbps`;
+  
   const li = document.createElement('li');
   li.title = name;
   li.dataset.url = url;
-  li.dataset.genre = genre;
-  [span, ...buttons].forEach(el => li.appendChild(el));
+  li.dataset.bitrate = bitrate;
+  [span, div, ...buttons].forEach(el => li.appendChild(el));
   return li;
 }
 
