@@ -63,18 +63,46 @@ async function connectToDb(url) {
 
 async function isLiveStream(url) {
   try {
+    defaultPorts.forEach(port => {
+      url = url.replace(port, '/');
+    });
+
+    if (url.startsWith('http://')) {
+      const httpsUrl = url.replace('http://', 'https://');
+      const httpsResponse = await axios.head(httpsUrl, {
+        timeout: 3000
+      });
+      if (httpsResponse.status === 200) {
+        url = httpsUrl;
+        const isLive = httpsResponse.status === 200;
+        const name = httpsResponse.headers['icy-name'];
+        const icyGenre = httpsResponse.headers['icy-genre'];
+        const bitrate = httpsResponse.headers['icy-br'];
+        const content = httpsResponse.headers['content-type'];
+        return {
+          url,
+          name,
+          isLive,
+          icyGenre,
+          content,
+          bitrate
+        };
+      }
+    }
+
     const response = await axios.head(url, {
       timeout: 3000
     });
     const isLive = response.status === 200;
+    const name = response.headers['icy-name'];
     const icyGenre = response.headers['icy-genre'];
-    const icyDescription = response.headers['icy-description'];
     const bitrate = response.headers['icy-br'];
-    const content = response.headers['content-type']
+    const content = response.headers['content-type'];
     return {
+      url,
+      name,
       isLive,
       icyGenre,
-      icyDescription,
       content,
       bitrate
     };
@@ -85,13 +113,10 @@ async function isLiveStream(url) {
 
 
 async function testStreams() {
-  log('Running database update');
+  log('Updating database');
   const stations = await db.find({}).toArray();
   let total = 0;
   for (const station of stations) {
-    defaultPorts.forEach(port => {
-      station.url = station.url.replace(port, '/');
-    });
     const stream = await isLiveStream(station.url);
     if (!stream) continue;
     if (stream.bitrate && stream.bitrate.length > 3) stream.bitrate = stream.bitrate.split(',')[0];
@@ -100,7 +125,8 @@ async function testStreams() {
     }
     const updates = {
       $set: {
-        url: station.url,
+        name: stream.name || station.name,
+        url: stream.url,
         genre: stream.icyGenre || station.genre,
         online: stream.isLive,
         'content-type': stream.content,
@@ -110,7 +136,7 @@ async function testStreams() {
     const res = await db.updateOne(filter, updates);
     total += res.modifiedCount;
   }
-  log(`database update complete: ${total} entry${plural(total)} updated`);
+  log(`Database update complete: ${total} entry${plural(total)} updated`);
 }
 
 
