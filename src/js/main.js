@@ -368,7 +368,7 @@ function createStationElement({ name, url, bitrate }) {
   [':80/', ':443/'].forEach(port => {
     url = url.replace(port, '/');
   });
-
+  
   const buttons = buttonData.map(createSmallButton);
   
   const span = document.createElement('span');
