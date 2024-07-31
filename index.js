@@ -87,9 +87,9 @@ async function testStreams() {
     defaultPorts.forEach(port => {
       station.url = station.url.replace(port, '/');
     });
-    if (stream.bitrate.length > 3) stream.bitrate = stream.bitrate.split(',')[0];
     const stream = await isLiveStream(station.url);
     if (!stream) continue;
+    if (stream.bitrate.length > 3) stream.bitrate = stream.bitrate.split(',')[0];
     const filter = {
       _id: new ObjectId(station._id)
     }
