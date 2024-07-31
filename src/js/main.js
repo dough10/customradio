@@ -369,8 +369,6 @@ function createStationElement({ name, url, bitrate }) {
     url = url.replace(port, '/');
   });
 
-  if (bitrate.length > 3) bitrate = bitrate.split(',')[0];
-  
   const buttons = buttonData.map(createSmallButton);
   
   const span = document.createElement('span');
