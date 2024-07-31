@@ -261,9 +261,10 @@ function reset() {
  * 
  * @returns {void} 
  */
-function playStream(ev) {
+async function playStream(ev) {
   ev.preventDefault();
   const el = ev.target.parentElement;
+  const url = el.dataset.url
   const miniPlayer = document.querySelector('.player');
   if (!miniPlayer.hasAttribute('playing')) {
     miniPlayer.toggleAttribute('playing');
@@ -271,10 +272,16 @@ function playStream(ev) {
   document.querySelector('#name').textContent = el.title;
   document.querySelector('#bitrate').textContent = `${el.dataset.bitrate}kbps`;
   new Toast(`Playing ${el.title}`, 1);
-  player.src = el.dataset.url;
-  player.load();
-  player.play();
-  if (_paq) _paq.push(['trackEvent', 'Button', 'Play stream', el.dataset.url]);
+
+  try {
+    player.src = url;
+    player.load();
+    await player.play();
+  } catch (error) {
+    console.error('Error setting player source or playing media:', error);
+  }
+
+  if (_paq) _paq.push(['trackEvent', 'Button', 'Play stream', url]);
 }
 
 /**
@@ -363,11 +370,6 @@ function createStationElement({ name, url, bitrate }) {
       title: 'Remove from file'
     }
   ];
-
-  // remove default port numbers
-  [':80/', ':443/'].forEach(port => {
-    url = url.replace(port, '/');
-  });
   
   const buttons = buttonData.map(createSmallButton);
   
@@ -401,6 +403,7 @@ function lazyLoadOnScroll(list, container) {
   let pullNumber = Math.round(window.innerHeight / 58);
   let loading = false;
   let lastTop = 0;
+
   function load() {
     if (loading || ndx >= list.length) return;
     loading = true;
@@ -414,6 +417,7 @@ function lazyLoadOnScroll(list, container) {
     ndx += pullNumber;
     loading = false;
   }
+
   window.addEventListener('resize', _ => {
     const adjusted = Math.round(window.innerHeight / 58);
     if (adjusted > pullNumber) {
@@ -421,8 +425,10 @@ function lazyLoadOnScroll(list, container) {
       load();
     }
   });
+
   const parent = container.parentElement;
   const toTop = document.querySelector('.to-top');
+
   parent.onscroll = _ => {
     if (parent.scrollTop < lastTop) {
       toTop.classList.add('hidden');
@@ -436,6 +442,7 @@ function lazyLoadOnScroll(list, container) {
       load();
     }
   };
+
   load();
 }
 
