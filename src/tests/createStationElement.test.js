@@ -26,6 +26,7 @@ describe('createStationElement', () => {
     const div = li.querySelector('div');
     expect(div).to.exist;
     expect(div.textContent).to.equal(`${bitrate}kbps`);
+    expect(div.title).to.equal(`${bitrate}kbps`);
 
     // Check the buttons
     const buttons = li.querySelectorAll('button');

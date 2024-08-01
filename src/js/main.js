@@ -383,7 +383,7 @@ function createStationElement({ name, url, bitrate }) {
   
   const div = document.createElement('div');
   div.textContent = `${bitrate}kbps`;
-  div.title = `${bitrate}kbps bitrate`;
+  div.title = div.textContent;
 
   const li = document.createElement('li');
   li.title = name;
