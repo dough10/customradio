@@ -378,10 +378,9 @@ function createStationElement({ name, url, bitrate }) {
   
   const div = document.createElement('div');
   div.textContent = `${bitrate}kbps`;
-  div.title = `${bitrate}kbps bitrate`;
   
   const li = document.createElement('li');
-  li.title = name;
+  li.title = `${name} - ${bitrate}kbps bitrate`;
   li.dataset.url = url;
   li.dataset.bitrate = bitrate;
   [span, div, ...buttons].forEach(el => li.appendChild(el));
