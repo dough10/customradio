@@ -76,12 +76,12 @@ app.get('/', (req, res) => {
  *   {
  *     "name": "Rock Station",
  *     "url": "http://example.com/rock",
- *     "bitrate": "128kbps"
+ *     "bitrate": 128
  *   },
  *   {
  *     "name": "Pop Station",
  *     "url": "http://example.com/pop",
- *     "bitrate": "256kbps"
+ *     "bitrate": 256
  *   }
  * ]
  */
