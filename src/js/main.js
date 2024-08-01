@@ -533,14 +533,26 @@ player.onwaiting = _ => {
  * @returns {void}
  */
 player.onplaying = _ => {
-  if (pauseTimer) {
-    clearTimeout(pauseTimer);
-    pauseTimer = 0;
-  }
   const icon = document.querySelector('.player>.small-button>svg>path');
   if (!icon) return;
   icon.parentElement.classList.remove('spin');
   icon.setAttribute('d', 'M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
+};
+
+/**
+ * audio play back started
+ * 
+ * @function
+ * 
+ * @param {void} _
+ *  
+ * @returns {void}
+ */
+player.onplay = _ => {
+  if (pauseTimer) {
+    clearTimeout(pauseTimer);
+    pauseTimer = 0;
+  }
 };
 
 /**

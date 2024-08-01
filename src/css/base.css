@@ -242,7 +242,7 @@ svg {
 }
 
 #stations>li[playing][selected]>div {
-  background: var(--main-color);
+  background: var(--background-color);
   color: var(--text-color);
 }
 
