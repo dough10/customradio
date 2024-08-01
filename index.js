@@ -11,9 +11,11 @@ const {
   ObjectId
 } = require('mongodb');
 const schedule = require('node-schedule');
-const config = require('./db.json');
 const app = express();
 const axios = require('axios');
+
+
+require('dotenv').config();
 
 
 app.use(compression());
@@ -24,6 +26,10 @@ app.use(express.static(path.join(__dirname, 'html')));
 
 
 let db;
+
+
+const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
+
 
 /**
  * An array containing default port numbers used in network protocols.
@@ -290,7 +296,7 @@ app.get('/stations', [
       }
     }).sort({
       name: 1
-    }).toArray()
+    }).toArray();
     log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned`);
     res.json(stations);
   } catch (err) {
@@ -412,7 +418,7 @@ app.post('/add', [
  * });
  */
 app.listen(3000, async _ => {
-  db = await connectToDb(config.url)
+  db = await connectToDb(DB_HOST)
   log('Online. o( ❛ᴗ❛ )o');
   schedule.scheduleJob('0 0 * * *', testStreams);
 });
