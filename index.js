@@ -190,7 +190,7 @@ async function testStreams() {
     if (stream.bitrate && stream.bitrate.length > 3) stream.bitrate = stream.bitrate.split(',')[0];
     const filter = {
       _id: new ObjectId(station._id)
-    }
+    };
     const updates = {
       $set: {
         name: stream.name || station.name,
@@ -382,7 +382,7 @@ app.post('/add', [
       res.json({
         message: 'station exists'
       });
-      return
+      return;
     }
     await db.insertOne(data);
     res.json({
@@ -418,7 +418,7 @@ app.post('/add', [
  * });
  */
 app.listen(3000, async _ => {
-  db = await connectToDb(DB_HOST)
+  db = await connectToDb(DB_HOST);
   log('Online. o( ❛ᴗ❛ )o');
   schedule.scheduleJob('0 0 * * *', testStreams);
 });

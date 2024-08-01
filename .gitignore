@@ -5,4 +5,4 @@
 /html/
 /collect_headers.js
 /.env
-
+/.jshintrc

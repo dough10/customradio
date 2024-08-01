@@ -77,7 +77,7 @@ class Toast {
     toast.style.willChange = 'auto';
     toast.style.transition = 'all 300ms cubic-bezier(.33,.17,.85,1.1) 0ms';
     toast.addEventListener('transitionend', this._transitionEnd, true);
-    toast.addEventListener('click', this._clicked, true)
+    toast.addEventListener('click', this._clicked, true);
     return toast;
   }
 
@@ -176,13 +176,13 @@ setInterval(_ => {
 function toggleSelect(ev) {
   const dlButton = document.querySelector('#download');
   const el = ev.target.parentElement;
-  el.toggleAttribute('selected')
+  el.toggleAttribute('selected');
   const all = el.parentNode.querySelectorAll('li[selected]');
   const count = document.querySelector('#count');
   count.textContent = all.length;
   if (all.length) {
     dlButton.removeAttribute('disabled');
-    if (_paq) _paq.push(['trackEvent', 'Button', 'Remove from file', el.dataset.url])
+    if (_paq) _paq.push(['trackEvent', 'Button', 'Remove from file', el.dataset.url]);
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
@@ -264,7 +264,7 @@ function reset() {
 async function playStream(ev) {
   ev.preventDefault();
   const el = ev.target.parentElement;
-  const url = el.dataset.url
+  const url = el.dataset.url;
   const miniPlayer = document.querySelector('.player');
   if (!miniPlayer.hasAttribute('playing')) {
     miniPlayer.toggleAttribute('playing');
