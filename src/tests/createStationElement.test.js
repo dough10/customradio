@@ -13,7 +13,7 @@ describe('createStationElement', () => {
     // Check the li element
     expect(li).to.exist;
     expect(li.tagName).to.equal('LI');
-    expect(li.title).to.equal(`${name} - ${bitrate}kbps bitrate`);
+    expect(li.title).to.equal(name);
     expect(li.dataset.url).to.equal(url);
     expect(li.dataset.bitrate).to.equal(bitrate.toString());
 
