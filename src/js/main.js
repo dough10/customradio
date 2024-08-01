@@ -1,5 +1,4 @@
-import '../css/reset.css';
-import '../css/base.css';
+export {queryString, stamp};
 
 const player = new Audio();
 
