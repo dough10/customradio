@@ -7,7 +7,7 @@
   --main-rgb: 255, 255, 255;
   --disabled-color: #c1bebe;
   --background-color: rgb(213, 213, 213);
-  --selected-color: rgba(100, 100, 100, 0.582);
+  --selected-color: rgba(100, 100, 100, 0.4);
   --seperator-line: 1px solid rgba(51, 51, 51, 0.2);
   --contrast-color: #333333;
   --animate-150: 150ms;
@@ -22,7 +22,7 @@
     --main-rgb: 58, 58, 58;
     --disabled-color: #868686;
     --background-color: rgb(22, 22, 22);
-    --selected-color: rgba(136, 136, 136, 0.582);
+    --selected-color: rgba(136, 136, 136, 0.6);
     --seperator-line: 1px solid rgba(225, 225, 225, 0.1);
   }
 }
