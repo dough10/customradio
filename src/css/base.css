@@ -591,7 +591,7 @@ input:focus {
   border: none;
   background: none;
   color: inherit;
-  width: 36px;
+  width: 2.25em;
 }
 
 .small-button[disabled] {
@@ -601,6 +601,10 @@ input:focus {
 
 .small-button>* {
   pointer-events: none;
+}
+
+.player-big {
+  width: fit-content;
 }
 
 .to-top {
