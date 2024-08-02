@@ -267,7 +267,7 @@ svg {
 }
 
 #stations>li[playing]>.play {
-  opacity:0;
+  opacity: 0;
   pointer-events: none;
   cursor: auto;
 }
@@ -591,6 +591,7 @@ input:focus {
   border: none;
   background: none;
   color: inherit;
+  width: 36px;
 }
 
 .small-button[disabled] {
