@@ -626,6 +626,47 @@ function isValidURL(url) {
 }
 
 
+async function formSubmission(ev) {
+  ev.preventDefault();
+
+  const formData = new FormData(form);
+
+  try {
+    const response = await fetch('/add', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await response.json();
+    document.getElementById('response').innerText = result.message;
+    new Toast(result.message);
+    await sleep(3000);
+    inputElement.value = '';
+    document.getElementById('response').innerText = ''
+    if (!submit.hasAttribute('disabled')) {
+      submit.toggleAttribute('disabled');
+    }
+  } catch(e) {
+    document.getElementById('response').innerText = 'An error occurred!';
+    console.error('Error:', error);
+  }
+}
+
+
+function toggleButtonActivity() {
+  const inputElement = document.querySelector('#station-url');
+  const submit = document.querySelector('#submit-stream');
+  
+  if (isValidURL(inputElement.value)) {
+    submit.removeAttribute('disabled');
+  } else {
+    if (!submit.hasAttribute('disabled')) {
+      submit.toggleAttribute('disabled');
+    }
+  }
+}
+
+
 window.onload = async _ => {
   document.querySelectorAll('dialog>.close').forEach(el => {
     el.addEventListener('click', _ => el.parentElement.close());
@@ -657,46 +698,10 @@ window.onload = async _ => {
   document.querySelector('#greeting').showModal();
 
   const form = document.querySelector('#add-stream');
+  form.addEventListener('submit', formSubmission);
+  
   const inputElement = document.querySelector('#station-url');
-  const submit = document.querySelector('#submit-stream');
-
-  form.addEventListener('submit', async ev => {
-    ev.preventDefault();
-
-    const formData = new FormData(form);
-
-    try {
-      const response = await fetch('/add', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
-      document.getElementById('response').innerText = result.message;
-      new Toast(result.message);
-      await sleep(3000);
-      inputElement.value = '';
-      document.getElementById('response').innerText = ''
-      if (!submit.hasAttribute('disabled')) {
-        submit.toggleAttribute('disabled');
-      }
-    } catch(e) {
-      document.getElementById('response').innerText = 'An error occurred!';
-      console.error('Error:', error);
-    }
-  });
-
-
-  inputElement.oninput = e => {
-    // enable button for valid url only
-    if (isValidURL(inputElement.value)) {
-      submit.removeAttribute('disabled');
-    } else {
-      if (!submit.hasAttribute('disabled')) {
-        submit.toggleAttribute('disabled');
-      }
-    }
-  };
+  inputElement.oninput = toggleButtonActivity;
 };
 
 function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
