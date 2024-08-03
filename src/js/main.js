@@ -625,7 +625,22 @@ function isValidURL(url) {
   return urlRegex.test(url);
 }
 
-
+/**
+ * Handles the form submission event.
+ *
+ * This function prevents the default form submission behavior, collects the form data,
+ * and sends it to the server via a POST request. It then handles the server response,
+ * updates the UI accordingly, and manages the form state. In case of an error, it
+ * displays an error message and logs the error to the console.
+ *
+ * @async
+ * @function formSubmission
+ * @param {Event} ev - The form submission event.
+ * 
+ * @returns {Promise<void>} - A promise that resolves when the form submission handling is complete.
+ * 
+ * @throws {Error} - Throws an error if the fetch request fails.
+ */
 async function formSubmission(ev) {
   ev.preventDefault();
 
@@ -652,11 +667,19 @@ async function formSubmission(ev) {
   }
 }
 
-
+/**
+ * Toggles the activity state of the submit button based on the validity of the URL input.
+ *
+ * This function selects the input element and the submit button, checks if the URL
+ * provided in the input element is valid, and enables or disables the submit button
+ * accordingly.
+ *
+ * @function toggleButtonActivity
+ */
 function toggleButtonActivity() {
   const inputElement = document.querySelector('#station-url');
   const submit = document.querySelector('#submit-stream');
-  
+
   if (isValidURL(inputElement.value)) {
     submit.removeAttribute('disabled');
   } else {
@@ -664,6 +687,27 @@ function toggleButtonActivity() {
       submit.toggleAttribute('disabled');
     }
   }
+}
+
+/**
+ * Reports a JavaScript error to Matomo and logs it to the console.
+ *
+ * This function constructs an error message from the provided error details,
+ * logs the error to the console, and sends the error message to Matomo if the
+ * Matomo tracking array (_paq) is available.
+ *
+ * @function reportErrorToMatomo
+ * 
+ * @param {string} message - The error message.
+ * @param {string} url - The URL where the error occurred.
+ * @param {number} lineNumber - The line number where the error occurred.
+ * @param {number} columnNumber - The column number where the error occurred.
+ * @param {Error} error - The error object.
+ */
+function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
+  // console.error(error);
+  var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
+  if (_paq) _paq.push(['trackEvent', 'JavaScript Error', 'Error', errorMessage]);
 }
 
 
@@ -704,13 +748,7 @@ window.onload = async _ => {
   inputElement.oninput = toggleButtonActivity;
 };
 
-function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
-  console.error(error);
-  var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
-  if (_paq) _paq.push(['trackEvent', 'JavaScript Error', 'Error', errorMessage]);
-}
 
-// Attach the function to the global error handler
 window.onerror = function(message, url, lineNumber, columnNumber, error) {
   reportErrorToMatomo(message, url, lineNumber, columnNumber, error);
   return true;
