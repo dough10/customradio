@@ -610,6 +610,21 @@ player.ontimeupdate = async _ => {
   }));
 };
 
+/**
+ * validate srteam URL is valid url format
+ * 
+ * @function
+ * 
+ * 
+ * @param {String} url
+ * 
+ * @returns {Boolean}
+ */
+function isValidURL(url) {
+  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+  return urlRegex.test(url);
+}
+
 
 window.onload = async _ => {
   document.querySelectorAll('dialog>.close').forEach(el => {
@@ -640,6 +655,48 @@ window.onload = async _ => {
 
   await sleep(100);
   document.querySelector('#greeting').showModal();
+
+  const form = document.querySelector('#add-stream');
+  const inputElement = document.querySelector('#station-url');
+  const submit = document.querySelector('#submit-stream');
+
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/add', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      document.getElementById('response').innerText = result.message;
+      new Toast(result.message);
+      await sleep(3000);
+      inputElement.value = '';
+      document.getElementById('response').innerText = ''
+      if (!submit.hasAttribute('disabled')) {
+        submit.toggleAttribute('disabled');
+      }
+    } catch(e) {
+      document.getElementById('response').innerText = 'An error occurred!';
+      console.error('Error:', error);
+    }
+  });
+
+
+  inputElement.oninput = e => {
+    // enable button for valid url only
+    if (isValidURL(inputElement.value)) {
+      submit.removeAttribute('disabled');
+    } else {
+      if (!submit.hasAttribute('disabled')) {
+        submit.toggleAttribute('disabled');
+      }
+    }
+  };
 };
 
 function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {

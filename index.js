@@ -4,6 +4,8 @@ const compression = require('compression');
 const path = require('path');
 const schedule = require('node-schedule');
 const app = express();
+const multer = require('multer');
+const upload = multer();
 require('dotenv').config();
 
 
@@ -137,8 +139,7 @@ app.get('/stations', [
  *   "error": "Failed to add station (╬ Ò﹏Ó)"
  * }
  */
-app.post('/add', [
-  body('name').trim().escape().notEmpty().withMessage('Name is required'),
+app.post('/add', upload.none(), [
   body('url').trim().isURL().withMessage('Invalid URL')
 ], (req, res) => addToDatabase(db, req, res));
 

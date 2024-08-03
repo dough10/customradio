@@ -83,21 +83,18 @@
     <div>
       <h1>add station</h1>
       <p>feature to come soon</p>
-      <div class="form-group">
-        <input disabled placeholder="Station name:" type="text" id="station-name" name="station-name">
-        <label for="station-name">Station name:</label>
-      </div>
-      <div class="form-group">
-        <input disabled placeholder="Station URL:" type="url" id="station-url" name="station-url">
+      <form id="add-stream" class="form-group">
         <label for="station-url">Station URL:</label>
-      </div>
+        <input placeholder="Station URL:" type="url" id="station-url" name="url" required>
+        <div id="response"></div>
+        <button id="submit-stream" class="button" type="submit" disabled>
+          <svg viewBox="0 0 24 24">
+            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+          </svg>
+          <span>add</span>
+        </button>
+      </form>
     </div>
-    <button class="button" type="button" disabled>
-      <svg viewBox="0 0 24 24">
-        <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-      </svg>
-      <span>add</span>
-    </button>
     <button class="button close" type="button" autofocus>
       <svg viewBox="0 0 24 24">
         <path fill="currentColor"
