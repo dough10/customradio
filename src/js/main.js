@@ -206,7 +206,7 @@ function toggleSelect(ev) {
 function stamp() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
-  return `# created by https://customradio.dough10.me [${formattedDate}] #\n`;
+  return `# created by https://customradio.dough10.me [${formattedDate}]\n`;
 }
 
 /**
@@ -219,18 +219,13 @@ function stamp() {
 async function dlTxt() {
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
-  const str = elements.map(el => {
-    return {
-      name: el.title,
-      url: el.dataset.url
-    };
-  })
-  .sort((a, b) => a.name.localeCompare(b.name))
-  .map(el => `${el.name}, ${el.url}`).join('\n');
+  const str = elements.sort((a, b) => a.title.localeCompare(b.title))
+  .map(el => `${el.title}, ${el.dataset.url}`).join('\n');
   
-  const blob = new Blob([`${stamp()}${str}`], {
+  const blob = new Blob([`${stamp()}\n${str}`], {
     type: 'text/plain'
   });
+
   const filename = 'radio.txt';
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
@@ -561,19 +556,6 @@ player.onplay = _ => {
 };
 
 /**
- * clears interface of playing stream
- * 
- * @function
- * 
- * @returns {void}
- */
-function clearPlaying() {
-  document.querySelector('.player').removeAttribute('playing');
-  const all = document.querySelectorAll('#stations>li');
-  all.forEach(el => el.removeAttribute('playing'));
-}
-
-/**
  * audio paused callback
  * 
  * @function
@@ -609,6 +591,19 @@ player.ontimeupdate = async _ => {
     block: 'start' 
   }));
 };
+
+/**
+ * clears interface of playing stream
+ * 
+ * @function
+ * 
+ * @returns {void}
+ */
+function clearPlaying() {
+  document.querySelector('.player').removeAttribute('playing');
+  const all = document.querySelectorAll('#stations>li');
+  all.forEach(el => el.removeAttribute('playing'));
+}
 
 /**
  * validate srteam URL is valid url format
