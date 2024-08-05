@@ -639,12 +639,10 @@ function isValidURL(url) {
 async function formSubmission(ev) {
   ev.preventDefault();
 
-  const formData = new FormData(form);
-
   try {
     const response = await fetch('/add', {
       method: 'POST',
-      body: formData,
+      body: new FormData(ev.target),
     });
 
     const result = await response.json();
