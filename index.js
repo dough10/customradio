@@ -6,6 +6,8 @@ const schedule = require('node-schedule');
 const app = express();
 const multer = require('multer');
 const upload = multer();
+const Redis = require('ioredis');
+const promClient = require('prom-client');
 require('dotenv').config();
 
 
@@ -16,12 +18,43 @@ const connectToDb = require('./util/connectToDb.js');
 const {testStreams} = require('./util/testStreams.js');
 
 
+const redis = new Redis({
+  host: process.env.REDIS_HOST || '127.0.0.1',
+  port: 6379
+});
+
+
+const register = new promClient.Registry();
+
+register.setDefaultLabels({
+  app: 'customradio-api'
+});
+
+promClient.collectDefaultMetrics({ register });
+
+const httpRequestCounter = new promClient.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status_code']
+});
+
+register.registerMetric(httpRequestCounter);
+
 app.use(compression());
 app.use(express.json());
 app.set('trust proxy', true);
 app.disable('x-powered-by');
 app.use(express.static(path.join(__dirname, 'html')));
-
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    httpRequestCounter.inc({
+      method: req.method,
+      route: req.path,
+      status_code: res.statusCode
+    });
+  });
+  next();
+});
 
 let db;
 
@@ -47,9 +80,55 @@ const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
  *   res.sendFile(path.join(__dirname, 'html', 'index.html'));
  * });
  */
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  const cacheKey = 'index.html';
+  const cachedPage = await redis.get(cacheKey);
+
   log(`${req.ip} -> /`);
-  res.sendFile(path.join(__dirname, 'html', 'index.html'));
+
+  if (cachedPage) {
+    res.set('Content-Type', 'text/html');
+    return res.send(cachedPage);
+  }
+  const filePath = path.join(__dirname, 'html', 'index.html');
+  res.sendFile(filePath, async (err) => {
+    if (err) {
+      res.status(500).send('Error serving the index.html file');
+      return;
+    }
+    const fs = require('fs').promises;
+    const fileContent = await fs.readFile(filePath, 'utf8');
+    await redis.set(cacheKey, fileContent, 'EX', 3600);
+  });
+});
+
+/**
+ * GET /metrics
+ * @summary Exposes Prometheus metrics for scraping.
+ * @description This route handler exposes all the collected Prometheus metrics for the Node.js Express application. It sets the content type to the type required by Prometheus and sends the collected metrics.
+ * 
+ * @name GetMetrics
+ * @function
+ * @async
+ * @memberof module:routes/metrics
+ * 
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
+ * 
+ * @returns {Promise<void>} Sends the collected metrics as the response body.
+ * 
+ * @example
+ * // Example request to the /metrics endpoint
+ * // GET http://localhost:3000/metrics
+ * // Response:
+ * // # HELP process_cpu_user_seconds_total Total user CPU time spent in seconds.
+ * // # TYPE process_cpu_user_seconds_total counter
+ * // process_cpu_user_seconds_total 0.12
+ * // ...
+ */
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
 });
 
 /**
@@ -92,7 +171,7 @@ app.get('/stations', [
   .trim()
   .escape()
   .isString().withMessage('Genres must be a string'),
-], (req, res) => getStations(db, req, res));
+], (req, res) => getStations(db, redis, req, res));
 
 /**
  * Handles POST requests to the '/add' endpoint.
