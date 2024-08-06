@@ -74,6 +74,11 @@ async function isLiveStream(url) {
         const icyGenre = httpsResponse.headers['icy-genre'];
         const bitrate = httpsResponse.headers['icy-br'];
         const content = httpsResponse.headers['content-type'];
+
+        const isAudioStream = content && content.startsWith('audio/');
+
+        if (!isAudioStream) return false;
+
         return {
           url,
           name,
@@ -93,6 +98,11 @@ async function isLiveStream(url) {
     const icyGenre = response.headers['icy-genre'];
     const bitrate = response.headers['icy-br'];
     const content = response.headers['content-type'];
+
+    const isAudioStream = content && content.startsWith('audio/');
+
+    if (!isAudioStream) return false;
+
     return {
       url,
       name,
