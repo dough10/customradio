@@ -72,11 +72,11 @@ async function addToDatabase(db, req, res) {
     };
     await db.insertOne(data);
     res.json({
-      message: "station saved o( ❛ᴗ❛ )o"
+      message: "station saved"
     });
   } catch (e) {
     res.status(500).json({
-      message: 'Failed to add station (╬ Ò﹏Ó)'
+      message: 'Failed to add station'
     });
   }
 }
