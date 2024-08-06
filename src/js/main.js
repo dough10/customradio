@@ -187,11 +187,11 @@ function toggleSelect(ev) {
   count.textContent = all.length;
   if (all.length) {
     dlButton.removeAttribute('disabled');
-    if (_paq) _paq.push(['trackEvent', 'Button', 'Remove from file', el.dataset.url]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Remove from file', el.dataset.url]);
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
-      if (_paq) _paq.push(['trackEvent', 'Button', 'Add to file', el.dataset.url]);
+      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Add to file', el.dataset.url]);
     }
   }
 }
@@ -236,7 +236,7 @@ async function dlTxt() {
   document.body.removeChild(link);
   
   URL.revokeObjectURL(link.href);
-  if (_paq) _paq.push(['trackLink', 'radio.txt', 'download']);
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Download', 'radio.txt']);
 }
 
 /**
@@ -281,7 +281,7 @@ async function playStream(ev) {
     console.error('Error setting player source or playing media:', error);
   }
 
-  if (_paq) _paq.push(['trackEvent', 'Button', 'Play stream', url]);
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Play stream', url]);
 }
 
 /**
@@ -454,7 +454,7 @@ function lazyLoadOnScroll(list, container) {
  * @returns {String}
  */
 function queryString(value) {
-  return (value.length === 0) ? '' : `?genres=${value}`;
+  return (value.length === 0) ? '' : encodeURIComponent(`genres=${value}`);
 }
 
 /**
@@ -484,9 +484,9 @@ async function filterChanged(ev) {
     container.appendChild(fragment);
     lazyLoadOnScroll(list, container);
     document.querySelector('#station-count').textContent = stations.length;
-    if (_paq) _paq.push(['trackEvent', 'Filter', 'Genre', ev.target.value]);
+    if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', 'Genre', ev.target.value]);
   } catch (error) {
-    if (_paq) _paq.push(['trackEvent', 'Fetch Error', 'Error', error]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', 'Error', error]);
     console.error('Error fetching stations:', error);
     new Toast('Error fetching stations:', error);
   }
@@ -649,6 +649,8 @@ async function formSubmission(ev) {
     document.getElementById('response').innerText = result.message;
     new Toast(result.message);
     await sleep(3000);
+    const inputElement = document.querySelector('#station-url');
+    const submit = document.querySelector('#submit-stream');
     inputElement.value = '';
     document.getElementById('response').innerText = ''
     if (!submit.hasAttribute('disabled')) {
@@ -656,8 +658,9 @@ async function formSubmission(ev) {
     }
   } catch(e) {
     document.getElementById('response').innerText = 'An error occurred!';
-    console.error('Error:', error);
+    console.error('Error:', e);
   }
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'URL Submission']);
 }
 
 /**
@@ -698,9 +701,9 @@ function toggleButtonActivity() {
  * @param {Error} error - The error object.
  */
 function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
-  // console.error(error);
+  console.error(error);
   var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
-  if (_paq) _paq.push(['trackEvent', 'JavaScript Error', 'Error', errorMessage]);
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'JavaScript Error', 'Error', errorMessage]);
 }
 
 
@@ -718,7 +721,7 @@ window.onload = async _ => {
 
   const filter = document.querySelector('#filter');
   filter.addEventListener('change', filterChanged);
-  filterChanged({ target: filter });
+  filterChanged({ target: filter});
 
   document.querySelector('body').appendChild(player);
   document.querySelector('.player>.small-button').addEventListener('click', togglePlay);
@@ -739,10 +742,19 @@ window.onload = async _ => {
   
   const inputElement = document.querySelector('#station-url');
   inputElement.oninput = toggleButtonActivity;
+
+
+  if ('serviceWorker' in navigator) {
+    try{
+      const worker = await navigator.serviceWorker.register('/worker.js');
+    } catch(error) {
+      console.log('ServiceWorker registration failed: ', error);
+    }
+  }
 };
 
 
-window.onerror = function(message, url, lineNumber, columnNumber, error) {
+window.onerror = (message, url, lineNumber, columnNumber, error) => {
   reportErrorToMatomo(message, url, lineNumber, columnNumber, error);
   return true;
 };
