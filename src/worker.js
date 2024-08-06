@@ -2,7 +2,8 @@ const CACHE_NAME = 'customradio-cache-v1';
 const urlsToCache = [
   '/',
   '/styles.min.css',
-  '/bundle.min.js'
+  '/bundle.min.js',
+  '/stations'
 ];
 
 self.addEventListener('install', event => {
