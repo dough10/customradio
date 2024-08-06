@@ -1,7 +1,7 @@
 module.exports = getStations;
 
 
-const {validationResult} = require('express-validator');
+const { validationResult } = require('express-validator');
 
 
 const log = require('../util/log.js');
@@ -19,6 +19,7 @@ const queryString = require('../util/queryString.js');
  * @function
  * 
  * @param {Object} db - The MongoDB database object used to query the stations.
+ * @param {Object} redis - The redis cache server instance 
  * @param {Object} req - The HTTP request object containing query parameters and other request data.
  * @param {Object} res - The HTTP response object used to send the results or error messages.
  * 
@@ -29,7 +30,7 @@ const queryString = require('../util/queryString.js');
  * @example
  * 
  * app.get('/stations', (req, res) => {
- *   getStations(db, req, res)
+ *   getStations(db, redis, req, res)
  *     .then(() => {
  *       // Response is sent from within getStations
  *     })
@@ -39,7 +40,7 @@ const queryString = require('../util/queryString.js');
  *     });
  * });
  */
-async function getStations(db, req, res) {
+async function getStations(db, redis, req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -49,13 +50,24 @@ async function getStations(db, req, res) {
 
   try {
     const genres = req.query.genres.split(',');
+
+    const cacheKey = `stations_${req.query.genres}`;
+    const cachedStations = await redis.get(cacheKey);
+
+    if (cachedStations) {
+      const stations = JSON.parse(cachedStations);
+      res.set('content-type', 'application/json');
+      log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} cached stations returned`);
+      return res.send(stations);
+    }
+
     const stations = await db.find({
       'content-type': 'audio/mpeg',
       online: true,
       genre: {
         $in: genres.map(genre => new RegExp(genre, 'i'))
       },
-      bitrate: { $exists: true, $ne: null || 'Quality'}
+      bitrate: { $exists: true, $ne: null || 'Quality' }
     }, {
       projection: {
         _id: 0,
@@ -63,11 +75,10 @@ async function getStations(db, req, res) {
         url: 1,
         bitrate: 1
       }
-    }).sort({
-      name: 1
-    }).toArray();
+    }).sort({ name: 1 }).toArray();
     log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned`);
     res.json(stations);
+    await redis.set(cacheKey, JSON.stringify(stations), 'EX', 3600);
   } catch (err) {
     console.error('(╬ Ò﹏Ó) Error fetching stations:', err);
     res.status(500).json({

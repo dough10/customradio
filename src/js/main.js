@@ -187,11 +187,11 @@ function toggleSelect(ev) {
   count.textContent = all.length;
   if (all.length) {
     dlButton.removeAttribute('disabled');
-    if (_paq) _paq.push(['trackEvent', 'Button', 'Remove from file', el.dataset.url]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Remove from file', el.dataset.url]);
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
-      if (_paq) _paq.push(['trackEvent', 'Button', 'Add to file', el.dataset.url]);
+      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Add to file', el.dataset.url]);
     }
   }
 }
@@ -206,7 +206,7 @@ function toggleSelect(ev) {
 function stamp() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
-  return `# created by https://customradio.dough10.me [${formattedDate}] #\n`;
+  return `# created by https://customradio.dough10.me [${formattedDate}]\n`;
 }
 
 /**
@@ -219,18 +219,13 @@ function stamp() {
 async function dlTxt() {
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
-  const str = elements.map(el => {
-    return {
-      name: el.title,
-      url: el.dataset.url
-    };
-  })
-  .sort((a, b) => a.name.localeCompare(b.name))
-  .map(el => `${el.name}, ${el.url}`).join('\n');
+  const str = elements.sort((a, b) => a.title.localeCompare(b.title))
+  .map(el => `${el.title}, ${el.dataset.url}`).join('\n');
   
-  const blob = new Blob([`${stamp()}${str}`], {
+  const blob = new Blob([`${stamp()}\n${str}`], {
     type: 'text/plain'
   });
+
   const filename = 'radio.txt';
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
@@ -241,7 +236,7 @@ async function dlTxt() {
   document.body.removeChild(link);
   
   URL.revokeObjectURL(link.href);
-  if (_paq) _paq.push(['trackLink', 'radio.txt', 'download']);
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Download', 'radio.txt']);
 }
 
 /**
@@ -286,7 +281,7 @@ async function playStream(ev) {
     console.error('Error setting player source or playing media:', error);
   }
 
-  if (_paq) _paq.push(['trackEvent', 'Button', 'Play stream', url]);
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Play stream', url]);
 }
 
 /**
@@ -459,7 +454,7 @@ function lazyLoadOnScroll(list, container) {
  * @returns {String}
  */
 function queryString(value) {
-  return (value.length === 0) ? '' : `?genres=${value}`;
+  return (value.length === 0) ? '' : encodeURIComponent(`genres=${value}`);
 }
 
 /**
@@ -489,9 +484,9 @@ async function filterChanged(ev) {
     container.appendChild(fragment);
     lazyLoadOnScroll(list, container);
     document.querySelector('#station-count').textContent = stations.length;
-    if (_paq) _paq.push(['trackEvent', 'Filter', 'Genre', ev.target.value]);
+    if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', 'Genre', ev.target.value]);
   } catch (error) {
-    if (_paq) _paq.push(['trackEvent', 'Fetch Error', 'Error', error]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', 'Error', error]);
     console.error('Error fetching stations:', error);
     new Toast('Error fetching stations:', error);
   }
@@ -561,19 +556,6 @@ player.onplay = _ => {
 };
 
 /**
- * clears interface of playing stream
- * 
- * @function
- * 
- * @returns {void}
- */
-function clearPlaying() {
-  document.querySelector('.player').removeAttribute('playing');
-  const all = document.querySelectorAll('#stations>li');
-  all.forEach(el => el.removeAttribute('playing'));
-}
-
-/**
  * audio paused callback
  * 
  * @function
@@ -610,6 +592,120 @@ player.ontimeupdate = async _ => {
   }));
 };
 
+/**
+ * clears interface of playing stream
+ * 
+ * @function
+ * 
+ * @returns {void}
+ */
+function clearPlaying() {
+  document.querySelector('.player').removeAttribute('playing');
+  const all = document.querySelectorAll('#stations>li');
+  all.forEach(el => el.removeAttribute('playing'));
+}
+
+/**
+ * validate srteam URL is valid url format
+ * 
+ * @function
+ * 
+ * 
+ * @param {String} url
+ * 
+ * @returns {Boolean}
+ */
+function isValidURL(url) {
+  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+  return urlRegex.test(url);
+}
+
+/**
+ * Handles the form submission event.
+ *
+ * This function prevents the default form submission behavior, collects the form data,
+ * and sends it to the server via a POST request. It then handles the server response,
+ * updates the UI accordingly, and manages the form state. In case of an error, it
+ * displays an error message and logs the error to the console.
+ *
+ * @async
+ * @function formSubmission
+ * @param {Event} ev - The form submission event.
+ * 
+ * @returns {Promise<void>} - A promise that resolves when the form submission handling is complete.
+ * 
+ * @throws {Error} - Throws an error if the fetch request fails.
+ */
+async function formSubmission(ev) {
+  ev.preventDefault();
+
+  try {
+    const response = await fetch('/add', {
+      method: 'POST',
+      body: new FormData(ev.target),
+    });
+
+    const result = await response.json();
+    document.getElementById('response').innerText = result.message;
+    new Toast(result.message);
+    await sleep(3000);
+    const inputElement = document.querySelector('#station-url');
+    const submit = document.querySelector('#submit-stream');
+    inputElement.value = '';
+    document.getElementById('response').innerText = ''
+    if (!submit.hasAttribute('disabled')) {
+      submit.toggleAttribute('disabled');
+    }
+  } catch(e) {
+    document.getElementById('response').innerText = 'An error occurred!';
+    console.error('Error:', e);
+  }
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'URL Submission']);
+}
+
+/**
+ * Toggles the activity state of the submit button based on the validity of the URL input.
+ *
+ * This function selects the input element and the submit button, checks if the URL
+ * provided in the input element is valid, and enables or disables the submit button
+ * accordingly.
+ *
+ * @function toggleButtonActivity
+ */
+function toggleButtonActivity() {
+  const inputElement = document.querySelector('#station-url');
+  const submit = document.querySelector('#submit-stream');
+
+  if (isValidURL(inputElement.value)) {
+    submit.removeAttribute('disabled');
+  } else {
+    if (!submit.hasAttribute('disabled')) {
+      submit.toggleAttribute('disabled');
+    }
+  }
+}
+
+/**
+ * Reports a JavaScript error to Matomo and logs it to the console.
+ *
+ * This function constructs an error message from the provided error details,
+ * logs the error to the console, and sends the error message to Matomo if the
+ * Matomo tracking array (_paq) is available.
+ *
+ * @function reportErrorToMatomo
+ * 
+ * @param {string} message - The error message.
+ * @param {string} url - The URL where the error occurred.
+ * @param {number} lineNumber - The line number where the error occurred.
+ * @param {number} columnNumber - The column number where the error occurred.
+ * @param {Error} error - The error object.
+ */
+function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
+  console.error(error);
+  var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'JavaScript Error', 'Error', errorMessage]);
+}
+
 
 window.onload = async _ => {
   document.querySelectorAll('dialog>.close').forEach(el => {
@@ -625,7 +721,7 @@ window.onload = async _ => {
 
   const filter = document.querySelector('#filter');
   filter.addEventListener('change', filterChanged);
-  filterChanged({ target: filter });
+  filterChanged({ target: filter});
 
   document.querySelector('body').appendChild(player);
   document.querySelector('.player>.small-button').addEventListener('click', togglePlay);
@@ -640,16 +736,25 @@ window.onload = async _ => {
 
   await sleep(100);
   document.querySelector('#greeting').showModal();
+
+  const form = document.querySelector('#add-stream');
+  form.addEventListener('submit', formSubmission);
+  
+  const inputElement = document.querySelector('#station-url');
+  inputElement.oninput = toggleButtonActivity;
+
+
+  if ('serviceWorker' in navigator) {
+    try{
+      const worker = await navigator.serviceWorker.register('/worker.js');
+    } catch(error) {
+      console.log('ServiceWorker registration failed: ', error);
+    }
+  }
 };
 
-function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
-  console.error(error);
-  var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
-  if (_paq) _paq.push(['trackEvent', 'JavaScript Error', 'Error', errorMessage]);
-}
 
-// Attach the function to the global error handler
-window.onerror = function(message, url, lineNumber, columnNumber, error) {
+window.onerror = (message, url, lineNumber, columnNumber, error) => {
   reportErrorToMatomo(message, url, lineNumber, columnNumber, error);
   return true;
 };

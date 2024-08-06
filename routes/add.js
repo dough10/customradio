@@ -3,7 +3,7 @@ module.exports = addToDatabase;
 
 const {validationResult} = require('express-validator');
 
-
+const log = require('../util/log.js');
 const isLiveStream = require('../util/isLiveStream.js');
 
 
@@ -45,18 +45,8 @@ async function addToDatabase(db, req, res) {
       errors: errors.array()
     });
   }
-  const {
-    name,
-    url
-  } = req.body;
-  log(`${req.ip} -> /add ${name}:${url}`);
-  const status = await isLiveStream(url);
-  const data = {
-    name,
-    url,
-    online: status.isLive,
-    genre: status.genre
-  };
+  const {url} = req.body;
+  log(`${req.ip} -> /add ${url}`);
   try {
     const exists = await db.findOne({
       url
@@ -67,13 +57,26 @@ async function addToDatabase(db, req, res) {
       });
       return;
     }
+    const status = await isLiveStream(url);
+    if (!status) {
+      res.status(200).json({
+        message: 'Connection test failed'
+      });
+      return;
+    }
+    const data = {
+      name: status.name,
+      url,
+      online: status.isLive,
+      genre: status.genre
+    };
     await db.insertOne(data);
     res.json({
-      message: "station saved o( ❛ᴗ❛ )o"
+      message: "station saved"
     });
   } catch (e) {
     res.status(500).json({
-      error: 'Failed to add station (╬ Ò﹏Ó)'
+      message: 'Failed to add station'
     });
   }
 }
