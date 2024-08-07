@@ -751,6 +751,24 @@ window.onload = async _ => {
       console.log('ServiceWorker registration failed: ', error);
     }
   }
+
+  let dismissed = Number(localStorage.getItem('dismissed'));
+
+  const alert = document.querySelector('#alert');
+  let checkAnalytics;
+  
+  document.querySelector('.alert>.yellow-text').addEventListener('click', _ => {
+    localStorage.setItem('dismissed', '1');
+    clearInterval(checkAnalytics);
+    alert.removeAttribute('open');
+  });
+
+  if (!dismissed) {
+    checkAnalytics = setInterval(_ => {
+      const hasChildren = document.querySelectorAll('#matomo-opt-out>*').length;
+      if (hasChildren && !alert.hasAttribute('open')) alert.toggleAttribute('open');
+    }, 500);
+  }
 };
 
 

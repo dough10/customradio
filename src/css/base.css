@@ -489,7 +489,7 @@ dialog::backdrop {
 }
 
 .form-group>.button {
-  margin:auto;
+  margin: auto;
 }
 
 input {
@@ -659,5 +659,59 @@ input:focus {
   to {
     display: block;
     opacity: 1
+  }
+}
+
+.alert {
+  background: #323232;
+  padding: 16px;
+  display: flex;
+  flex-direction: row;
+  font-size: 14px;
+  text-align: left;
+  position: absolute;
+  border-radius: 8px;
+  top: 8px;
+  color: #fff;
+  z-index: 4;
+  box-shadow: 0 8px 10px 1px rgba(0, 0, 0, .14), 0 3px 14px 2px rgba(0, 0, 0, .12), 0 5px 5px -3px rgba(0, 0, 0, .4);
+  min-width: 200px;
+  max-width: 600px;
+  margin: auto;
+  left: 50%;
+  opacity: 0;
+  transition-property: transform, opacity;
+  transition-duration: 500ms;
+  transition-timing-function: linear;
+  transform: translateY(-120%) translateX(-50%);
+}
+
+.alert[open] {
+  opacity: 1;
+  transform: translateY(0) translateX(-50%);
+}
+
+.alert>.yellow-text {
+  padding: 16px;
+  cursor: pointer;
+  margin: auto;
+  color: yellow;
+  min-width: 135px;
+}
+
+#matomo-opt-out>input {
+  margin-right: 8px;
+  width: auto;
+}
+
+#matomo-opt-out>label {
+  position: inherit;
+  font-size: inherit;
+  display: inline-block;
+}
+
+@media screen and (max-width: 600px) {
+  .alert {
+    display: inline-block;
   }
 }

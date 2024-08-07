@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="manifest"href="customradio.webmanifest">
+  <link rel="manifest" href="customradio.webmanifest">
   <meta name="description" content="custom radio file creator.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Cache-control" content="public">
@@ -17,6 +17,14 @@
 </head>
 
 <body>
+  <div id="alert" class="alert">
+    <div id="reset-text">
+      <div id="matomo-opt-out"></div>
+      <script
+        src="https://analytics.dough10.me/index.php?module=CoreAdminHome&action=optOutJS&divId=matomo-opt-out&language=auto&showIntro=1"></script>
+    </div>
+    <div class="yellow-text">Click to dismiss</div>
+  </div>
   <button id="add_button" class="fab" type="button" title="add station">
     <svg viewBox="0 0 24 24">
       <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
@@ -84,6 +92,7 @@
   <dialog id="add">
     <div>
       <h1>add station</h1>
+      <p>The API will get the other information required for the database</p>
       <form id="add-stream" class="form-group">
         <label for="station-url">Station URL:</label>
         <input placeholder="Station URL:" type="url" id="station-url" name="url" required>
