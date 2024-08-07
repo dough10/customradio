@@ -1,5 +1,5 @@
 const express = require('express');
-const {query, body} = require('express-validator');
+const { query, body } = require('express-validator');
 const compression = require('compression');
 const path = require('path');
 const schedule = require('node-schedule');
@@ -8,6 +8,7 @@ const multer = require('multer');
 const upload = multer();
 const Redis = require('ioredis');
 const promClient = require('prom-client');
+const url = require('url');
 require('dotenv').config();
 
 
@@ -15,7 +16,7 @@ const addToDatabase = require('./routes/add.js');
 const getStations = require('./routes/stations.js');
 const log = require('./util/log.js');
 const connectToDb = require('./util/connectToDb.js');
-const {testStreams} = require('./util/testStreams.js');
+const { testStreams } = require('./util/testStreams.js');
 
 
 const redis = new Redis({
@@ -168,9 +169,9 @@ app.get('/metrics', async (req, res) => {
  */
 app.get('/stations', [
   query('genres')
-  .trim()
-  .escape()
-  .isString().withMessage('Genres must be a string'),
+    .trim()
+    .escape()
+    .isString().withMessage('Genres must be a string'),
 ], (req, res) => getStations(db, redis, req, res));
 
 /**
@@ -223,6 +224,33 @@ app.post('/add', upload.none(), [
 ], (req, res) => addToDatabase(db, req, res));
 
 /**
+ * Catch-all route for handling 404 errors.
+ * 
+ * @summary Logs the request details and responds with a 404 error in JSON format.
+ * 
+ * @description This route catches all requests that do not match any defined routes.
+ * It logs the request details (protocol, host, and pathname) and responds with a 404 status code and a JSON message.
+ * 
+ * @name CatchAll
+ * @function
+ * @memberof module:routes/errors
+ * 
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
+ * 
+ * @returns {void} Responds with a 404 status code and a JSON error message.
+ */
+app.get('*', (req, res) => {
+  let reqadd = {
+    protocol: req.protocol,
+    host: req.get('host'),
+    pathname: req.originalUrl
+  };
+  log(`${req.ip} requested ${url.format(reqadd)} 404! ╭∩╮(︶︿︶)╭∩╮`);
+  res.status(404).json({ message: '╭∩╮(︶︿︶)╭∩╮' });
+});
+
+/**
  * Starts the Express server and sets up necessary initializations.
  * 
  * This function listens on port 3000 and performs the following tasks:
@@ -239,7 +267,7 @@ app.post('/add', upload.none(), [
  * @example
  * // Starting the server
  * app.listen(3000, async _ => {
- *   db = await connectToDb(config.url);
+ *   db = await connectToDb(DB_HOST);
  *   log('Online. o( ❛ᴗ❛ )o');
  *   schedule.scheduleJob('0 0 * * *', _ => testStreams(db));
  * });

@@ -1,9 +1,8 @@
-const CACHE_NAME = 'customradio-cache-v1.1';
+const CACHE_NAME = 'customradio-cache-v1.2';
 const urlsToCache = [
   '/',
   '/styles.min.css',
   '/bundle.min.js',
-  '/stations'
 ];
 
 self.addEventListener('install', event => {
@@ -17,15 +16,19 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
-  );
+  if (event.request.url.includes('/stations')) {
+    event.respondWith(handleStationsRequest(event));
+  } else {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          if (response) {
+            return response;
+          }
+          return fetch(event.request);
+        })
+    );
+  }
 });
 
 self.addEventListener('activate', event => {
@@ -42,3 +45,38 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
+/**
+ * Handles fetch requests for /stations.
+ * Checks if the cache is older than 24 hours and updates it if necessary.
+ * 
+ * @param {FetchEvent} event - The fetch event.
+ * @returns {Promise<Response>} The response from cache or network.
+ */
+async function handleStationsRequest(event) {
+  const cache = await caches.open(CACHE_NAME);
+  const cachedResponse = await cache.match(event.request);
+  const now = Date.now();
+
+  if (cachedResponse) {
+    const cachedDate = new Date(cachedResponse.headers.get('sw-cache-date'));
+
+    if ((now - cachedDate.getTime()) < 24 * 60 * 60 * 1000) {
+      return cachedResponse;
+    }
+  }
+
+  const networkResponse = await fetch(event.request);
+  const clonedResponse = networkResponse.clone();
+  const headers = new Headers(clonedResponse.headers);
+  headers.set('sw-cache-date', new Date(now).toISOString());
+
+  const responseToCache = new Response(clonedResponse.body, {
+    status: clonedResponse.status,
+    statusText: clonedResponse.statusText,
+    headers: headers,
+  });
+
+  await cache.put(event.request, responseToCache);
+  return networkResponse;
+}

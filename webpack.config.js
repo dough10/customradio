@@ -59,7 +59,12 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: './src/worker.js', to: 'worker.js' }
+        { from: './src/worker.js', to: 'worker.js' },
+        { from: './src/customradio.webmanifest', to: 'customradio.webmanifest' },
+        { from: './src/favicon.ico', to: 'favicon.ico' },
+        { from: './src/apple-touch-icon.png', to: 'apple-touch-icon.png' },
+        { from: './src/android-chrome-512x512.png', to: 'android-chrome-512x512.png' },
+        { from: './src/android-chrome-192x192.png', to: 'android-chrome-192x192.png' }
       ],
     }),
   ],
