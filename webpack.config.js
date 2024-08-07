@@ -66,7 +66,8 @@ module.exports = {
         { from: './src/favicon-32x32.png', to: 'favicon-32x32.png' },
         { from: './src/apple-touch-icon.png', to: 'apple-touch-icon.png' },
         { from: './src/android-chrome-512x512.png', to: 'android-chrome-512x512.png' },
-        { from: './src/android-chrome-192x192.png', to: 'android-chrome-192x192.png' }
+        { from: './src/android-chrome-192x192.png', to: 'android-chrome-192x192.png' },
+        { from: './src/screenshots', to: 'screenshots' }
       ],
     }),
   ],
