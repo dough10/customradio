@@ -220,7 +220,7 @@ async function dlTxt() {
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
   const str = elements.sort((a, b) => a.title.localeCompare(b.title))
-  .map(el => `${el.title}, ${el.dataset.url}`).join('\n');
+  .map(el => `${el.dataset.title}, ${el.dataset.url}`).join('\n');
   
   const blob = new Blob([`${stamp()}\n${str}`], {
     type: 'text/plain'
@@ -342,7 +342,7 @@ function createSmallButton({ icon, cssClass, func, title }) {
  * 
  * @returns {HTMLElement} li element
  */
-function createStationElement({ name, url, bitrate }) {
+function createStationElement({ name, url, bitrate, genre }) {
   const buttonData = [
     {
       icon: {
@@ -381,7 +381,8 @@ function createStationElement({ name, url, bitrate }) {
   div.title = div.textContent;
 
   const li = document.createElement('li');
-  li.title = name;
+  li.title = `${name}: ${genre}`;
+  li.dataset.title = name;
   li.dataset.url = url;
   li.dataset.bitrate = bitrate;
   [span, div, ...buttons].forEach(el => li.appendChild(el));
@@ -652,7 +653,7 @@ async function formSubmission(ev) {
     const inputElement = document.querySelector('#station-url');
     const submit = document.querySelector('#submit-stream');
     inputElement.value = '';
-    document.getElementById('response').innerText = ''
+    document.getElementById('response').innerText = '';
     if (!submit.hasAttribute('disabled')) {
       submit.toggleAttribute('disabled');
     }

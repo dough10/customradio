@@ -67,15 +67,21 @@ async function getStations(db, redis, req, res) {
       genre: {
         $in: genres.map(genre => new RegExp(genre, 'i'))
       },
-      bitrate: { $exists: true, $ne: null || 'Quality' }
+      bitrate: {
+        $exists: true,
+        $ne: null || 'Quality'
+      }
     }, {
       projection: {
         _id: 0,
         name: 1,
         url: 1,
-        bitrate: 1
+        bitrate: 1,
+        genre: 1
       }
-    }).sort({ name: 1 }).toArray();
+    }).sort({
+      name: 1
+    }).toArray();
     log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned`);
     res.json(stations);
     await redis.set(cacheKey, JSON.stringify(stations), 'EX', 3600);
