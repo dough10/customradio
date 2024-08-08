@@ -14,4 +14,4 @@ RUN npx webpack
 
 EXPOSE 3000/tcp
 
-CMD ["node", "index.js" ]
+CMD ["node", "index.js"]
