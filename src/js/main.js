@@ -748,7 +748,7 @@ window.onload = async _ => {
   if ('serviceWorker' in navigator) {
     try{
       const worker = await navigator.serviceWorker.register('/worker.js');
-      if (worker) worker.update();
+      // if (worker) worker.update();
     } catch(error) {
       console.log('ServiceWorker registration failed: ', error);
     }
