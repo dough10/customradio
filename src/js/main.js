@@ -377,6 +377,7 @@ function createStationElement({ name, url, bitrate, genre }) {
   span.textContent = name;
   
   const div = document.createElement('div');
+  if (bitrate === 'Unknown') bitrate = '???';
   div.textContent = `${bitrate}kbps`;
   div.title = div.textContent;
 
@@ -754,23 +755,32 @@ window.onload = async _ => {
     }
   }
 
-  let dismissed = Number(localStorage.getItem('dismissed'));
-
   const alert = document.querySelector('#alert');
-  let checkAnalytics;
   
-  document.querySelector('.alert>.yellow-text').addEventListener('click', _ => {
+  document.querySelector('.alert>.yellow-text').addEventListener('click', async _ => {
     localStorage.setItem('dismissed', '1');
     clearInterval(checkAnalytics);
     alert.removeAttribute('open');
+    await sleep(1000);
+    alert.remove();
   });
+  
+  let dismissed = Number(localStorage.getItem('dismissed'));
 
-  if (!dismissed) {
-    checkAnalytics = setInterval(_ => {
-      const hasChildren = document.querySelectorAll('#matomo-opt-out>*').length;
-      if (hasChildren && !alert.hasAttribute('open')) alert.toggleAttribute('open');
-    }, 500);
-  }
+  let checkAnalytics = setInterval(_ => {
+    const hasChildren = document.querySelectorAll('#matomo-opt-out>*').length;
+    if (!hasChildren) return;
+    if (dismissed) {
+      clearInterval(checkAnalytics);
+      alert.remove();
+      return;
+    }
+    if (!alert.hasAttribute('open')) {
+      clearInterval(checkAnalytics);
+      alert.toggleAttribute('open');
+    }
+  }, 500);
+
 };
 
 
