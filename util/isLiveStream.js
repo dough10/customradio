@@ -20,6 +20,54 @@ const defaultPorts = [
 ];
 
 /**
+ * Tests if the provided URL is an audio stream and retrieves related information.
+ *
+ * This function sends a HEAD request to the given URL to check if it is a live audio stream
+ * by inspecting the response headers. It checks for audio-related headers and parses them,
+ * returning an object with stream details if the URL points to a valid audio stream.
+ *
+ * @param {string} url - The URL to be tested for streaming.
+ * @returns {Promise<Object|boolean>} Returns a promise that resolves to an object containing
+ * stream information (if the URL is an audio stream) or `false` if it is not an audio stream
+ * or if an error occurs.
+ * @returns {Object} - The returned object contains:
+ *   @property {string} url - The URL that was tested.
+ *   @property {string} [name='Unknown'] - The name of the stream, or 'Unknown' if not available.
+ *   @property {boolean} isLive - Indicates if the stream is live (i.e., responds with status 200).
+ *   @property {string} [icyGenre='Unknown'] - The genre of the stream, or 'Unknown' if not available.
+ *   @property {string} content - The content type of the stream (e.g., 'audio/mp3').
+ *   @property {number|string} [bitrate='Unknown'] - The bitrate of the stream, or 'Unknown' if not available.
+ * 
+ * @throws {Error} Throws an error if the HTTP request fails or if there is an issue with the URL.
+ */
+async function streamTest(url) {
+  try {
+    const response = await axios.head(url, {
+      timeout: 3000
+    });
+    const isLive = response.status === 200;
+    const name = response.headers['icy-name'];
+    const icyGenre = response.headers['icy-genre'];
+    const bitrate = response.headers['icy-br'];
+    const content = response.headers['content-type'];
+    const isAudioStream = content && content.startsWith('audio/');
+
+    if (!isAudioStream) return false;
+
+    return {
+      url,
+      name: name || 'Unknown',
+      isLive,
+      icyGenre: icyGenre || 'Unknown',
+      content,
+      bitrate: bitrate ? parseInt(bitrate, 10) : 'Unknown'
+    };
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
  * Checks if the provided URL is a live stream and retrieves its metadata.
  * 
  * This function attempts to send a HEAD request to the URL (or its HTTPS equivalent) to determine if the stream is live.
@@ -57,61 +105,15 @@ const defaultPorts = [
  *   });
  */
 async function isLiveStream(url) {
-  try {
-    defaultPorts.forEach(port => {
-      url = url.replace(port, '/');
-    });
+  if (!url) return false;
+  defaultPorts.forEach(port => {
+    url = url.replace(port, '/');
+  });
 
-    if (url.startsWith('http://')) {
-      const httpsUrl = url.replace('http://', 'https://');
-      const httpsResponse = await axios.head(httpsUrl, {
-        timeout: 3000
-      });
-      if (httpsResponse.status === 200) {
-        url = httpsUrl;
-        const isLive = httpsResponse.status === 200;
-        const name = httpsResponse.headers['icy-name'];
-        const icyGenre = httpsResponse.headers['icy-genre'];
-        const bitrate = httpsResponse.headers['icy-br'];
-        const content = httpsResponse.headers['content-type'];
-
-        const isAudioStream = content && content.startsWith('audio/');
-
-        if (!isAudioStream) return false;
-
-        return {
-          url,
-          name,
-          isLive,
-          icyGenre,
-          content,
-          bitrate
-        };
-      }
-    }
-
-    const response = await axios.head(url, {
-      timeout: 3000
-    });
-    const isLive = response.status === 200;
-    const name = response.headers['icy-name'];
-    const icyGenre = response.headers['icy-genre'];
-    const bitrate = response.headers['icy-br'];
-    const content = response.headers['content-type'];
-
-    const isAudioStream = content && content.startsWith('audio/');
-
-    if (!isAudioStream) return false;
-
-    return {
-      url,
-      name,
-      isLive,
-      icyGenre,
-      content,
-      bitrate
-    };
-  } catch (error) {
-    return false;
+  if (url.startsWith('http://')) {
+    const httpsUrl = url.replace('http://', 'https://');
+    const httpsStream = await streamTest(httpsUrl);
+    if (!httpsStream || httpsStream.isLive) return httpsStream;
   }
+  return await streamTest(url);
 }
