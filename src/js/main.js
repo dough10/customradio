@@ -269,9 +269,9 @@ async function playStream(ev) {
   if (!miniPlayer.hasAttribute('playing')) {
     miniPlayer.toggleAttribute('playing');
   }
-  document.querySelector('#name').textContent = el.title;
+  document.querySelector('#name').textContent = el.dataset.title;
   document.querySelector('#bitrate').textContent = `${el.dataset.bitrate}kbps`;
-  new Toast(`Playing ${el.title}`, 1);
+  new Toast(`Playing ${el.dataset.title}`, 1);
 
   try {
     player.src = url;
