@@ -45,7 +45,12 @@ app.use(compression());
 app.use(express.json());
 app.set('trust proxy', true);
 app.disable('x-powered-by');
-app.use(express.static(path.join(__dirname, 'html')));
+app.use(express.static(path.join(__dirname, 'html'), {
+  maxAge: 86400000,
+  setHeaders: function(res, path) {
+    res.setHeader("Expires", new Date(Date.now() + 2592000000*30).toUTCString());
+  }
+}));
 app.use((req, res, next) => {
   res.on('finish', () => {
     httpRequestCounter.inc({
@@ -56,6 +61,7 @@ app.use((req, res, next) => {
   });
   next();
 });
+
 
 let db;
 
