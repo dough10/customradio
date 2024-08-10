@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/roboto-v15-latin-regular.eot');
+  src: local('Roboto'), local('Roboto-Regular'),
+    url('../fonts/roboto-v15-latin-regular.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/roboto-v15-latin-regular.woff2') format('woff2'),
+    url('../fonts/roboto-v15-latin-regular.woff') format('woff'),
+    url('../fonts/roboto-v15-latin-regular.ttf') format('truetype'),
+    url('../fonts/roboto-v15-latin-regular.svg#Roboto') format('svg');
+}
+
 :root {
   --font-family: 'Roboto', 'Noto', sans-serif;
   --pop-rgb: 166, 136, 250;
