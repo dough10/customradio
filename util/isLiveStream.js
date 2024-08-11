@@ -58,7 +58,7 @@ async function streamTest(url) {
 
     return {
       url,
-      name: name || 'Unknown',
+      name,
       description,
       icyurl,
       isLive,
