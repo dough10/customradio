@@ -6,3 +6,5 @@
 /collect_headers.js
 /.env
 /.jshintrc
+/import.mjs
+stream_test.js
