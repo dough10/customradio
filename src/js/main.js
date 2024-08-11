@@ -119,10 +119,9 @@ class Toast {
       window.open(this.link, "_blank");
     } else if (this.link && typeof this.link === 'function') {
       this.link();
-    } else {
+    } else if (this.link) {
       console.error('Toast "link" paramater must be a valid URL or function.');
     }
-    // createRipple(e);
     this._cleanUp();
   }
 
