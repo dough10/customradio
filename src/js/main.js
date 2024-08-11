@@ -764,6 +764,15 @@ function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
 }
 
 /**
+ * force service worker to activate
+ * 
+ * @param {Object} newWorker 
+ */
+function skipWaiting(newWorker) {
+  newWorker.postMessage({ action: 'skipWaiting' });
+}
+
+/**
  * An update was installed for the active service worker
  * 
  * @param {Object} newWorker 
@@ -772,8 +781,8 @@ function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
  */
 function updateInstalled(newWorker) {
   if (newWorker.state !== 'installed') return;
-  const clickAction = _ => newWorker.postMessage({ action: 'skipWaiting' });
-  new Toast('App cache updated', 10, clickAction, 'Refresh');
+  if (!navigator.serviceWorker.controller) return;
+  new Toast('App cache updated', 10, _ => skipWaiting(newWorker), 'Refresh');
 }
 
 /**
