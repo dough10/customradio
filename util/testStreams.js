@@ -90,7 +90,7 @@ async function testStreams(db) {
     };
     const updates = {
       $set: {
-        name: stream.name || station.name,
+        name: stream.name || station.name || stream.description,
         url: stream.url,
         genre: stream.icyGenre || station.genre,
         online: stream.isLive,
