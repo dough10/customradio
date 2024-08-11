@@ -792,6 +792,21 @@ function updateFound(worker) {
  * window loaded
  */
 window.onload = async () => {
+  if ('serviceWorker' in navigator) {
+    try {
+      const worker = await navigator.serviceWorker.register('/worker.js');
+      worker.onupdatefound = () => updateFound(worker);
+      worker.oncontrollerchange = () => {
+        if (!window.hasRefreshed) {
+          window.hasRefreshed = true;
+          window.location.reload();
+        }
+      };
+    } catch (error) {
+      console.log('ServiceWorker registration failed: ', error);
+    }
+  }
+
   document.querySelectorAll('dialog>.close').forEach(el => {
     el.addEventListener('click', _ => el.parentElement.close());
   });
@@ -826,21 +841,6 @@ window.onload = async () => {
 
   const inputElement = document.querySelector('#station-url');
   inputElement.oninput = toggleButtonActivity;
-
-  if ('serviceWorker' in navigator) {
-    try {
-      const worker = await navigator.serviceWorker.register('/worker.js');
-      worker.onupdatefound = () => updateFound(worker);
-      worker.oncontrollerchange = () => {
-        if (!window.hasRefreshed) {
-          window.hasRefreshed = true;
-          window.location.reload();
-        }
-      };
-    } catch (error) {
-      console.log('ServiceWorker registration failed: ', error);
-    }
-  }
 
   // matomo 
   const alert = document.querySelector('#alert');
