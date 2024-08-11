@@ -173,20 +173,21 @@ setInterval(_ => {
 }, 500);
 
 /**
- * toggles selected attribute
+ * Updates the selected count displayed on the page and manages the state of the download button.
  * 
- * @param {Event} ev
+ * This function updates the text content of the element with the ID `#count` to display the provided number. 
+ * It also enables or disables the download button (`#download`) based on whether the number is greater than zero.
+ * If a global `_paq` tracking object is available, the function sends events to it based on the state of the button.
  * 
- * @returns {void} 
+ * @param {number} number - The number to set as the selected count.
+ * 
+ * @fires _paq.push - If `_paq` is defined, the function tracks events related to enabling or disabling the download button.
  */
-function toggleSelect(ev) {
-  const dlButton = document.querySelector('#download');
-  const el = ev.target.parentElement;
-  el.toggleAttribute('selected');
-  const all = el.parentNode.querySelectorAll('li[selected]');
+function setSelectedCount(number) {
   const count = document.querySelector('#count');
-  count.textContent = all.length;
-  if (all.length) {
+  const dlButton = document.querySelector('#download');
+  count.textContent = number;
+  if (number) {
     dlButton.removeAttribute('disabled');
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Remove from file', el.dataset.url]);
   } else {
@@ -195,6 +196,29 @@ function toggleSelect(ev) {
       if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Add to file', el.dataset.url]);
     }
   }
+}
+
+/**
+ * toggles selected attribute
+ * 
+ * @param {Event} ev
+ * 
+ * @returns {void} 
+ */
+function toggleSelect(ev) {
+  const el = ev.target.parentElement;
+  el.toggleAttribute('selected');
+  const all = Array.from(el.parentNode.querySelectorAll('li[selected]'));
+  const forStorage = all.map(el => {
+    return {
+      name: el.dataset.title,
+      url: el.dataset.url,
+      bitrate: el.dataset.bitrate,
+      genre: el.dataset.genre
+    }
+  });
+  localStorage.setItem('selected', JSON.stringify(forStorage));
+  setSelectedCount(all.length);
 }
 
 /**
