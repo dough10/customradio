@@ -604,6 +604,10 @@ input:focus {
   color: yellow;
 }
 
+.toast:first-child {
+  margin-right: 1.5em;
+}
+
 .flex-row {
   display: flex;
   flex-direction: row;
