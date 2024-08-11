@@ -278,6 +278,19 @@ function reset() {
 }
 
 /**
+ * opens a context menu at the click location
+ * 
+ * @param {Event} ev 
+ */
+function contextMenu(ev) {
+  ev.preventDefault();
+
+  const X = ev.pageX;
+  const Y = ev.pageY;
+  console.log(X, Y);
+}
+
+/**
  * plays stream when button is clicked
  * 
  * @function
@@ -412,6 +425,8 @@ function createStationElement({ name, url, bitrate, genre }) {
   li.dataset.title = name;
   li.dataset.url = url;
   li.dataset.bitrate = bitrate;
+  li.dataset.genre = genre;
+  li.addEventListener('contextmenu', contextMenu);
   [span, div, ...buttons].forEach(el => li.appendChild(el));
   return li;
 }
