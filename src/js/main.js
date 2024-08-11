@@ -763,7 +763,7 @@ window.onload = async _ => {
 
   const filter = document.querySelector('#filter');
   filter.addEventListener('change', filterChanged);
-  filterChanged({ target: filter});
+  filterChanged({ target: filter, loadLocal: true });
 
   document.querySelector('body').appendChild(player);
   document.querySelector('.player>.small-button').addEventListener('click', togglePlay);
