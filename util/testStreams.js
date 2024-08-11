@@ -81,7 +81,7 @@ async function testStreams(db) {
   const stations = await db.find({}).toArray();
   let total = 0;
   for (const station of stations) {
-    if (!station) return;
+    if (!station) continue;
     const stream = await isLiveStream(rmRef(station.url));
     if (!stream) continue;
     if (stream.bitrate && stream.bitrate.length > 3) stream.bitrate = stream.bitrate.split(',')[0];
