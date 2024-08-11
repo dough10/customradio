@@ -108,6 +108,9 @@ async function streamTest(url) {
  */
 async function isLiveStream(url) {
   if (!url || typeof url !== 'string') return false;
+  if (url.endsWith("?")) {
+    url = url.slice(0, -1);
+  }
   defaultPorts.forEach(port => {
     url = url.replace(port, '/');
   });
