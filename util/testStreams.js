@@ -3,9 +3,9 @@ module.exports = {testStreams, plural};
 
 const {ObjectId} = require('mongodb');
 
-
 const log = require('./log.js');
 const isLiveStream = require('./isLiveStream.js');
+const rmRef = require('./rmRef.js');
 
 
 /**
@@ -63,7 +63,7 @@ async function testStreams(db) {
   let total = 0;
   for (const station of stations) {
     if (!station) return;
-    const stream = await isLiveStream(station.url);
+    const stream = await isLiveStream(rmRef(station.url));
     if (!stream) continue;
     if (stream.bitrate && stream.bitrate.length > 3) stream.bitrate = stream.bitrate.split(',')[0];
     const filter = {
