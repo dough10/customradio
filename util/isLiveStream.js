@@ -51,6 +51,7 @@ async function streamTest(url) {
     const icyGenre = response.headers['icy-genre'];
     const bitrate = response.headers['icy-br'];
     const content = response.headers['content-type'];
+    const icyurl = response.headers['icy-url'];
     const isAudioStream = content && content.startsWith('audio/');
 
     if (!isAudioStream) return false;
@@ -59,6 +60,7 @@ async function streamTest(url) {
       url,
       name: name || 'Unknown',
       description,
+      icyurl,
       isLive,
       icyGenre: icyGenre || 'Unknown',
       content,
