@@ -64,7 +64,7 @@ async function streamTest(url) {
       isLive,
       icyGenre: icyGenre || 'Unknown',
       content,
-      bitrate: bitrate ? parseInt(bitrate, 10) : 'Unknown'
+      bitrate: bitrate
     };
   } catch (error) {
     return false;
