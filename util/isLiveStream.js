@@ -47,6 +47,7 @@ async function streamTest(url) {
     });
     const isLive = response.status === 200;
     const name = response.headers['icy-name'];
+    const description = response.headers['icy-description'];
     const icyGenre = response.headers['icy-genre'];
     const bitrate = response.headers['icy-br'];
     const content = response.headers['content-type'];
@@ -57,6 +58,7 @@ async function streamTest(url) {
     return {
       url,
       name: name || 'Unknown',
+      description,
       isLive,
       icyGenre: icyGenre || 'Unknown',
       content,
@@ -105,7 +107,7 @@ async function streamTest(url) {
  *   });
  */
 async function isLiveStream(url) {
-  if (!url) return false;
+  if (!url || typeof url !== 'string') return false;
   defaultPorts.forEach(port => {
     url = url.replace(port, '/');
   });
@@ -113,7 +115,7 @@ async function isLiveStream(url) {
   if (url.startsWith('http://')) {
     const httpsUrl = url.replace('http://', 'https://');
     const httpsStream = await streamTest(httpsUrl);
-    if (!httpsStream || httpsStream.isLive) return httpsStream;
+    if (httpsStream) return httpsStream;
   }
   return await streamTest(url);
 }
