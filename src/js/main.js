@@ -509,6 +509,20 @@ async function filterChanged(ev) {
     selectedElements.forEach(el => fragment.appendChild(el));
     container.innerHTML = '';
     container.scrollTop = 0;
+    // run @ load ONLY to get item from localstroage into dom
+    const data = JSON.parse(localStorage.getItem('selected'));
+    if (data && ev.loadLocal) {
+      data.sort((a, b) => a.name.localeCompare(b.name));
+      const container = document.querySelector('#stations');
+      const localFragment = document.createDocumentFragment();
+      const elements = data.map(createStationElement);
+      elements.forEach(el => {
+        el.toggleAttribute('selected');
+        localFragment.appendChild(el)
+      });
+      setSelectedCount(elements.length);
+      container.appendChild(localFragment);
+    }
     container.appendChild(fragment);
     lazyLoadOnScroll(list, container);
     document.querySelector('#station-count').textContent = stations.length;
