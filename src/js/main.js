@@ -115,10 +115,12 @@ class Toast {
    * event handler for toast click
    */
   _clicked(e) {
-    if (this.link && typeof this.link === 'string') {
+    if (this.link && typeof this.link === 'string' && isValidURL(this.link)) {
       window.open(this.link, "_blank");
-    } else if (this.link) {
+    } else if (this.link && typeof this.link === 'function') {
       this.link();
+    } else {
+      console.error('Toast "link" paramater must be a valid URL or function.');
     }
     // createRipple(e);
     this._cleanUp();
