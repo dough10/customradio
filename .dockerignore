@@ -1,0 +1,8 @@
+.env
+.git
+.gitignore
+.hintrc
+html
+README.md
+node_modules
+test
