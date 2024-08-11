@@ -305,19 +305,18 @@ async function playStream(ev) {
   const el = ev.target.parentElement;
   const url = el.dataset.url;
   const miniPlayer = document.querySelector('.player');
-  if (!miniPlayer.hasAttribute('playing')) {
-    miniPlayer.toggleAttribute('playing');
-  }
-  document.querySelector('#name').textContent = el.dataset.title;
-  document.querySelector('#bitrate').textContent = `${el.dataset.bitrate}kbps`;
-
   try {
+    document.querySelector('#name').textContent = el.dataset.title;
+    document.querySelector('#bitrate').textContent = `${el.dataset.bitrate}kbps`;
+    if (!miniPlayer.hasAttribute('playing')) {
+      miniPlayer.toggleAttribute('playing');
+    }
     player.src = url;
     player.load();
     await player.play();
-    new Toast(`Playing ${el.dataset.title}`, 1);
+    new Toast(`Playing ${el.dataset.title}`, 3);
   } catch (error) {
-    new Toast('Media playback failed');
+    new Toast('Media playback failed', 3);
     console.error('Error playing media:', error);
   }
 
