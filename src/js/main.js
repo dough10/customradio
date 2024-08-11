@@ -56,7 +56,6 @@ class Toast {
     this._timeout = _timeout * 1000 || 3500;
     this.toast = this._createToast();
     if (link && linkText) {
-      this.link = link;
       this.toast.appendChild(this._withLink(message, link, linkText));
     } else {
       this.toast.textContent = message;
@@ -116,8 +115,10 @@ class Toast {
    * event handler for toast click
    */
   _clicked(e) {
-    if (this.link) {
+    if (this.link && typeof this.link === 'string') {
       window.open(this.link, "_blank");
+    } else if (this.link) {
+      this.link();
     }
     // createRipple(e);
     this._cleanUp();
