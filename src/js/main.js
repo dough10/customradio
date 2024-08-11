@@ -748,8 +748,35 @@ function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
   if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'JavaScript Error', 'Error', errorMessage]);
 }
 
+/**
+ * An update was installed for the active service worker
+ * 
+ * @param {Object} newWorker 
+ * 
+ * @returns {void}
+ */
+function updateInstalled(newWorker) {
+  if (newWorker.state !== 'installed') return;
+  const clickAction = _ => newWorker.postMessage({ action: 'skipWaiting' });
+  new Toast('App updated', 3, clickAction, 'Refresh');
+}
 
-window.onload = async _ => {
+/**
+ * An update was found to the service worker cache
+ * 
+ * @param {Object} worker 
+ * 
+ * @returns {void}
+ */
+function updateFound(worker) {
+  const newWorker = worker.installing;
+  newWorker.onstatechange = _ => updateInstalled(newWorker);
+}
+
+/**
+ * window loaded
+ */
+window.onload = async () => {
   document.querySelectorAll('dialog>.close').forEach(el => {
     el.addEventListener('click', _ => el.parentElement.close());
   });
@@ -789,8 +816,14 @@ window.onload = async _ => {
   if ('serviceWorker' in navigator) {
     try{
       const worker = await navigator.serviceWorker.register('/worker.js');
-      // if (worker) worker.update();
-    } catch(error) {
+      worker.onupdatefound = () => updateFound(worker);
+      worker.oncontrollerchange = () => {
+        if (!window.hasRefreshed) {
+          window.hasRefreshed = true;
+          window.location.reload();
+        }
+      };
+    } catch (error) {
       console.log('ServiceWorker registration failed: ', error);
     }
   }
