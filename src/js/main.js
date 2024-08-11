@@ -1,8 +1,8 @@
 export {
-  queryString, 
-  stamp, 
-  svgIcon, 
-  createSmallButton, 
+  queryString,
+  stamp,
+  svgIcon,
+  createSmallButton,
   createStationElement
 };
 
@@ -245,8 +245,8 @@ async function dlTxt() {
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
   const str = elements.sort((a, b) => a.title.localeCompare(b.title))
-  .map(el => `${el.dataset.title}, ${el.dataset.url}`).join('\n');
-  
+    .map(el => `${el.dataset.title}, ${el.dataset.url}`).join('\n');
+
   const blob = new Blob([`${stamp()}\n${str}`], {
     type: 'text/plain'
   });
@@ -255,11 +255,11 @@ async function dlTxt() {
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = filename;
-  
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   URL.revokeObjectURL(link.href);
   if (typeof _paq !== 'undefined') _paq.push(['trackLink', link.href, 'download']);
 }
@@ -409,12 +409,12 @@ function createStationElement({ name, url, bitrate, genre }) {
       title: 'Remove from file'
     }
   ];
-  
+
   const buttons = buttonData.map(createSmallButton);
-  
+
   const span = document.createElement('span');
   span.textContent = name;
-  
+
   const div = document.createElement('div');
   if (bitrate === 'Unknown') bitrate = '???';
   div.textContent = `${bitrate}kbps`;
@@ -643,9 +643,9 @@ player.ontimeupdate = async _ => {
   const playing = document.querySelector(selector);
   if (!playing || playing.hasAttribute('playing')) return;
   playing.toggleAttribute('playing');
-  document.querySelector('#name').addEventListener('click', _ => playing.scrollIntoView({ 
-    behavior: 'smooth', 
-    block: 'start' 
+  document.querySelector('#name').addEventListener('click', _ => playing.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
   }));
 };
 
@@ -713,7 +713,7 @@ async function formSubmission(ev) {
     if (!submit.hasAttribute('disabled')) {
       submit.toggleAttribute('disabled');
     }
-  } catch(e) {
+  } catch (e) {
     document.getElementById('response').innerText = 'An error occurred!';
     console.error('Error:', e);
   }
@@ -823,13 +823,12 @@ window.onload = async () => {
 
   const form = document.querySelector('#add-stream');
   form.addEventListener('submit', formSubmission);
-  
+
   const inputElement = document.querySelector('#station-url');
   inputElement.oninput = toggleButtonActivity;
 
-
   if ('serviceWorker' in navigator) {
-    try{
+    try {
       const worker = await navigator.serviceWorker.register('/worker.js');
       worker.onupdatefound = () => updateFound(worker);
       worker.oncontrollerchange = () => {
@@ -843,8 +842,8 @@ window.onload = async () => {
     }
   }
 
+  // matomo 
   const alert = document.querySelector('#alert');
-  
   document.querySelector('.alert>.yellow-text').addEventListener('click', async _ => {
     localStorage.setItem('dismissed', '1');
     clearInterval(checkAnalytics);
@@ -852,7 +851,7 @@ window.onload = async () => {
     await sleep(1000);
     alert.remove();
   });
-  
+
   let dismissed = Number(localStorage.getItem('dismissed'));
 
   let checkAnalytics = setInterval(_ => {
@@ -868,7 +867,7 @@ window.onload = async () => {
       alert.toggleAttribute('open');
     }
   }, 500);
-
+  // end matomo
 };
 
 
