@@ -185,17 +185,17 @@ setInterval(_ => {
  * 
  * @fires _paq.push - If `_paq` is defined, the function tracks events related to enabling or disabling the download button.
  */
-function setSelectedCount(number) {
+function setSelectedCount(number, url) {
   const count = document.querySelector('#count');
   const dlButton = document.querySelector('#download');
   count.textContent = number;
   if (number) {
     dlButton.removeAttribute('disabled');
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Remove from file', el.dataset.url]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Remove from file', url]);
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
-      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Add to file', el.dataset.url]);
+      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Add to file', url]);
     }
   }
 }
@@ -220,7 +220,7 @@ function toggleSelect(ev) {
     }
   });
   localStorage.setItem('selected', JSON.stringify(forStorage));
-  setSelectedCount(all.length);
+  setSelectedCount(all.length, el.dataset.url);
 }
 
 /**
