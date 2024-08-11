@@ -33,6 +33,24 @@ function plural(num) {
 }
 
 /**
+ * Convert milliseconds into a formatted string "HH hours MM minutes and SS seconds"
+ * 
+ * @param {Number} milliseconds - time in milliseconds
+ * 
+ * @returns {String} - formatted time as "HH hours MM minutes and SS seconds"
+ */
+function msToHhMmSs(milliseconds) {
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const remainder = totalSeconds % 3600;
+  const minutes = Math.floor(remainder / 60);
+  const secs = remainder % 60;
+
+  return `${hours > 0 ? `${hours} hours ` : ''}${minutes} minutes and ${secs} seconds`;
+}
+
+
+/**
  * Tests streams for online state and headers to update the database with stream information.
  * 
  * This function queries the database for all station records, checks the online status and metadata
@@ -59,6 +77,7 @@ function plural(num) {
  */
 async function testStreams(db) {
   log('Updating database');
+  const startTime = new Date().getTime();
   const stations = await db.find({}).toArray();
   let total = 0;
   for (const station of stations) {
@@ -82,5 +101,6 @@ async function testStreams(db) {
     const res = await db.updateOne(filter, updates);
     total += res.modifiedCount;
   }
-  log(`Database update complete: ${total} entry${plural(total)} updated`);
+  const ms = new Date().getTime() - startTime;
+  log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}`);
 }
