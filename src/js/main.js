@@ -775,7 +775,7 @@ function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
 function updateInstalled(newWorker) {
   if (newWorker.state !== 'installed') return;
   const clickAction = _ => newWorker.postMessage({ action: 'skipWaiting' });
-  new Toast('App cache updated', 5, clickAction, 'Refresh');
+  new Toast('App cache updated', 10, clickAction, 'Refresh');
 }
 
 /**
@@ -796,11 +796,12 @@ function updateFound(worker) {
 window.onload = async () => {
   if ('serviceWorker' in navigator) {
     try {
+      let hasRefreshed = false;
       const worker = await navigator.serviceWorker.register('/worker.js');
       worker.onupdatefound = () => updateFound(worker);
       worker.oncontrollerchange = () => {
-        if (!window.hasRefreshed) {
-          window.hasRefreshed = true;
+        if (!hasRefreshed) {
+          hasRefreshed = true;
           window.location.reload();
         }
       };
