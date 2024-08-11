@@ -95,7 +95,8 @@ async function testStreams(db) {
         genre: stream.icyGenre || station.genre,
         online: stream.isLive,
         'content-type': stream.content,
-        bitrate: stream.bitrate
+        bitrate: stream.bitrate,
+        homepage: stream.icyurl
       }
     };
     const res = await db.updateOne(filter, updates);
