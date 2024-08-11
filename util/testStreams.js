@@ -80,6 +80,7 @@ async function testStreams(db) {
   const startTime = new Date().getTime();
   const stations = await db.find({}).toArray();
   let total = 0;
+  const length = stations.length;
   for (const station of stations) {
     if (!station) continue;
     const stream = await isLiveStream(rmRef(station.url));
@@ -101,6 +102,7 @@ async function testStreams(db) {
     };
     const res = await db.updateOne(filter, updates);
     total += res.modifiedCount;
+    log(`${((stations.indexOf(station) / length) * 100).toFixed(2)}%`);
   }
   const ms = new Date().getTime() - startTime;
   log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}`);
