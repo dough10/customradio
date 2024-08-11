@@ -296,14 +296,15 @@ async function playStream(ev) {
   }
   document.querySelector('#name').textContent = el.dataset.title;
   document.querySelector('#bitrate').textContent = `${el.dataset.bitrate}kbps`;
-  new Toast(`Playing ${el.dataset.title}`, 1);
 
   try {
     player.src = url;
     player.load();
     await player.play();
+    new Toast(`Playing ${el.dataset.title}`, 1);
   } catch (error) {
-    console.error('Error setting player source or playing media:', error);
+    new Toast('Media playback failed');
+    console.error('Error playing media:', error);
   }
 
   if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Play stream', url]);
