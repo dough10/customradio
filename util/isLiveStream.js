@@ -19,6 +19,22 @@ const defaultPorts = [
   ':443/'
 ];
 
+
+/**
+ * validate srteam URL is valid url format
+ * 
+ * @function
+ * 
+ * 
+ * @param {String} url
+ * 
+ * @returns {Boolean}
+ */
+function isValidURL(url) {
+  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+  return urlRegex.test(url);
+}
+
 /**
  * Tests if the provided URL is an audio stream and retrieves related information.
  *
@@ -109,14 +125,13 @@ async function streamTest(url) {
  *   });
  */
 async function isLiveStream(url) {
-  if (!url || typeof url !== 'string') return false;
+  if (!url || typeof url !== 'string' || !isValidURL(url)) return false;
   if (url.endsWith("?")) {
     url = url.slice(0, -1);
   }
   defaultPorts.forEach(port => {
     url = url.replace(port, '/');
   });
-
   if (url.startsWith('http://')) {
     const httpsUrl = url.replace('http://', 'https://');
     const httpsStream = await streamTest(httpsUrl);
