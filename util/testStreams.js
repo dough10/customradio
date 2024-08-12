@@ -102,7 +102,7 @@ async function testStreams(db) {
     };
     const res = await db.updateOne(filter, updates);
     total += res.modifiedCount;
-    log(`${((stations.indexOf(station) / length) * 100).toFixed(2)}%`);
+    // log(`${((stations.indexOf(station) / length) * 100).toFixed(2)}%`);
   }
   const ms = new Date().getTime() - startTime;
   log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}`);
