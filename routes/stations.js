@@ -69,7 +69,7 @@ async function getStations(db, redis, req, res) {
       },
       bitrate: {
         $exists: true,
-        $ne: null || 'Quality'
+        $ne: null
       }
     }, {
       projection: {
