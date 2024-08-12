@@ -1,4 +1,4 @@
-const CACHE_NAME = 'customradio-cache-v1.7.2';
+const CACHE_NAME = 'customradio-cache-v1.7.3';
 const urlsToCache = [
   '/',
   '/styles.min.css',
@@ -79,4 +79,10 @@ self.addEventListener('activate', event => {
       );
     })
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });
