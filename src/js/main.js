@@ -764,15 +764,6 @@ function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
 }
 
 /**
- * force service worker to activate
- * 
- * @param {Object} newWorker 
- */
-function skipWaiting(newWorker) {
-  newWorker.postMessage({ action: 'skipWaiting' });
-}
-
-/**
  * An update was installed for the active service worker
  * 
  * @param {Object} newWorker 
@@ -782,7 +773,7 @@ function skipWaiting(newWorker) {
 function updateInstalled(newWorker) {
   if (newWorker.state !== 'installed') return;
   if (!navigator.serviceWorker.controller) return;
-  new Toast('App cache updated', 10, _ => skipWaiting(newWorker), 'Refresh');
+  new Toast('App cache updated', 10, _ => newWorker.postMessage({ action: 'skipWaiting' }), 'Refresh');
 }
 
 /**
@@ -803,15 +794,15 @@ function updateFound(worker) {
 window.onload = async () => {
   if ('serviceWorker' in navigator) {
     try {
-      let hasRefreshed = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        console.log('Controller has changed, reloading the page...');
+        window.location.reload();
+      });
       const worker = await navigator.serviceWorker.register('/worker.js');
       worker.onupdatefound = () => updateFound(worker);
-      worker.oncontrollerchange = () => {
-        if (!hasRefreshed) {
-          hasRefreshed = true;
-          window.location.reload();
-        }
-      };
+      let refreshing = false;
     } catch (error) {
       console.log('ServiceWorker registration failed: ', error);
     }
