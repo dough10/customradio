@@ -773,7 +773,7 @@ function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
 function updateInstalled(newWorker) {
   if (newWorker.state !== 'installed') return;
   if (!navigator.serviceWorker.controller) return;
-  new Toast('App cache updated', 10, _ => newWorker.postMessage({ action: 'skipWaiting' }), 'Refresh');
+  new Toast('App updated', 15, _ => newWorker.postMessage({ action: 'skipWaiting' }), 'Press to refresh');
 }
 
 /**
