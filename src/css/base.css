@@ -602,10 +602,7 @@ input:focus {
 
 .toast .yellow-text {
   color: yellow;
-}
-
-.toast:first-child {
-  margin-right: 1.5em;
+  margin-left: 24px;
 }
 
 .flex-row {
