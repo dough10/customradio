@@ -15,5 +15,9 @@ function rmRef(URL) {
   let queryParams = querystring.parse(parsedUrl.query);
   delete queryParams['ref'];
   const newQueryString = querystring.stringify(queryParams);
-  return `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}?${newQueryString}`;
+  newURL = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}?${newQueryString}`;
+  if (newURL.endsWith("?")) {
+    newURL = newURL.slice(0, -1);
+  }
+  return newURL;
 }
