@@ -80,7 +80,7 @@ async function testStreams(db) {
   const startTime = new Date().getTime();
   const stations = await db.find({}).toArray();
   let total = 0;
-  const length = stations.length;
+  // const length = stations.length;
   for (const station of stations) {
     if (!station) continue;
     const stream = await isLiveStream(rmRef(station.url));
