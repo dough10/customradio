@@ -294,6 +294,8 @@ function contextMenu(ev) {
 /**
  * plays stream when button is clicked
  * 
+ * reports any playback error to server where it is logged in the database
+ * 
  * @function
  * 
  * @param {Event} ev
