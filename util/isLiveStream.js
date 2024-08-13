@@ -78,7 +78,7 @@ async function streamTest(url) {
       description,
       icyurl,
       isLive,
-      icyGenre: icyGenre || 'Unknown',
+      icyGenre,
       content,
       bitrate: bitrate
     };
@@ -135,7 +135,7 @@ async function isLiveStream(url) {
   if (url.startsWith('http://')) {
     const httpsUrl = url.replace('http://', 'https://');
     const httpsStream = await streamTest(httpsUrl);
-    if (httpsStream) return httpsStream;
+    return httpsStream;
   }
   return await streamTest(url);
 }

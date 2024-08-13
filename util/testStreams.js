@@ -102,11 +102,11 @@ async function testStreams(db) {
       $set: {
         name: stream.name || station.name || stream.description,
         url: stream.url,
-        genre: stream.icyGenre || station.genre,
+        genre: stream.icyGenre || station.genre || 'Unknown',
         online: stream.isLive,
         'content-type': stream.content,
-        bitrate: stream.bitrate,
-        homepage: stream.icyurl
+        bitrate: stream.bitrate || 'Unknown',
+        homepage: stream.icyurl || 'Unknown'
       }
     };
     const res = await db.updateOne(filter, updates);
