@@ -17,7 +17,7 @@ const getStations = require('./routes/stations.js');
 const log = require('./util/log.js');
 const connectToDb = require('./util/connectToDb.js');
 const { testStreams } = require('./util/testStreams.js');
-
+const streamIssue = require('./routes/stream-issue.js');
 
 const redis = new Redis({
   host: process.env.REDIS_HOST || '127.0.0.1',
@@ -43,13 +43,14 @@ const httpRequestCounter = new promClient.Counter({
 register.registerMetric(httpRequestCounter);
 
 app.use(compression());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('trust proxy', true);
 app.disable('x-powered-by');
 app.use(express.static(path.join(__dirname, 'html'), {
   maxAge: 2_592_000_000,
-  setHeaders: function(res, path) {
-    res.setHeader("Expires", new Date(Date.now() + 2592000000*30).toUTCString());
+  setHeaders: function (res, path) {
+    res.setHeader("Expires", new Date(Date.now() + 2592000000 * 30).toUTCString());
   }
 }));
 app.use((req, res, next) => {
@@ -140,6 +141,29 @@ app.get('/metrics', async (req, res) => {
 });
 
 /**
+ * An endpoint for audio stream playback error callback
+ * 
+ * When a stream fails to play frontend will capture URL that caused the issue and post it here for manual check.
+ * 
+ * @function
+ * @param {express.Request} req - The request object.
+ * @param {express.Response} res - The response object.
+ * 
+ * @param {express.Request} req.body - The body of the request.
+ * @param {string} req.body.url - The URL of the station. Must be a valid URL.
+ * @param {string} req.body.error - The error.message string from frontend.
+ * 
+ * @returns {Promise<void>} - A promise that resolves when the response has been sent.
+ * 
+ * @throws {express.Response} 400 - If validation fails or required fields are missing.
+ * @throws {express.Response} 500 - If an error occurs while adding the station with the issue to the database.
+ */
+app.post('/stream-issue', upload.none(), [
+  body('url').trim().isURL().withMessage('Invalid URL'),
+  body('error').trim().escape().isString().withMessage('Error meessage must be a string')
+], (req, res) => streamIssue(db, req, res));
+
+/**
  * Handles GET requests to the '/stations' endpoint.
  * 
  * Validates the query parameter `genres` to ensure it is a string. Fetches and returns a list of radio stations that match the specified genres.
@@ -193,7 +217,6 @@ app.get('/stations', [
  * @param {express.Response} res - The response object.
  * 
  * @param {express.Request} req.body - The body of the request.
- * @param {string} req.body.name - The name of the station. Must be a non-empty string.
  * @param {string} req.body.url - The URL of the station. Must be a valid URL.
  * 
  * @returns {Promise<void>} - A promise that resolves when the response has been sent.
@@ -213,7 +236,7 @@ app.get('/stations', [
  * 
  * // Example successful response:
  * {
- *   "message": "station saved o( ❛ᴗ❛ )o"
+ *   "message": "station saved"
  * }
  * 
  * // Example response when station already exists:
@@ -223,7 +246,7 @@ app.get('/stations', [
  * 
  * // Example error response:
  * {
- *   "error": "Failed to add station (╬ Ò﹏Ó)"
+ *   "error": "Failed to add station"
  * }
  */
 app.post('/add', upload.none(), [
