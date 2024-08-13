@@ -83,12 +83,21 @@ async function testStreams(db) {
   // const length = stations.length;
   for (const station of stations) {
     if (!station) continue;
-    const stream = await isLiveStream(rmRef(station.url));
-    if (!stream) continue;
-    if (stream.bitrate && stream.bitrate.length > 3) stream.bitrate = stream.bitrate.split(',')[0];
     const filter = {
       _id: new ObjectId(station._id)
     };
+    const stream = await isLiveStream(rmRef(station.url));
+    if (!stream || station.error) {
+      const updates = {
+        $set: {
+          online: false
+        }
+      };
+      const res = await db.updateOne(filter, updates);
+      total += res.modifiedCount;
+      continue;
+    }
+    if (stream.bitrate && stream.bitrate.length > 3) stream.bitrate = stream.bitrate.split(',')[0];
     const updates = {
       $set: {
         name: stream.name || station.name || stream.description,
