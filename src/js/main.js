@@ -327,6 +327,7 @@ async function pushStreamIssue(url, error) {
  * 
  * reports any playback error to server where it is logged in the database
  * 
+ * @async
  * @function
  * 
  * @param {Event} ev
