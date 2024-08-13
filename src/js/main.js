@@ -318,6 +318,23 @@ async function playStream(ev) {
   } catch (error) {
     new Toast('Media playback failed', 3);
     console.error('Error playing media:', error);
+    try {
+      const formBody = new URLSearchParams({
+        url: url,
+        error: error.message
+      }).toString();
+      const response = await fetch('/stream-issue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formBody,
+      });
+      const result = await response.json();
+      console.log(result.message);
+    } catch (err) {
+      console.error('could not report stream:', err);
+    }
   }
 
   if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Play stream', url]);
@@ -798,7 +815,7 @@ window.onload = async () => {
         if (refreshing) return;
         refreshing = true;
         console.log('Controller has changed, reloading the page...');
-        window.location.reload();
+        window.location.reload(true);
       });
       const worker = await navigator.serviceWorker.register('/worker.js');
       worker.onupdatefound = () => updateFound(worker);
