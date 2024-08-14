@@ -217,7 +217,7 @@ function toggleSelect(ev) {
       bitrate: el.dataset.bitrate,
       genre: el.dataset.genre
     }
-  });
+  }).sort((a, b) => a.name.localeCompare(b.name));
   localStorage.setItem('selected', JSON.stringify(forStorage));
   setSelectedCount(all.length, el.dataset.url);
 }
@@ -545,24 +545,11 @@ function queryString(value) {
  */
 async function filterChanged(ev) {
   try {
-    const res = await fetch(`${window.location.origin}/stations${queryString(ev.target.value)}`);
-    if (res.status !== 200) {
-      return;
-    }
-    const stations = await res.json();
     const container = document.querySelector('#stations');
-    const selectedElements = Array.from(container.querySelectorAll('li[selected]'));
-    const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
-    const list = stations.filter(station => !selectedUrls.has(station.url));
-    const fragment = document.createDocumentFragment();
-    selectedElements.forEach(el => fragment.appendChild(el));
-    container.innerHTML = '';
-    container.scrollTop = 0;
-    // run @ load ONLY to get item from localstroage into dom
     const data = JSON.parse(localStorage.getItem('selected'));
+    // run @ load ONLY to get item from localstroage into dom
     if (data && ev.loadLocal) {
       data.sort((a, b) => a.name.localeCompare(b.name));
-      const container = document.querySelector('#stations');
       const localFragment = document.createDocumentFragment();
       const elements = data.map(createStationElement);
       elements.forEach(el => {
@@ -572,6 +559,18 @@ async function filterChanged(ev) {
       setSelectedCount(elements.length);
       container.appendChild(localFragment);
     }
+    const res = await fetch(`${window.location.origin}/stations${queryString(ev.target.value)}`);
+    if (res.status !== 200) {
+      return;
+    }
+    const stations = await res.json();
+    const selectedElements = Array.from(container.querySelectorAll('li[selected]'));
+    const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
+    const list = stations.filter(station => !selectedUrls.has(station.url));
+    const fragment = document.createDocumentFragment();
+    selectedElements.forEach(el => fragment.appendChild(el));
+    container.innerHTML = '';
+    container.scrollTop = 0;
     container.appendChild(fragment);
     lazyLoadOnScroll(list, container);
     document.querySelector('#station-count').textContent = stations.length;
