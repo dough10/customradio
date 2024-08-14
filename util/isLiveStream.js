@@ -62,10 +62,10 @@ async function streamTest(url) {
       timeout: 3000
     });
     const isLive = response.status === 200;
-    const name = response.headers['icy-name'];
+    let name = response.headers['icy-name'];
     const description = response.headers['icy-description'];
     const icyGenre = response.headers['icy-genre'];
-    const bitrate = response.headers['icy-br'];
+    let bitrate = response.headers['icy-br'];
     const content = response.headers['content-type'];
     const icyurl = response.headers['icy-url'];
     const isAudioStream = content && content.startsWith('audio/');
@@ -76,6 +76,10 @@ async function streamTest(url) {
     };
 
     if (bitrate && bitrate.length > 3) bitrate = bitrate.split(',')[0];
+
+    if (name.length <= 1 && icyurl) {
+      name = icyurl;
+    }
 
     const ok = true;
 
