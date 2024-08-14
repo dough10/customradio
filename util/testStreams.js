@@ -75,22 +75,23 @@ function msToHhMmSs(milliseconds) {
  *     console.error('Failed to test streams and update database:', err);
  *   });
  */
-async function testStreams(db) {
+async function testStreams(db, trackProgress) {
   log('Updating database');
   const startTime = new Date().getTime();
   const stations = await db.find({}).toArray();
   let total = 0;
-  // const length = stations.length;
+  const length = stations.length;
   for (const station of stations) {
     if (!station) continue;
     const filter = {
       _id: new ObjectId(station._id)
     };
     const stream = await isLiveStream(rmRef(station.url));
-    if (!stream || station.error) {
+    if (!stream.ok || station.error) {
       const updates = {
         $set: {
-          online: false
+          online: false,
+          error: stream.error
         }
       };
       const res = await db.updateOne(filter, updates);
@@ -111,7 +112,7 @@ async function testStreams(db) {
     };
     const res = await db.updateOne(filter, updates);
     total += res.modifiedCount;
-    // log(`${((stations.indexOf(station) / length) * 100).toFixed(2)}%`);
+    if (trackProgress) log(`${((stations.indexOf(station) / length) * 100).toFixed(2)}%`);
   }
   const ms = new Date().getTime() - startTime;
   log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}`);

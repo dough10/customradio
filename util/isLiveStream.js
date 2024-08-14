@@ -70,9 +70,15 @@ async function streamTest(url) {
     const icyurl = response.headers['icy-url'];
     const isAudioStream = content && content.startsWith('audio/');
 
-    if (!isAudioStream) return false;
+    if (!isAudioStream) return {
+      ok: false,
+      error: `invalid content-type: ${content}`
+    };
+
+    const ok = true;
 
     return {
+      ok,
       url,
       name,
       description,
@@ -80,10 +86,13 @@ async function streamTest(url) {
       isLive,
       icyGenre,
       content,
-      bitrate: bitrate
+      bitrate
     };
   } catch (error) {
-    return false;
+    return {
+      ok: false,
+      error: error.message || 'Unknown error occurred'
+    };
   }
 }
 
@@ -125,7 +134,10 @@ async function streamTest(url) {
  *   });
  */
 async function isLiveStream(url) {
-  if (!url || typeof url !== 'string' || !isValidURL(url)) return false;
+  if (!url || typeof url !== 'string' || !isValidURL(url)) return {
+    ok: false,
+    error: `url must be a string have a value and be a value URL format: ${url}`
+  };
   if (url.endsWith("?")) {
     url = url.slice(0, -1);
   }
@@ -134,8 +146,7 @@ async function isLiveStream(url) {
   });
   if (url.startsWith('http://')) {
     const httpsUrl = url.replace('http://', 'https://');
-    const httpsStream = await streamTest(httpsUrl);
-    return httpsStream;
+    return await streamTest(httpsUrl);
   }
   return await streamTest(url);
 }

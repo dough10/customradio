@@ -58,9 +58,9 @@ async function addToDatabase(db, req, res) {
       return;
     }
     const status = await isLiveStream(url);
-    if (!status) {
-      res.status(200).json({
-        message: 'Connection test failed'
+    if (!status.ok) {
+      res.status(500).json({
+        message: `Connection test failed: ${status.error}`
       });
       return;
     }
@@ -68,7 +68,10 @@ async function addToDatabase(db, req, res) {
       name: status.name,
       url,
       online: status.isLive,
-      genre: status.genre
+      genre: status.genre,
+      'content-type': status.content,
+      bitrate: status.bitrate || 'Unknown',
+      homepage: status.icyurl || 'Unknown'
     };
     await db.insertOne(data);
     res.json({

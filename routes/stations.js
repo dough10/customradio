@@ -49,7 +49,7 @@ async function getStations(db, redis, req, res) {
   }
 
   try {
-    const genres = req.query.genres.split(',');
+    const genres = req.query.genres.split(',').map(genre => genre.toLowerCase());
 
     const cacheKey = `stations_${req.query.genres}`;
     const cachedStations = await redis.get(cacheKey);
