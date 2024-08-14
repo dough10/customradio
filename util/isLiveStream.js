@@ -75,6 +75,8 @@ async function streamTest(url) {
       error: `invalid content-type: ${content}`
     };
 
+    if (bitrate && bitrate.length > 3) bitrate = bitrate.split(',')[0];
+
     const ok = true;
 
     return {
