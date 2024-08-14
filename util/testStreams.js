@@ -1,4 +1,4 @@
-module.exports = {testStreams, plural};
+module.exports = {testStreams, plural, replaceNull};
 
 
 const {ObjectId} = require('mongodb');
@@ -49,6 +49,34 @@ function msToHhMmSs(milliseconds) {
   return `${hours > 0 ? `${hours} hours ` : ''}${minutes} minutes and ${secs} seconds`;
 }
 
+/**
+ * replace "null" values with "Unknown"
+ * 
+ * @param {Object} db 
+ */
+async function replaceNull(db) {
+  const startTime = new Date().getTime();
+  let total = 0;
+  const stations = await db.find({
+    icon: {$in: [
+      'null',
+      'NULL',
+      '(NULL)',
+      '(null)',
+      'Null'
+    ]}
+  }).toArray();
+  for (const station of stations) {
+    const res = await db.updateOne({
+      _id: new ObjectId(station._id)
+    }, {
+      $set: {icon: 'Unknown'}
+    });
+    total += res.modifiedCount;
+  }
+  const ms = new Date().getTime() - startTime;
+  log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}`);
+}
 
 /**
  * Tests streams for online state and headers to update the database with stream information.
@@ -84,9 +112,6 @@ async function testStreams(db, trackProgress) {
   for (const station of stations) {
     if (trackProgress) log(`${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
     if (!station) continue;
-    if (station.genre.toLowerCase() === 'null' || station.genre.toLowerCase() === '(null)') {
-      station.genre = undefined;
-    }
     const filter = {
       _id: new ObjectId(station._id)
     };
@@ -111,8 +136,7 @@ async function testStreams(db, trackProgress) {
         online: stream.isLive,
         'content-type': stream.content,
         bitrate: stream.bitrate || 'Unknown',
-        homepage: stream.icyurl || 'Unknown',
-        error: undefined
+        homepage: stream.icyurl || 'Unknown'
       }
     });
     total += res.modifiedCount;
