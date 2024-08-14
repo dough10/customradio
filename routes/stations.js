@@ -51,7 +51,7 @@ async function getStations(db, redis, req, res) {
   try {
     const genres = req.query.genres.split(',').map(genre => genre.toLowerCase());
 
-    const cacheKey = `stations_${req.query.genres}`;
+    const cacheKey = `stations_${genres.join(',')}`;
     const cachedStations = await redis.get(cacheKey);
 
     if (cachedStations) {
@@ -62,7 +62,13 @@ async function getStations(db, redis, req, res) {
     }
 
     const stations = await db.find({
-      'content-type': 'audio/mpeg',
+      'content-type': {
+        $in: [
+          'audio/mpeg',
+          'audio/mp3',
+          'audio/mpeg; charset=UTF-8'
+        ]
+      },
       online: true,
       genre: {
         $in: genres.map(genre => new RegExp(genre, 'i'))
