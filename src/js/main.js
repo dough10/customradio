@@ -302,11 +302,11 @@ function contextMenu(ev) {
  * 
  * @returns {void}
  */
-async function pushStreamIssue(url, error) {
+async function postStreamIssue(url, error) {
   try {
     const formBody = new URLSearchParams({
       url: url,
-      error: error.message
+      error: error
     }).toString();
     const response = await fetch('/stream-issue', {
       method: 'POST',
@@ -350,9 +350,10 @@ async function playStream(ev) {
     await player.play();
     new Toast(`Playing ${el.dataset.title}`, 3);
   } catch (error) {
-    new Toast('Media playback failed', 3);
-    console.error('Error playing media:', error);
-    pushStreamIssue(url, error);
+    const str = `Error playing media: ${error.message}`;
+    new Toast(str, 3);
+    console.error(str);
+    postStreamIssue(url, error.message);
   }
   if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Play stream', url]);
 }
@@ -415,7 +416,7 @@ function createSmallButton({ icon, cssClass, func, title }) {
  * 
  * @returns {HTMLElement} li element
  */
-function createStationElement({ name, url, bitrate, genre }) {
+function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
   const buttonData = [
     {
       icon: {
@@ -460,6 +461,8 @@ function createStationElement({ name, url, bitrate, genre }) {
   li.dataset.url = url;
   li.dataset.bitrate = bitrate;
   li.dataset.genre = genre;
+  li.dataset.icon = icon;
+  li.dataset.homepage = homepage;
   li.addEventListener('contextmenu', contextMenu);
   [span, div, ...buttons].forEach(el => li.appendChild(el));
   return li;
@@ -546,10 +549,10 @@ function queryString(value) {
 async function filterChanged(ev) {
   try {
     const container = document.querySelector('#stations');
-    const data = JSON.parse(localStorage.getItem('selected'));
+    let data = JSON.parse(localStorage.getItem('selected'));
     // run @ load ONLY to get item from localstroage into dom
     if (data && ev.loadLocal) {
-      data.sort((a, b) => a.name.localeCompare(b.name));
+      data = data.sort((a, b) => a.name.localeCompare(b.name));
       const localFragment = document.createDocumentFragment();
       const elements = data.map(createStationElement);
       elements.forEach(el => {
@@ -841,15 +844,19 @@ window.onload = async () => {
     }
   }
 
-  const slider = document.querySelector('#vol>input');
-  slider.value = Number(localStorage.getItem('volume')) || 100;
-  player.volume =  slider.value / 100;
-  let changeTimer = 0;
-  slider.addEventListener('input', _ => {
-    player.volume = slider.value / 100;
-    if (changeTimer) clearTimeout(changeTimer);
-    changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 100);
-  });
+  try {
+    const slider = document.querySelector('#vol>input');
+    slider.value = Number(localStorage.getItem('volume')) || 100;
+    player.volume =  slider.value / 100;
+    let changeTimer = 0;
+    slider.addEventListener('input', _ => {
+      player.volume = slider.value / 100;
+      if (changeTimer) clearTimeout(changeTimer);
+      changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 200);
+    });
+  } catch(error) {
+    document.querySelector('#vol').style.display = 'none';
+  }
 
   document.querySelectorAll('dialog>.close').forEach(el => {
     el.addEventListener('click', _ => el.parentElement.close());
