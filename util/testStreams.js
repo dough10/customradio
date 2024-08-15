@@ -1,4 +1,4 @@
-module.exports = {testStreams, plural, replaceNull};
+module.exports = {testStreams, plural, replaceValue};
 
 
 const {ObjectId} = require('mongodb');
@@ -54,23 +54,19 @@ function msToHhMmSs(milliseconds) {
  * 
  * @param {Object} db 
  */
-async function replaceNull(db) {
+async function replaceValue(db) {
   const startTime = new Date().getTime();
   let total = 0;
   const stations = await db.find({
-    icon: {$in: [
-      'null',
-      'NULL',
-      '(NULL)',
-      '(null)',
-      'Null'
+    error: {$in: [
+      "Cannot read properties of undefined (reading 'length')"
     ]}
   }).toArray();
   for (const station of stations) {
     const res = await db.updateOne({
       _id: new ObjectId(station._id)
     }, {
-      $set: {icon: 'Unknown'}
+      $set: {error: 'Unknown'}
     });
     total += res.modifiedCount;
   }
@@ -117,11 +113,11 @@ async function testStreams(db, trackProgress) {
     };
     const stream = await isLiveStream(rmRef(station.url));
     // error testing stream or existing error from UI
-    if (!stream.ok || station.error) {
+    if (!stream.ok) {
       const res = await db.updateOne(filter, {
         $set: {
           online: false,
-          error: stream.error || station.error
+          error: stream.error
         }
       });
       total += res.modifiedCount;
