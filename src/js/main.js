@@ -844,9 +844,11 @@ window.onload = async () => {
   const slider = document.querySelector('#vol>input');
   slider.value = Number(localStorage.getItem('volume')) || 100;
   player.volume =  slider.value / 100;
+  let changeTimer = 0;
   slider.addEventListener('input', _ => {
-    localStorage.setItem('volume', slider.value);
     player.volume = slider.value / 100;
+    if (changeTimer) clearTimeout(changeTimer);
+    changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 100);
   });
 
   document.querySelectorAll('dialog>.close').forEach(el => {
