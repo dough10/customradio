@@ -190,11 +190,11 @@ function setSelectedCount(number, url) {
   count.textContent = number;
   if (number) {
     dlButton.removeAttribute('disabled');
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Remove from file', url]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Add to file', url]);
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
-      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Add to file', url]);
+      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Remove from file', url]);
     }
   }
 }
