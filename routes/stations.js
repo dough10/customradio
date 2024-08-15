@@ -83,7 +83,9 @@ async function getStations(db, redis, req, res) {
         name: 1,
         url: 1,
         bitrate: 1,
-        genre: 1
+        genre: 1,
+        icon: 1,
+        homepage: 1
       }
     }).sort({
       name: 1
