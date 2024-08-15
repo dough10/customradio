@@ -96,10 +96,11 @@ async function streamTest(url) {
       bitrate
     };
   } catch (error) {
-    log(`${url} - ${error.message}`);
+    const message = error.message || 'Unknown error occurred'
+    log(`${url} - ${message}`);
     return {
       ok: false,
-      error: error.message || 'Unknown error occurred'
+      error: message
     };
   }
 }
