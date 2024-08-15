@@ -3,6 +3,7 @@ module.exports = isLiveStream;
 
 const axios = require('axios');
 
+const log = require('./log.js');
 
 /**
  * An array containing default port numbers used in network protocols.
@@ -77,7 +78,7 @@ async function streamTest(url) {
 
     if (bitrate && bitrate.length > 3) bitrate = bitrate.split(',')[0];
 
-    if (name.length <= 1 && icyurl) {
+    if (!name && icyurl || name && name.length <= 1 && icyurl) {
       name = icyurl;
     }
 
@@ -95,6 +96,7 @@ async function streamTest(url) {
       bitrate
     };
   } catch (error) {
+    log(url, error.message);
     return {
       ok: false,
       error: error.message || 'Unknown error occurred'
