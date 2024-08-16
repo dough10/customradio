@@ -93,7 +93,7 @@ async function streamTest(url) {
       isLive,
       icyGenre,
       content,
-      bitrate
+      bitrate: Number(bitrate)
     };
   } catch (error) {
     const message = error.message || 'Unknown error occurred'
