@@ -305,8 +305,8 @@ function contextMenu(ev) {
 async function postStreamIssue(url, error) {
   try {
     const formBody = new URLSearchParams({
-      url: url,
-      error: error
+      url,
+      error
     }).toString();
     const response = await fetch('/stream-issue', {
       method: 'POST',
