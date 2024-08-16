@@ -834,7 +834,7 @@ window.onload = async () => {
         if (refreshing) return;
         refreshing = true;
         console.log('Controller has changed, reloading the page...');
-        window.location.reload(true);
+        window.location.reload();
       });
       const worker = await navigator.serviceWorker.register('/worker.js');
       worker.onupdatefound = () => updateFound(worker);
