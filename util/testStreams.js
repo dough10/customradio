@@ -111,7 +111,8 @@ async function testStreams(db, trackProgress) {
     const filter = {
       _id: new ObjectId(station._id)
     };
-    const stream = await isLiveStream(rmRef(station.url));
+    station.url = rmRef(station.url);
+    const stream = await isLiveStream(station.url);
     // error testing stream or existing error from UI
     if (!stream.ok) {
       const res = await db.updateOne(filter, {
