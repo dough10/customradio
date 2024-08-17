@@ -24,7 +24,7 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        exclude: /node_modules/, 
+        exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
@@ -35,17 +35,17 @@ module.exports = {
     ],
   },
   optimization: {
-    minimize: true, 
+    minimize: true,
     minimizer: [
       new TerserPlugin(),
-      new CssMinimizerPlugin(), 
+      new CssMinimizerPlugin(),
     ],
   },
   plugins: [
-    new CleanWebpackPlugin(), 
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      template: './src/index.html', 
-      inject: 'body', 
+      template: './src/index.html',
+      inject: 'body',
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -55,20 +55,41 @@ module.exports = {
       },
     }),
     new MiniCssExtractPlugin({
-      filename: 'styles.min.css', 
+      filename: 'styles.min.css',
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: './src/worker.js', to: 'worker.js' },
-        { from: './src/customradio.webmanifest', to: 'customradio.webmanifest' },
-        { from: './src/favicon.ico', to: 'favicon.ico' },
-        { from: './src/favicon-16x16.png', to: 'favicon-16x16.png' },
-        { from: './src/favicon-32x32.png', to: 'favicon-32x32.png' },
-        { from: './src/apple-touch-icon.png', to: 'apple-touch-icon.png' },
-        { from: './src/android-chrome-512x512.png', to: 'android-chrome-512x512.png' },
-        { from: './src/android-chrome-192x192.png', to: 'android-chrome-192x192.png' },
-        { from: './src/robots.txt', to: 'robots.txt' },
-        { from: './src/screenshots', to: 'screenshots' }
+        {
+          from: './src/worker.js',
+          to: 'worker.js'
+        }, {
+          from: './src/customradio.webmanifest',
+          to: 'customradio.webmanifest'
+        }, {
+          from: './src/favicon.ico',
+          to: 'favicon.ico'
+        }, {
+          from: './src/favicon-16x16.png',
+          to: 'favicon-16x16.png'
+        }, {
+          from: './src/favicon-32x32.png',
+          to: 'favicon-32x32.png'
+        }, {
+          from: './src/apple-touch-icon.png',
+          to: 'apple-touch-icon.png'
+        }, {
+          from: './src/android-chrome-512x512.png',
+          to: 'android-chrome-512x512.png'
+        }, {
+          from: './src/android-chrome-192x192.png',
+          to: 'android-chrome-192x192.png'
+        }, {
+          from: './src/robots.txt',
+          to: 'robots.txt'
+        }, {
+          from: './src/screenshots',
+          to: 'screenshots'
+        }
       ],
     }),
   ],
