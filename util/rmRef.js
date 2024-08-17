@@ -1,7 +1,6 @@
 module.exports = rmRef;
 
 const url = require('url');
-const querystring = require('querystring');
 
 /**
  * remove "ref" query parameter
