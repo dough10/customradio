@@ -50,7 +50,7 @@ function msToHhMmSs(milliseconds) {
 }
 
 /**
- * replace "null" values with "Unknown"
+ * replace a value with "Unknown"
  * 
  * @param {Object} db 
  */
