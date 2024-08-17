@@ -11,13 +11,13 @@ const querystring = require('querystring');
  * @returns {String} url without ref query paramater
  */
 function rmRef(URL) {
-  const parsedUrl = url.parse(URL);
-  let queryParams = querystring.parse(parsedUrl.query);
-  delete queryParams['ref'];
-  const newQueryString = querystring.stringify(queryParams);
-  newURL = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}?${newQueryString}`;
-  if (newURL.endsWith("?")) {
-    newURL = newURL.slice(0, -1);
-  }
-  return newURL;
+  const parsedUrl = url.parse(URL, true);
+  delete parsedUrl.query.ref;
+  return url.format({
+    protocol: parsedUrl.protocol,
+    hostname: parsedUrl.hostname,
+    port: parsedUrl.port,
+    pathname: parsedUrl.pathname,
+    query: parsedUrl.query,
+  });
 }
