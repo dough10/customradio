@@ -1,4 +1,4 @@
-module.exports = {testStreams, plural, replaceValue};
+module.exports = {testStreams, plural};
 
 
 const {ObjectId} = require('mongodb');
@@ -48,31 +48,6 @@ function msToHhMmSs(milliseconds) {
   const secs = remainder % 60;
 
   return `${hours > 0 ? `${hours} hours ` : ''}${minutes} minutes and ${secs} seconds`;
-}
-
-/**
- * replace a value with "Unknown"
- * 
- * @param {Object} db 
- */
-async function replaceValue(db) {
-  const startTime = new Date().getTime();
-  let total = 0;
-  const stations = await db.find({
-    error: {$in: [
-      "Cannot read properties of undefined (reading 'length')"
-    ]}
-  }).toArray();
-  for (const station of stations) {
-    const res = await db.updateOne({
-      _id: new ObjectId(station._id)
-    }, {
-      $set: {error: 'Unknown'}
-    });
-    total += res.modifiedCount;
-  }
-  const ms = new Date().getTime() - startTime;
-  log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}`);
 }
 
 /**
