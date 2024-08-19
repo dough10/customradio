@@ -550,7 +550,6 @@ async function filterChanged(ev) {
   try {
     const container = document.querySelector('#stations');
     let data = JSON.parse(localStorage.getItem('selected'));
-    // run @ load ONLY to get item from localstroage into dom
     if (data && ev.loadLocal) {
       data = data.sort((a, b) => a.name.localeCompare(b.name));
       const localFragment = document.createDocumentFragment();
