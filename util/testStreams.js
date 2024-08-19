@@ -89,7 +89,7 @@ async function testStreams(db, trackProgress) {
     };
     station.url = rmRef(station.url);
     const stream = await isLiveStream(station.url);
-    // error testing stream or existing error from UI
+    // error testing stream
     if (!stream.ok) {
       const res = await db.updateOne(filter, {
         $set: {
