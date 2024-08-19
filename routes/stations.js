@@ -3,7 +3,7 @@ module.exports = getStations;
 
 const { validationResult } = require('express-validator');
 
-
+const usedTypes = require("../util/usedTypes.js");
 const log = require('../util/log.js');
 const queryString = require('../util/queryString.js');
 
@@ -62,13 +62,7 @@ async function getStations(db, redis, req, res) {
     }
 
     const stations = await db.find({
-      'content-type': {
-        $in: [
-          'audio/mpeg',
-          'audio/mp3',
-          'audio/mpeg; charset=UTF-8'
-        ]
-      },
+      'content-type': usedTypes,
       online: true,
       genre: {
         $in: genres.map(genre => new RegExp(genre, 'i'))
