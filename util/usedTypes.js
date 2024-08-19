@@ -1,4 +1,3 @@
-module.exports = usedTypes;
 
 const usedTypes = {
   $in: [
@@ -7,3 +6,5 @@ const usedTypes = {
     'audio/mpeg; charset=UTF-8'
   ]
 };
+
+module.exports = usedTypes;
