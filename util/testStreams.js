@@ -6,6 +6,7 @@ const {ObjectId} = require('mongodb');
 const log = require('./log.js');
 const isLiveStream = require('./isLiveStream.js');
 const rmRef = require('./rmRef.js');
+const dbStatistics = require('./dbStatistics.js');
 
 
 /**
@@ -138,6 +139,7 @@ async function testStreams(db, trackProgress) {
     });
     total += res.modifiedCount;
   }
+  const stats = dbStatistics(db);
   const ms = new Date().getTime() - startTime;
-  log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}`);
+  log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
 }
