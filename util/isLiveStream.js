@@ -93,7 +93,8 @@ async function streamTest(url) {
       isLive,
       icyGenre,
       content,
-      bitrate: Number(bitrate)
+      bitrate: Number(bitrate),
+      error: null
     };
   } catch (error) {
     return {
