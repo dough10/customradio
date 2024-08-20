@@ -1,8 +1,6 @@
 const usedTypes = require("./usedTypes.js");
 
-module.exports = dbStatistics;
-
-async function dbStatistics(db) {
+module.exports = async (db) => {
   const online = await db.countDocuments({
     online:true,
     'content-type': usedTypes
@@ -16,4 +14,4 @@ async function dbStatistics(db) {
     offline,
     usableEntrys: online + offline
   }
-}
+};
