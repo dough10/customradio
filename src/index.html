@@ -115,7 +115,8 @@
   <dialog id="add">
     <div>
       <h1>add station</h1>
-      <p>The API will get the other information required for the database</p>
+      <p>URL should be a path to an Icecast server with a content type of "audio/mpeg" or "audio/mp3"</p>
+      <p>The API will get the other information required for the database from the stream headers.</p>
       <form id="add-stream" class="form-group">
         <label for="station-url">Station URL:</label>
         <input placeholder="Station URL:" type="url" id="station-url" name="url" required>
