@@ -270,7 +270,7 @@ svg {
 }
 
 #stations>li[selected] {
-  background: var(--selected-color);
+  background: var(--main-color);
 }
 
 #stations>li>.remove {
@@ -424,7 +424,7 @@ svg {
   min-width: 62px;
 }
 
-@media screen and (max-width: 400px) {
+@media screen and (max-width: 450px) {
   #name {
     max-width: 11.75em;
   }
