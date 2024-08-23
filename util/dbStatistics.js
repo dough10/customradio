@@ -13,5 +13,5 @@ module.exports = async (db) => {
     online,
     offline,
     usableEntrys: online + offline
-  }
+  };
 };
