@@ -59,7 +59,7 @@ async function addToDatabase(db, req, res) {
     }
     const status = await isLiveStream(url);
     if (!status.ok) {
-      res.status(500).json({
+      res.json({
         message: `Connection test failed: ${status.error}`
       });
       return;
