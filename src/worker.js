@@ -1,4 +1,4 @@
-const CACHE_NAME = 'customradio-cache-v1.7.9';
+const CACHE_NAME = 'customradio-cache-v1.8.0';
 const urlsToCache = [
   '/',
   '/styles.min.css',
