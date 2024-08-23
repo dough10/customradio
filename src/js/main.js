@@ -174,6 +174,24 @@ setInterval(_ => {
 }, 500);
 
 /**
+ * Creates a loading animation in the element passed to the input
+ * 
+ * @param {HTMLElement} parent 
+ * 
+ * @returns {void}
+ */
+function loadingAnimation(parent) {
+  const div = document.createElement('div');
+  div.classList.add('loading');
+  for (let i = 0; i < 5; i++) {
+    const circle = document.createElement('div');
+    circle.classList.add('circle');
+    div.appendChild(circle);
+  }
+  parent.appendChild(div);
+}
+
+/**
  * Updates the selected count displayed on the page and manages the state of the download button.
  * 
  * This function updates the text content of the element with the ID `#count` to display the provided number. 
@@ -549,6 +567,7 @@ function queryString(value) {
 async function filterChanged(ev) {
   try {
     const container = document.querySelector('#stations');
+    loadingAnimation(container);
     let data = JSON.parse(localStorage.getItem('selected'));
     if (data && ev.loadLocal) {
       data = data.sort((a, b) => a.name.localeCompare(b.name));

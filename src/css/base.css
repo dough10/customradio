@@ -28,6 +28,7 @@
   --animate-200: 200ms;
   --animate-300: 300ms;
   --animate-500: 500ms;
+  --animation-timing: linear(0 0%, 0 1.8%, 0.01 3.6%, 0.03 6.35%, 0.07 9.1%, 0.13 11.4%, 0.19 13.4%, 0.27 15%, 0.34 16.1%, 0.54 18.35%, 0.66 20.6%, 0.72 22.4%, 0.77 24.6%, 0.81 27.3%, 0.85 30.4%, 0.88 35.1%, 0.92 40.6%, 0.94 47.2%, 0.96 55%, 0.98 64%, 0.99 74.4%, 1 86.4%, 1 100%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -437,7 +438,7 @@ svg {
 @media screen and (max-width: 767px) {
   #vol {
     display: none;
-  } 
+  }
 }
 
 @keyframes spin {
@@ -834,5 +835,56 @@ input[type="range"]::-ms-fill-upper {
 @media screen and (max-width: 600px) {
   .alert {
     display: inline-block;
+  }
+}
+
+.loading {
+  margin: 24px auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.circle {
+  background: var(--text-color, #000000);
+  border-radius: 50%;
+  height: 15px;
+  width: 15px;
+  margin: 0 4px;
+  transform: scale3d(0, 0, 0);
+}
+
+.loading>.circle:first-child {
+  animation: dots 800ms var(--animation-timing, linear) 0ms infinite;
+}
+
+.loading>.circle:nth-child(2) {
+  animation: dots 800ms var(--animation-timing, linear) 160ms infinite;
+}
+
+.loading>.circle:nth-child(3) {
+  animation: dots 800ms var(--animation-timing, linear) 320ms infinite;
+}
+
+.loading>.circle:nth-child(4) {
+  animation: dots 800ms var(--animation-timing, linear) 480ms infinite;
+}
+
+.loading>.circle:nth-child(5) {
+  animation: dots 800ms var(--animation-timing, linear) 640ms infinite;
+}
+
+@keyframes dots {
+  0% {
+    transform: scale3d(0, 0, 0);
+  }
+
+  15% {
+    transform: scale3d(1, 1, 1);
+  }
+
+  100% {
+    transform: scale3d(0, 0, 0);
   }
 }
