@@ -1,6 +1,3 @@
-module.exports = connectToDb;
-
-
 const {MongoClient} = require('mongodb');
 
 
@@ -34,7 +31,7 @@ const log = require('./log.js');
  *     console.error('Failed to connect to MongoDB:', err);
  *   });
  */
-async function connectToDb(url) {
+module.exports = async (url) => {
   const client = new MongoClient(url);
   try {
     await client.connect();
@@ -45,4 +42,4 @@ async function connectToDb(url) {
     console.error('(╬ Ò﹏Ó) Error connecting to MongoDB:', err);
     throw err;
   }
-}
+};
