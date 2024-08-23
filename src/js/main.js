@@ -216,7 +216,7 @@ function toggleSelect(ev) {
       url: el.dataset.url,
       bitrate: el.dataset.bitrate,
       genre: el.dataset.genre
-    }
+    };
   }).sort((a, b) => a.name.localeCompare(b.name));
   localStorage.setItem('selected', JSON.stringify(forStorage));
   setSelectedCount(all.length, el.dataset.url);
@@ -556,7 +556,7 @@ async function filterChanged(ev) {
       const elements = data.map(createStationElement);
       elements.forEach(el => {
         el.toggleAttribute('selected');
-        localFragment.appendChild(el)
+        localFragment.appendChild(el);
       });
       setSelectedCount(elements.length);
       container.appendChild(localFragment);
