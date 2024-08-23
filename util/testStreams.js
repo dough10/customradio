@@ -114,7 +114,7 @@ async function testStreams(db, trackProgress) {
     });
     total += res.modifiedCount;
   }
-  const stats = dbStatistics(db);
+  const stats = await dbStatistics(db);
   const ms = new Date().getTime() - startTime;
   log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
 }
