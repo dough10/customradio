@@ -862,6 +862,7 @@ window.onload = async () => {
     }
   }
 
+  const volumeElement = document.querySelector('#vol');
   try {
     const slider = document.querySelector('#vol>input');
     slider.value = Number(localStorage.getItem('volume')) || 100;
@@ -872,8 +873,11 @@ window.onload = async () => {
       if (changeTimer) clearTimeout(changeTimer);
       changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 200);
     });
+    if (/iPad/.test(navigator.userAgent)) {
+      volumeElement.style.display = 'none';
+    }
   } catch(error) {
-    document.querySelector('#vol').style.display = 'none';
+    volumeElement.style.display = 'none';
   }
 
   document.querySelectorAll('dialog>.close').forEach(el => {
