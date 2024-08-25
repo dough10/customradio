@@ -56,11 +56,11 @@ class Toast {
     this._timeout = _timeout * 1000 || 3500;
     this.toast = this._createToast();
     if (link && linkText) {
-      this.toast.appendChild(this._withLink(message, link, linkText));
+      this.toast.append(this._withLink(message, link, linkText));
     } else {
       this.toast.textContent = message;
     }
-    document.querySelector('body').appendChild(this.toast);
+    document.querySelector('body').append(this.toast);
     sleep(25).then(_ => requestAnimationFrame(_ => {
       this.toast.style.opacity = 1;
       this.toast.style.transform = 'translateY(0px)';
@@ -107,7 +107,7 @@ class Toast {
     wrapper.style.justifyContent = 'space-between';
     wrapper.style.alignItems = 'center';
     wrapper.style.overflow = 'none';
-    [mText, lText].forEach(el => wrapper.appendChild(el));
+    wrapper.append(mText, lText);
     return wrapper;
   }
 
@@ -186,9 +186,9 @@ function loadingAnimation(parent) {
   for (let i = 0; i < 5; i++) {
     const circle = document.createElement('div');
     circle.classList.add('circle');
-    div.appendChild(circle);
+    div.append(circle);
   }
-  parent.appendChild(div);
+  parent.prepend(div);
 }
 
 /**
@@ -275,7 +275,7 @@ async function dlTxt() {
   link.href = URL.createObjectURL(blob);
   link.download = filename;
 
-  document.body.appendChild(link);
+  document.body.append(link);
   link.click();
   document.body.removeChild(link);
 
@@ -393,7 +393,7 @@ function svgIcon({ viewbox, d }) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
   svg.setAttribute('fill', 'currentColor');
   svg.setAttribute('viewBox', viewbox);
-  svg.appendChild(path);
+  svg.append(path);
   return svg;
 }
 
@@ -417,7 +417,7 @@ function createSmallButton({ icon, cssClass, func, title }) {
   button.title = title;
   button.type = 'button';
   button.classList.add('small-button', cssClass);
-  button.appendChild(svgIcon(icon));
+  button.append(svgIcon(icon));
   button.addEventListener('click', func);
   return button;
 }
@@ -482,7 +482,7 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
   li.dataset.icon = icon;
   li.dataset.homepage = homepage;
   li.addEventListener('contextmenu', contextMenu);
-  [span, div, ...buttons].forEach(el => li.appendChild(el));
+  li.append(span, div, ...buttons);
   return li;
 }
 
@@ -509,9 +509,9 @@ function lazyLoadOnScroll(list, container) {
     const fragment = document.createDocumentFragment();
     slices.forEach(slice => {
       slice.name = slice.name.replace(/,/g, '');
-      fragment.appendChild(createStationElement(slice));
+      fragment.append(createStationElement(slice));
     });
-    container.appendChild(fragment);
+    container.append(fragment);
     ndx += pullNumber;
     loading = false;
   }
@@ -575,10 +575,10 @@ async function filterChanged(ev) {
       const elements = data.map(createStationElement);
       elements.forEach(el => {
         el.toggleAttribute('selected');
-        localFragment.appendChild(el);
+        localFragment.append(el);
       });
       setSelectedCount(elements.length);
-      container.appendChild(localFragment);
+      container.append(localFragment);
     }
     const res = await fetch(`${window.location.origin}/stations${queryString(ev.target.value)}`);
     if (res.status !== 200) {
@@ -589,10 +589,10 @@ async function filterChanged(ev) {
     const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
     const list = stations.filter(station => !selectedUrls.has(station.url));
     const fragment = document.createDocumentFragment();
-    selectedElements.forEach(el => fragment.appendChild(el));
+    fragment.append(...selectedElements);
     container.innerHTML = '';
     container.scrollTop = 0;
-    container.appendChild(fragment);
+    container.append(fragment);
     lazyLoadOnScroll(list, container);
     document.querySelector('#station-count').textContent = stations.length;
     if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', 'Genre', ev.target.value]);
@@ -891,7 +891,7 @@ window.onload = async () => {
   filter.addEventListener('change', filterChanged);
   filterChanged({ target: filter, loadLocal: true });
 
-  document.querySelector('body').appendChild(player);
+  document.querySelector('body').append(player);
   document.querySelector('.player>.small-button').addEventListener('click', togglePlay);
 
   const wrapper = document.querySelector('.wrapper');
