@@ -585,7 +585,8 @@ async function filterChanged(ev) {
       return;
     }
     const stations = await res.json();
-    const selectedElements = Array.from(container.querySelectorAll('li[selected]'));
+    const selectedElements = Array.from(container.querySelectorAll('li[selected]'))
+      .sort((a, b) => a.dataset.title.localeCompare(b.dataset.title));
     const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
     const list = stations.filter(station => !selectedUrls.has(station.url));
     const fragment = document.createDocumentFragment();
