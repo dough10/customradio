@@ -885,17 +885,18 @@ window.onload = async () => {
     el.addEventListener('click', _ => el.parentElement.close());
   });
 
+  
   const add = document.querySelector('#add');
   const addButton = document.querySelector('#add_button');
   addButton.addEventListener('click', _ => add.showModal());
-
+  
   const dlButton = document.querySelector('#download');
   dlButton.addEventListener('click', dlTxt);
-
+  
   const filter = document.querySelector('#filter');
   filter.addEventListener('change', filterChanged);
   filterChanged({ target: filter, loadLocal: true });
-
+  
   document.querySelector('body').append(player);
   document.querySelector('.player>.small-button').addEventListener('click', togglePlay);
 
