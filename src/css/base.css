@@ -229,7 +229,7 @@ svg {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-bottom: var(--seperator-line);
+  border-top: var(--seperator-line);
   transition: background-color var(--animate-500, 500ms) linear;
 }
 
@@ -263,12 +263,9 @@ svg {
   color: var(--text-color);
 }
 
-#stations>li:first-child {
-  border-top: var(--seperator-line);
-}
-
 #stations>li:last-child {
   margin-bottom: 11.25em;
+  border-bottom: var(--seperator-line);
 }
 
 #stations>li[selected] {
@@ -379,8 +376,8 @@ svg {
 }
 
 .player>.small-button>svg {
-  height: 2.25em;
-  width: 2.25em;
+  height: 24px;
+  width: 24px;
 }
 
 .player>.small-button {
@@ -569,6 +566,10 @@ input:focus {
   border-bottom: 2px solid var(--pop-color);
 }
 
+.w93 {
+  width: 93%;
+}
+
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -728,7 +729,7 @@ input[type="range"]::-ms-fill-upper {
   border: none;
   background: none;
   color: inherit;
-  width: 2.25em;
+  width: 24px;
 }
 
 .small-button[disabled] {
@@ -740,6 +741,12 @@ input[type="range"]::-ms-fill-upper {
   pointer-events: none;
 }
 
+.reset {
+  position: absolute;
+  top: 15px;
+  right:-15px;
+}
+
 .player-big {
   width: fit-content;
 }
@@ -748,6 +755,7 @@ input[type="range"]::-ms-fill-upper {
   position: fixed;
   bottom: 10px;
   left: 50%;
+  width:auto;
   transform: translateX(-50%);
   animation: show-it var(--animate-150, 150ms) linear forwards;
   transition: transform var(--animate-150, 150ms) linear;
@@ -840,7 +848,8 @@ input[type="range"]::-ms-fill-upper {
 }
 
 .loading {
-  margin: 24px auto;
+  margin: 0px auto;
+  padding: 4px;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -850,8 +859,8 @@ input[type="range"]::-ms-fill-upper {
 .circle {
   background: var(--text-color, #000000);
   border-radius: 50%;
-  height: 15px;
-  width: 15px;
+  height: 16px;
+  width: 16px;
   margin: 0 4px;
   transform: scale3d(0, 0, 0);
   animation: dots var(--animation-duration, 800ms) var(--animation-timing, linear) infinite;
