@@ -376,8 +376,8 @@ svg {
 }
 
 .player>.small-button>svg {
-  height: 24px;
-  width: 24px;
+  height: 2.25em;
+  width: 2.25em;
 }
 
 .player>.small-button {
