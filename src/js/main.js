@@ -567,6 +567,8 @@ function queryString(value) {
 async function filterChanged(ev) {
   try {
     const container = document.querySelector('#stations');
+    const stationCount = document.querySelector('#station-count');
+    stationCount.parentElement.style.display = 'none';
     loadingAnimation(container);
     let data = JSON.parse(localStorage.getItem('selected'));
     if (data && ev.loadLocal) {
@@ -595,7 +597,8 @@ async function filterChanged(ev) {
     container.scrollTop = 0;
     container.append(fragment);
     lazyLoadOnScroll(list, container);
-    document.querySelector('#station-count').textContent = stations.length;
+    stationCount.parentElement.style.removeProperty('display');
+    stationCount.textContent = stations.length;
     if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', 'Genre', ev.target.value]);
   } catch (error) {
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', 'Error', error]);
@@ -896,6 +899,11 @@ window.onload = async () => {
   const filter = document.querySelector('#filter');
   filter.addEventListener('change', filterChanged);
   filterChanged({ target: filter, loadLocal: true });
+  document.querySelector('.reset').addEventListener('click', _ => {
+    if (filter.value === '') return;
+    filter.value = '';
+    filterChanged({ target: filter});
+  });
   
   document.querySelector('body').append(player);
   document.querySelector('.player>.small-button').addEventListener('click', togglePlay);
