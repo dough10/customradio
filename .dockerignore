@@ -6,3 +6,5 @@ html
 README.md
 node_modules
 test
+stream_test.js
+import.mjs
