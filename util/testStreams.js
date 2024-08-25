@@ -7,6 +7,7 @@ const log = require('./log.js');
 const isLiveStream = require('./isLiveStream.js');
 const rmRef = require('./rmRef.js');
 const dbStatistics = require('./dbStatistics.js');
+const saveStats = require('./saveStats.js');
 
 
 /**
@@ -115,6 +116,9 @@ async function testStreams(db, trackProgress) {
     total += res.modifiedCount;
   }
   const stats = await dbStatistics(db);
-  const ms = new Date().getTime() - startTime;
+  const now = new Date().getTime();
+  const ms = now - startTime;
   log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
+  stats.time = now;
+  await saveStats(stats);
 }
