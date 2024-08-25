@@ -572,7 +572,6 @@ async function filterChanged(ev) {
     loadingAnimation(container);
     let data = JSON.parse(localStorage.getItem('selected'));
     if (data && ev.loadLocal) {
-      data = data.sort((a, b) => a.name.localeCompare(b.name));
       const localFragment = document.createDocumentFragment();
       const elements = data.map(createStationElement);
       elements.forEach(el => {
@@ -597,8 +596,8 @@ async function filterChanged(ev) {
     container.scrollTop = 0;
     container.append(fragment);
     lazyLoadOnScroll(list, container);
-    stationCount.parentElement.style.removeProperty('display');
     stationCount.textContent = stations.length;
+    stationCount.parentElement.style.removeProperty('display');
     if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', 'Genre', ev.target.value]);
   } catch (error) {
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', 'Error', error]);
