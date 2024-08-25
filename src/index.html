@@ -56,8 +56,20 @@
           <h1>radio.txt creator</h1>
           <p><span id="count">0</span> stations selected</p>
           <div class="form-group">
-            <input placeholder="Filter by genre:" type="text" id="filter" name="filter">
+            <input placeholder="Filter by genre:" type="text" id="filter" name="filter" list="genres">
             <label for="filter">Filter by genre:</label>
+            <datalist id="genres">
+              <option value="Ambient"></option>
+              <option value="Blues"></option>
+              <option value="Country"></option>
+              <option value="Classical"></option>
+              <option value="Drum & Bass"></option>
+              <option value="House"></option>
+              <option value="Jazz"></option>
+              <option value="Pop"></option>
+              <option value="Rock"></option>
+              <option value="Various"></option>
+            </datalist>
           </div>
         </div>
         <button class="button close" type="button" id="download" disabled title="download text file">
