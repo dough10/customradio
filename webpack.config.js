@@ -89,6 +89,9 @@ module.exports = {
         }, {
           from: './src/screenshots',
           to: 'screenshots'
+        }, {
+          from: './src/sitemap.xml',
+          to: 'sitemap.xml'
         }
       ],
     }),
