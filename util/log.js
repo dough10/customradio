@@ -1,6 +1,3 @@
-module.exports = log;
-
-
 /**
  * Logs a message to the console with a timestamp.
  * 
@@ -18,7 +15,6 @@ module.exports = log;
  * log('This is a log message');
  * // Output: (MM/DD/YYYY, HH:MM:SS AM/PM) This is a log message
  */
-function log(str) {
-  var now = new Date().toLocaleString();
-  console.log(`(${now}) ${str}`);
-}
+module.exports = (str) => {
+  console.log(`(${new Date().toLocaleString()}) ${str}`);
+};

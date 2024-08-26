@@ -1,4 +1,3 @@
-module.exports = queryString;
 
 
 /**
@@ -21,6 +20,6 @@ module.exports = queryString;
  * queryString('');
  * // Returns: ''
  */
-function queryString(value) {
+module.exports = (value) => {
   return (value.length === 0) ? '' : `?genres=${value}`;
-}
+};
