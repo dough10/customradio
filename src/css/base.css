@@ -529,6 +529,11 @@ input {
   transition: border-color var(--animate-200, 200ms) linear;
 }
 
+input::-webkit-list-button,
+input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
 input[disabled] {
   color: var(--disabled-color)
 }
