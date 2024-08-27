@@ -8,7 +8,7 @@ ENV TZ="America/Chicago"
 
 RUN date
 RUN npm install
-RUN npm build
+RUN npm run build
 
 EXPOSE 3000/tcp
 
