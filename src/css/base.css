@@ -529,10 +529,11 @@ input {
   transition: border-color var(--animate-200, 200ms) linear;
 }
 
-input::-webkit-list-button,
-input::-webkit-calendar-picker-indicator {
-  display: none;
+input[list]::-webkit-list-button,
+input[list]::-webkit-calendar-picker-indicator {
+  display: none !important;
 }
+
 
 input[disabled] {
   color: var(--disabled-color)
@@ -625,6 +626,7 @@ input[type="range"]::-webkit-slider-thumb {
   cursor: pointer;
   transform: translateY(-25%);
   transition: background 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -635,6 +637,7 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 50%;
   cursor: pointer;
   transition: background 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 input[type="range"]::-ms-thumb {
@@ -645,6 +648,7 @@ input[type="range"]::-ms-thumb {
   border-radius: 50%;
   cursor: pointer;
   transition: background 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 /* Custom focus style */
@@ -749,7 +753,7 @@ input[type="range"]::-ms-fill-upper {
 .reset {
   position: absolute;
   top: 15px;
-  right:-15px;
+  right: -15px;
 }
 
 .player-big {
@@ -760,7 +764,7 @@ input[type="range"]::-ms-fill-upper {
   position: fixed;
   bottom: 10px;
   left: 50%;
-  width:auto;
+  width: auto;
   transform: translateX(-50%);
   animation: show-it var(--animate-150, 150ms) linear forwards;
   transition: transform var(--animate-150, 150ms) linear;
