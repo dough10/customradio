@@ -9,7 +9,8 @@
     "build": "npx webpack",
     "test-HTML": "web-test-runner \"src/tests/*.test.js\" --node-resolve",
     "test-API": "mocha",
-    "version++": "node build_assets/incriment-version.js"
+    "version++": "node build_assets/incriment-version.js",
+    "build-docker": "sh build-container.sh"
   },
   "author": "dough10",
   "license": "ISC",
