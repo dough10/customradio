@@ -1,10 +1,13 @@
 .env
 .git
-.gitignore
+.vscode
 .hintrc
+.gitignore
 html
-README.md
-node_modules
 test
-stream_test.js
+src/test
+README.md
 import.mjs
+node_modules
+stream_test.js
+build-container.sh

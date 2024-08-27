@@ -10,7 +10,7 @@
     "test-HTML": "web-test-runner \"src/tests/*.test.js\" --node-resolve",
     "test-API": "mocha",
     "version++": "node build_assets/incriment-version.js",
-    "build-docker": "sh build-container.sh"
+    "build-docker": "sh build-container.sh \"registry.dough10.me/customradio\""
   },
   "author": "dough10",
   "license": "ISC",
