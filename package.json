@@ -1,11 +1,11 @@
 {
   "name": "customradio",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "description": "build custion radio.txt from for use on hiby audio players",
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "build": "npx webpack",
+    "build": "node build_assets/update-sw-cache-version.js && npx webpack",
     "test-HTML": "web-test-runner \"src/tests/*.test.js\" --node-resolve",
     "test-API": "mocha"
   },
