@@ -8,7 +8,8 @@
     "prebuild": "node build_assets/update-sw-cache-version.js",
     "build": "npx webpack",
     "test-HTML": "web-test-runner \"src/tests/*.test.js\" --node-resolve",
-    "test-API": "mocha"
+    "test-API": "mocha",
+    "version++": "node build_assets/incriment-version.js"
   },
   "author": "dough10",
   "license": "ISC",
@@ -47,6 +48,7 @@
     "mini-css-extract-plugin": "^2.9.0",
     "mocha": "^10.7.3",
     "terser-webpack-plugin": "^5.3.10",
+    "version-incrementer": "^0.1.1",
     "webpack": "^5.93.0",
     "webpack-cli": "^5.1.4",
     "webpack-merge": "^6.0.1"
