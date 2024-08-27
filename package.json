@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "build": "node build_assets/update-sw-cache-version.js && npx webpack",
+    "prebuild": "node build_assets/update-sw-cache-version.js",
+    "build": "npx webpack",
     "test-HTML": "web-test-runner \"src/tests/*.test.js\" --node-resolve",
     "test-API": "mocha"
   },
