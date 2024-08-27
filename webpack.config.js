@@ -8,7 +8,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'production',
-  entry: './build.js',
+  entry: './build_assets/build.js',
   output: {
     filename: 'bundle.min.js',
     path: path.resolve(__dirname, 'html'),
