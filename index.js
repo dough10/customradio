@@ -1,5 +1,8 @@
 const express = require('express');
-const { query, body } = require('express-validator');
+const {
+  query,
+  body
+} = require('express-validator');
 const compression = require('compression');
 const path = require('path');
 const schedule = require('node-schedule');
@@ -16,7 +19,9 @@ const addToDatabase = require('./routes/add.js');
 const getStations = require('./routes/stations.js');
 const log = require('./util/log.js');
 const connectToDb = require('./util/connectToDb.js');
-const { testStreams } = require('./util/testStreams.js');
+const {
+  testStreams
+} = require('./util/testStreams.js');
 const streamIssue = require('./routes/stream-issue.js');
 
 const redis = new Redis({
@@ -32,7 +37,9 @@ register.setDefaultLabels({
   app: 'customradio-api'
 });
 
-promClient.collectDefaultMetrics({ register });
+promClient.collectDefaultMetrics({
+  register
+});
 
 const httpRequestCounter = new promClient.Counter({
   name: 'http_requests_total',
@@ -43,10 +50,40 @@ const httpRequestCounter = new promClient.Counter({
 register.registerMetric(httpRequestCounter);
 
 app.use(compression());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+  extended: true
+}));
 app.use(express.json());
 app.set('trust proxy', true);
 app.disable('x-powered-by');
+app.use(async (req, res, next) => {
+  if (req.method === 'GET' && req.url.startsWith('/static/')) {
+    try {
+      const cacheKey = `static:${req.url}`;
+      const cachedContent = await redis.get(cacheKey);
+      
+      if (cachedContent) {
+        const contentType = mime.lookup(req.url) || 'application/octet-stream';
+        res.setHeader('Content-Type', contentType);
+        res.send(cachedContent);
+        return;
+      }
+      
+      res.sendResponse = res.send;
+      res.send = async (body) => {
+        await redis.set(cacheKey, body, 'EX', 2592000);
+        const contentType = mime.lookup(req.url) || 'application/octet-stream';
+        res.setHeader('Content-Type', contentType);
+        res.sendResponse(body);
+      };
+      next();
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    next();
+  }
+});
 app.use(express.static(path.join(__dirname, 'html'), {
   maxAge: 2592000000,
   setHeaders: function (res, path) {
@@ -90,7 +127,7 @@ const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
  * });
  */
 app.get('/', async (req, res) => {
-  const cacheKey = 'index.html';
+  const cacheKey = req.originalUrl;
   const cachedPage = await redis.get(cacheKey);
 
   log(`${req.ip} -> /`);
@@ -200,9 +237,9 @@ app.post('/stream-issue', upload.none(), [
  */
 app.get('/stations', [
   query('genres')
-    .trim()
-    .escape()
-    .isString().withMessage('Genres must be a string'),
+  .trim()
+  .escape()
+  .isString().withMessage('Genres must be a string'),
 ], (req, res) => getStations(db, redis, req, res));
 
 /**
@@ -277,7 +314,9 @@ app.get('*', (req, res) => {
     pathname: req.originalUrl
   };
   log(`${req.ip} requested ${url.format(reqadd)} 404! ╭∩╮(︶︿︶)╭∩╮`);
-  res.status(404).json({ message: '╭∩╮(︶︿︶)╭∩╮' });
+  res.status(404).json({
+    message: '╭∩╮(︶︿︶)╭∩╮'
+  });
 });
 
 /**
