@@ -208,11 +208,11 @@ function setSelectedCount(number, url) {
   count.textContent = number;
   if (number) {
     dlButton.removeAttribute('disabled');
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Add to file', url]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', url]);
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
-      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Remove from file', url]);
+      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Remove from file', url]);
     }
   }
 }
@@ -280,7 +280,7 @@ async function dlTxt() {
   document.body.removeChild(link);
 
   URL.revokeObjectURL(link.href);
-  if (typeof _paq !== 'undefined') _paq.push(['trackLink', link.href, 'download']);
+  if (typeof _paq !== 'undefined') _paq.push(['trackLink', 'Download', 'radio.txt']);
 }
 
 /**
@@ -373,7 +373,7 @@ async function playStream(ev) {
     console.error(str);
     postStreamIssue(url, error.message);
   }
-  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'Play stream', url]);
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Play stream', url]);
 }
 
 /**
@@ -598,9 +598,9 @@ async function filterChanged(ev) {
     lazyLoadOnScroll(list, container);
     stationCount.textContent = stations.length;
     stationCount.parentElement.style.removeProperty('display');
-    if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', 'Genre', ev.target.value]);
+    if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', ev.target.value]);
   } catch (error) {
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', 'Error', error]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error]);
     console.error('Error fetching stations:', error);
     new Toast('Error fetching stations:', error);
   }
@@ -753,10 +753,12 @@ function isValidURL(url) {
 async function formSubmission(ev) {
   ev.preventDefault();
 
+  const fData = new FormData(ev.target);
+
   try {
     const response = await fetch('/add', {
       method: 'POST',
-      body: new FormData(ev.target),
+      body: fData,
     });
 
     const result = await response.json();
@@ -770,11 +772,12 @@ async function formSubmission(ev) {
     if (!submit.hasAttribute('disabled')) {
       submit.toggleAttribute('disabled');
     }
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', fData.url]);
   } catch (e) {
     document.getElementById('response').innerText = 'An error occurred!';
     console.error('Error:', e);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Error', e.massage]);
   }
-  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Button', 'URL Submission']);
 }
 
 /**
@@ -817,7 +820,7 @@ function toggleButtonActivity() {
 function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
   console.error(error);
   var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
-  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'JavaScript Error', 'Error', errorMessage]);
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'JavaScript Error', errorMessage]);
 }
 
 /**
