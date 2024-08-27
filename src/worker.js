@@ -13,7 +13,7 @@ const urlsToCache = [
  * @returns {Promise<Response>} The response from cache or network.
  */
 async function handleStationsRequest(event) {
-  const cache = await caches.open(CACHE_NAME);
+  const cache = await caches.open(CACHE_VERSION);
   const cachedResponse = await cache.match(event.request);
   const now = Date.now();
 
@@ -42,7 +42,7 @@ async function handleStationsRequest(event) {
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(CACHE_VERSION)
       .then(cache => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
@@ -67,7 +67,7 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+  const cacheWhitelist = [CACHE_VERSION];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
