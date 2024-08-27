@@ -7,6 +7,5 @@ if [ $? -ne 0 ] || [ -z "$VERSION" ]; then
   exit 1
 fi
 
-
 docker build -t "$1:$VERSION" -t "$1:latest" .
 docker push "$1:$VERSION" && docker push "$1:latest"
