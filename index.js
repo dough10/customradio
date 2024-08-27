@@ -48,7 +48,7 @@ app.use(express.json());
 app.set('trust proxy', true);
 app.disable('x-powered-by');
 app.use(express.static(path.join(__dirname, 'html'), {
-  maxAge: 2_592_000_000,
+  maxAge: 2592000000,
   setHeaders: function (res, path) {
     res.setHeader("Expires", new Date(Date.now() + 2592000000 * 30).toUTCString());
   }
