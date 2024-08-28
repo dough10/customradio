@@ -858,7 +858,7 @@ window.onload = async () => {
         if (refreshing) return;
         refreshing = true;
         console.log('Controller has changed, reloading the page...');
-        window.location.reload();
+        window.location.reload(true);
       });
       const worker = await navigator.serviceWorker.register('/worker.js');
       worker.onupdatefound = () => updateFound(worker);
@@ -890,7 +890,6 @@ window.onload = async () => {
     el.addEventListener('click', _ => el.parentElement.close());
   });
 
-  
   const add = document.querySelector('#add');
   const addButton = document.querySelector('#add_button');
   addButton.addEventListener('click', _ => add.showModal());
