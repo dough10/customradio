@@ -37,7 +37,7 @@ module.exports = async (url) => {
     await client.connect();
     log('Connected to MongoDB');
     const database = client.db('custom-radio');
-    return database.collection('stations2');
+    return database.collection('stations');
   } catch (err) {
     console.error('(╬ Ò﹏Ó) Error connecting to MongoDB:', err);
     throw err;
