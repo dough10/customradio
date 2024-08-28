@@ -1,4 +1,4 @@
-FROM node:22-slim AS build
+FROM node:lts-slim AS build
 
 WORKDIR /usr/src/app
 
@@ -8,7 +8,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM node:22-slim
+FROM node:lts-slim
 
 WORKDIR /usr/src/app
 
