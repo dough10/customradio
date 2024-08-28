@@ -1,8 +1,5 @@
 const express = require('express');
-const {
-  query,
-  body
-} = require('express-validator');
+const { query, body } = require('express-validator');
 const compression = require('compression');
 const path = require('path');
 const schedule = require('node-schedule');
@@ -18,17 +15,19 @@ require('dotenv').config();
 const addToDatabase = require('./routes/add.js');
 const getStations = require('./routes/stations.js');
 const log = require('./util/log.js');
-const {
-  testStreams
-} = require('./util/testStreams.js');
+const { testStreams } = require('./util/testStreams.js');
 const streamIssue = require('./routes/stream-issue.js');
 const DbConnector = require('./util/dbConnector.js');
 
+
 const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
+
 
 const DB_COLLECTION = 'stations2';
 
+
 const connector = new DbConnector(DB_HOST, DB_COLLECTION);
+
 
 const redis = new Redis({
   host: process.env.REDIS_HOST || '127.0.0.1',
@@ -38,6 +37,7 @@ const redis = new Redis({
 
 
 const register = new promClient.Registry();
+
 
 register.setDefaultLabels({
   app: 'customradio-api'
