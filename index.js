@@ -18,11 +18,17 @@ require('dotenv').config();
 const addToDatabase = require('./routes/add.js');
 const getStations = require('./routes/stations.js');
 const log = require('./util/log.js');
-const connectToDb = require('./util/connectToDb.js');
 const {
   testStreams
 } = require('./util/testStreams.js');
 const streamIssue = require('./routes/stream-issue.js');
+const DbConnector = require('./util/dbConnector.js');
+
+const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
+
+const DB_COLLECTION = 'stations2';
+
+const connector = new DbConnector(DB_HOST, DB_COLLECTION);
 
 const redis = new Redis({
   host: process.env.REDIS_HOST || '127.0.0.1',
@@ -61,7 +67,7 @@ app.use(async (req, res, next) => {
     try {
       const cacheKey = `static:${req.url}`;
       const cachedContent = await redis.get(cacheKey);
-      
+
       if (cachedContent) {
         const contentType = mime.lookup(req.url) || 'application/octet-stream';
         res.setHeader('Content-Type', contentType);
@@ -103,9 +109,6 @@ app.use((req, res, next) => {
 
 
 let db;
-
-
-const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 
 
 /**
@@ -342,7 +345,7 @@ app.get('*', (req, res) => {
  * });
  */
 app.listen(3000, async _ => {
-  db = await connectToDb(DB_HOST);
+  db = await connector.connect();
   log('Online. o( ❛ᴗ❛ )o');
   schedule.scheduleJob('0 0 * * *', _ => testStreams(db));
 });
