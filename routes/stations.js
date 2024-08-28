@@ -47,20 +47,28 @@ async function getStations(db, redis, req, res) {
       errors: errors.array()
     });
   }
+  
+  const genres = req.query.genres.split(',').map(genre => genre.toLowerCase());
+
+  const cacheKey = `stations_${genres.join(',')}`;
 
   try {
-    const genres = req.query.genres.split(',').map(genre => genre.toLowerCase());
-
-    const cacheKey = `stations_${genres.join(',')}`;
     const cachedStations = await redis.get(cacheKey);
-
+    
     if (cachedStations) {
       const stations = JSON.parse(cachedStations);
       res.set('content-type', 'application/json');
       log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} cached stations returned`);
       return res.send(stations);
     }
+  } catch(error) {
+    console.error('(╬ Ò﹏Ó) Error fetching cached stations:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch cached stations (╬ Ò﹏Ó)'
+    });  
+  }
 
+  try {
     const stations = await db.find({
       'content-type': usedTypes,
       online: true,
