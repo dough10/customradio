@@ -36,7 +36,7 @@ function urlDeconstruction(URL) {
   let ip;
 
   if (isIPv4(parsedUrl.hostname)) {
-    ip = parsedUrl.hostname
+    ip = parsedUrl.hostname;
   } else if (splitHostname.length > 2) {
     subdomain = splitHostname[0];
     domain = splitHostname[1];
