@@ -90,7 +90,6 @@ async function testStreams(db, trackProgress) {
     };
     station.url = rmRef(station.url);
     const stream = await isLiveStream(station.url);
-    // error testing stream
     if (!stream.ok) {
       const res = await db.updateOne(filter, {
         $set: {
@@ -101,7 +100,6 @@ async function testStreams(db, trackProgress) {
       total += res.modifiedCount;
       continue;
     }
-    // stream "ok" 
     const res = await db.updateOne(filter, {
       $set: {
         name: stream.name || station.name || stream.description,
