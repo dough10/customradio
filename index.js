@@ -39,6 +39,13 @@ const redis = new Redis({
 });
 
 
+const httpRequestCounter = new promClient.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status_code']
+});
+
+
 const register = new promClient.Registry();
 
 
@@ -50,12 +57,6 @@ promClient.collectDefaultMetrics({
   register
 });
 
-const httpRequestCounter = new promClient.Counter({
-  name: 'http_requests_total',
-  help: 'Total number of HTTP requests',
-  labelNames: ['method', 'route', 'status_code']
-});
-
 register.registerMetric(httpRequestCounter);
 
 app.use(compression());
@@ -65,6 +66,10 @@ app.use(express.urlencoded({
 app.use(express.json());
 app.set('trust proxy', true);
 app.disable('x-powered-by');
+
+/**
+ * cache requested files
+ */
 app.use(async (req, res, next) => {
   if (req.method === 'GET' && req.url.startsWith('/static/')) {
     try {
@@ -93,12 +98,20 @@ app.use(async (req, res, next) => {
     next();
   }
 });
+
+/**
+ * serves static files
+ */
 app.use(express.static(path.join(__dirname, 'html'), {
   maxAge: 2592000000,
   setHeaders: function (res, path) {
     res.setHeader("Expires", new Date(Date.now() + 2592000000 * 30).toUTCString());
   }
 }));
+
+/**
+ * counts connection requests
+ */
 app.use((req, res, next) => {
   res.on('finish', () => {
     httpRequestCounter.inc({
