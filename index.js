@@ -29,6 +29,9 @@ const DB_COLLECTION = 'stations2';
 const connector = new DbConnector(DB_HOST, DB_COLLECTION);
 
 
+let db;
+
+
 const redis = new Redis({
   host: process.env.REDIS_HOST || '127.0.0.1',
   port: process.env.REDIS_PORT || 6379,
@@ -106,9 +109,6 @@ app.use((req, res, next) => {
   });
   next();
 });
-
-
-let db;
 
 
 /**
