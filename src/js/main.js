@@ -208,11 +208,11 @@ function setSelectedCount(number, url) {
   count.textContent = number;
   if (number) {
     dlButton.removeAttribute('disabled');
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', url]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', url || '']);
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
-      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Remove from file', url]);
+      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Remove from file', url || '']);
     }
   }
 }
@@ -598,9 +598,9 @@ async function filterChanged(ev) {
     lazyLoadOnScroll(list, container);
     stationCount.textContent = stations.length;
     stationCount.parentElement.style.removeProperty('display');
-    if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', ev.target.value]);
+    if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', ev.target.value || '']);
   } catch (error) {
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);
     console.error('Error fetching stations:', error);
     new Toast('Error fetching stations:', error);
   }
@@ -772,11 +772,11 @@ async function formSubmission(ev) {
     if (!submit.hasAttribute('disabled')) {
       submit.toggleAttribute('disabled');
     }
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', fData.url]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', ev.target.querySelector('input').value || '']);
   } catch (e) {
     document.getElementById('response').innerText = 'An error occurred!';
     console.error('Error:', e);
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Error', e.massage]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
   }
 }
 
@@ -818,9 +818,8 @@ function toggleButtonActivity() {
  * @param {Error} error - The error object.
  */
 function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
-  console.error(error);
   var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
-  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'JavaScript Error', errorMessage]);
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'JavaScript Error', errorMessage || '']);
 }
 
 /**
