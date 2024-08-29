@@ -23,7 +23,7 @@ const DbConnector = require('./util/dbConnector.js');
 const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 
 
-const DB_COLLECTION = 'stations2';
+const DB_COLLECTION = 'stations';
 
 
 const connector = new DbConnector(DB_HOST, DB_COLLECTION);
