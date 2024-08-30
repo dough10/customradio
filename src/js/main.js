@@ -228,14 +228,7 @@ function toggleSelect(ev) {
   const el = ev.target.parentElement;
   el.toggleAttribute('selected');
   const all = Array.from(el.parentNode.querySelectorAll('li[selected]'));
-  const forStorage = all.map(el => {
-    return {
-      name: el.dataset.title,
-      url: el.dataset.url,
-      bitrate: el.dataset.bitrate,
-      genre: el.dataset.genre
-    };
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  const forStorage = all.map(el => el.dataset).sort((a, b) => a.name.localeCompare(b.name));
   localStorage.setItem('selected', JSON.stringify(forStorage));
   setSelectedCount(all.length, el.dataset.url);
 }
@@ -264,7 +257,7 @@ async function dlTxt() {
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
   const str = elements.sort((a, b) => a.title.localeCompare(b.title))
-    .map(el => `${el.dataset.title}, ${el.dataset.url}`).join('\n');
+    .map(el => `${el.dataset.name}, ${el.dataset.url}`).join('\n');
 
   const blob = new Blob([`${stamp()}\n${str}`], {
     type: 'text/plain'
@@ -358,7 +351,7 @@ async function playStream(ev) {
   const url = el.dataset.url;
   const miniPlayer = document.querySelector('.player');
   try {
-    document.querySelector('#name').textContent = el.dataset.title;
+    document.querySelector('#name').textContent = el.dataset.name;
     document.querySelector('#bitrate').textContent = `${el.dataset.bitrate}kbps`;
     if (!miniPlayer.hasAttribute('playing')) {
       miniPlayer.toggleAttribute('playing');
@@ -366,7 +359,7 @@ async function playStream(ev) {
     player.src = url;
     player.load();
     await player.play();
-    new Toast(`Playing ${el.dataset.title}`, 3);
+    new Toast(`Playing ${el.dataset.name}`, 3);
   } catch (error) {
     const str = `Error playing media: ${error.message}`;
     new Toast(str, 3);
@@ -475,7 +468,7 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
 
   const li = document.createElement('li');
   li.title = `${name}: ${genre}`;
-  li.dataset.title = name;
+  li.dataset.name = name;
   li.dataset.url = url;
   li.dataset.bitrate = bitrate;
   li.dataset.genre = genre;
@@ -587,7 +580,7 @@ async function filterChanged(ev) {
     }
     const stations = await res.json();
     const selectedElements = Array.from(container.querySelectorAll('li[selected]'))
-      .sort((a, b) => a.dataset.title.localeCompare(b.dataset.title));
+      .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
     const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
     const list = stations.filter(station => !selectedUrls.has(station.url));
     const fragment = document.createDocumentFragment();
