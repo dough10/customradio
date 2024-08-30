@@ -181,6 +181,7 @@ setInterval(_ => {
  * @returns {void}
  */
 function loadingAnimation(parent) {
+  if (parent.querySelector('.loading')) return;
   const div = document.createElement('div');
   div.classList.add('loading');
   for (let i = 0; i < 5; i++) {
