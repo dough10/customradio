@@ -878,9 +878,6 @@ window.onload = async () => {
       if (changeTimer) clearTimeout(changeTimer);
       changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 200);
     });
-    if (/iPad/.test(navigator.userAgent)) {
-      volumeElement.style.display = 'none';
-    }
   } catch(error) {
     volumeElement.style.display = 'none';
   }
