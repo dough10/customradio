@@ -559,10 +559,11 @@ function queryString(value) {
  * @returns {void}
  */
 async function filterChanged(ev) {
+  const container = document.querySelector('#stations');
+  const stationCount = document.querySelector('#station-count');
+  const countParent = stationCount.parentElement;
   try {
-    const container = document.querySelector('#stations');
-    const stationCount = document.querySelector('#station-count');
-    stationCount.parentElement.style.display = 'none';
+    countParent.style.display = 'none';
     loadingAnimation(container);
     let data = JSON.parse(localStorage.getItem('selected'));
     if (data && ev.loadLocal) {
@@ -591,9 +592,12 @@ async function filterChanged(ev) {
     container.append(fragment);
     lazyLoadOnScroll(list, container);
     stationCount.textContent = stations.length;
-    stationCount.parentElement.style.removeProperty('display');
+    countParent.style.removeProperty('display');
     if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', ev.target.value || '']);
   } catch (error) {
+    const loadingEl = document.querySelector('.loading');
+    if (loadingEl) loadingEl.remove();
+    countParent.style.removeProperty('display');
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);
     console.error('Error fetching stations:', error);
     new Toast('Error fetching stations:', error);
