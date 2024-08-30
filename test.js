@@ -45,9 +45,14 @@ function urlDeconstruction(URL) {
 
 }
 
-async function run() {
+async function parseGernes() {
   const db = await connector.connect();
   const allGenres = await db.aggregate([
+    {
+      $project: {
+        genre: { $toLower: "$genre" }
+      }
+    },
     {
       $group: {
         _id: "$genre"
@@ -61,9 +66,19 @@ async function run() {
     }
   ]).toArray();
   await connector.disconnect();
-  for (const genreString of allGenres.map(obj => obj.genre)) {
-    console.log(genreString);
-  }
+
+  const genreList = allGenres.flatMap(obj => obj.genre.split(',')).sort((a,b) => a.localeCompare(b));
+  const set = new Set();
+  genreList.forEach(genre => {
+    if (genre) set.add(genre.trim().replace(/"/g, '').replace(/'/g, ''));
+  });
+  console.log(set);
 }
 
-run();
+async function duplicate_url() {
+  const db = await connector.connect();
+
+  await connector.disconnect();
+}
+
+parseGernes();
