@@ -1,6 +1,3 @@
-module.exports = isLiveStream;
-
-
 const axios = require('axios');
 
 const log = require('./log.js');
@@ -141,7 +138,7 @@ async function streamTest(url) {
  *     console.error('Error checking stream:', err);
  *   });
  */
-async function isLiveStream(url) {
+module.exports = async (url) => {
   if (!url || typeof url !== 'string' || !isValidURL(url)) return {
     ok: false,
     error: `url must be a string have a value and be a value URL format: ${url}`
@@ -157,4 +154,4 @@ async function isLiveStream(url) {
     return await streamTest(httpsUrl);
   }
   return await streamTest(url);
-}
+};
