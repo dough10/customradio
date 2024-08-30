@@ -257,7 +257,7 @@ function stamp() {
 async function dlTxt() {
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
-  const str = elements.sort((a, b) => a.title.localeCompare(b.title))
+  const str = elements.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name))
     .map(el => `${el.dataset.name}, ${el.dataset.url}`).join('\n');
 
   const blob = new Blob([`${stamp()}\n${str}`], {
