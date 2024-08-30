@@ -859,7 +859,7 @@ window.onload = async () => {
         console.log('Controller has changed, reloading the page...');
         window.location.reload(true);
       });
-      const worker = await navigator.serviceWorker.register('/worker.js');
+      const worker = await navigator.serviceWorker.register('/worker.js', { scope: '/' });
       worker.onupdatefound = () => updateFound(worker);
       let refreshing = false;
     } catch (error) {
