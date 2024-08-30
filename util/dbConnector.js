@@ -7,6 +7,7 @@ class DbConnector {
     this.client = new MongoClient(url);
     this.collection = collection;
   }
+
   async connect() {
     try {
       await this.client.connect();
