@@ -1,6 +1,3 @@
-module.exports = getStations;
-
-
 const { validationResult } = require('express-validator');
 
 const usedTypes = require("../util/usedTypes.js");
@@ -40,7 +37,7 @@ const queryString = require('../util/queryString.js');
  *     });
  * });
  */
-async function getStations(db, redis, req, res) {
+module.exports = async (db, redis, req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -101,4 +98,4 @@ async function getStations(db, redis, req, res) {
       error: 'Failed to fetch stations (╬ Ò﹏Ó)'
     });
   }
-}
+};
