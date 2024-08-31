@@ -203,17 +203,15 @@ function loadingAnimation(parent) {
  * 
  * @fires _paq.push - If `_paq` is defined, the function tracks events related to enabling or disabling the download button.
  */
-function setSelectedCount(number, url) {
+function setSelectedCount(number) {
   const count = document.querySelector('#count');
   const dlButton = document.querySelector('#download');
   count.textContent = number;
   if (number) {
     dlButton.removeAttribute('disabled');
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', url || '']);
   } else {
     if (!dlButton.hasAttribute('disabled')) {
       dlButton.toggleAttribute('disabled');
-      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Remove from file', url || '']);
     }
   }
 }
@@ -231,7 +229,12 @@ function toggleSelect(ev) {
   const all = Array.from(el.parentNode.querySelectorAll('li[selected]'));
   const forStorage = all.map(el => el.dataset).sort((a, b) => a.name.localeCompare(b.name));
   localStorage.setItem('selected', JSON.stringify(forStorage));
-  setSelectedCount(all.length, el.dataset.url);
+  setSelectedCount(all.length);
+  if (el.hasAttribute('selected')) {
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', el.dataset.url || '']);
+  } else {
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Remove from file', el.dataset.url || '']);
+  }
 }
 
 /**
