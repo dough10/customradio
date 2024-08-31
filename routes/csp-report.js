@@ -1,4 +1,4 @@
-const {validationResult} = require('express-validator');
+require('dotenv').config();
 
 const Connector = require('../util/dbConnector.js');
 const log = require('../util/log.js');
