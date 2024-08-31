@@ -305,7 +305,16 @@ app.post('/add', upload.none(), [
  * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 204 No Content
  */
-app.post('/csp-report', (req, res) => cspReport(req, res));
+app.post('/csp-report', apiKeyMiddleware, [
+  body('csp-report').isObject().withMessage('csp-report must be an object'),
+  body('csp-report.document-uri').isURL().withMessage('document-uri must be a valid URL'),
+  body('csp-report.referrer').optional().isURL().withMessage('referrer must be a valid URL'),
+  body('csp-report.blocked-uri').isURL().withMessage('blocked-uri must be a valid URL'),
+  body('csp-report.violated-directive').isString().withMessage('violated-directive must be a string'),
+  body('csp-report.original-policy').isString().withMessage('original-policy must be a string'),
+  body('csp-report.source-file').optional().isURL().withMessage('source-file must be a valid URL'),
+  body('csp-report.status-code').isInt({ min: 100, max: 599 }).withMessage('status-code must be an integer between 100 and 599'),
+], (req, res) => cspReport(req, res));
 
 /**
  * Catch-all route for handling 404 errors.
