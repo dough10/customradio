@@ -1,6 +1,3 @@
-module.exports = addToDatabase;
-
-
 const {validationResult} = require('express-validator');
 
 const log = require('../util/log.js');
@@ -38,7 +35,7 @@ const isLiveStream = require('../util/isLiveStream.js');
  *     });
  * });
  */
-async function addToDatabase(db, req, res) {
+module.exports = async (db, req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -82,4 +79,4 @@ async function addToDatabase(db, req, res) {
       message: 'Failed to add station'
     });
   }
-}
+};
