@@ -11,7 +11,7 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 - **MongoDB**
 - **Redis**
 
-### Enviroment Variables
+### Environment Variables
 
 - **DB_HOST** = *Mongodb connection url*
     > mongodb://username:password@localhost:27017
