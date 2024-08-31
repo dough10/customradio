@@ -68,38 +68,6 @@ app.set('trust proxy', true);
 app.disable('x-powered-by');
 
 /**
- * cache requested files
- */
-app.use(async (req, res, next) => {
-  if (req.method === 'GET' && req.url.startsWith('/static/')) {
-    try {
-      const cacheKey = `static:${req.url}`;
-      const cachedContent = await redis.get(cacheKey);
-
-      if (cachedContent) {
-        const contentType = mime.lookup(req.url) || 'application/octet-stream';
-        res.setHeader('Content-Type', contentType);
-        res.send(cachedContent);
-        return;
-      }
-      
-      res.sendResponse = res.send;
-      res.send = async (body) => {
-        await redis.set(cacheKey, body, 'EX', 2592000);
-        const contentType = mime.lookup(req.url) || 'application/octet-stream';
-        res.setHeader('Content-Type', contentType);
-        res.sendResponse(body);
-      };
-      next();
-    } catch (err) {
-      next(err);
-    }
-  } else {
-    next();
-  }
-});
-
-/**
  * serves static files
  */
 app.use(express.static(path.join(__dirname, 'html')));
@@ -118,46 +86,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
-/**
- * Handles GET requests to the root URL ('/').
- * Logs the IP address of the requester and sends the 'index.html' file as the response.
- * 
- * @function
- * @param {express.Request} req - The request object.
- * @param {express.Response} res - The response object.
- * @param {express.NextFunction} [next] - The optional next middleware function.
- * 
- * @returns {void}
- * 
- * @example
- * // Example usage:
- * app.get('/', (req, res) => {
- *   log(`${req.ip} -> /`);
- *   res.sendFile(path.join(__dirname, 'html', 'index.html'));
- * });
- */
-app.get('/', async (req, res) => {
-  const cacheKey = req.originalUrl;
-  const cachedPage = await redis.get(cacheKey);
-
-  log(`${req.ip} -> /`);
-
-  if (cachedPage) {
-    res.set('Content-Type', 'text/html');
-    return res.send(cachedPage);
-  }
-  const filePath = path.join(__dirname, 'html', 'index.html');
-  res.sendFile(filePath, async (err) => {
-    if (err) {
-      res.status(500).send('Error serving the index.html file');
-      return;
-    }
-    const fs = require('fs').promises;
-    const fileContent = await fs.readFile(filePath, 'utf8');
-    await redis.set(cacheKey, fileContent, 'EX', 3600);
-  });
-});
 
 /**
  * GET /metrics
