@@ -7,10 +7,10 @@ const connector = new Connector(process.env.DB_HOST, 'csp-report');
 
 module.exports = async (req, res) => {
   try {
-    const cspReport = req.body;
     const db = await connector.connect();
-    cspReport.time = new Date().getTime();
+    const cspReport = req.body;
     log('CSP Report Received:', cspReport['csp-report']);
+    cspReport.time = new Date().getTime();
     db.insertOne(cspReport);
     await connector.disconnect();
     res.status(204).send();
