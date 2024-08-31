@@ -10,7 +10,6 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 
 - MongoDB
 - Redis
-- Nginx
 
 ### Enviroment Variables
 
