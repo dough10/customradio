@@ -1,4 +1,5 @@
 require('dotenv').config();
+const {validationResult} = require('express-validator');
 
 const Connector = require('../util/dbConnector.js');
 const log = require('../util/log.js');
@@ -49,6 +50,12 @@ const connector = new Connector(process.env.DB_HOST || 'mongodb://127.0.0.1:2701
  * HTTP/1.1 204 No Content
  */
 module.exports = async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const db = await connector.connect();
     const cspReport = req.body;
