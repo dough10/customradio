@@ -6,8 +6,8 @@ const DbConnector = require('./dbConnector.js');
 module.exports = async (stats) => {
   const url = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
   const connector = new DbConnector(url, 'statistics');
-  const db = connector.connect();
+  const db = await connector.connect();
   db.insertOne(stats);
   log('database statistics saved');
-  connector.disconnect();
+  await connector.disconnect();
 };
