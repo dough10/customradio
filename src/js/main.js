@@ -692,11 +692,16 @@ player.onpause = _ => {
  * @returns {void} 
  */
 player.ontimeupdate = async _ => {
-  const last = document.querySelector('#stations>li[playing]');
-  if (last) last.removeAttribute('playing');
   const selector = `li[data-url="${player.src}"]`;
   const playing = document.querySelector(selector);
-  if (!playing || playing.hasAttribute('playing')) return;
+
+  if (playing && playing.hasAttribute('playing')) return;
+  
+  const last = document.querySelector('#stations>li[playing]');
+  if (last) last.removeAttribute('playing');
+  
+  if (!playing) return;
+  
   playing.toggleAttribute('playing');
   document.querySelector('#name').addEventListener('click', _ => playing.scrollIntoView({
     behavior: 'smooth',
