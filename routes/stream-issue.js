@@ -1,10 +1,8 @@
-module.exports = streamIssue;
-
 const {validationResult} = require('express-validator');
 
 const log = require('../util/log.js');
 
-async function streamIssue(db, req, res) {
+module.exports = async (db, req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -31,4 +29,4 @@ async function streamIssue(db, req, res) {
       message: `Failed to log error: ${entryError.message}` 
     });
   }
-}
+};
