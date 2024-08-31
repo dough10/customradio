@@ -102,12 +102,7 @@ app.use(async (req, res, next) => {
 /**
  * serves static files
  */
-app.use(express.static(path.join(__dirname, 'html'), {
-  maxAge: 2592000000,
-  setHeaders: function (res, path) {
-    res.setHeader("Expires", new Date(Date.now() + 2592000000 * 30).toUTCString());
-  }
-}));
+app.use(express.static(path.join(__dirname, 'html')));
 
 /**
  * counts connection requests
