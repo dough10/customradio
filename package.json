@@ -16,6 +16,7 @@
   "author": "dough10",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.4",
     "compression": "^1.7.4",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -26,7 +27,6 @@
     "multer": "^1.4.5-lts.1",
     "node-schedule": "^2.1.1",
     "prom-client": "^15.1.3",
-    "url": "^0.11.4",
     "validator": "^13.12.0"
   },
   "devDependencies": {
@@ -35,7 +35,6 @@
     "@open-wc/testing": "^4.0.0",
     "@web/test-runner": "^0.18.2",
     "@webpack-cli/generators": "^3.0.7",
-    "axios": "^1.7.4",
     "axios-mock-adapter": "^2.0.0",
     "babel-loader": "^9.1.3",
     "chai": "^5.1.1",
