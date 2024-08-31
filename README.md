@@ -2,14 +2,17 @@
 
 An online radio station browser with the ability to export a radio.txt file for use in Hiby digital audio players.
 
-Sourcecode for <https://customradio.dough10.me>
+> Sourcecode for <https://customradio.dough10.me>
 
-Requires
+Hosts a database of [Icecast](https://icecast.org/) stations so users can listen and add them to a custom list. Users can download the list in .txt format for use in a [Hiby](https://store.hiby.com/) digital audio player.
+
+## Requires
 
 - MongoDB
 - Redis
+- Nginx
 
-Enviroment Variables
+### Enviroment Variables
 
 - DB_HOST = Mongodb connection url (ie. mongodb://username:password@localhost:27017)
 - REDIS_HOST = redis server address (ie. 127.0.0.1)
@@ -17,10 +20,9 @@ Enviroment Variables
 - REDIS_PASSWORD = password for redis server (ie. supersecretpassword123)
 - TOKEN = access token for submissing to /csp-report endpoint
 
+### NPM Dependencies
 
-contact me: [admin@dough10.me](mailto:admin@dough10.me)
-## NPM Dependencies
-
+- axios: ^1.7.4
 - compression: ^1.7.4
 - dotenv: ^16.4.5
 - express: ^4.19.2
@@ -31,17 +33,15 @@ contact me: [admin@dough10.me](mailto:admin@dough10.me)
 - multer: ^1.4.5-lts.1
 - node-schedule: ^2.1.1
 - prom-client: ^15.1.3
-- url: ^0.11.4
 - validator: ^13.12.0
 
-## NPM Dev Dependencies
+### NPM Dev Dependencies
 
 - @babel/core: ^7.24.9
 - @babel/preset-env: ^7.24.8
 - @open-wc/testing: ^4.0.0
 - @web/test-runner: ^0.18.2
 - @webpack-cli/generators: ^3.0.7
-- axios: ^1.7.4
 - axios-mock-adapter: ^2.0.0
 - babel-loader: ^9.1.3
 - chai: ^5.1.1
@@ -59,3 +59,7 @@ contact me: [admin@dough10.me](mailto:admin@dough10.me)
 - webpack: ^5.93.0
 - webpack-cli: ^5.1.4
 - webpack-merge: ^6.0.1
+
+### contact me
+
+[admin@dough10.me](mailto:admin@dough10.me)
