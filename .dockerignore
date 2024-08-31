@@ -12,3 +12,4 @@ node_modules
 stream_test.js
 build-container.sh
 test.js
+assets
