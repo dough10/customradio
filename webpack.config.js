@@ -92,6 +92,9 @@ module.exports = {
         }, {
           from: './src/sitemap.xml',
           to: 'sitemap.xml'
+        }, {
+          from: './src/.well-known',
+          to: '.well-known'
         }
       ],
     }),
