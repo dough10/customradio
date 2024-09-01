@@ -47,7 +47,9 @@ module.exports = async (db, redis, req, res) => {
   
   const genres = req.query.genres.split(',').map(genre => genre.toLowerCase());
 
-  const cacheKey = `stations_${genres.join(',')}`;
+  const genreString = genres.join(',');
+
+  const cacheKey = `stations_${genreString}`;
 
   try {
     const cachedStations = await redis.get(cacheKey);
@@ -55,7 +57,7 @@ module.exports = async (db, redis, req, res) => {
     if (cachedStations) {
       const stations = JSON.parse(cachedStations);
       res.set('content-type', 'application/json');
-      log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} cached stations returned`);
+      log(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} cached stations returned`);
       return res.send(stations);
     }
   } catch(error) {
