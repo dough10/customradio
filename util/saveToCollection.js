@@ -9,5 +9,5 @@ module.exports = async (stats) => {
   const db = await connector.connect();
   db.insertOne(stats);
   log('database statistics saved');
-  await connector.disconnect();
+  // await connector.disconnect();
 };
