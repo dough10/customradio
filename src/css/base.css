@@ -394,7 +394,6 @@ svg {
 }
 
 #name {
-  text-transform: uppercase;
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
