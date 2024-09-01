@@ -116,7 +116,8 @@ async function testStreams(db, trackProgress) {
   const stats = await dbStatistics(db);
   const now = new Date().getTime();
   const ms = now - startTime;
-  log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
   stats.time = now;
+  stats.updateDuration = ms;
+  log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
   await saveStats('statistics', stats);
 }
