@@ -890,21 +890,6 @@ window.onload = async () => {
     }
   }
 
-  const volumeElement = document.querySelector('#vol');
-  try {
-    const slider = document.querySelector('#vol>input');
-    slider.value = Number(localStorage.getItem('volume')) || 100;
-    player.volume =  slider.value / 100;
-    let changeTimer = 0;
-    slider.addEventListener('input', _ => {
-      player.volume = slider.value / 100;
-      if (changeTimer) clearTimeout(changeTimer);
-      changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 200);
-    });
-  } catch(error) {
-    volumeElement.style.display = 'none';
-  }
-
   document.querySelectorAll('dialog>.close').forEach(el => {
     el.addEventListener('click', _ => el.parentElement.close());
   });
@@ -945,7 +930,22 @@ window.onload = async () => {
   const inputElement = document.querySelector('#station-url');
   inputElement.oninput = toggleButtonActivity;
 
-  // matomo 
+  if (await canChangeVol()) {
+    const slider = document.querySelector('#vol>input');
+    slider.value = Number(localStorage.getItem('volume')) || 100;
+    player.volume =  slider.value / 100;
+    let changeTimer = 0;
+    slider.addEventListener('input', _ => {
+      player.volume = slider.value / 100;
+      if (changeTimer) clearTimeout(changeTimer);
+      changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 200);
+    });
+  } else {
+    const volumeElement = document.querySelector('#vol');
+    volumeElement.style.display = 'none';
+  }
+
+    // matomo 
   const alert = document.querySelector('#alert');
   document.querySelector('.alert>.yellow-text').addEventListener('click', async _ => {
     localStorage.setItem('dismissed', '1');
