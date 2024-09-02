@@ -1,7 +1,5 @@
 const {MongoClient} = require('mongodb');
 
-const log = require('./log.js');
-
 /**
  * A class to handle connections to a MongoDB database.
  */
@@ -37,7 +35,6 @@ class DbConnector {
   async connect() {
     try {
       await this.client.connect();
-      log('Connected to MongoDB');
       const database = this.client.db('custom-radio');
       return database.collection(this.collection);
     } catch (err) {
