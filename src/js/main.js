@@ -842,6 +842,23 @@ function updateInstalled(newWorker) {
 }
 
 /**
+ * attempts to check if volume can be changed. 
+ * used to hide volume slider on mobile devices.
+ * 
+ * @param {HTMLElement} volumeElement
+ * 
+ * @returns {Boolean} 
+ */
+async function canChangeVol() {
+  const initialVolume = player.volume;
+  player.volume = 0.1;
+  await sleep(100);
+  const volumeChanged = player.volume !== initialVolume;
+  player.volume = initialVolume;
+  return volumeChanged;
+}
+
+/**
  * An update was found to the service worker cache
  * 
  * @param {Object} worker 
