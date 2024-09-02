@@ -1,6 +1,10 @@
-# customradio V:1.9.2
+# customradio V:1.9.3
 
 An online radio station browser with the ability to export a radio.txt file for use in Hiby digital audio players.
+
+![Mobile](src/screenshots/375x667.png)
+
+![desktop](src/screenshots/1280x720.png)
 
 > Sourcecode for <https://customradio.dough10.me>
 
