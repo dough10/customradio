@@ -212,6 +212,10 @@ svg {
   height: 1.5em;
 }
 
+ul {
+  list-style-type: none;
+}
+
 #stations {
   overflow: hidden;
   width: 100%;
@@ -219,7 +223,6 @@ svg {
   color: inherit;
   margin: 0;
   padding: 0;
-  list-style-type: none;
 }
 
 #stations>li {
