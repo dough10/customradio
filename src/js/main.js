@@ -294,18 +294,95 @@ function reset() {
 }
 
 /**
+ * creates a button element for context menu
+ * 
+ * @param {Object} buttonData - Object containing button details.
+ * @param {Object} buttonData.icon - Object containing SVG attributes.
+ * @param {String} buttonData.icon.viewbox - The viewBox attribute for the SVG element.
+ * @param {String} buttonData.icon.d - The path data for the SVG path element.
+ * @param {String} buttonData.text - The text for menu button.
+ * @param {Function} buttonData.func - The function to be called on button click.
+ */
+function contextMenuItem({icon, text, func}) {
+  const txt = document.createElement('span');
+  txt.textContent = text;
+  const li = document.createElement('li');
+  li.append(svgIcon(icon), txt);
+  li.addEventListener('click', _ => func());
+  return li;
+}
+
+/**
+ * sets absolute placement properties of context menu
+ * 
+ * @param {HTMLElement} menu 
+ * @param {Number} X 
+ * @param {Number} Y 
+ * @param {Number} popupHeight 
+ */
+function placeMenu(menu, X, Y, popupHeight) {
+  const wHeight = window.innerHeight / 2;
+  const wWidth = window.innerWidth / 2;
+  
+  if (Y > wHeight) {
+    menu.style.top = `${Y - popupHeight}px`;
+  } else {
+    menu.style.top = `${Y}px`;
+  }
+  if (X > wWidth) {
+    menu.style.left = `${X - menu.innerWidth}px`;
+  } else {
+    menu.style.left = `${X}px`;
+  }
+}
+
+/**
  * opens a context menu at the click location
  * 
  * @param {Event} ev 
  */
 function contextMenu(ev) {
   ev.preventDefault();
-  
-  const el = ev.target;
 
+  const el = ev.target;
+  
+  if (!el.dataset.name) return;
+  
+  const buttonData = [
+    {
+      icon: {
+        viewbox: '0 -960 960 960',
+        d: 'M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z'
+      },
+      text : 'homepage',
+      func: _ => {
+        if (el.dataset.homepage === 'Unknown') return;
+        window.open(el.dataset.homepage);
+      }
+    }
+  ];
+  
+  const body = document.querySelector('body');
+  const buttons = buttonData.map(contextMenuItem);
+  const elementHeight = 60;
+  const popupHeight = elementHeight * buttonData.length;
   const X = ev.pageX;
   const Y = ev.pageY;
-  console.log(X, Y);
+  const popup = document.createElement('ul');
+  popup.classList.add('context-menu');
+  popup.append(...buttons);
+  placeMenu(popup, X, Y, popupHeight);
+  
+  const dismiss = _ => {
+    body.removeEventListener('click', dismiss);
+    body.removeEventListener('contextmenu', dismiss);
+    popup.addEventListener('transitionend', popup.remove);
+    popup.style.removeProperty('transform');
+  };
+
+  body.addEventListener('click', dismiss);
+  body.addEventListener('contextmenu', dismiss);
+  body.append(popup);
 }
 
 /**
