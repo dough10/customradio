@@ -300,6 +300,8 @@ function reset() {
  */
 function contextMenu(ev) {
   ev.preventDefault();
+  
+  const el = ev.target;
 
   const X = ev.pageX;
   const Y = ev.pageY;
