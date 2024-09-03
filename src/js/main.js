@@ -281,19 +281,6 @@ async function dlTxt() {
 }
 
 /**
- * reset selected elements in UI
- * 
- * @function
- * 
- * @returns {void}
- */
-function reset() {
-  const container = document.querySelector('#stations');
-  const elements = container.querySelectorAll('li[selected]');
-  elements.forEach(el => el.removeAttribute('selected'));
-}
-
-/**
  * creates a button element for context menu
  * 
  * @param {Object} buttonData - Object containing button details.
@@ -301,12 +288,14 @@ function reset() {
  * @param {String} buttonData.icon.viewbox - The viewBox attribute for the SVG element.
  * @param {String} buttonData.icon.d - The path data for the SVG path element.
  * @param {String} buttonData.text - The text for menu button.
+ * @param {String} buttonData.title = the "title" for the button
  * @param {Function} buttonData.func - The function to be called on button click.
  */
-function contextMenuItem({icon, text, func}) {
+function contextMenuItem({icon, text, title, func}) {
   const txt = document.createElement('span');
   txt.textContent = text;
   const li = document.createElement('li');
+  li.title = title;
   li.append(svgIcon(icon), txt);
   li.addEventListener('click', _ => func());
   return li;
@@ -330,7 +319,7 @@ function placeMenu(menu, X, Y, popupHeight) {
     menu.style.top = `${Y}px`;
   }
   if (X > wWidth) {
-    menu.style.left = `${X - menu.innerWidth}px`;
+    menu.style.left = `${X - 175}px`;
   } else {
     menu.style.left = `${X}px`;
   }
@@ -341,7 +330,7 @@ function placeMenu(menu, X, Y, popupHeight) {
  * 
  * @param {Event} ev 
  */
-function contextMenu(ev) {
+async function contextMenu(ev) {
   ev.preventDefault();
 
   const el = ev.target;
@@ -355,34 +344,53 @@ function contextMenu(ev) {
         d: 'M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z'
       },
       text : 'homepage',
+      title: 'navigate to the homepage',
       func: _ => {
-        if (el.dataset.homepage === 'Unknown') return;
-        window.open(el.dataset.homepage);
+        if (el.dataset.homepage === 'Unknown') {
+          new Toast('Homepage not given.');
+          return;
+        }
+        const homepage = el.dataset.homepage
+        window.open(homepage);
       }
     }
   ];
-  
   const body = document.querySelector('body');
   const buttons = buttonData.map(contextMenuItem);
-  const elementHeight = 60;
+  const elementHeight = 40;
   const popupHeight = elementHeight * buttonData.length;
   const X = ev.pageX;
   const Y = ev.pageY;
   const popup = document.createElement('ul');
+  const backdrop = document.createElement('div');
+  backdrop.classList.add('backdrop');
   popup.classList.add('context-menu');
-  popup.append(...buttons);
+  if (el.dataset.icon !== 'Unknown') {
+    popup.append(...buttons);
+  } else {
+    popup.append(...buttons);
+  }
   placeMenu(popup, X, Y, popupHeight);
+  body.append(popup, backdrop);
+  await sleep(10);
+  backdrop.toggleAttribute('visable');
+  popup.toggleAttribute('open');
   
-  const dismiss = _ => {
-    body.removeEventListener('click', dismiss);
-    body.removeEventListener('contextmenu', dismiss);
-    popup.addEventListener('transitionend', popup.remove);
-    popup.style.removeProperty('transform');
-  };
-
-  body.addEventListener('click', dismiss);
-  body.addEventListener('contextmenu', dismiss);
-  body.append(popup);
+  popup.addEventListener('transitionend', _ => {
+    const dismiss = _ => {
+      body.removeEventListener('click', _ => dismiss());
+      body.removeEventListener('contextmenu', _ => dismiss());
+      popup.addEventListener('transitionend', _ => {
+        backdrop.remove();
+        popup.remove();
+      });
+      popup.removeAttribute('open');
+      backdrop.removeAttribute('visable');
+    };
+  
+    body.addEventListener('click', _ => dismiss());
+    body.addEventListener('contextmenu', _ => dismiss());
+  });
 }
 
 /**
