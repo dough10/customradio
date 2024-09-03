@@ -365,11 +365,7 @@ async function contextMenu(ev) {
   const backdrop = document.createElement('div');
   backdrop.classList.add('backdrop');
   popup.classList.add('context-menu');
-  if (el.dataset.icon !== 'Unknown') {
-    popup.append(...buttons);
-  } else {
-    popup.append(...buttons);
-  }
+  popup.append(...buttons);
   placeMenu(popup, X, Y, popupHeight);
   body.append(popup, backdrop);
   await sleep(10);
