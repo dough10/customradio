@@ -319,10 +319,32 @@ function placeMenu(menu, X, Y, popupHeight) {
     menu.style.top = `${Y}px`;
   }
   if (X > wWidth) {
-    menu.style.left = `${X - 175}px`;
+    menu.style.left = `${X - 185}px`;
   } else {
-    menu.style.left = `${X}px`;
+    menu.style.left = `${X + 10}px`;
   }
+}
+
+/**
+ * add event listeners to dismiss popup element
+ * 
+ * @param {HTMLElement} popup 
+ * @param {HTMLElement} body 
+ */
+function addPopupListeners(popup, body, backdrop) {
+  const dismiss = _ => {
+    body.removeEventListener('click', _ => dismiss());
+    body.removeEventListener('contextmenu', _ => dismiss());
+    popup.addEventListener('transitionend', _ => {
+      backdrop.remove();
+      popup.remove();
+    });
+    popup.removeAttribute('open');
+    backdrop.removeAttribute('visable');
+  };
+  popup.addEventListener('mouseleave', _ => dismiss());
+  body.addEventListener('click', _ => dismiss());
+  body.addEventListener('contextmenu', _ => dismiss());
 }
 
 /**
@@ -347,7 +369,7 @@ async function contextMenu(ev) {
       title: 'navigate to the homepage',
       func: _ => {
         if (el.dataset.homepage === 'Unknown') {
-          new Toast('Homepage not given.');
+          new Toast('No homepage header', 3);
           return;
         }
         const homepage = el.dataset.homepage
@@ -363,30 +385,16 @@ async function contextMenu(ev) {
   const Y = ev.pageY;
   const popup = document.createElement('ul');
   const backdrop = document.createElement('div');
+
   backdrop.classList.add('backdrop');
   popup.classList.add('context-menu');
   popup.append(...buttons);
   placeMenu(popup, X, Y, popupHeight);
   body.append(popup, backdrop);
   await sleep(10);
+  popup.addEventListener('transitionend', _ => addPopupListeners(popup, body, backdrop));
   backdrop.toggleAttribute('visable');
   popup.toggleAttribute('open');
-  
-  popup.addEventListener('transitionend', _ => {
-    const dismiss = _ => {
-      body.removeEventListener('click', _ => dismiss());
-      body.removeEventListener('contextmenu', _ => dismiss());
-      popup.addEventListener('transitionend', _ => {
-        backdrop.remove();
-        popup.remove();
-      });
-      popup.removeAttribute('open');
-      backdrop.removeAttribute('visable');
-    };
-  
-    body.addEventListener('click', _ => dismiss());
-    body.addEventListener('contextmenu', _ => dismiss());
-  });
 }
 
 /**
