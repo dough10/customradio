@@ -247,7 +247,7 @@ function toggleSelect(ev) {
 function stamp() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
-  return `# created by https://customradio.dough10.me [${formattedDate}]\n`;
+  return `# created by ${window.location.origin} [${formattedDate}]\n`;
 }
 
 /**
