@@ -7,7 +7,6 @@ module.exports = async (stats) => {
   const url = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
   const connector = new DbConnector(url, 'statistics');
   const db = await connector.connect();
-  console.log(stats);
   try{
     await db.insertOne(stats);
     log('database statistics saved');
