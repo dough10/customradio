@@ -216,6 +216,43 @@ ul {
   list-style-type: none;
 }
 
+.context-menu {
+  overflow: hidden;
+  background-color: var(--main-color);
+  color: var(--text-color);
+  border-radius: 5px;
+  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  position: fixed;
+  transform: scale3d(0, 0, 0);
+  transition: transform 100ms cubic-bezier(.33, .17, .85, 1.1);
+}
+
+.context-menu>li {
+  padding: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  border-bottom: var(--seperator-line);
+  transition: var(--button-bg-animation);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.context-menu > li > svg {
+  height: 24px;
+  width: 24px;
+  margin-right: 8px;
+}
+
+.context-menu > li > span {
+  width: 100%;
+}
+
+.context-menu > li:hover {
+  background: var(--selected-color)
+}
+
 #stations {
   overflow: hidden;
   width: 100%;
