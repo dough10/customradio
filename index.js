@@ -383,6 +383,8 @@ app.get('*', (req, res) => {
  * // Starting the server
  * app.listen(3000, async _ => {
  *   db = await connectToDb(DB_HOST);
+ *   const pack = require('./package.json');
+ *   log(`${pack.name} V:${pack.version}`);
  *   log('Online. o( ❛ᴗ❛ )o');
  *   schedule.scheduleJob('0 0 * * *', _ => testStreams(db));
  * });
