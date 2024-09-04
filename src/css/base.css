@@ -61,6 +61,7 @@ body {
   background: var(--background-color);
   font-family: var(--font-family);
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-user-select: none;
   user-select: none;
   overflow-x: hidden;
   overflow-y: hidden;
