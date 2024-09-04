@@ -79,7 +79,7 @@ class Toast {
     toast.style.opacity = 0;
     toast.style.transform = 'translateY(80px)';
     toast.style.willChange = 'auto';
-    toast.style.transition = 'all 300ms cubic-bezier(.33,.17,.85,1.1) 0ms';
+    toast.style.transition = `all var(--animate-150, 150ms) cubic-bezier(.33,.17,.85,1.1)`;
     toast.addEventListener('transitionend', this._transitionEnd, true);
     toast.addEventListener('click', this._clicked, true);
     return toast;
