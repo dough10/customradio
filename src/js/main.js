@@ -382,7 +382,7 @@ function openStationHomepage(homepage) {
  * @param {Event} ev 
  */
 async function contextMenu(ev) {
-  ev.preventDefault();
+  if (ev.pageX) ev.preventDefault();
   const el = ev.target;
   if (!el.dataset.name) return;
   const buttonData = [
@@ -592,7 +592,7 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
   let pressTimer = 0;
   li.addEventListener('touchstart', ev => {
     pressTimer = setTimeout(_ => contextMenu(ev), 500);
-  });
+  }, { passive: true });
   li.addEventListener('touchend', _ => {
     clearTimeout(pressTimer);
   });
