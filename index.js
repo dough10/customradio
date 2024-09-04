@@ -325,7 +325,7 @@ app.post('/add', upload.none(), [
  * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 204 No Content
  */
-app.post('/csp-report', apiKeyMiddleware, [
+app.post('/csp-report', apiKeyMiddleware, upload.none(), [
   body('csp-report').isObject().withMessage('csp-report must be an object'),
   body('csp-report.document-uri').isURL().withMessage('document-uri must be a valid URL'),
   body('csp-report.referrer').optional().isURL().withMessage('referrer must be a valid URL'),
