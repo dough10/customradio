@@ -19,6 +19,7 @@ const { testStreams } = require('./util/testStreams.js');
 const streamIssue = require('./routes/stream-issue.js');
 const cspReport = require('./routes/csp-report.js');
 const DbConnector = require('./util/dbConnector.js');
+const markDuplicate = require('./routes/markDuplicate.js');
 
 
 const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
@@ -148,6 +149,25 @@ app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());
 });
+
+/**
+ * endpoint for marking a station as a duplicate
+ * 
+ * @function
+ * @param {express.Request} req - The request object.
+ * @param {express.Response} res - The response object.
+ * 
+ * @param {express.Request} req.body - The body of the request.
+ * @param {string} req.body.url - The URL of the station. Must be a valid URL.
+ * 
+ * @returns {Promise<void>} - A promise that resolves when the response has been sent.
+ * 
+ * @throws {express.Response} 400 - If validation fails or required fields are missing.
+ * @throws {express.Response} 500 - If an error occurs while adding the station to the database.
+ */
+app.post('/mark-duplicate', upload.none(), [
+  body('url').trim().isURL().withMessage('Invalid URL')
+], (req, res) => markDuplicate(db, req, res));
 
 /**
  * An endpoint for audio stream playback error callback
