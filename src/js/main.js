@@ -348,17 +348,43 @@ function addPopupListeners(popup, body, backdrop) {
 }
 
 /**
+ * opens the stations homepage if present
+ * 
+ * @param {String} homepage 
+ * 
+ * @returns {void}
+ */
+function openStationHomepage(homepage) {
+  if (homepage === 'Unknown') {
+    new Toast('No homepage header', 3);
+    return;
+  }
+  
+  try {
+    if (!(homepage.startsWith('https://') || homepage.startsWith('http://'))) {
+      homepage = 'http://' + homepage;
+    }
+    const url = new URL(homepage, document.baseURI);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw new Error('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
+    }
+    window.open(url.toString());
+  } catch(error) {
+    new Toast('Error opening homepage');
+    console.log(homepage);
+    console.error('error validating url:', error);
+  }
+}
+
+/**
  * opens a context menu at the click location
  * 
  * @param {Event} ev 
  */
 async function contextMenu(ev) {
   ev.preventDefault();
-
   const el = ev.target;
-  
   if (!el.dataset.name) return;
-  
   const buttonData = [
     {
       icon: {
@@ -366,23 +392,16 @@ async function contextMenu(ev) {
         d: 'M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z'
       },
       text : 'homepage',
-      title: 'navigate to the homepage',
-      func: _ => {
-        if (el.dataset.homepage === 'Unknown') {
-          new Toast('No homepage header', 3);
-          return;
-        }
-        const homepage = el.dataset.homepage
-        window.open(homepage);
-      }
+      title: `navigate to the ${el.dataset.homepage}`,
+      func: _ => openStationHomepage(el.dataset.homepage)
     }
   ];
   const body = document.querySelector('body');
   const buttons = buttonData.map(contextMenuItem);
   const elementHeight = 40;
   const popupHeight = elementHeight * buttonData.length;
-  const X = ev.pageX;
-  const Y = ev.pageY;
+  const X = ev.pageX || ev.touches[0].pageX;
+  const Y = ev.pageY || ev.touches[0].pageY;
   const popup = document.createElement('ul');
   const backdrop = document.createElement('div');
 
@@ -570,6 +589,13 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
   li.dataset.icon = icon;
   li.dataset.homepage = homepage;
   li.addEventListener('contextmenu', contextMenu);
+  let pressTimer = 0;
+  li.addEventListener('touchstart', ev => {
+    pressTimer = setTimeout(_ => contextMenu(ev), 500);
+  });
+  li.addEventListener('touchend', _ => {
+    clearTimeout(pressTimer);
+  });
   li.append(span, div, ...buttons);
   return li;
 }
