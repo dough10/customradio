@@ -377,6 +377,30 @@ function openStationHomepage(homepage) {
 }
 
 /**
+ * marks a station as a duplicate in database for manual review
+ * 
+ * @param {String} url 
+ */
+async function markDuplicate(url) {
+  try {
+    const formBody = new URLSearchParams({
+      url
+    }).toString();
+    const response = await fetch('/mark-duplicate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formBody,
+    });
+    const result = await response.json();
+    new Toast(result.message, 1.5);
+  } catch (err) {
+    console.error('error reporting stream issue:', err);
+  }
+} 
+
+/**
  * opens a context menu at the click location
  * 
  * @param {Event} ev 
@@ -387,6 +411,14 @@ async function contextMenu(ev) {
   if (!el.dataset.name) return;
   const buttonData = [
     {
+      icon: {
+        viewbox: '0 -960 960 960',
+        d: 'M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z'
+      },
+      text: 'mark duplicate',
+      title: 'mark station duplicate',
+      func:  _ => markDuplicate(el.dataset.url)
+    }, {
       icon: {
         viewbox: '0 -960 960 960',
         d: 'M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z'
