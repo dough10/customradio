@@ -282,6 +282,10 @@ ul {
   justify-content: center;
 }
 
+.context-menu>li:last-child {
+  border-bottom: none;
+}
+
 .context-menu>li>svg {
   height: 24px;
   width: 24px;
