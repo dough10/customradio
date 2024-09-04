@@ -319,7 +319,7 @@ function placeMenu(menu, X, Y, popupHeight) {
     menu.style.top = `${Y}px`;
   }
   if (X > wWidth) {
-    menu.style.left = `${X - 185}px`;
+    menu.style.left = `${X - 250}px`;
   } else {
     menu.style.left = `${X + 10}px`;
   }
@@ -382,7 +382,7 @@ function openStationHomepage(homepage) {
  * @param {Event} ev 
  */
 async function contextMenu(ev) {
-  if (ev.pageX) ev.preventDefault();
+  if (ev.type === "contextmenu") ev.preventDefault();
   const el = ev.target;
   if (!el.dataset.name) return;
   const buttonData = [
@@ -570,6 +570,8 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
     }
   ];
 
+  let pressTimer = 0;
+
   const buttons = buttonData.map(createSmallButton);
 
   const span = document.createElement('span');
@@ -589,7 +591,6 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
   li.dataset.icon = icon;
   li.dataset.homepage = homepage;
   li.addEventListener('contextmenu', contextMenu);
-  let pressTimer = 0;
   li.addEventListener('touchstart', ev => {
     pressTimer = setTimeout(_ => contextMenu(ev), 500);
   }, { passive: true });

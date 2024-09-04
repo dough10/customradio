@@ -240,7 +240,7 @@ ul {
   position: fixed;
   transform: scale3d(0, 0, 0);
   transition: transform 100ms cubic-bezier(.33, .17, .85, 1.1);
-  min-width: 175px;
+  min-width: 240px;
   z-index: 2;
 }
 
