@@ -364,7 +364,7 @@ function openStationHomepage(homepage) {
     if (!(homepage.startsWith('https://') || homepage.startsWith('http://'))) {
       homepage = 'http://' + homepage;
     }
-    const url = new URL(homepage, document.baseURI);
+    const url = new URL(homepage);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') {
       throw new Error('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
     }
