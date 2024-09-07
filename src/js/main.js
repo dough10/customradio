@@ -1022,6 +1022,10 @@ function updateFound(worker) {
 
 /**
  * sets max-width of the playing station name element
+ * 
+ * quote "anytime you are using js to fix css issues you are doing it wrong" - someone smarter than me
+ * I am doing it wrong
+ * this is easier and less code then making 100+ media querys to get the same behavior
  */
 function stationTitleWidth() {
   let maxWidth;
