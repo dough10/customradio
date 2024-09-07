@@ -126,9 +126,7 @@ class Toast {
       this._timer = false;
     }
     this.toast.addEventListener('transitionend', _ => {
-      if (this.toast) {
-        this.toast.remove();
-      }
+      if (this.toast) this.toast.remove();
     });
     requestAnimationFrame(_ => {
       this.toast.removeAttribute('opened');
