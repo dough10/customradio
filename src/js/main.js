@@ -1020,23 +1020,6 @@ function updateFound(worker) {
   newWorker.onstatechange = _ => updateInstalled(newWorker);
 }
 
-/**
- * sets max-width of the playing station name element
- * 
- * quote "anytime you are using js to fix css issues you are doing it wrong" - someone smarter than me
- * I am doing it wrong
- * this is easier and less code then making 100+ media querys to get the same behavior
- */
-function stationTitleWidth() {
-  let maxWidth;
-  if (window.innerWidth <= 767) {
-    maxWidth = window.innerWidth - (90 + 180);
-  } else {
-    maxWidth = window.innerWidth - ((90 + 180) + 200);
-  }
-  document.querySelector('#name').style.maxWidth = `${maxWidth}px`;
-}
-
 
 /**
  * window loaded
@@ -1139,8 +1122,6 @@ window.onload = async () => {
     }
   }, 500);
   // end matomo
-  stationTitleWidth();
-  window.addEventListener('resize', stationTitleWidth);
 };
 
 
