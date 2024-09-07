@@ -98,10 +98,7 @@ class Toast {
     lText.classList.add('yellow-text');
 
     const wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.justifyContent = 'space-between';
-    wrapper.style.alignItems = 'center';
-    wrapper.style.overflow = 'none';
+    wrapper.classList.add('toast-wrapper');
     wrapper.append(mText, lText);
     return wrapper;
   }
