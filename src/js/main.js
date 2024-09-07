@@ -602,6 +602,7 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
     }
   ];
 
+  let isScrolling = false;
   let pressTimer = 0;
 
   const buttons = buttonData.map(createSmallButton);
@@ -624,10 +625,16 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
   li.dataset.homepage = homepage;
   li.addEventListener('contextmenu', contextMenu);
   li.addEventListener('touchstart', ev => {
-    pressTimer = setTimeout(_ => contextMenu(ev), 500);
+    isScrolling = false;
+    pressTimer = setTimeout(_ => {
+      if (!isScrolling) contextMenu(ev);
+    }, 500);
   }, { passive: true });
   li.addEventListener('touchend', _ => {
     clearTimeout(pressTimer);
+  });
+  li.addEventListener('touchmove', () => {
+    isScrolling = true;
   });
   li.append(span, div, ...buttons);
   return li;
