@@ -394,5 +394,5 @@ app.listen(3000, async _ => {
   const pack = require('./package.json');
   log(`${pack.name} V:${pack.version}`);
   log('Online. o( ❛ᴗ❛ )o');
-  schedule.scheduleJob('0 0 * * *', _ => testStreams(db));
+  schedule.scheduleJob('0 0 * * 0', _ => testStreams(db));
 });
