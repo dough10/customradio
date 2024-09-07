@@ -517,36 +517,6 @@ ul {
   min-width: 62px;
 }
 
-@media screen and (max-width: 767px) {
-  #name {
-    max-width: var(--max-width-small);
-  }
-
-  #vol {
-    display: none;
-  }
-}
-
-@media screen and (max-width: 450px) {
-  #name {
-    max-width: var(--max-width-xsmall);
-  }
-
-  #bitrate {
-    display: none;
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .spin {
   animation: spin 1.5s linear infinite;
 }
@@ -788,7 +758,7 @@ input[type="range"]::-ms-fill-upper {
   cursor: pointer;
   overflow: visible;
   opacity: 0;
-  transition: all var(--animate-150, 150ms) cubic-bezier(.33,.17,.85,1.1);
+  transition: all var(--animate-150, 150ms) cubic-bezier(.33, .17, .85, 1.1);
   transform: translateY(80px) translate3d(0, 0, 0);
 }
 
@@ -896,30 +866,6 @@ input[type="range"]::-ms-fill-upper {
   transform: translateY(-70px) translateX(-50%);
 }
 
-@keyframes hide-it {
-  from {
-    display: block;
-    opacity: 1
-  }
-
-  to {
-    display: none;
-    opacity: 0;
-  }
-}
-
-@keyframes show-it {
-  from {
-    display: none;
-    opacity: 0;
-  }
-
-  to {
-    display: block;
-    opacity: 1
-  }
-}
-
 .alert {
   background: #323232;
   padding: 16px;
@@ -968,12 +914,6 @@ input[type="range"]::-ms-fill-upper {
   display: inline-block;
 }
 
-@media screen and (max-width: 600px) {
-  .alert {
-    display: inline-block;
-  }
-}
-
 .loading {
   margin: 0px auto;
   padding: 4px;
@@ -1013,6 +953,60 @@ input[type="range"]::-ms-fill-upper {
   animation-delay: 640ms;
 }
 
+@media screen and (max-width: 600px) {
+  .alert {
+    display: inline-block;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  #name {
+    max-width: var(--max-width-small);
+  }
+
+  #vol {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  #name {
+    max-width: var(--max-width-xsmall);
+  }
+
+  #bitrate {
+    display: none;
+  }
+
+  .toast-wrapper>div:first-child {
+    max-width: 180px;
+  }
+}
+
+@keyframes hide-it {
+  from {
+    display: block;
+    opacity: 1
+  }
+
+  to {
+    display: none;
+    opacity: 0;
+  }
+}
+
+@keyframes show-it {
+  from {
+    display: none;
+    opacity: 0;
+  }
+
+  to {
+    display: block;
+    opacity: 1
+  }
+}
+
 @keyframes dots {
   0% {
     transform: scale3d(0, 0, 0);
@@ -1024,5 +1018,15 @@ input[type="range"]::-ms-fill-upper {
 
   100% {
     transform: scale3d(0, 0, 0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }
