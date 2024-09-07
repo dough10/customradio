@@ -30,6 +30,9 @@
   --animate-500: 500ms;
   --animation-duration: 800ms;
   --animation-timing: linear(0 0%, 0 1.8%, 0.01 3.6%, 0.03 6.35%, 0.07 9.1%, 0.13 11.4%, 0.19 13.4%, 0.27 15%, 0.34 16.1%, 0.54 18.35%, 0.66 20.6%, 0.72 22.4%, 0.77 24.6%, 0.81 27.3%, 0.85 30.4%, 0.88 35.1%, 0.92 40.6%, 0.94 47.2%, 0.96 55%, 0.98 64%, 0.99 74.4%, 1 86.4%, 1 100%);
+  --max-width-large: calc(100vw - ((90px + 180px) + 200px));
+  --max-width-small: calc(100vw - (90px + 180px));
+  --max-width-xsmall: calc(100vw - (90px + 70px));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -492,6 +495,7 @@ ul {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  max-width: var(--max-width-large);
 }
 
 #bitrate {
@@ -513,18 +517,22 @@ ul {
   min-width: 62px;
 }
 
-@media screen and (max-width: 450px) {
+@media screen and (max-width: 767px) {
   #name {
-    max-width: 11.75em;
+    max-width: var(--max-width-small);
   }
 
-  #bitrate {
+  #vol {
     display: none;
   }
 }
 
-@media screen and (max-width: 767px) {
-  #vol {
+@media screen and (max-width: 450px) {
+  #name {
+    max-width: var(--max-width-xsmall);
+  }
+
+  #bitrate {
     display: none;
   }
 }
