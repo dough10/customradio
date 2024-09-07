@@ -1021,6 +1021,20 @@ function updateFound(worker) {
 }
 
 /**
+ * sets max-width of the playing station name element
+ */
+function stationTitleWidth() {
+  let maxWidth;
+  if (window.innerWidth <= 767) {
+    maxWidth = window.innerWidth - (90 + 180);
+  } else {
+    maxWidth = window.innerWidth - ((90 + 180) + 200);
+  }
+  document.querySelector('#name').style.maxWidth = `${maxWidth}px`;
+}
+
+
+/**
  * window loaded
  */
 window.onload = async () => {
@@ -1121,6 +1135,8 @@ window.onload = async () => {
     }
   }, 500);
   // end matomo
+  stationTitleWidth();
+  window.addEventListener('resize', stationTitleWidth);
 };
 
 
