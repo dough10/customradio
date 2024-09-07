@@ -494,7 +494,11 @@ async function playStream(ev) {
     player.src = url;
     player.load();
     await player.play();
+    if (el.dataset.homepage !== 'Unknown') {
+      new Toast(`Playing ${el.dataset.name}`, 3, el.dataset.homepage, 'homepage');
+    } else {
     new Toast(`Playing ${el.dataset.name}`, 3);
+    }
   } catch (error) {
     const str = `Error playing media: ${error.message}`;
     new Toast(str, 3);
