@@ -225,9 +225,9 @@ function toggleSelect(ev) {
   localStorage.setItem('selected', JSON.stringify(forStorage));
   setSelectedCount(all.length);
   if (el.hasAttribute('selected')) {
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', el.dataset.url || '']);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', el.dataset.url]);
   } else {
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Remove from file', el.dataset.url || '']);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Remove from file', el.dataset.url]);
   }
 }
 
