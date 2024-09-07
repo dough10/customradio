@@ -62,8 +62,7 @@ class Toast {
     }
     document.querySelector('body').append(this.toast);
     sleep(25).then(_ => requestAnimationFrame(_ => {
-      this.toast.style.opacity = 1;
-      this.toast.style.transform = 'translateY(0px)';
+      this.toast.toggleAttribute('opened');
     }));
   }
 
@@ -76,10 +75,6 @@ class Toast {
     const toast = document.createElement('div');
     toast.id = 'toast';
     toast.classList.add('toast');
-    toast.style.opacity = 0;
-    toast.style.transform = 'translateY(80px)';
-    toast.style.willChange = 'auto';
-    toast.style.transition = `all var(--animate-150, 150ms) cubic-bezier(.33,.17,.85,1.1)`;
     toast.addEventListener('transitionend', this._transitionEnd, true);
     toast.addEventListener('click', this._clicked, true);
     return toast;
@@ -139,8 +134,7 @@ class Toast {
       }
     });
     requestAnimationFrame(_ => {
-      this.toast.style.opacity = 0;
-      this.toast.style.transform = 'translateY(80px)';
+      this.toast.removeAttribute('opened');
     });
   }
 

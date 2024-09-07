@@ -779,7 +779,14 @@ input[type="range"]::-ms-fill-upper {
   min-width: 200px;
   cursor: pointer;
   overflow: visible;
-  transform: translate3d(0, 0, 0);
+  opacity: 0;
+  transition: all var(--animate-150, 150ms) cubic-bezier(.33,.17,.85,1.1);
+  transform: translateY(80px) translate3d(0, 0, 0);
+}
+
+.toast[opened] {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .player[playing]~.toast {
