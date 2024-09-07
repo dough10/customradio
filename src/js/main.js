@@ -625,10 +625,10 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
   }, { passive: true });
   li.addEventListener('touchend', _ => {
     clearTimeout(pressTimer);
-  });
+  }, { passive: true });
   li.addEventListener('touchmove', () => {
     isScrolling = true;
-  });
+  }, { passive: true });
   li.append(span, div, ...buttons);
   return li;
 }
