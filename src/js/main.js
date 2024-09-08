@@ -608,6 +608,7 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
   div.textContent = `${bitrate}kbps`;
   div.title = div.textContent;
 
+  const passive = { passive: true };
   const li = document.createElement('li');
   li.title = `${name}: ${genre}`;
   li.dataset.name = name;
@@ -622,13 +623,13 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
     pressTimer = setTimeout(_ => {
       if (!isScrolling) contextMenu(ev);
     }, 500);
-  }, { passive: true });
+  }, passive);
   li.addEventListener('touchend', _ => {
     clearTimeout(pressTimer);
-  }, { passive: true });
-  li.addEventListener('touchmove', () => {
+  }, passive);
+  li.addEventListener('touchmove', _ => {
     isScrolling = true;
-  }, { passive: true });
+  }, passive);
   li.append(span, div, ...buttons);
   return li;
 }
