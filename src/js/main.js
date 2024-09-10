@@ -1128,7 +1128,12 @@ window.onload = async () => {
   // end matomo
 
   await sleep(100);
-  document.querySelector('#greeting').showModal();
+  const greeting = document.querySelector('#greeting');
+  greeting.showModal();
+  greeting.addEventListener('transitionend', e => {
+    if (greeting.hasAttribute('open')) return;
+    greeting.remove();
+  });
 };
 
 
