@@ -719,10 +719,10 @@ async function filterChanged(ev) {
   try {
     countParent.style.display = 'none';
     loadingAnimation(container);
-    let data = JSON.parse(localStorage.getItem('selected'));
-    if (data && ev.loadLocal) {
+    let storedElements = JSON.parse(localStorage.getItem('selected'));
+    if (storedElements && ev.loadLocal) {
       const localFragment = document.createDocumentFragment();
-      const elements = data.map(createStationElement);
+      const elements = storedElements.map(createStationElement);
       elements.forEach(el => {
         el.toggleAttribute('selected');
         localFragment.append(el);
