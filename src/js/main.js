@@ -1021,6 +1021,18 @@ function updateFound(worker) {
   newWorker.onstatechange = _ => updateInstalled(newWorker);
 }
 
+/**
+ * service worker controller changed
+ * 
+ * @returns {void}
+ */
+let refreshing = false;
+function controllerChange() {
+  if (refreshing) return;
+  refreshing = true;
+  console.log('Controller has changed, reloading the page...');
+  window.location.reload(true);
+}
 
 /**
  * window loaded
@@ -1028,15 +1040,9 @@ function updateFound(worker) {
 window.onload = async () => {
   if ('serviceWorker' in navigator) {
     try {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        refreshing = true;
-        console.log('Controller has changed, reloading the page...');
-        window.location.reload(true);
-      });
+      navigator.serviceWorker.addEventListener('controllerchange', controllerChange);
       const worker = await navigator.serviceWorker.register('/worker.js', { scope: '/' });
       worker.onupdatefound = () => updateFound(worker);
-      let refreshing = false;
     } catch (error) {
       console.log('ServiceWorker registration failed: ', error);
     }
@@ -1072,9 +1078,6 @@ window.onload = async () => {
     top: 0,
     behavior: 'smooth'
   }));
-
-  await sleep(100);
-  document.querySelector('#greeting').showModal();
 
   const form = document.querySelector('#add-stream');
   form.addEventListener('submit', formSubmission);
@@ -1123,6 +1126,9 @@ window.onload = async () => {
     }
   }, 500);
   // end matomo
+
+  await sleep(100);
+  document.querySelector('#greeting').showModal();
 };
 
 
