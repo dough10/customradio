@@ -562,7 +562,10 @@ function createSmallButton({ icon, cssClass, func, title }) {
  * @param {Object} station - Object containing station details.
  * @param {String} station.name - The name of the station.
  * @param {String} station.url - The URL of the station.
- * @param {String} station.bitrate - The genre of the station.
+ * @param {String} station.bitrate - The bitrate of the station.
+ * @param {String} station.genre - the stations return genre header
+ * @param {Object} station.icon - object with icon svg properties
+ * @param {String} station.homepage - the url to the stations homepage
  * 
  * @returns {HTMLElement} li element
  */
