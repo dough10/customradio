@@ -1103,6 +1103,21 @@ window.onload = async () => {
     volumeElement.style.display = 'none';
   }
 
+  window.addEventListener('offline', _ => {
+    const playerElement = document.querySelector('.player');
+    if (playerElement.hasAttribute('playing')) {
+      new Toast('Disconnected: attempting reconnect', 1.5);
+    }
+  });
+
+  window.addEventListener('online', _ => {
+    const playerElement = document.querySelector('.player');
+    if (playerElement.hasAttribute('playing')) {
+      new Toast('Reconnected: attempting to restart play', 1.5);
+      player.play();
+    }
+  });
+
     // matomo 
   const alert = document.querySelector('#alert');
   document.querySelector('.alert>.yellow-text').addEventListener('click', async _ => {
