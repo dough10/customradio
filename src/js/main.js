@@ -266,7 +266,7 @@ async function dlTxt() {
   document.body.removeChild(link);
 
   URL.revokeObjectURL(link.href);
-  if (typeof _paq !== 'undefined') _paq.push(['trackLink', 'Download', 'radio.txt']);
+  if (typeof _paq !== 'undefined') _paq.push(['trackLink', 'Download', filename]);
 }
 
 /**
