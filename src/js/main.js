@@ -1015,9 +1015,7 @@ async function canChangeVol() {
 /**
  * An update was found to the service worker cache
  * 
- * @param {Object} worker 
- * 
- * @returns {void}
+ * @param {Object} worker
  */
 function updateFound(worker) {
   const newWorker = worker.installing;
