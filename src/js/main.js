@@ -1118,7 +1118,7 @@ window.onload = async () => {
     }
   });
 
-    // matomo 
+  // matomo 
   const alert = document.querySelector('#alert');
   document.querySelector('.alert>.yellow-text').addEventListener('click', async _ => {
     localStorage.setItem('dismissed', '1');
