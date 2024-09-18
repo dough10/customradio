@@ -4,15 +4,14 @@ const fs = require('fs');
 const log = require('../util/log.js');
 
 module.exports = (req, res) => {
-  fs.stat('index.js', (error, stats) => {
+  fs.stat('../index.js', (error, stats) => {
     if (error) {
-      console.error(error);
+      console.error('Failed getting sitemap:', error.message);
       res.status(500).json({
         message: 'Failed getting sitemap.xml'
       });
     }
     log(`${req.ip} -> /sitemap.xml`);
-    const date = stats.mtime.toISOString();
     const sitemapObject = {
       urlset: {
         $: {
@@ -22,7 +21,7 @@ module.exports = (req, res) => {
         },
         url: {
           loc: "https://customradio.dough10.me/",
-          lastmod: date
+          lastmod: stats.mtime.toISOString()
         }
       }
     };
