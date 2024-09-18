@@ -84,17 +84,8 @@ module.exports = {
           from: './src/android-chrome-192x192.png',
           to: 'android-chrome-192x192.png'
         }, {
-          from: './src/robots.txt',
-          to: 'robots.txt'
-        }, {
           from: './src/screenshots',
           to: 'screenshots'
-        }, {
-          from: './src/sitemap.xml',
-          to: 'sitemap.xml'
-        }, {
-          from: './src/.well-known',
-          to: '.well-known'
         }
       ],
     }),

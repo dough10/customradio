@@ -20,7 +20,8 @@ const streamIssue = require('./routes/stream-issue.js');
 const cspReport = require('./routes/csp-report.js');
 const DbConnector = require('./util/dbConnector.js');
 const markDuplicate = require('./routes/markDuplicate.js');
-
+const sitemap = require('./routes/sitemap.js');
+const robots = require('./routes/robots.js');
 
 const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 
@@ -120,6 +121,23 @@ function apiKeyMiddleware(req, res, next) {
   res.status(403).json({ error: 'Forbidden: Invalid Access Token' });
 }
 
+/** 
+ * robots
+ */
+app.get('/robots.txt', robots);
+
+/**
+ * sitemap
+ */
+app.get('/sitemap.xml', sitemap);
+
+/**
+ * assetLinks
+ */
+app.get('/.well-known/assetLinks.json', (req,res) => {
+  log(`${req.ip} -> /.well-known/assetLinks.json`);
+  res.send({});
+});
 
 /**
  * GET /metrics
@@ -229,9 +247,9 @@ app.post('/stream-issue', upload.none(), [
  */
 app.get('/stations', [
   query('genres')
-  .trim()
-  .escape()
-  .isString().withMessage('Genres must be a string'),
+    .trim()
+    .escape()
+    .isString().withMessage('Genres must be a string'),
 ], (req, res) => getStations(db, redis, req, res));
 
 /**
