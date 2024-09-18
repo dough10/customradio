@@ -42,6 +42,7 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 - **node-schedule**: *^2.1.1*
 - **prom-client**: *^15.1.3*
 - **validator**: *^13.12.0*
+- **xml2js**: *^0.6.2*
 
 ### NPM Dev Dependencies
 
