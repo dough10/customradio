@@ -27,6 +27,7 @@ module.exports = (req, res) => {
     };
     const builder = new xml2js.Builder();
     const xml = builder.buildObject(sitemapObject);
+    res.set('Content-Type', 'application/xml');
     res.send(xml);
   });
 };
