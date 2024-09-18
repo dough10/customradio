@@ -136,7 +136,7 @@ app.get('/sitemap.xml', sitemap);
  */
 app.get('/.well-known/assetLinks.json', (req,res) => {
   log(`${req.ip} -> /.well-known/assetLinks.json`);
-  res.send({});
+  res.send([]);
 });
 
 /**
