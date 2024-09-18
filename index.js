@@ -344,14 +344,11 @@ app.post('/add', upload.none(), [
  * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 204 No Content
  */
-app.post('/csp-report', (req, res, next) => {
-  console.log(req.body); // Log the incoming request body
-  next();
-}, apiKeyMiddleware, upload.none(), [
+app.post('/csp-report', apiKeyMiddleware, upload.none(), [
   body('csp-report').isObject().withMessage('csp-report must be an object'),
   body('csp-report.document-uri').isURL().withMessage('document-uri must be a valid URL'),
   body('csp-report.referrer').optional().isURL().withMessage('referrer must be a valid URL').bail().custom(value => {
-    if (value === '') return true; // Allow empty string
+    if (value === '') return true;
     return true;
   }),
   body('csp-report.blocked-uri').not().equals('inline').isURL().withMessage('blocked-uri must be a valid URL'),
