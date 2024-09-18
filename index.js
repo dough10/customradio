@@ -382,7 +382,17 @@ app.post('/add', upload.none(), [
 app.post('/csp-report', apiKeyMiddleware, upload.none(), [
   body('csp-report').isObject().withMessage('csp-report must be an object'),
   body('csp-report.document-uri').isURL().withMessage('document-uri must be a valid URL'),
-  body('csp-report.blocked-uri').not().equals('inline').isURL().withMessage('blocked-uri must be a valid URL'),
+  body('csp-report.referrer').optional().custom(value => {
+    if (value === '' || value === null) return true; // Allow empty or null
+    return isURL(value); // Validate URL if not empty
+  }).withMessage('referrer must be a valid URL'),
+  body('csp-report.blocked-uri').custom(value => {
+    // Allow "inline" as a valid value or validate as a URL
+    if (value === 'inline' || isURL(value)) {
+      return true;
+    }
+    throw new Error('blocked-uri must be a valid URL or "inline"');
+  }).withMessage('blocked-uri must be a valid URL or "inline"'),
   body('csp-report.violated-directive').isString().withMessage('violated-directive must be a string'),
   body('csp-report.original-policy').isString().withMessage('original-policy must be a string'),
   body('csp-report.source-file').optional().isURL().withMessage('source-file must be a valid URL'),
