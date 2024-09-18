@@ -70,7 +70,6 @@ app.use(express.urlencoded({
 app.use(express.json());
 app.set('trust proxy', true);
 app.disable('x-powered-by');
-app.use(bodyParser.json());
 
 /**
  * serves static files
