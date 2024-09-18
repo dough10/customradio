@@ -58,11 +58,11 @@ module.exports = async (req, res) => {
   const connector = new Connector(process.env.DB_HOST || 'mongodb://127.0.0.1:27017', 'csp-report');
 
   try {
-    const cspReport = req.body;
+    const cspReport = req.body['csp-report'];
     const db = await connector.connect();
-    log(`${req.ip} -> /csp-report ${JSON.stringify(cspReport['csp-report'])}`);
+    log(`${req.ip} -> /csp-report ${JSON.stringify(cspReport)}`);
     cspReport.time = new Date().getTime();
-    db.insertOne(cspReport);
+    await db.insertOne(cspReport);
     await connector.disconnect();
     res.status(204).send();
   } catch(error) {
