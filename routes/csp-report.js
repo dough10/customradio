@@ -4,6 +4,7 @@ const {validationResult} = require('express-validator');
 const Connector = require('../util/dbConnector.js');
 const log = require('../util/log.js');
 
+const connector = new Connector(process.env.DB_HOST || 'mongodb://127.0.0.1:27017', 'csp-report');
 
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports
@@ -54,8 +55,6 @@ module.exports = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
-  const connector = new Connector(process.env.DB_HOST || 'mongodb://127.0.0.1:27017', 'csp-report');
 
   try {
     const cspReport = req.body['csp-report'];
