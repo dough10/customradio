@@ -9,6 +9,7 @@ const upload = multer();
 const Redis = require('ioredis');
 const promClient = require('prom-client');
 const url = require('url');
+const bodyParser = require('body-parser');
 require('dotenv').config();
 
 
@@ -69,6 +70,7 @@ app.use(express.urlencoded({
 app.use(express.json());
 app.set('trust proxy', true);
 app.disable('x-powered-by');
+app.use(bodyParser.json());
 
 /**
  * serves static files
