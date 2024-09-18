@@ -4,7 +4,7 @@ const fs = require('fs');
 const log = require('../util/log.js');
 
 module.exports = (req, res) => {
-  fs.stat('../index.js', (error, stats) => {
+  fs.stat('index.js', (error, stats) => {
     if (error) {
       console.error('Failed getting sitemap:', error.message);
       res.status(500).json({
@@ -20,7 +20,7 @@ module.exports = (req, res) => {
           "xsi:schemaLocation": "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
         },
         url: {
-          loc: "https://customradio.dough10.me/",
+          loc: `${req.protocol}://${req.get('host')}/`,
           lastmod: stats.mtime.toISOString()
         }
       }
