@@ -1,4 +1,5 @@
 const express = require('express');
+const validator = require('validator');
 const { query, body } = require('express-validator');
 const compression = require('compression');
 const path = require('path');
@@ -383,12 +384,11 @@ app.post('/csp-report', apiKeyMiddleware, upload.none(), [
   body('csp-report').isObject().withMessage('csp-report must be an object'),
   body('csp-report.document-uri').isURL().withMessage('document-uri must be a valid URL'),
   body('csp-report.referrer').optional().custom(value => {
-    if (value === '' || value === null) return true; // Allow empty or null
-    return isURL(value); // Validate URL if not empty
+    if (value === '' || value === null) return true;
+    return validator.isURL(value);
   }).withMessage('referrer must be a valid URL'),
   body('csp-report.blocked-uri').custom(value => {
-    // Allow "inline" as a valid value or validate as a URL
-    if (value === 'inline' || isURL(value)) {
+    if (value === 'inline' || validator.isURL(value)) {
       return true;
     }
     throw new Error('blocked-uri must be a valid URL or "inline"');
