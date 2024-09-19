@@ -25,4 +25,4 @@ COPY --from=build /usr/src/app/node_modules ./node_modules
 
 EXPOSE 3000/tcp
 
-CMD ["dumb-init", "node", "server.js"]
+CMD ["dumb-init", "node", "index.js"]
