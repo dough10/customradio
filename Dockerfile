@@ -3,12 +3,17 @@ FROM node:lts-slim AS build
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci --only=production
+# RUN npm install
 
-COPY . .
+COPY --chown=node:node . .
 RUN npm run build
 
 FROM node:lts-slim
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
+
+ENV NODE_ENV production
+ENV TZ="America/Chicago"
 
 WORKDIR /usr/src/app
 
@@ -19,8 +24,6 @@ COPY --from=build /usr/src/app/util ./util
 COPY --from=build /usr/src/app/routes ./routes
 COPY --from=build /usr/src/app/node_modules ./node_modules
 
-ENV TZ="America/Chicago"
-
 EXPOSE 3000/tcp
 
-CMD ["node", "index.js"]
+CMD ["dumb-init", "node", "server.js"]
