@@ -3,8 +3,7 @@ FROM node:lts-slim AS build
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-RUN npm ci --only=production
-# RUN npm install
+RUN npm install
 
 COPY --chown=node:node . .
 RUN npm run build
