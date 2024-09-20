@@ -5,7 +5,7 @@ module.exports = (req, res) => {
     `User-agent: *`,
     `Allow: /`,
     `Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml`
-  ]
+  ];
   const joinedStrings = strings.join('\n');
   log(`${req.ip} -> /robots.txt`);
   res.type('text/plain');
