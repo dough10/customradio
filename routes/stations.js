@@ -1,9 +1,9 @@
 const { validationResult } = require('express-validator');
+const he = require('he');
 
 const usedTypes = require("../util/usedTypes.js");
 const log = require('../util/log.js');
 const queryString = require('../util/queryString.js');
-
 
 /**
  * Handles the request to fetch and return a list of audio stations based on query parameters.
@@ -45,7 +45,7 @@ module.exports = async (db, redis, req, res) => {
     });
   }
   
-  const genres = req.query.genres.split(',').map(genre => genre.toLowerCase());
+  const genres = req.query.genres.split(',').map(genre => he.decode(genre).toLowerCase());
 
   const genreString = genres.join(',');
 

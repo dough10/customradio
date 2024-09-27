@@ -703,7 +703,7 @@ function lazyLoadOnScroll(list, container) {
  * @returns {String}
  */
 function queryString(value) {
-  return (value.length === 0) ? '' : `?genres=${value}`;
+  return (value.length === 0) ? '' : `?genres=${encodeURIComponent(value)}`;
 }
 
 /**
@@ -1162,7 +1162,7 @@ window.onload = async () => {
     "Country",
     "Classical",
     "Disco",
-    "Drum and Bass",
+    "Drum & Bass",
     "Funk",
     "House",
     "Jazz",
