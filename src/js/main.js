@@ -1036,6 +1036,19 @@ function controllerChange() {
 }
 
 /**
+ * creates a datalist element
+ * 
+ * @param {String} str 
+ * 
+ * @returns {HTMLElement}
+ */
+function createOption(str) {
+  const option = document.createElement('option');
+  option.value = str;
+  return option;
+}
+
+/**
  * window loaded
  */
 window.onload = async () => {
@@ -1142,6 +1155,23 @@ window.onload = async () => {
     }
   }, 500);
   // end matomo
+
+  const options = [
+    "Ambient",
+    "Blues",
+    "Country",
+    "Classical",
+    "Disco",
+    "Drum & Bass",
+    "Funk",
+    "House",
+    "Jazz",
+    "Pop",
+    "Rock",
+    "Talk",
+    "Various"
+  ].map(createOption);
+  document.querySelector('#genres').append(...options);
 
   await sleep(100);
   const greeting = document.querySelector('#greeting');
