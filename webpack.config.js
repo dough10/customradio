@@ -61,13 +61,13 @@ module.exports = {
       patterns: [
         {
           from: './src/worker.js',
-          to: 'worker.js'
+          to: '[name][ext]'
         }, {
           from: './src/customradio.webmanifest',
-          to: 'customradio.webmanifest'
+          to: '[name][ext]'
         }, {
           from: './src/favicon.ico',
-          to: 'favicon.ico'
+          to: '[name][ext]'
         }, {
           from: './src/*.png',
           to: '[name][ext]'
