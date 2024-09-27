@@ -1162,7 +1162,7 @@ window.onload = async () => {
     "Country",
     "Classical",
     "Disco",
-    "Drum & Bass",
+    "Drum and Bass",
     "Funk",
     "House",
     "Jazz",
