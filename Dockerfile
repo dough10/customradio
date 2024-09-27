@@ -11,7 +11,7 @@ RUN npm run build
 FROM node:lts-slim
 RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 ENV TZ="America/Chicago"
 
 WORKDIR /usr/src/app
