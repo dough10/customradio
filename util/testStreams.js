@@ -7,7 +7,7 @@ const log = require('./log.js');
 const isLiveStream = require('./isLiveStream.js');
 const rmRef = require('./rmRef.js');
 const dbStatistics = require('./dbStatistics.js');
-const saveStats = require('./saveToCollection.js');
+const saveStats = require('./saveStats.js');
 
 
 /**
