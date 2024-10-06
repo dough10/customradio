@@ -50,8 +50,8 @@ module.exports = async (db, redis, req, res) => {
 
   const genreString = genres.join(',');
 
-  if (genreString) {
-    // await saveToCollection(, 'genres');
+  if (genres.length) {
+    await saveToCollection(genres, 'genres');
   }
 
   const cacheKey = `stations_${genreString}`;
