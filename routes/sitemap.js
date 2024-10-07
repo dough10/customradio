@@ -11,7 +11,7 @@ module.exports = (req, res) => {
         message: 'Failed getting sitemap.xml'
       });
     }
-    log(`${req.ip} -> /sitemap.xml`);
+    log(`${req.ip} -> ${req.originalUrl}`);
     const sitemapObject = {
       urlset: {
         $: {
