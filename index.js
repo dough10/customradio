@@ -24,6 +24,7 @@ const DbConnector = require('./util/dbConnector.js');
 const markDuplicate = require('./routes/markDuplicate.js');
 const sitemap = require('./routes/sitemap.js');
 const robots = require('./routes/robots.js');
+const topGenres = require('./routes/topGenres.js');
 
 const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 
@@ -246,6 +247,32 @@ app.post('/stream-issue', upload.none(), [
   body('url').trim().isURL().withMessage('Invalid URL'),
   body('error').trim().escape().isString().withMessage('Error meessage must be a string')
 ], (req, res) => streamIssue(db, req, res));
+
+/**
+ * Handles the request to retrieve the top genres from the database.
+ *
+ * This function connects to a MongoDB database, aggregates the genres,
+ * and returns the top 10 genres sorted alphabetically.
+ *
+ * @async
+ * @function
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @returns {Promise<void>} Returns a promise that resolves when the response has been sent.
+ * 
+ * @throws {Error} Throws an error if there is an issue with the database connection
+ *                 or during the aggregation process. The response will be sent with a 500 status code
+ *                 and an error message.
+ *
+ * @example
+ * // Example of calling the function
+ * const express = require('express');
+ * const app = express();
+ * const getTopGenres = require('./path/to/your/function');
+ * 
+ * app.get('/topGenres', getTopGenres);
+ */
+app.get('/topGenres', topGenres)
 
 /**
  * Handles GET requests to the '/stations' endpoint.
