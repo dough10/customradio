@@ -272,7 +272,7 @@ app.post('/stream-issue', upload.none(), [
  * 
  * app.get('/topGenres', getTopGenres);
  */
-app.get('/topGenres', topGenres)
+app.get('/topGenres', (req, res) => topGenres(redis, req, res))
 
 /**
  * Handles GET requests to the '/stations' endpoint.
