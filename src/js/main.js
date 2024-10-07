@@ -744,12 +744,12 @@ async function filterChanged(ev) {
     const list = stations.filter(station => !selectedUrls.has(station.url));
     const fragment = document.createDocumentFragment();
     fragment.append(...selectedElements);
-    container.innerHTML = '';
     container.scrollTop = 0;
-    container.append(fragment);
+    container.replaceChildren(fragment);
     lazyLoadOnScroll(list, container);
     stationCount.textContent = stations.length;
     countParent.style.removeProperty('display');
+    await loadGenres();
     if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', ev.target.value || '']);
   } catch (error) {
     const loadingEl = document.querySelector('.loading');
@@ -1049,6 +1049,19 @@ function createOption(str) {
 }
 
 /**
+ * loads genres into a datalist element
+ */
+async function loadGenres() {
+  const res = await fetch(`${window.location.origin}/topGenres`);
+  if (res.status !== 200) {
+    console.error('failed loading genres');
+  }
+  const jsonData = await res.json()
+  const options = jsonData.map(createOption);
+  document.querySelector('#genres').replaceChildren(...options);
+}
+
+/**
  * window loaded
  */
 window.onload = async () => {
@@ -1155,23 +1168,6 @@ window.onload = async () => {
     }
   }, 500);
   // end matomo
-
-  const options = [
-    "Ambient",
-    "Blues",
-    "Country",
-    "Classical",
-    "Disco",
-    "Drum & Bass",
-    "Funk",
-    "House",
-    "Jazz",
-    "Pop",
-    "Rock",
-    "Talk",
-    "Various"
-  ].map(createOption);
-  document.querySelector('#genres').append(...options);
 
   await sleep(100);
   const greeting = document.querySelector('#greeting');
