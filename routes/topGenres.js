@@ -53,7 +53,7 @@ module.exports = async (redis, req, res) => {
     const topGenres = await db.aggregate([
       {
         $group: {
-          _id: "$genre",
+          _id: "$genres",
           count: { $sum: 1 }
         }
       },
@@ -66,7 +66,7 @@ module.exports = async (redis, req, res) => {
     ]).toArray();
     log(`${req.ip} -> /topGenres`);
     console.log(topGenres);
-    const genreObj = topGenres.map(obj => obj.genre).sort((a, b) => a.localeCompare(b));
+    const genreObj = topGenres.map(obj => obj._id).sort((a, b) => a.localeCompare(b));
     res.json(genreObj);
     await redis.set(cacheKey, JSON.stringify(genreObj), 'EX', 3600);
   } catch(error) {
