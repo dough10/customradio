@@ -716,6 +716,7 @@ function queryString(value) {
  * @returns {void}
  */
 async function filterChanged(ev) {
+  ev.target.blur();
   const container = document.querySelector('#stations');
   const stationCount = document.querySelector('#station-count');
   const countParent = stationCount.parentElement;
