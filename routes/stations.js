@@ -45,31 +45,34 @@ module.exports = async (db, redis, req, res) => {
       errors: errors.array()
     });
   }
-  
+
   const genres = req.query.genres.split(',').map(genre => he.decode(genre).toLowerCase());
 
   const genreString = genres.join(',');
 
   if (genreString) {
-    await saveToCollection({genres: genreString}, 'genres');
+    await saveToCollection({ 
+      genres: genreString, 
+      time: new Date().getTime() 
+    }, 'genres');
   }
 
   const cacheKey = `stations_${genreString}`;
 
   try {
     const cachedStations = await redis.get(cacheKey);
-    
+
     if (cachedStations) {
       const stations = JSON.parse(cachedStations);
       res.set('content-type', 'application/json');
       log(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} cached stations returned`);
       return res.send(stations);
     }
-  } catch(error) {
+  } catch (error) {
     console.error('(╬ Ò﹏Ó) Error fetching cached stations:', error);
     return res.status(500).json({
       error: 'Failed to fetch cached stations (╬ Ò﹏Ó)'
-    });  
+    });
   }
 
   try {
