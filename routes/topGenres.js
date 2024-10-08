@@ -34,6 +34,11 @@ module.exports = async (redis, req, res) => {
   try{
     const topGenres = await db.aggregate([
       {
+        $match: {
+          time: { $gt: new Date().getTime() - 1296000000 }
+        }
+      },
+      {
         $group: {
           _id: "$genres",
           count: { $sum: 1 }
