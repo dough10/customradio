@@ -167,7 +167,7 @@ app.get('/robots.txt', robots);
 /**
  * sitemap
  */
-app.get(['/sitemap.xml', '/sitemaps.xml'], sitemap);
+app.get(['/sitemap.xml', '/sitemaps.xml', '/sitemap_index.xml'], sitemap);
 
 /**
  * assetLinks
