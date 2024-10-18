@@ -638,6 +638,15 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
 }
 
 /**
+ * calculate how many station elements can fit in the current browser window height
+ * 
+ * @returns {Number} number of elements that will fit in browser window height
+ */
+function getPullCount() {
+  return Math.round(window.innerHeight / 58);
+}
+
+/**
  * load more stations to the UI when user scrolls to end of loaded content
  * 
  * @function
@@ -649,7 +658,7 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
  */
 function lazyLoadOnScroll(list, container) {
   let ndx = 0;
-  let pullNumber = Math.round(window.innerHeight / 58);
+  let pullNumber = getPullCount();
   let loading = false;
   let lastTop = 0;
 
@@ -668,7 +677,7 @@ function lazyLoadOnScroll(list, container) {
   }
 
   window.addEventListener('resize', _ => {
-    const adjusted = Math.round(window.innerHeight / 58);
+    const adjusted = getPullCount();
     if (adjusted > pullNumber) {
       pullNumber = adjusted;
       load();
