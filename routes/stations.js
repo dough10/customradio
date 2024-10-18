@@ -55,6 +55,12 @@ module.exports = async (db, redis, req, res) => {
       genres: genreString, 
       time: new Date().getTime() 
     }, 'genres');
+    try {
+      const removed = await redis.del('genres');
+      if (!removed) log('Failed deleting genres cache');
+    } catch(error) {
+      log(`error deleting genres cache: ${error.message}`);
+    }
   }
 
   const cacheKey = `stations_${genreString}`;

@@ -28,6 +28,24 @@ const DbConnector = require('../util/dbConnector.js');
  * app.get('/topGenres', getTopGenres);
  */
 module.exports = async (redis, req, res) => {
+  const cacheKey = `genres`;
+
+  try {
+    const genresCache = await redis.get(cacheKey);
+
+    if (genresCache) {
+      const cachedGenres = JSON.parse(genresCache);
+      res.set('content-type', 'application/json');
+      return res.send(cachedGenres);
+    }
+  } catch (error) {
+    console.error('(╬ Ò﹏Ó) Error fetching cached genres:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch cached genres (╬ Ò﹏Ó)'
+    });
+  }
+
+
   const url = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
   const connector = new DbConnector(url, 'genres');
   const db = await connector.connect();
@@ -53,6 +71,7 @@ module.exports = async (redis, req, res) => {
     ]).toArray();
     const genreObj = topGenres.map(obj => obj._id).sort((a, b) => a.localeCompare(b));
     res.json(genreObj);
+    await redis.set(cacheKey, JSON.stringify(genreObj), 'EX', 3600);
   } catch(error) {
     console.error('Error getting genres', error.message);
     res.status(500).json({
