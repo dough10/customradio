@@ -5,6 +5,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlCriticalWebpackPlugin = require('html-critical-webpack-plugin');
 
 module.exports = {
   mode: 'production',
@@ -57,24 +58,41 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: 'styles.min.css',
     }),
+    new HtmlCriticalWebpackPlugin({
+      base: path.resolve(__dirname, 'html'),
+      src: 'index.html',
+      dest: 'index.html',
+      inline: true,
+      minify: true,
+      extract: true,
+      width: 1280,
+      height: 800,
+      penthouse: {
+        blockJSRequests: false,
+      },
+    }),
     new CopyWebpackPlugin({
       patterns: [
         {
           from: './src/worker.js',
-          to: '[name][ext]'
-        }, {
+          to: '[name][ext]',
+        },
+        {
           from: './src/customradio.webmanifest',
-          to: '[name][ext]'
-        }, {
+          to: '[name][ext]',
+        },
+        {
           from: './src/favicon.ico',
-          to: '[name][ext]'
-        }, {
+          to: '[name][ext]',
+        },
+        {
           from: './src/*.png',
-          to: '[name][ext]'
-        }, {
+          to: '[name][ext]',
+        },
+        {
           from: './src/screenshots',
-          to: 'screenshots'
-        }
+          to: 'screenshots',
+        },
       ],
     }),
   ],
