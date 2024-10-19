@@ -57,7 +57,7 @@ module.exports = async (db, redis, req, res) => {
     }, 'genres');
     try {
       const removed = await redis.del('genres');
-      if (!removed) log('Failed deleting genres cache');
+      if (removed) log('genres cache deleted');
     } catch(error) {
       log(`error deleting genres cache: ${error.message}`);
     }
