@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.10.2';
+const CACHE_VERSION = '1.10.3';
 const urlsToCache = [
   '/',
   '/styles.min.css',
