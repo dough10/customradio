@@ -265,8 +265,8 @@ async function dlTxt() {
   link.click();
   document.body.removeChild(link);
 
-  URL.revokeObjectURL(link.href);
   if (typeof _paq !== 'undefined') _paq.push(['trackLink', link.href, 'download']);
+  URL.revokeObjectURL(link.href);
 }
 
 /**
