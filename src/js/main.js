@@ -716,6 +716,16 @@ function queryString(value) {
 }
 
 /**
+ * lists genres currently in the genre filter datalist element
+ * 
+ * @returns {Array}
+ */
+function currentGenres() {
+  const options = Array.from(document.querySelector('#genres').querySelectorAll('option'));
+  return options.map(element => element.value);
+}
+
+/**
  * filter db request by user entered genres
  * 
  * @function
@@ -733,15 +743,18 @@ async function filterChanged(ev) {
     countParent.style.display = 'none';
     loadingAnimation(container);
     let storedElements = JSON.parse(localStorage.getItem('selected'));
-    if (storedElements && ev.loadLocal) {
-      const localFragment = document.createDocumentFragment();
-      const elements = storedElements.map(createStationElement);
-      elements.forEach(el => {
-        el.toggleAttribute('selected');
-        localFragment.append(el);
-      });
-      setSelectedCount(elements.length);
-      container.append(localFragment);
+    if (ev.loadLocal) {
+      if (storedElements) {
+        const localFragment = document.createDocumentFragment();
+        const elements = storedElements.map(createStationElement);
+        elements.forEach(el => {
+          el.toggleAttribute('selected');
+          localFragment.append(el);
+        });
+        setSelectedCount(elements.length);
+        container.append(localFragment);
+      }
+      await loadGenres();
     }
     const res = await fetch(`${window.location.origin}/stations${queryString(ev.target.value)}`);
     if (res.status !== 200) {
@@ -759,7 +772,9 @@ async function filterChanged(ev) {
     lazyLoadOnScroll(list, container);
     stationCount.textContent = stations.length;
     countParent.style.removeProperty('display');
-    await loadGenres();
+    if (ev.target.value.length && !currentGenres().includes(ev.target.value)) {
+      await loadGenres();
+    }
     if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', ev.target.value || '']);
   } catch (error) {
     const loadingEl = document.querySelector('.loading');
