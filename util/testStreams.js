@@ -83,8 +83,8 @@ async function testStreams(db, trackProgress) {
   let total = 0;
   const length = stations.length;
   for (const station of stations) {
-    if (trackProgress) log(`${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
     if (!station) continue;
+    if (trackProgress) log(`${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
     const filter = {
       _id: new ObjectId(station._id)
     };
@@ -108,7 +108,8 @@ async function testStreams(db, trackProgress) {
         online: stream.isLive,
         'content-type': stream.content,
         bitrate: stream.bitrate || 'Unknown',
-        homepage: stream.icyurl || 'Unknown'
+        homepage: stream.icyurl || 'Unknown',
+        error: undefined
       }
     });
     total += res.modifiedCount;
