@@ -66,6 +66,6 @@ module.exports = async (req, res) => {
     res.status(204).send();
   } catch(error) {
     console.error('Error Saving CSP-Report:', error.message);
-    res.status(500).send();
+    res.status(500).send('Error Saving CSP-Report:', error.message);
   }
 };
