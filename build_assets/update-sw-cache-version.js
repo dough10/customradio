@@ -8,7 +8,10 @@ const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const version = packageJson.version;
 
 let workerFileContent = fs.readFileSync(workerFilePath, 'utf8');
-const newWorkerFileContent = workerFileContent.replace(/CACHE_VERSION = '.*'/, `CACHE_VERSION = '${version}'`);
+const newWorkerFileContent = workerFileContent.replace(
+  /CACHE_VERSION = '.*'/,
+  `CACHE_VERSION = '${version}'`
+);
 
 fs.writeFileSync(workerFilePath, newWorkerFileContent, 'utf8');
 console.log(`Updated service worker with CACHE_VERSION = '${version}'`);
