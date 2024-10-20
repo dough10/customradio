@@ -35,7 +35,7 @@ const isLiveStream = require('../util/isLiveStream.js');
  *     });
  * });
  */
-module.exports = async (db, req, res) => {
+module.exports = async (db, redis, req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -61,6 +61,18 @@ module.exports = async (db, req, res) => {
       });
       return;
     }
+
+    // clear stations cache
+    try {
+      const keys = await redis.keys('stations_*');
+      if (keys.length > 0) {
+        const removed = await redis.del(...keys);
+        if (removed) log(`${removed} stations cache deleted`);
+      }
+    } catch(error) {
+      log(`error deleting stations cache: ${error.message}`);
+    }
+
     const data = {
       name: status.name,
       url,

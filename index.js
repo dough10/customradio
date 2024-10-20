@@ -362,7 +362,7 @@ app.get('/stations', [
  */
 app.post('/add', upload.none(), [
   body('url').trim().isURL().withMessage('Invalid URL')
-], (req, res) => addToDatabase(db, req, res));
+], (req, res) => addToDatabase(db, redis, req, res));
 
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports
