@@ -10,7 +10,9 @@ module.exports = (req, stats) => {
       },
       url: {
         loc: `${req.protocol}://${req.get('host')}/`,
-        lastmod: stats.mtime.toISOString()
+        lastmod: stats.mtime.toISOString(),
+        priority: '1.0',
+        changefreq: 'weekly'
       }
     }
   };
