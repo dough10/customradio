@@ -1,6 +1,6 @@
 {
   "name": "customradio",
-  "version": "1.10.4",
+  "version": "1.10.5",
   "description": "build custion radio.txt for use on hiby audio players",
   "main": "index.js",
   "scripts": {
