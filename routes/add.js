@@ -73,6 +73,13 @@ module.exports = async (db, redis, req, res) => {
       log(`error deleting stations cache: ${error.message}`);
     }
 
+    if (!status.name) {
+      res.status(500).json({
+        message: 'Failed getting station name'
+      });
+      return; 
+    }
+
     const data = {
       name: status.name,
       url,
@@ -82,6 +89,7 @@ module.exports = async (db, redis, req, res) => {
       bitrate: status.bitrate || 'Unknown',
       homepage: status.icyurl || 'Unknown'
     };
+
     await db.insertOne(data);
     res.json({
       message: "station saved"
