@@ -62,6 +62,13 @@ module.exports = async (db, redis, req, res) => {
       return;
     }
 
+    if (!status.name) {
+      res.status(500).json({
+        message: 'Failed getting station name'
+      });
+      return; 
+    }
+
     // clear stations cache
     try {
       const keys = await redis.keys('stations_*');
@@ -71,13 +78,6 @@ module.exports = async (db, redis, req, res) => {
       }
     } catch(error) {
       log(`error deleting stations cache: ${error.message}`);
-    }
-
-    if (!status.name) {
-      res.status(500).json({
-        message: 'Failed getting station name'
-      });
-      return; 
     }
 
     const data = {
