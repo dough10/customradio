@@ -1101,7 +1101,13 @@ window.onload = async () => {
   }
 
   document.querySelectorAll('dialog>.close').forEach(el => {
-    el.addEventListener('click', _ => el.parentElement.close());
+    el.addEventListener('click', _ => {
+      const dialog = el.parentElement;
+      if (dialog.id === 'greeting') {
+        localStorage.setItem('greeted', '1');
+      }
+      dialog.close();
+    });
   });
 
   const add = document.querySelector('#add');
@@ -1194,9 +1200,15 @@ window.onload = async () => {
   }, 500);
   // end matomo
 
+  let greeted = Number(localStorage.getItem('greeted'))
+
   await sleep(100);
   const greeting = document.querySelector('#greeting');
-  greeting.showModal();
+  if (greeted) {
+    greeting.remove();
+  } else {
+    greeting.showModal();
+  }
   greeting.addEventListener('transitionend', e => {
     if (greeting.hasAttribute('open')) return;
     greeting.remove();
