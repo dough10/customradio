@@ -1151,7 +1151,7 @@ window.onload = async () => {
     slider.addEventListener('input', _ => {
       player.volume = slider.value / 100;
       if (changeTimer) clearTimeout(changeTimer);
-      changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 200);
+      changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 1000);
     });
   } else {
     const volumeElement = document.querySelector('#vol');
