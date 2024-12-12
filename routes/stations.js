@@ -81,17 +81,28 @@ module.exports = async (db, redis, req, res) => {
     });
   }
 
+  const searchQuery = genres.map(genre => new RegExp(genre, 'i'))
+
   try {
     const stations = await db.find({
       'content-type': usedTypes,
       online: true,
-      genre: {
-        $in: genres.map(genre => new RegExp(genre, 'i'))
-      },
       bitrate: {
         $exists: true,
         $ne: null
-      }
+      },
+      $or: [
+        {
+          genre: {
+            $in: searchQuery
+          }
+        },
+        {
+          name: {
+            $in: searchQuery
+          }
+        }
+      ]
     }, {
       projection: {
         _id: 0,
@@ -104,7 +115,7 @@ module.exports = async (db, redis, req, res) => {
       }
     }).sort({
       name: 1
-    }).toArray();
+    }).toArray();    
     log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned`);
     res.json(stations);
     await redis.set(cacheKey, JSON.stringify(stations), 'EX', 3600);
