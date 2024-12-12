@@ -65,7 +65,10 @@ module.exports = async (req, res) => {
     await connector.disconnect();
     res.status(204).send();
   } catch(error) {
-    console.error('Error Saving CSP-Report:', error.message);
-    res.status(500).send('Error Saving CSP-Report:', error.message);
+    const message = `Error Saving CSP-Report: ${error.message}`
+    console.error(message);
+    res.status(500).json({
+      message: message
+    });
   }
 };
