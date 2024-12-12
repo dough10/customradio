@@ -59,16 +59,14 @@ module.exports = async (req, res) => {
   try {
     const cspReport = req.body['csp-report'];
     const db = await connector.connect();
-    log(`${req.ip} -> /csp-report ${JSON.stringify(cspReport)}`);
     cspReport.time = new Date().getTime();
+    log(`${req.ip} -> /csp-report ${JSON.stringify(cspReport)}`);
     await db.insertOne(cspReport);
     await connector.disconnect();
     res.status(204).send();
   } catch(error) {
     const message = `Error Saving CSP-Report: ${error.message}`
     console.error(message);
-    res.status(500).json({
-      message: message
-    });
+    res.status(500).send(message);
   }
 };
