@@ -279,6 +279,8 @@ async function dlTxt() {
  * @param {String} buttonData.text - The text for menu button.
  * @param {String} buttonData.title = the "title" for the button
  * @param {Function} buttonData.func - The function to be called on button click.
+ * 
+ * @returns {HTMLElement}
  */
 function contextMenuItem({icon, text, title, func}) {
   const txt = document.createElement('span');
