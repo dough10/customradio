@@ -49,6 +49,8 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   if (event.request.url.includes('/stations')) {
     event.respondWith(handleStationsRequest(event));
+  } else if (event.request.url.includes('/topGenres')) {
+    return fetch(event.request);
   } else {
     event.respondWith(
       caches.match(event.request)
