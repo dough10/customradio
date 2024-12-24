@@ -6,7 +6,6 @@ module.exports = (req, res) => {
     'Disallow: /add',
     'Disallow: /csp-report',
     'Disallow: /mark-duplicate',
-    'Disallow: /metrics',
     'Disallow: /stations',
     'Disallow: /stream-issue',
     'Disallow: /topGenres',

@@ -1,6 +1,6 @@
 const url = require('url');
 const log = require('../util/log.js');
-const saveToCollection = require('./saveToCollection.js');
+const saveToCollection = require('../util/saveToCollection.js');
 
 module.exports = async (req, res) => {
   
@@ -17,7 +17,8 @@ module.exports = async (req, res) => {
     time: new Date().toLocaleString(),
     ip: req.ip,
     agent: req.headers['user-agent'],
-    referer: req.headers.referer
+    referer: req.headers.referer,
+    cookies: req.headers.cookies
   }
   
   await saveToCollection(data, 'fourohfour');
