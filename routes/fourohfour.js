@@ -12,16 +12,14 @@ module.exports = async (req, res) => {
   
   log(`${req.ip} requested ${url.format(reqadd)} 404! ╭∩╮(︶︿︶)╭∩╮`);
   
-  const data = {
+  await saveToCollection({
     ...reqadd,
     time: new Date().toLocaleString(),
     ip: req.ip,
     agent: req.headers['user-agent'],
     referer: req.headers.referer,
     cookies: req.headers.cookies
-  }
-  
-  await saveToCollection(data, 'fourohfour');
+  }, 'fourohfour');
 
   res.status(404).json({
     message: '╭∩╮(︶︿︶)╭∩╮'
