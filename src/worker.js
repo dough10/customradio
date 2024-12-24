@@ -50,7 +50,7 @@ self.addEventListener('fetch', event => {
   if (event.request.url.includes('/stations')) {
     event.respondWith(handleStationsRequest(event));
   } else if (event.request.url.includes('/topGenres')) {
-    return fetch(event.request);
+    event.respondWith(fetch(event.request));
   } else {
     event.respondWith(
       caches.match(event.request)
