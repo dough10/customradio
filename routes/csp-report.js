@@ -59,7 +59,7 @@ module.exports = async (req, res) => {
   try {
     const cspReport = req.body['csp-report'];
     const db = await connector.connect();
-    cspReport.time = new Date().getTime();
+    cspReport.time = new Date().toLocaleString();
     log(`${req.ip} -> /csp-report ${JSON.stringify(cspReport)}`);
     await db.insertOne(cspReport);
     await connector.disconnect();

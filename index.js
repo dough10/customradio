@@ -9,7 +9,6 @@ const multer = require('multer');
 const upload = multer();
 const Redis = require('ioredis');
 const promClient = require('prom-client');
-const url = require('url');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 
@@ -25,6 +24,7 @@ const markDuplicate = require('./routes/markDuplicate.js');
 const sitemap = require('./routes/sitemap.js');
 const robots = require('./routes/robots.js');
 const topGenres = require('./routes/topGenres.js');
+const fourohfour = require('./routes/fourohfour.js')
 
 const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 
@@ -443,17 +443,7 @@ app.post('/csp-report', apiKeyMiddleware, upload.none(), [
  * 
  * @returns {void} Responds with a 404 status code and a JSON error message.
  */
-app.get('*', (req, res) => {
-  let reqadd = {
-    protocol: req.protocol,
-    host: req.get('host'),
-    pathname: req.originalUrl
-  };
-  log(`${req.ip} requested ${url.format(reqadd)} 404! ╭∩╮(︶︿︶)╭∩╮`);
-  res.status(404).json({
-    message: '╭∩╮(︶︿︶)╭∩╮'
-  });
-});
+app.get('*', fourohfour);
 
 /**
  * Starts the Express server and sets up necessary initializations.

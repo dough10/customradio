@@ -115,7 +115,7 @@ async function testStreams(db, trackProgress) {
     total += res.modifiedCount;
   }
   const stats = await dbStatistics(db);
-  const now = new Date().getTime();
+  const now = new Date().toLocaleString();
   const ms = now - startTime;
   stats.timeCompleted = now;
   stats.duration = ms;
