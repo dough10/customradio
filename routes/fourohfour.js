@@ -1,9 +1,6 @@
-require('dotenv').config();
 const url = require('url');
 const log = require('../util/log.js');
 const saveToCollection = require('./saveToCollection.js');
-const connector = new Connector(process.env.DB_HOST || 'mongodb://127.0.0.1:27017', 'fourohfour');
- 
 
 module.exports = async (req, res) => {
   
