@@ -23,6 +23,7 @@ const DbConnector = require('./util/dbConnector.js');
 const markDuplicate = require('./routes/markDuplicate.js');
 const sitemap = require('./routes/sitemap.js');
 const robots = require('./routes/robots.js');
+const ads = require('./routes/ads.js');
 const topGenres = require('./routes/topGenres.js');
 const fourohfour = require('./routes/fourohfour.js')
 
@@ -160,9 +161,14 @@ function apiKeyMiddleware(req, res, next) {
 }
 
 /** 
- * robots
+ * robots.txt
  */
 app.get('/robots.txt', robots);
+
+/**
+ * ads.txt
+ */
+app.get('/ads.txt', ads);
 
 /**
  * sitemap
