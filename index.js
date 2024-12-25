@@ -424,7 +424,7 @@ app.post('/csp-report', apiKeyMiddleware, upload.none(), [
   body('csp-report.original-policy').isString().withMessage('original-policy must be a string'),
   body('csp-report.source-file').optional().isURL().withMessage('source-file must be a valid URL'),
   body('csp-report.status-code').isInt({ min: 100, max: 599 }).withMessage('status-code must be an integer between 100 and 599'),
-], (req, res) => cspReport(req, res));
+], cspReport);
 
 /**
  * Catch-all route for handling 404 errors.
