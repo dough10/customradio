@@ -46,7 +46,7 @@ module.exports = async (db, redis, req, res) => {
     });
   }
 
-  const genres = req.query.genres.split(',').map(genre => he.decode(genre).toLowerCase());
+  const genres = decodeURIComponent(req.query.genres).split(',').map(genre => he.decode(genre).toLowerCase());
 
   const genreString = genres.join(',');
 
