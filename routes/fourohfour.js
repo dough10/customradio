@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
    * Array of sensitive paths that will trigger a redirect to a Rickroll if detected.
    * @type {string[]}
    */
-  const sensitivePaths = ['.env', 'wp-admin', '.git'];
+  const sensitivePaths = ['.env', 'wp-admin', '.git', '.ssh', '.json', '.yml', '.sql'];
 
   // Check if the requested path contains any sensitive path and redirect accordingly
   for (const path of sensitivePaths) {
