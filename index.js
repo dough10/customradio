@@ -10,6 +10,9 @@ const upload = multer();
 const Redis = require('ioredis');
 const promClient = require('prom-client');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 require('dotenv').config();
 
 
@@ -46,6 +49,14 @@ const redis = new Redis({
 });
 
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests, please try again later.',
+  trustProxy: 1
+});
+
+
 const httpRequestCounter = new promClient.Counter({
   name: 'http_requests_total',
   help: 'Total number of HTTP requests',
@@ -66,6 +77,9 @@ promClient.collectDefaultMetrics({
 
 register.registerMetric(httpRequestCounter);
 
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
 app.use(compression());
 app.use(express.urlencoded({
   extended: true
@@ -73,11 +87,17 @@ app.use(express.urlencoded({
 app.use(express.json());
 app.set('trust proxy', true);
 app.disable('x-powered-by');
+app.use(limiter);
 
 /**
  * serves static files
  */
 app.use(express.static(path.join(__dirname, 'html')));
+
+app.use(cors({
+  origin: ['https://customradio.dough10.me'],
+  methods: ['GET', 'POST'],
+}));
 
 /**
  * counts connection requests
