@@ -45,11 +45,19 @@ module.exports = async (req, res) => {
    */
   await saveToCollection({
     ...reqadd,
+    method: req.method,
+    query: req.query,
+    body: req.body,
+    headers: req.headers,
+    agent: req.headers['user-agent'],
     time: new Date().toLocaleString(),
     ip: req.ip,
-    agent: req.headers['user-agent'],
-    referer: req.headers.referer,
-    cookies: req.headers.cookies
+    forwardedFor: req.headers['x-forwarded-for'],
+    referer: req.headers.referer || 'No Referer',
+    cookies: req.headers.cookies || 'No Cookies',
+    attackLabel: "Suspicious User-Agent",
+    responseTime: Date.now() - req.startTime,
+    sessionId: req.session ? req.session.id : null
   }, 'fourohfour');
 
   const requestedPath = decodeURIComponent(reqadd.pathname);

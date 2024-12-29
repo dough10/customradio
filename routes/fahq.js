@@ -37,11 +37,21 @@ const saveToCollection = require('../util/saveToCollection.js');
 module.exports = async (req, res) => {
   log(`${req.ip} ╭∩╮(︶︿︶)╭∩╮ FAHQ!`);
   await saveToCollection({
+    protocol: req.protocol,
+    host: req.get('host'),
+    pathname: req.originalUrl,
+    method: req.method,
+    query: req.query,
+    body: req.body,
+    headers: req.headers,
     time: new Date().toLocaleString(),
     ip: req.ip,
-    agent: req.headers['user-agent'],
-    referer: req.headers.referer,
-    cookies: req.headers.cookies
+    forwardedFor: req.headers['x-forwarded-for'],
+    referer: req.headers.referer || 'No Referer',
+    cookies: req.headers.cookies || 'No Cookies',
+    attackLabel: "Suspicious User-Agent",
+    responseTime: Date.now() - req.startTime,
+    sessionId: req.session ? req.session.id : null
   }, 'fourohfour');
   res.status(403).send();
 };
