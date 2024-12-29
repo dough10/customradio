@@ -474,9 +474,9 @@ app.post('/csp-report', apiKeyMiddleware, upload.none(), [
  * // - Logs the protocol, host, pathname, timestamp, IP, agent, referer, and cookies.
  * // - Sends a 403 Forbidden response.
  *
- * app.use('/fahq', fahq);
+ * app.use('/denied', fahq);
  */
-app.get('/fahq', fahq);
+app.get('/denied', fahq);
 
 /**
  * Catch-all route for handling 404 errors.

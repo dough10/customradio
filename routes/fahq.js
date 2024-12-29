@@ -32,7 +32,7 @@ const saveToCollection = require('../util/saveToCollection.js');
  * // - Logs the protocol, host, pathname, timestamp, IP, agent, referer, and cookies.
  * // - Sends a 403 Forbidden response.
  *
- * app.use('/api/your-endpoint', yourApiEndpoint);
+ * app.use('/denied', fahq);
  */
 module.exports = async (req, res) => {
   log(`${req.ip} ╭∩╮(︶︿︶)╭∩╮ FAHQ!`);
