@@ -1,3 +1,4 @@
+const log = require('../util/log.js');
 const saveToCollection = require('../util/saveToCollection.js');
 
 /**
@@ -8,9 +9,6 @@ const saveToCollection = require('../util/saveToCollection.js');
  * status, indicating that the request is not allowed, but the system still logs the request data.
  *
  * The details captured include the following:
- * - Protocol used in the request (HTTP or HTTPS)
- * - Host of the server that received the request
- * - Original URL path requested
  * - Timestamp of when the request was received
  * - IP address from which the request originated
  * - User-Agent header which contains information about the client’s browser or device
@@ -37,10 +35,8 @@ const saveToCollection = require('../util/saveToCollection.js');
  * app.use('/api/your-endpoint', yourApiEndpoint);
  */
 module.exports = async (req, res) => {
+  log(`${req.ip} ╭∩╮(︶︿︶)╭∩╮ FAHQ!`);
   await saveToCollection({
-    protocol: req.protocol,
-    host: req.get('host'),
-    pathname: req.originalUrl,
     time: new Date().toLocaleString(),
     ip: req.ip,
     agent: req.headers['user-agent'],

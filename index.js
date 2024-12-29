@@ -451,9 +451,6 @@ app.post('/csp-report', apiKeyMiddleware, upload.none(), [
  * status, indicating that the request is not allowed, but the system still logs the request data.
  *
  * The details captured include the following:
- * - Protocol used in the request (HTTP or HTTPS)
- * - Host of the server that received the request
- * - Original URL path requested
  * - Timestamp of when the request was received
  * - IP address from which the request originated
  * - User-Agent header which contains information about the client’s browser or device
