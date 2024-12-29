@@ -105,6 +105,15 @@ app.use((req, res, next) => {
 });
 
 /**
+ * middleware for timing response times
+ */
+app.use((req, res, next) => {
+  req.startTime = Date.now();
+  next();
+});
+
+
+/**
  * Middleware to handle Content Security Policy (CSP) violation reports.
  * 
  * This middleware checks if the incoming request is of the type `application/csp-report`.
