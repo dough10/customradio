@@ -13,7 +13,7 @@ module.exports = (req, res) => {
     `Allow: /$`,
     `Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml`
   ];
-  log(`${req.ip} -> /robots.txt`);
+  log(`${req.ip} -> /robots.txt ${Date.now() - req.startTime}ms`);
   res.type('text/plain');
   res.send(strings.join('\n'));
 };

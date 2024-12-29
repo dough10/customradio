@@ -71,7 +71,7 @@ module.exports = async (db, redis, req, res) => {
     if (cachedStations) {
       const stations = JSON.parse(cachedStations);
       res.set('content-type', 'application/json');
-      log(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} cached stations returned`);
+      log(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} cached stations returned ${Date.now() - req.startTime}ms`);
       return res.send(stations);
     }
   } catch (error) {
@@ -116,7 +116,7 @@ module.exports = async (db, redis, req, res) => {
     }).sort({
       name: 1
     }).toArray();    
-    log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned`);
+    log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
     res.json(stations);
     await redis.set(cacheKey, JSON.stringify(stations), 'EX', 3600);
   } catch (err) {

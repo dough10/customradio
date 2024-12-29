@@ -11,7 +11,7 @@ module.exports = (req, res) => {
         message: 'Failed getting sitemap.xml'
       });
     }
-    log(`${req.ip} -> ${req.originalUrl}`);
+    log(`${req.ip} -> ${req.originalUrl} ${Date.now() - req.startTime}ms`);
     const xml = sitemapxml(req, stats);
     res.set('Content-Type', 'application/xml');
     res.send(xml);

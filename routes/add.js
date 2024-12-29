@@ -49,7 +49,7 @@ module.exports = async (db, redis, req, res) => {
       url
     });
     if (exists) {
-      log('station exists');
+      log(`station exists ${Date.now() - req.startTime}ms`);
       res.json({
         message: 'station exists'
       });
@@ -57,7 +57,7 @@ module.exports = async (db, redis, req, res) => {
     }
     const status = await isLiveStream(url);
     if (!status.ok) {
-      const message = `Connection test failed: ${status.error}`;
+      const message = `Connection test failed: ${status.error} ${Date.now() - req.startTime}ms`;
       log(message);
       res.status(500).json({
         message: message
@@ -66,7 +66,7 @@ module.exports = async (db, redis, req, res) => {
     }
 
     if (!status.name) {
-      const message = 'Failed getting station name';
+      const message = `Failed getting station name ${Date.now() - req.startTime}ms`;
       log(message);
       res.status(500).json({
         message: message
@@ -96,13 +96,13 @@ module.exports = async (db, redis, req, res) => {
     };
 
     await db.insertOne(data);
-    const message = "station saved";
+    const message = `station saved ${Date.now() - req.startTime}ms`;
     log(message);
     res.json({
       message: message
     });
   } catch (e) {
-    const message = 'Failed to add station';
+    const message = `Failed to add station ${Date.now() - req.startTime}ms`;
     log(message);
     res.status(500).json({
       message: message
