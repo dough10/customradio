@@ -138,6 +138,43 @@ app.use((req, res, next) => {
   }
 });
 
+/**
+ * Middleware to intercept requests with specific User-Agent values and trigger a custom action.
+ *
+ * This middleware checks the `User-Agent` header of incoming requests to determine whether it matches one
+ * of a predefined set of user agents. If there is a match, it executes a custom function (`fahq`) and does
+ * not proceed further with the request processing. If there is no match, the request continues as usual
+ * by calling `next()`, passing control to the next middleware or route handler in the Express app.
+ *
+ * The middleware specifically targets the following user agents:
+ * - "Custom-AsyncHttpClient"
+ * - "Go-http-client/1.1"
+ *
+ * If the request contains one of these `User-Agent` strings, the `fahq` function is called, where the
+ * request and response objects are passed. The request will not be passed to the next middleware in this case.
+ * 
+ * If the `User-Agent` doesn't match any of the specified values, the request will continue to the next middleware
+ * or route handler without interruption.
+ *
+ * @function
+ * @param {Object} req - The Express request object that contains details about the incoming HTTP request.
+ * @param {Object} res - The Express response object used to send an HTTP response.
+ * @param {Function} next - The callback function that passes control to the next middleware or route handler.
+ * 
+ * @returns {void} This function does not return anything, but it either executes the `fahq` function or calls `next()`.
+ */
+app.use((req, res, next) => {
+  const agent = req.headers['user-agent'];
+  if ([
+    "Custom-AsyncHttpClient",
+    "Go-http-client/1.1"
+  ].includes(agent)) {
+    fahq(req, res);
+    return;
+  }
+  next();
+});
+
 
 /**
  * Middleware function to validate API access tokens.
@@ -442,41 +479,6 @@ app.post('/csp-report', apiKeyMiddleware, upload.none(), [
   body('csp-report.source-file').optional().isURL().withMessage('source-file must be a valid URL'),
   body('csp-report.status-code').isInt({ min: 100, max: 599 }).withMessage('status-code must be an integer between 100 and 599'),
 ], cspReport);
-
-/**
- * logs details of the incoming request to a collection and returns a 403 status.
- *
- * This endpoint captures specific request details and stores them in a collection, presumably for
- * logging purposes (e.g., monitoring, analytics, or error tracking). It then responds with a 403 Forbidden
- * status, indicating that the request is not allowed, but the system still logs the request data.
- *
- * The details captured include the following:
- * - Timestamp of when the request was received
- * - IP address from which the request originated
- * - User-Agent header which contains information about the client’s browser or device
- * - Referer header which contains the referring URL (if present)
- * - Cookies associated with the request
- *
- * The data is saved to a 'fourohfour' collection, (e.g., for logging 404 or other error responses). 
- * The actual saving is done using the `saveToCollection` utility
- * function.
- *
- * @async
- * @function
- * @param {Object} req - The request object containing the details of the incoming HTTP request.
- * @param {Object} res - The response object used to send the HTTP response back to the client.
- *
- * @returns {void} The function does not return a value, but it sends a 403 Forbidden status code as a response.
- *
- * @example
- * // Example of a client request:
- * // A request to this endpoint will trigger the following logging and response behavior:
- * // - Logs the protocol, host, pathname, timestamp, IP, agent, referer, and cookies.
- * // - Sends a 403 Forbidden response.
- *
- * app.use('/denied', fahq);
- */
-app.get('/denied', fahq);
 
 /**
  * Catch-all route for handling 404 errors.
