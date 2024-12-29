@@ -49,9 +49,8 @@ module.exports = async (req, res) => {
     forwardedFor: req.headers['x-forwarded-for'],
     referer: req.headers.referer || 'No Referer',
     cookies: req.headers.cookies || 'No Cookies',
-    attackLabel: "Suspicious User-Agent",
     responseTime: Date.now() - req.startTime,
     sessionId: req.session ? req.session.id : null
-  }, 'fourohfour');
+  }, "Suspicious User-Agent");
   res.status(403).send();
 };
