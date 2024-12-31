@@ -8,7 +8,7 @@ module.exports = (req, res) => {
     '# example-network.com, account-id, RESELLER'
   ];
   
-  log(`${req.ip} -> /ads.txt`);
+  log(`${req.ip} -> /ads.txt ${Date.now() - req.startTime}ms`);
   res.type('text/plain');
   res.send(lines.join('\n'));
 };
