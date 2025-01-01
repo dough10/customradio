@@ -35,7 +35,6 @@ const saveToCollection = require('../util/saveToCollection.js');
  * app.use('/denied', fahq);
  */
 module.exports = async (req, res) => {
-  log(`${req.ip} ╭∩╮(︶︿︶)╭∩╮ FAHQ!`);
   await saveToCollection({
     protocol: req.protocol,
     host: req.get('host'),
@@ -52,5 +51,6 @@ module.exports = async (req, res) => {
     responseTime: Date.now() - req.startTime,
     sessionId: req.session ? req.session.id : null
   }, "Suspicious User-Agent");
+  log(`${req.ip} ╭∩╮(︶︿︶)╭∩╮ FAHQ! ${Date.now() - req.startTime}ms`);
   res.status(403).send();
 };
