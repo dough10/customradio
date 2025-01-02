@@ -85,10 +85,13 @@ app.disable('x-powered-by');
  */
 app.use(express.static(path.join(__dirname, 'html')));
 
-app.use(cors({
-  origin: ['https://customradio.dough10.me'],
-  methods: ['GET', 'POST'],
-}));
+/**
+ * middleware for timing response times
+ */
+app.use((req, res, next) => {
+  req.startTime = Date.now();
+  next();
+});
 
 /**
  * counts connection requests
@@ -105,13 +108,12 @@ app.use((req, res, next) => {
 });
 
 /**
- * middleware for timing response times
+ * cors
  */
-app.use((req, res, next) => {
-  req.startTime = Date.now();
-  next();
-});
-
+app.use(cors({
+  origin: ['https://customradio.dough10.me'],
+  methods: ['GET', 'POST'],
+}));
 
 /**
  * Middleware to handle Content Security Policy (CSP) violation reports.
