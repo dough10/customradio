@@ -25,6 +25,7 @@ const DbConnector = require('./util/dbConnector.js');
 const markDuplicate = require('./routes/markDuplicate.js');
 const sitemap = require('./routes/sitemap.js');
 const robots = require('./routes/robots.js');
+const securitytxt = require('./routes/securitytxt.js');
 const ads = require('./routes/ads.js');
 const topGenres = require('./routes/topGenres.js');
 const fourohfour = require('./routes/fourohfour.js');
@@ -241,6 +242,11 @@ app.get('/.well-known/assetLinks.json', (req,res) => {
   log(`${req.ip} -> /.well-known/assetLinks.json`);
   res.json([]);
 });
+
+/**
+ * security.txt
+ */
+app.get('/.well-known/security.txt', securitytxt);
 
 /**
  * GET /metrics
