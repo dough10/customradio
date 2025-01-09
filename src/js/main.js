@@ -1105,7 +1105,7 @@ function addDialogInteractions() {
         setTimeout(_ => {
           closeButton.classList.remove('attention');
           dialog.classList.remove('dialog-attention');
-        }, 1000);
+        }, 750);
       }
     });
   });
@@ -1127,13 +1127,21 @@ function addDialogInteractions() {
     document.querySelector('#info-dialog').showModal();
     const response = await fetch('/info');
     const dep = await response.json();
-    const str = Object.entries(dep).map(([key, value]) => `${key}: ${value}`).join('<br>');
+    const str = Object.entries(dep).map(([key, value]) => `${escapeHTML(key)}: ${escapeHTML(value)}`).join('<br>');
     depDiv.innerHTML = str;
   });
 
   const add = document.querySelector('#add');
   const addButton = document.querySelector('#add_button');
   addButton.addEventListener('click', _ => add.showModal());
+}
+
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  if (str) {
+    div.textContent = str;
+  }
+  return div.textContent;
 }
 
 /**

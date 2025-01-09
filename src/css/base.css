@@ -967,11 +967,11 @@ dialog>.small-button.close {
 }
 
 .attention {
-  animation: get-attention 0.5s ease-in-out 2;
+  animation: get-attention 0.375s ease-in-out 2;
 }
 
 .dialog-attention {
-  animation: get-dialog-attention 1s ease-in-out;
+  animation: get-dialog-attention .75s ease-in-out;
 }
 
 .margin-right-8 {
