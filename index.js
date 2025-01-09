@@ -150,43 +150,6 @@ app.use((req, res, next) => {
   }
 });
 
-/**
- * Middleware to intercept requests with specific User-Agent values and trigger a custom action.
- *
- * This middleware checks the `User-Agent` header of incoming requests to determine whether it matches one
- * of a predefined set of user agents. If there is a match, it executes a custom function (`fahq`) and does
- * not proceed further with the request processing. If there is no match, the request continues as usual
- * by calling `next()`, passing control to the next middleware or route handler in the Express app.
- *
- * The middleware specifically targets the following user agents:
- * - "Custom-AsyncHttpClient"
- * - "Go-http-client/1.1"
- *
- * If the request contains one of these `User-Agent` strings, the `fahq` function is called, where the
- * request and response objects are passed. The request will not be passed to the next middleware in this case.
- * 
- * If the `User-Agent` doesn't match any of the specified values, the request will continue to the next middleware
- * or route handler without interruption.
- *
- * @function
- * @param {Object} req - The Express request object that contains details about the incoming HTTP request.
- * @param {Object} res - The Express response object used to send an HTTP response.
- * @param {Function} next - The callback function that passes control to the next middleware or route handler.
- * 
- * @returns {void} This function does not return anything, but it either executes the `fahq` function or calls `next()`.
- */
-app.use((req, res, next) => {
-  const agent = req.headers['user-agent'];
-  if ([
-    "Custom-AsyncHttpClient",
-    "Go-http-client/1.1"
-  ].includes(agent)) {
-    fahq(req, res);
-    return;
-  }
-  next();
-});
-
 
 /**
  * Middleware function to validate API access tokens.
