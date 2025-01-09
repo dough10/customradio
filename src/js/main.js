@@ -1112,6 +1112,26 @@ window.onload = async () => {
     });
   });
 
+  document.querySelector('#info').addEventListener('click', _ => {
+    document.querySelector('#info-dialog').showModal();
+  });
+
+  const dialogs = document.querySelectorAll('dialog');
+  dialogs.forEach(dialog => {
+    dialog.addEventListener('click', event => {
+      const closeButton = dialog.querySelector('.small-button.close');
+      var rect = dialog.getBoundingClientRect();
+      var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
+        rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
+      if (!isInDialog) {
+        closeButton.classList.add('attention');
+        setTimeout(_ => {
+          closeButton.classList.remove('attention');
+        }, 1000);
+      }
+    });
+  });
+
   const add = document.querySelector('#add');
   const addButton = document.querySelector('#add_button');
   addButton.addEventListener('click', _ => add.showModal());

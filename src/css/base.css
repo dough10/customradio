@@ -953,6 +953,23 @@ input[type="range"]::-ms-fill-upper {
   animation-delay: 640ms;
 }
 
+#info {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  z-index: 1;
+}
+
+dialog>.small-button.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.attention {
+  animation: get-attention 0.5s linear 0s 2;
+}
+
 @media screen and (max-width: 600px) {
   .alert {
     display: inline-block;
@@ -1048,5 +1065,17 @@ input[type="range"]::-ms-fill-upper {
 
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes get-attention {
+  0% {
+    transform: scale(1);  
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
   }
 }
