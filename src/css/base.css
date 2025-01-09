@@ -967,7 +967,24 @@ dialog>.small-button.close {
 }
 
 .attention {
-  animation: get-attention 0.5s linear 0s 2;
+  animation: get-attention 0.5s ease-in-out 2;
+}
+
+.dialog-attention {
+  animation: get-dialog-attention 1s ease-in-out;
+}
+
+.margin-right-8 {
+  margin-right: 8px;
+}
+
+.scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height:400px;
+  margin-bottom: 16px;
+  min-width: 300px;
+  padding: 8px;
 }
 
 @media screen and (max-width: 600px) {
@@ -1070,12 +1087,28 @@ dialog>.small-button.close {
 
 @keyframes get-attention {
   0% {
-    transform: scale(1);  
+    transform: scale(1);
+    color: inherit;
   }
   50% {
     transform: scale(1.5);
+    color: var(--pop-color);
   }
   100% {
     transform: scale(1);
+    color: inherit;
   }
+}
+
+@keyframes get-dialog-attention {
+  0% {
+    transform: scale(1) translateX(-50%) translateY(-50%);
+  }
+  50% {
+    transform: scale(1.05) translateX(-48%) translateY(-48%);
+  }
+  100% {
+    transform: scale(1) translateX(-50%) translateY(-50%);
+  }
+  
 }

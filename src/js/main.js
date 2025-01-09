@@ -1089,6 +1089,54 @@ async function loadGenres() {
 }
 
 /**
+ * dialogs
+ */
+function addDialogInteractions() {
+  const dialogs = document.querySelectorAll('dialog');
+  dialogs.forEach(dialog => {
+    dialog.addEventListener('click', event => {
+      const closeButton = dialog.querySelector('.small-button.close');
+      var rect = dialog.getBoundingClientRect();
+      var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
+        rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
+      if (!isInDialog) {
+        closeButton.classList.add('attention');
+        dialog.classList.add('dialog-attention');
+        setTimeout(_ => {
+          closeButton.classList.remove('attention');
+          dialog.classList.remove('dialog-attention');
+        }, 1000);
+      }
+    });
+  });
+
+  document.querySelectorAll('dialog>.close').forEach(el => {
+    el.addEventListener('click', _ => {
+      const dialog = el.parentElement;
+      if (dialog.id === 'greeting') {
+        localStorage.setItem('greeted', '1');
+      }
+      dialog.close();
+    });
+  });
+
+  document.querySelector('#info').addEventListener('click', async _ => {
+    const depDiv = document.querySelector('#dependencies');
+    depDiv.innerHTML = '';
+    loadingAnimation(depDiv);
+    document.querySelector('#info-dialog').showModal();
+    const response = await fetch('/info');
+    const dep = await response.json();
+    const str = Object.entries(dep).map(([key, value]) => `${key}: ${value}`).join('<br>');
+    depDiv.innerHTML = str;
+  });
+
+  const add = document.querySelector('#add');
+  const addButton = document.querySelector('#add_button');
+  addButton.addEventListener('click', _ => add.showModal());
+}
+
+/**
  * window loaded
  */
 window.onload = async () => {
@@ -1102,39 +1150,7 @@ window.onload = async () => {
     }
   }
 
-  document.querySelectorAll('dialog>.close').forEach(el => {
-    el.addEventListener('click', _ => {
-      const dialog = el.parentElement;
-      if (dialog.id === 'greeting') {
-        localStorage.setItem('greeted', '1');
-      }
-      dialog.close();
-    });
-  });
-
-  document.querySelector('#info').addEventListener('click', _ => {
-    document.querySelector('#info-dialog').showModal();
-  });
-
-  const dialogs = document.querySelectorAll('dialog');
-  dialogs.forEach(dialog => {
-    dialog.addEventListener('click', event => {
-      const closeButton = dialog.querySelector('.small-button.close');
-      var rect = dialog.getBoundingClientRect();
-      var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
-        rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
-      if (!isInDialog) {
-        closeButton.classList.add('attention');
-        setTimeout(_ => {
-          closeButton.classList.remove('attention');
-        }, 1000);
-      }
-    });
-  });
-
-  const add = document.querySelector('#add');
-  const addButton = document.querySelector('#add_button');
-  addButton.addEventListener('click', _ => add.showModal());
+  addDialogInteractions();
   
   const dlButton = document.querySelector('#download');
   dlButton.addEventListener('click', dlTxt);

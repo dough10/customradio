@@ -1,6 +1,6 @@
 {
   "name": "customradio",
-  "version": "1.10.8",
+  "version": "1.10.9",
   "description": "build custion radio.txt for use on hiby audio players",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,6 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "express-rate-limit": "^7.5.0",
     "express-validator": "^7.1.0",
     "he": "^1.2.0",
     "helmet": "^8.0.0",

@@ -29,7 +29,7 @@ const securitytxt = require('./routes/securitytxt.js');
 const ads = require('./routes/ads.js');
 const topGenres = require('./routes/topGenres.js');
 const fourohfour = require('./routes/fourohfour.js');
-const fahq = require('./routes/fahq.js');
+const info = require('./routes/info.js');
 
 const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 
@@ -210,6 +210,11 @@ app.get('/.well-known/assetLinks.json', (req,res) => {
  * security.txt
  */
 app.get('/.well-known/security.txt', securitytxt);
+
+/**
+ * info!
+ */
+app.get('/info', info);
 
 /**
  * GET /metrics
