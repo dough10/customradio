@@ -24,6 +24,18 @@ function sleep(ms) {
 }
 
 
+/**
+ * check if a string appears to be a URL
+ * 
+ * @param {String} str
+ *  
+ * @returns {Boolean}
+ */
+function looksLikeAUrl(str) {
+  return str.startsWith('http://') || str.startsWith('ftp://') || str.startsWith('https://');
+}
+
+
 const _toastCache = [];
 
 /**
@@ -89,10 +101,13 @@ class Toast {
    * @returns {HTMLElement} link wrapper
    */
   _withLink(message, link, linkText) {
-    this.link = link;
     const mText = document.createElement('div');
     mText.textContent = message;
-
+    
+    if (typeof link === 'string' && !looksLikeAUrl(link)) {
+      return mText;
+    }
+    
     const lText = document.createElement('div');
     lText.textContent = linkText;
     lText.classList.add('yellow-text');
@@ -100,6 +115,9 @@ class Toast {
     const wrapper = document.createElement('div');
     wrapper.classList.add('toast-wrapper');
     wrapper.append(mText, lText);
+
+    this.link = link;
+
     return wrapper;
   }
 
@@ -112,7 +130,7 @@ class Toast {
     } else if (this.link && typeof this.link === 'function') {
       this.link();
     } else if (this.link) {
-      console.error('Toast "link" paramater must be a valid URL or function.');
+      console.error(`Toast "link" paramater must be a valid URL or function: Value=${this.link}, type=${typeof this.link}`);
     }
     this._cleanUp();
   }
@@ -1105,7 +1123,7 @@ function addDialogInteractions() {
         setTimeout(_ => {
           closeButton.classList.remove('attention');
           dialog.classList.remove('dialog-attention');
-        }, 750);
+        }, 500);
       }
     });
   });

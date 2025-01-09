@@ -827,6 +827,9 @@ input[type="range"]::-ms-fill-upper {
   background: none;
   color: inherit;
   width: 24px;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .small-button[disabled] {
@@ -967,11 +970,11 @@ dialog>.small-button.close {
 }
 
 .attention {
-  animation: get-attention 0.375s ease-in-out 2;
+  animation: get-attention 250ms ease-in-out 2;
 }
 
 .dialog-attention {
-  animation: get-dialog-attention .75s ease-in-out;
+  animation: get-dialog-attention 500ms ease-in-out;
 }
 
 .margin-right-8 {
