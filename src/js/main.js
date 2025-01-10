@@ -1107,21 +1107,24 @@ async function loadGenres() {
 }
 
 /**
- * dialogs
+ * dialog interactions
  */
 function addDialogInteractions() {
   const dialogs = document.querySelectorAll('dialog');
   dialogs.forEach(dialog => {
     dialog.addEventListener('click', event => {
       const closeButton = dialog.querySelector('.small-button.close');
+      const bigCloseButton = dialog.querySelector('.button.close');
       var rect = dialog.getBoundingClientRect();
       var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
         rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
       if (!isInDialog) {
-        closeButton.classList.add('attention');
+        if (closeButton) closeButton.classList.add('attention');
+        if (bigCloseButton) bigCloseButton.classList.add('button-attention');
         dialog.classList.add('dialog-attention');
         setTimeout(_ => {
-          closeButton.classList.remove('attention');
+          if (closeButton) closeButton.classList.remove('attention');
+          if (bigCloseButton) bigCloseButton.classList.remove('button-attention');
           dialog.classList.remove('dialog-attention');
         }, 500);
       }

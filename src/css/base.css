@@ -973,6 +973,10 @@ dialog>.small-button.close {
   animation: get-attention 250ms ease-in-out 2;
 }
 
+.button-attention {
+  animation: get-button-attention 250ms ease-in-out 2;
+}
+
 .dialog-attention {
   animation: get-dialog-attention 500ms ease-in-out;
 }
@@ -1104,6 +1108,18 @@ dialog>.small-button.close {
   100% {
     transform: scale(1);
     color: inherit;
+  }
+}
+
+@keyframes get-button-attention {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
