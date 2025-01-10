@@ -990,6 +990,10 @@ dialog>.small-button.close {
   padding: 8px;
 }
 
+#dependencies>p {
+  margin: 0;
+}
+
 @media screen and (max-width: 600px) {
   .alert {
     display: inline-block;

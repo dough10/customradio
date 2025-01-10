@@ -1145,21 +1145,18 @@ function addDialogInteractions() {
     document.querySelector('#info-dialog').showModal();
     const response = await fetch('/info');
     const dep = await response.json();
-    const str = Object.entries(dep).map(([key, value]) => `${escapeHTML(key)}: ${escapeHTML(value)}`).join('<br>');
-    depDiv.innerHTML = str;
+    const fragment = document.createDocumentFragment();
+    Object.entries(dep).forEach(([key, value]) => {
+      const p = document.createElement('p');
+      p.textContent = `${key}: ${value}`;
+      fragment.appendChild(p);
+    });
+    depDiv.replaceChildren(fragment);
   });
 
   const add = document.querySelector('#add');
   const addButton = document.querySelector('#add_button');
   addButton.addEventListener('click', _ => add.showModal());
-}
-
-function escapeHTML(str) {
-  const div = document.createElement('div');
-  if (str) {
-    div.textContent = str;
-  }
-  return div.textContent;
 }
 
 /**
