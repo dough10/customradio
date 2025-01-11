@@ -1,10 +1,24 @@
 const url = require('url');
 
+/**
+ * check for ip address
+ * 
+ * @param {String} address
+ * 
+ * @returns {Boolean}
+ */
 function isIPv4(address) {
   const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
   return ipv4Pattern.test(address);
 }
 
+/**
+ * breaks a URL into parts to be restructured
+ * 
+ * @param {String} URL 
+ * 
+ * @returns {Object}
+ */
 function urlDeconstruction(URL) {
   if (typeof URL !== 'string') return null;
 
@@ -54,7 +68,14 @@ function urlDeconstruction(URL) {
   }
 }
 
-function convertObjectToUrl(obj) {
+/**
+ * url object back into a string
+ * 
+ * @param {Object} obj
+ * 
+ * @returns {String}
+ */
+function objectToUrl(obj) {
   if (!obj) {
     return '';
   }
@@ -71,10 +92,17 @@ function convertObjectToUrl(obj) {
   return `${protocol}//${subdomain}${domain}${ext}${port}${pathname}${search}${hash}`;
 }
 
+/**
+ * attempts to reconstruct url to a usable form
+ * 
+ * @param {Object} obj
+ *  
+ * @returns {String} 
+ */
 module.exports = async (obj) => {
   const brokenHome = urlDeconstruction(obj.homepage);
   if (brokenHome) {
-    return convertObjectToUrl(brokenHome);
+    return objectToUrl(brokenHome);
   } else {
     return 
   }
