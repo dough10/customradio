@@ -9,6 +9,7 @@ const rmRef = require('./rmRef.js');
 const dbStatistics = require('./dbStatistics.js');
 const saveStats = require('./saveStats.js');
 const useableHomapage = require('./useableHomapage.js');
+const cleanUpGenres = require('./cleanUpGenres.js');
 
 /**
  * Returns an 's' if the number is not equal to 1, otherwise returns an empty string.
@@ -156,4 +157,5 @@ async function testStreams(db, trackProgress) {
   stats.duration = ms;
   log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
   await saveStats(stats);
+  await cleanUpGenres();
 }
