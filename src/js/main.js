@@ -1146,9 +1146,9 @@ function addDialogInteractions() {
   //info
   document.querySelector('#info').addEventListener('click', async _ => {
     const depDiv = document.querySelector('#dependencies');
-    depDiv.innerHTML = '';
-    loadingAnimation(depDiv);
     document.querySelector('#info-dialog').showModal();
+    if (depDiv.querySelectorAll('*').length) return;
+    loadingAnimation(depDiv);
     const response = await fetch('/info');
     const pack = await response.json();
     document.querySelector('#info-dialog>h1').textContent = `v${pack.version}`;
