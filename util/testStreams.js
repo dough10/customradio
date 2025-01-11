@@ -8,7 +8,7 @@ const isLiveStream = require('./isLiveStream.js');
 const rmRef = require('./rmRef.js');
 const dbStatistics = require('./dbStatistics.js');
 const saveStats = require('./saveStats.js');
-
+const useableHomapage = require('./useableHomapage.js');
 
 /**
  * Returns an 's' if the number is not equal to 1, otherwise returns an empty string.
@@ -78,10 +78,17 @@ function msToHhMmSs(milliseconds) {
  */
 async function testStreams(db, trackProgress) {
   log('Updating database');
+
   const startTime = new Date().getTime();
+  
   const stations = await db.find({}).toArray();
+  
   let total = 0;
+  
   const length = stations.length;
+
+  const testedHomepages = [];
+
   for (const station of stations) {
     if (!station) continue;
     if (trackProgress) log(`${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
@@ -90,6 +97,8 @@ async function testStreams(db, trackProgress) {
     };
     station.url = rmRef(station.url);
     const stream = await isLiveStream(station.url);
+
+    // stream connection test failed
     if (!stream.ok) {
       const res = await db.updateOne(filter, {
         $set: {
@@ -100,6 +109,32 @@ async function testStreams(db, trackProgress) {
       total += res.modifiedCount;
       continue;
     }
+
+    // ensure homepage url is usable
+    if (stream.icyurl) {
+      const homepage = await useableHomapage(stream.icyurl);
+      if (homepage) {
+        if (!testedHomepages.includes(homepage)) {
+          try {
+            const response = await axios.head(homepage, {
+              timeout: 3000
+            });
+            if (response.status === 200) {
+              testedHomepages.push(homepage);
+              stream.icyurl = homepage;
+            }
+          } catch(e) {
+            stream.icyurl = null;
+          }
+        } else {
+          stream.icyurl = homepage;
+        }
+      } else {
+        stream.icyurl = null;
+      }
+    }
+
+    // save updates
     const res = await db.updateOne(filter, {
       $set: {
         name: stream.name || station.name || stream.description,

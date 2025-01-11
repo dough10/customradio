@@ -985,6 +985,10 @@ dialog>.small-button.close {
   margin-right: 8px;
 }
 
+.margin-bottom-24 {
+  margin-bottom: 24px;
+}
+
 .scrollable {
   overflow-y: auto;
   overflow-x: hidden;

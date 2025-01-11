@@ -32,7 +32,7 @@ function sleep(ms) {
  * @returns {Boolean}
  */
 function looksLikeAUrl(str) {
-  return str.startsWith('http://') || str.startsWith('ftp://') || str.startsWith('https://');
+  return str.startsWith('http://') || str.startsWith('https://');
 }
 
 
@@ -1110,6 +1110,7 @@ async function loadGenres() {
  * dialog interactions
  */
 function addDialogInteractions() {
+  // animation telling user to click the x
   const dialogs = document.querySelectorAll('dialog');
   dialogs.forEach(dialog => {
     dialog.addEventListener('click', event => {
@@ -1131,16 +1132,18 @@ function addDialogInteractions() {
     });
   });
 
+  // close dialogs
   document.querySelectorAll('dialog>.close').forEach(el => {
     el.addEventListener('click', _ => {
       const dialog = el.parentElement;
+      dialog.close();
       if (dialog.id === 'greeting') {
         localStorage.setItem('greeted', '1');
       }
-      dialog.close();
     });
   });
 
+  //info
   document.querySelector('#info').addEventListener('click', async _ => {
     const depDiv = document.querySelector('#dependencies');
     depDiv.innerHTML = '';
@@ -1157,9 +1160,38 @@ function addDialogInteractions() {
     depDiv.replaceChildren(fragment);
   });
 
+  // add
   const add = document.querySelector('#add');
   const addButton = document.querySelector('#add_button');
   addButton.addEventListener('click', _ => add.showModal());
+}
+
+/**
+ * player volume slider
+ */
+function setupVolSlider() {
+  const slider = document.querySelector('#vol>input');
+  slider.value = Number(localStorage.getItem('volume')) || 100;
+  player.volume =  slider.value / 100;
+  let changeTimer = 0;
+  slider.addEventListener('input', _ => {
+    player.volume = slider.value / 100;
+    if (changeTimer) clearTimeout(changeTimer);
+    changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 1000);
+  });
+}
+
+/**
+ * service worker
+ */
+async function callServiceWorker() {
+  try {
+    navigator.serviceWorker.addEventListener('controllerchange', controllerChange);
+    const worker = await navigator.serviceWorker.register('/worker.js', { scope: '/' });
+    worker.onupdatefound = () => updateFound(worker);
+  } catch (error) {
+    console.log('ServiceWorker registration failed: ', error);
+  }
 }
 
 /**
@@ -1167,13 +1199,7 @@ function addDialogInteractions() {
  */
 window.onload = async () => {
   if ('serviceWorker' in navigator) {
-    try {
-      navigator.serviceWorker.addEventListener('controllerchange', controllerChange);
-      const worker = await navigator.serviceWorker.register('/worker.js', { scope: '/' });
-      worker.onupdatefound = () => updateFound(worker);
-    } catch (error) {
-      console.log('ServiceWorker registration failed: ', error);
-    }
+    await callServiceWorker()
   }
 
   addDialogInteractions();
@@ -1184,6 +1210,7 @@ window.onload = async () => {
   const filter = document.querySelector('#filter');
   filter.addEventListener('change', filterChanged);
   filterChanged({ target: filter, loadLocal: true });
+
   document.querySelector('.reset').addEventListener('click', _ => {
     if (filter.value === '') return;
     filter.value = '';
@@ -1208,15 +1235,7 @@ window.onload = async () => {
   inputElement.oninput = toggleButtonActivity;
 
   if (await canChangeVol()) {
-    const slider = document.querySelector('#vol>input');
-    slider.value = Number(localStorage.getItem('volume')) || 100;
-    player.volume =  slider.value / 100;
-    let changeTimer = 0;
-    slider.addEventListener('input', _ => {
-      player.volume = slider.value / 100;
-      if (changeTimer) clearTimeout(changeTimer);
-      changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 1000);
-    });
+    setupVolSlider()
   } else {
     const volumeElement = document.querySelector('#vol');
     volumeElement.style.display = 'none';
