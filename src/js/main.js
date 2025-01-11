@@ -1150,9 +1150,10 @@ function addDialogInteractions() {
     loadingAnimation(depDiv);
     document.querySelector('#info-dialog').showModal();
     const response = await fetch('/info');
-    const dep = await response.json();
+    const pack = await response.json();
+    document.querySelector('#info-dialog>h1').textContent = `v${pack.version}`;
     const fragment = document.createDocumentFragment();
-    Object.entries(dep).forEach(([key, value]) => {
+    Object.entries(pack.dependencies).forEach(([key, value]) => {
       const p = document.createElement('p');
       p.textContent = `${key}: ${value}`;
       fragment.appendChild(p);

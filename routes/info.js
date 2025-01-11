@@ -9,7 +9,7 @@ module.exports = (req, res) => {
     
     const packageJson = JSON.parse(packageData);
     log(`${req.ip} -> /info ${Date.now() - req.startTime}ms`);
-    res.json(packageJson.dependencies);
+    res.json({dependencies: packageJson.dependencies, version: packageJson.version});
   } catch (err) {
     console.error('Error reading package.json:', err);
     res.status(500).json({ error: 'An error occurred while reading the package.json file' });
