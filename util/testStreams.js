@@ -2,6 +2,7 @@ module.exports = {testStreams, plural};
 
 
 const {ObjectId} = require('mongodb');
+const pack = require('../package.json');
 
 const log = require('./log.js');
 const isLiveStream = require('./isLiveStream.js');
@@ -118,6 +119,9 @@ async function testStreams(db, trackProgress) {
         if (!testedHomepages.includes(homepage)) {
           try {
             const response = await axios.head(homepage, {
+              headers: {
+                'User-Agent': `customradio.dough10.me/${pack.version}`
+              },
               timeout: 3000
             });
             if (response.status === 200) {

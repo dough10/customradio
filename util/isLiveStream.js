@@ -1,4 +1,5 @@
 const axios = require('axios');
+const pack = require('../package.json');
 
 const log = require('./log.js');
 
@@ -57,6 +58,9 @@ function isValidURL(url) {
 async function streamTest(url) {
   try {
     const response = await axios.head(url, {
+      headers: {
+        'User-Agent': `customradio.dough10.me/${pack.version}`
+      },
       timeout: 3000
     });
     const isLive = response.status === 200;
