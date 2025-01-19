@@ -958,6 +958,9 @@ function isValidURL(url) {
 async function formSubmission(ev) {
   ev.preventDefault();
 
+  const button = document.querySelector('#add-stream');
+  button.setAttribute('disabled', true);
+
   const fData = new FormData(ev.target);
 
   try {
@@ -983,6 +986,7 @@ async function formSubmission(ev) {
     console.error('Error:', e);
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
   }
+  button.removeAttribute('disabled');
 }
 
 /**

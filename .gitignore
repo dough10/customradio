@@ -12,3 +12,4 @@ yp.xml
 .vscode
 assets
 make-docs.js
+.DS*
