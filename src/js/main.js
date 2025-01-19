@@ -958,8 +958,8 @@ function isValidURL(url) {
 async function formSubmission(ev) {
   ev.preventDefault();
 
-  const button = document.querySelector('#add-stream');
-  button.setAttribute('disabled', true);
+  const submit = document.querySelector('#submit-stream');
+  submit.setAttribute('disabled', true);
 
   const fData = new FormData(ev.target);
 
@@ -972,21 +972,17 @@ async function formSubmission(ev) {
     const result = await response.json();
     document.getElementById('response').innerText = result.message;
     new Toast(result.message);
-    await sleep(3000);
+    await sleep(2000);
     const inputElement = document.querySelector('#station-url');
-    const submit = document.querySelector('#submit-stream');
     inputElement.value = '';
     document.getElementById('response').innerText = '';
-    if (!submit.hasAttribute('disabled')) {
-      submit.toggleAttribute('disabled');
-    }
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', ev.target.querySelector('input').value || '']);
   } catch (e) {
+    submit.removeAttribute('disabled');
     document.getElementById('response').innerText = 'An error occurred!';
     console.error('Error:', e);
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
   }
-  button.removeAttribute('disabled');
 }
 
 /**
