@@ -23,8 +23,6 @@ const redis = new Redis({
   password: process.env.REDIS_PASSWORD || ''
 });
 
-middleware(app);
-
 /**
  * Starts the Express server and sets up necessary initializations.
  * 
@@ -51,6 +49,7 @@ middleware(app);
  */
 app.listen(3000, async _ => {
   db = await connector.connect();
+  middleware(app);
   routes(app, db, redis);
   const pack = require('./package.json');
   log(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o`);
