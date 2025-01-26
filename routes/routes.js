@@ -177,7 +177,7 @@ module.exports = (app, db, redis) => {
    * 
    * app.get('/topGenres', getTopGenres);
    */
-  app.get('/topGenres', (req, res) => topGenres(redis, req, res))
+  app.get('/topGenres', (req, res) => topGenres(redis, req, res));
 
   /**
    * Handles GET requests to the '/stations' endpoint.
