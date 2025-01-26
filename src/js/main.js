@@ -1107,61 +1107,81 @@ async function loadGenres() {
 }
 
 /**
+ * Bring users attention to the open dialog when clicked outside the dialog
+ * 
+ * @param {Event} event 
+ */
+function wobbleDialog(event) {
+  const dialog = event.target;
+  const closeButton = dialog.querySelector('.small-button.close');
+  const bigCloseButton = dialog.querySelector('.button.close');
+  const animationend = _ => {
+    dialog.removeEventListener('animationend', animationend);
+    if (closeButton) closeButton.classList.remove('attention');
+    if (bigCloseButton) bigCloseButton.classList.remove('button-attention');
+    dialog.classList.remove('dialog-attention');
+  };
+  var rect = dialog.getBoundingClientRect();
+  var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
+    rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
+  if (!isInDialog) {
+    dialog.addEventListener('animationend', animationend);
+    if (closeButton) closeButton.classList.add('attention');
+    if (bigCloseButton) bigCloseButton.classList.add('button-attention');
+    dialog.classList.add('dialog-attention');
+  }
+}
+
+/**
+ * close the opened dialog
+ * 
+ * @param {HTMLElement} el 
+ */
+function closeDialog(el) {
+  const dialog = el.parentElement;
+  dialog.close();
+  if (dialog.id === 'greeting') {
+    localStorage.setItem('greeted', '1');
+  }
+}
+
+/**
+ * populate info dialog with details about application
+ * 
+ * @returns {void}
+ */
+async function info() {
+  const depDiv = document.querySelector('#dependencies');
+  document.querySelector('#info-dialog').showModal();
+  if (depDiv.querySelectorAll('*').length) return;
+  loadingAnimation(depDiv);
+  const response = await fetch('/info');
+  const pack = await response.json();
+  document.querySelector('#info-dialog>h1').textContent = `v${pack.version}`;
+  const fragment = document.createDocumentFragment();
+  Object.entries(pack.dependencies).forEach(([key, value]) => {
+    const p = document.createElement('p');
+    p.textContent = `${key}: ${value}`;
+    fragment.appendChild(p);
+  });
+  depDiv.replaceChildren(fragment);
+}
+
+/**
  * dialog interactions
  */
 function addDialogInteractions() {
   // animation telling user to click the x
   const dialogs = document.querySelectorAll('dialog');
-  dialogs.forEach(dialog => {
-    dialog.addEventListener('click', event => {
-      const closeButton = dialog.querySelector('.small-button.close');
-      const bigCloseButton = dialog.querySelector('.button.close');
-      const aniend = _ => {
-        dialog.removeEventListener('animationend', aniend);
-        if (closeButton) closeButton.classList.remove('attention');
-        if (bigCloseButton) bigCloseButton.classList.remove('button-attention');
-        dialog.classList.remove('dialog-attention');
-      };
-      var rect = dialog.getBoundingClientRect();
-      var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
-        rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
-      if (!isInDialog) {
-        dialog.addEventListener('animationend', aniend);
-        if (closeButton) closeButton.classList.add('attention');
-        if (bigCloseButton) bigCloseButton.classList.add('button-attention');
-        dialog.classList.add('dialog-attention');
-      }
-    });
-  });
+  dialogs.forEach(dialog => dialog.addEventListener('click', wobbleDialog));
 
   // close dialogs
   document.querySelectorAll('dialog>.close').forEach(el => {
-    el.addEventListener('click', _ => {
-      const dialog = el.parentElement;
-      dialog.close();
-      if (dialog.id === 'greeting') {
-        localStorage.setItem('greeted', '1');
-      }
-    });
+    el.addEventListener('click', _ => closeDialog(el));
   });
 
   //info
-  document.querySelector('#info').addEventListener('click', async _ => {
-    const depDiv = document.querySelector('#dependencies');
-    document.querySelector('#info-dialog').showModal();
-    if (depDiv.querySelectorAll('*').length) return;
-    loadingAnimation(depDiv);
-    const response = await fetch('/info');
-    const pack = await response.json();
-    document.querySelector('#info-dialog>h1').textContent = `v${pack.version}`;
-    const fragment = document.createDocumentFragment();
-    Object.entries(pack.dependencies).forEach(([key, value]) => {
-      const p = document.createElement('p');
-      p.textContent = `${key}: ${value}`;
-      fragment.appendChild(p);
-    });
-    depDiv.replaceChildren(fragment);
-  });
+  document.querySelector('#info').addEventListener('click', info);
 
   // add
   const add = document.querySelector('#add');
