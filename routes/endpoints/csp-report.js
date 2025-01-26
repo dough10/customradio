@@ -1,8 +1,8 @@
 require('dotenv').config();
 const {validationResult} = require('express-validator');
 
-const saveToCollection = require('../util/saveToCollection.js');
-const log = require('../util/log.js');
+const saveToCollection = require('../../util/saveToCollection.js');
+const log = require('../../util/log.js');
 
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports

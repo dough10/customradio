@@ -1,7 +1,7 @@
 const fs = require('fs');
 
-const log = require('../util/log.js');
-const sitemapxml = require('../util/sitemapxml.js');
+const log = require('../../util/log.js');
+const sitemapxml = require('../../util/sitemapxml.js');
 
 module.exports = (req, res) => {
   fs.stat('index.js', (error, stats) => {

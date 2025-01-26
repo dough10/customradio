@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const htmlFolder = path.join(__dirname, '..', 'html');
+const htmlFolder = path.join(__dirname, '..', 'public');
 const workerFilePath = path.join(htmlFolder, 'worker.js');
 
 let workerFileContent = fs.readFileSync(workerFilePath, 'utf8');

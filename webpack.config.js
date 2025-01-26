@@ -12,7 +12,7 @@ module.exports = {
   entry: './build_assets/build.js',
   output: {
     filename: 'bundle.min.js',
-    path: path.resolve(__dirname, 'html'),
+    path: path.resolve(__dirname, 'public'),
   },
   module: {
     rules: [
@@ -59,7 +59,7 @@ module.exports = {
       filename: 'styles.min.css',
     }),
     new HtmlCriticalWebpackPlugin({
-      base: path.resolve(__dirname, 'html'),
+      base: path.resolve(__dirname, 'public'),
       src: 'index.html',
       dest: 'index.html',
       inline: true,

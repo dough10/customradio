@@ -1,5 +1,5 @@
-const log = require('../util/log.js');
-const saveToCollection = require('../util/saveToCollection.js');
+const log = require('../../util/log.js');
+const saveToCollection = require('../../util/saveToCollection.js');
 
 /**
  * logs details of the incoming request to a collection and returns a 403 status.

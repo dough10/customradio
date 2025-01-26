@@ -53,6 +53,40 @@ function msToHhMmSs(milliseconds) {
   return `${hours > 0 ? `${hours} hours ` : ''}${minutes} minutes and ${secs} seconds`;
 }
 
+
+/**
+ * breaks a string into parts and attempts to get a usable url from it
+ * 
+ * @param {String} url 
+ * @param {String[]} testedHomepages 
+ * 
+ * @returns {null|String}
+ */
+async function testHomepageConnection(url, testedHomepages) {
+  const homepage = await useableHomapage(url);
+  if (!homepage) {
+    return null;
+  }
+  if (testedHomepages.includes(homepage)) {
+    return homepage;
+  }
+  try {
+    const response = await axios.head(homepage, {
+      headers: {
+        'User-Agent': `customradio.dough10.me/${pack.version}`
+      },
+      timeout: 3000
+    });
+    if (response.status === 200) {
+      testedHomepages.push(homepage);
+      return homepage;
+    }
+  } catch(e) {
+    return null;
+  }
+}
+
+
 /**
  * Tests streams for online state and headers to update the database with stream information.
  * 
@@ -114,29 +148,7 @@ async function testStreams(db, trackProgress) {
 
     // ensure homepage url is usable
     if (stream.icyurl) {
-      const homepage = await useableHomapage(stream.icyurl);
-      if (homepage) {
-        if (!testedHomepages.includes(homepage)) {
-          try {
-            const response = await axios.head(homepage, {
-              headers: {
-                'User-Agent': `customradio.dough10.me/${pack.version}`
-              },
-              timeout: 3000
-            });
-            if (response.status === 200) {
-              testedHomepages.push(homepage);
-              stream.icyurl = homepage;
-            }
-          } catch(e) {
-            stream.icyurl = null;
-          }
-        } else {
-          stream.icyurl = homepage;
-        }
-      } else {
-        stream.icyurl = null;
-      }
+      await testHomepageConnection(stream.icyurl, testedHomepages);
     }
 
     // save updates

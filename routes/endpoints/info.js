@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const log = require('../util/log.js');
+const log = require('../../util/log.js');
 
 module.exports = (req, res) => {
   try {
-    const packagePath = path.join(__dirname, '../package.json');
+    const packagePath = path.join(__dirname, '../../package.json');
     const packageData = fs.readFileSync(packagePath, 'utf8');
     
     const packageJson = JSON.parse(packageData);

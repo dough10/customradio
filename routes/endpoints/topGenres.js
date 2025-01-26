@@ -1,7 +1,7 @@
 require('dotenv').config();
 
-const log = require('../util/log.js');
-const DbConnector = require('../util/dbConnector.js');
+const log = require('../../util/log.js');
+const DbConnector = require('../../util/dbConnector.js');
 
 /**
  * Handles the request to retrieve the top genres from the database.

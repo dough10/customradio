@@ -1,4 +1,4 @@
-const log = require('../util/log.js');
+const log = require('../../util/log.js');
 
 module.exports = (req, res) => {
   const lines = [

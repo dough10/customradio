@@ -1,7 +1,7 @@
 const {validationResult} = require('express-validator');
 
-const log = require('../util/log.js');
-const isLiveStream = require('../util/isLiveStream.js');
+const log = require('../../util/log.js');
+const isLiveStream = require('../../util/isLiveStream.js');
 
 
 /**
@@ -102,6 +102,7 @@ module.exports = async (db, redis, req, res) => {
       message: message
     });
   } catch (e) {
+    console.log(e)
     const message = `Failed to add station ${Date.now() - req.startTime}ms`;
     log(message);
     res.status(500).json({

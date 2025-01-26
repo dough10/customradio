@@ -1,10 +1,10 @@
 const { validationResult } = require('express-validator');
 const he = require('he');
 
-const usedTypes = require("../util/usedTypes.js");
-const log = require('../util/log.js');
-const queryString = require('../util/queryString.js');
-const saveToCollection = require('../util/saveToCollection.js');
+const usedTypes = require("../../util/usedTypes.js");
+const log = require('../../util/log.js');
+const queryString = require('../../util/queryString.js');
+const saveToCollection = require('../../util/saveToCollection.js');
 
 /**
  * Handles the request to fetch and return a list of audio stations based on query parameters.

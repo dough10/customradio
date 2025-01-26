@@ -2,7 +2,6 @@
 /genres.json
 /db.json
 /.hintrc
-/html/
 /collect_headers.js
 /.env
 /.jshintrc
@@ -13,3 +12,4 @@ yp.xml
 assets
 make-docs.js
 .DS*
+public

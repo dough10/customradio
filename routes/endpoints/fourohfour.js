@@ -1,6 +1,6 @@
 const url = require('url');
-const log = require('../util/log.js');
-const saveToCollection = require('../util/saveToCollection.js');
+const log = require('../../util/log.js');
+const saveToCollection = require('../../util/saveToCollection.js');
 
 /**
  * Express handler for 404 errors, logs request details, saves to collection, 
