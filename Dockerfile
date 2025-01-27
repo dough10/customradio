@@ -62,7 +62,7 @@ WORKDIR /usr/src/app
 # Copy built assets from the build stage
 COPY --chown=node:node --from=build /usr/src/app/package*.json ./
 COPY --chown=node:node --from=build /usr/src/app/index.js ./
-COPY --chown=node:node --from=build /usr/src/app/html ./html
+COPY --chown=node:node --from=build /usr/src/app/public ./public
 COPY --chown=node:node --from=build /usr/src/app/util ./util
 COPY --chown=node:node --from=build /usr/src/app/routes ./routes
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
