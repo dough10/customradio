@@ -42,9 +42,15 @@ function urlDeconstruction(URL) {
     if (isIPv4(parsedUrl.hostname)) {
       ip = parsedUrl.hostname;
     } else if (splitHostname.length > 2) {
-      subdomain = splitHostname[0];
-      domain = splitHostname[1];
-      ext = splitHostname[2];
+      const lastTwoParts = splitHostname.slice(-2).join('.');
+      if (['co.uk', 'org.uk', 'gov.uk'].includes(lastTwoParts)) {
+        domain = splitHostname.slice(0, -2).join('.');
+        ext = lastTwoParts;
+      } else {
+        subdomain = splitHostname[0];
+        domain = splitHostname[1];
+        ext = splitHostname[2];
+      }
     } else if (splitHostname.length === 2) {
       domain = splitHostname[0];
       ext = splitHostname[1];
@@ -99,8 +105,8 @@ function objectToUrl(obj) {
  *  
  * @returns {String} 
  */
-module.exports = async (obj) => {
-  const brokenHome = urlDeconstruction(obj.homepage);
+module.exports = async (homepage) => {
+  const brokenHome = urlDeconstruction(homepage);
   if (brokenHome) {
     return objectToUrl(brokenHome);
   } else {

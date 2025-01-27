@@ -1,5 +1,4 @@
 require('dotenv').config();
-const axios = require('axios');
 const Connector = require('./util/dbConnector.js');
 const testStreams = require('./util/testStreams.js').testStreams;
 const connector = new Connector(process.env.DB_HOST, 'stations');

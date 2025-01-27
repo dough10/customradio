@@ -77,7 +77,7 @@ async function testHomepageConnection(url, testedHomepages) {
       },
       timeout: 3000
     });
-    if (response.status === 200) {
+    if (response.status >= 200 && response.status < 300) {
       testedHomepages.push(homepage);
       return homepage;
     }
