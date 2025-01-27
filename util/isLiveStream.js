@@ -63,7 +63,7 @@ async function streamTest(url) {
       },
       timeout: 3000
     });
-    const isLive = response.status === 200;
+    const isLive = response.status >= 200 && response.status < 300;
     let name = response.headers['icy-name'];
     const description = response.headers['icy-description'];
     const icyGenre = response.headers['icy-genre'];
