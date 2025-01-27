@@ -65,7 +65,7 @@ function msToHhMmSs(milliseconds) {
 async function testHomepageConnection(url, testedHomepages) {
   const homepage = await useableHomapage(url);
   if (!homepage) {
-    return null;
+    return;
   }
   if (testedHomepages.includes(homepage)) {
     return homepage;
@@ -82,7 +82,7 @@ async function testHomepageConnection(url, testedHomepages) {
       return homepage;
     }
   } catch(e) {
-    return null;
+    return;
   }
 }
 
@@ -148,7 +148,7 @@ async function testStreams(db, trackProgress) {
 
     // ensure homepage url is usable
     if (stream.icyurl) {
-      await testHomepageConnection(stream.icyurl, testedHomepages);
+      stream.icyurl = await testHomepageConnection(stream.icyurl, testedHomepages);
     }
 
     // save updates
