@@ -16,13 +16,6 @@ const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 const DB_COLLECTION = 'stations';
 const connector = new DbConnector(DB_HOST, DB_COLLECTION);
 
-let db;
-const redis = new Redis({
-  host: process.env.REDIS_HOST || '127.0.0.1',
-  port: process.env.REDIS_PORT || 6379,
-  password: process.env.REDIS_PASSWORD || ''
-});
-
 /**
  * Starts the Express server and sets up necessary initializations.
  * 
@@ -48,7 +41,12 @@ const redis = new Redis({
  * });
  */
 app.listen(3000, async _ => {
-  db = await connector.connect();
+  const redis = new Redis({
+    host: process.env.REDIS_HOST || '127.0.0.1',
+    port: process.env.REDIS_PORT || 6379,
+    password: process.env.REDIS_PASSWORD || ''
+  });
+  const db = await connector.connect();
   middleware(app);
   routes(app, db, redis);
   const pack = require('./package.json');
