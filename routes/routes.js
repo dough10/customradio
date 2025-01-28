@@ -50,7 +50,7 @@ function apiKeyMiddleware(req, res, next) {
   res.status(403).json({ error: 'Forbidden: Invalid Access Token' });
 }
 
-module.exports = (app, db, redis) => {
+module.exports = (app, db, redis, register) => {
   /** 
    * robots.txt
    */
