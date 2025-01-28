@@ -213,7 +213,7 @@ function loadingAnimation(parent) {
 function setSelectedCount(number) {
   const count = document.querySelector('#count');
   const dlButton = document.querySelector('#download');
-  count.textContent = number;
+  count.textContent = `${number} station${number === 1 ? '' : 's'} selected`;
   if (number) {
     dlButton.removeAttribute('disabled');
   } else {
@@ -790,7 +790,7 @@ async function filterChanged(ev) {
     container.scrollTop = 0;
     container.replaceChildren(fragment);
     lazyLoadOnScroll(list, container);
-    stationCount.textContent = stations.length;
+    stationCount.textContent = `${stations.length} results`;
     countParent.style.removeProperty('display');
     if (ev.target.value.length && !currentGenres().includes(ev.target.value)) {
       await loadGenres();

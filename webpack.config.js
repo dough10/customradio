@@ -1,11 +1,11 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const HtmlCriticalWebpackPlugin = require('html-critical-webpack-plugin');
+
+
 
 module.exports = {
   mode: 'production',
@@ -44,32 +44,8 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(),
-    new HtmlWebpackPlugin({
-      template: './src/index.html',
-      inject: 'body',
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        minifyCSS: true,
-        minifyJS: true,
-      },
-    }),
     new MiniCssExtractPlugin({
       filename: 'styles.min.css',
-    }),
-    new HtmlCriticalWebpackPlugin({
-      base: path.resolve(__dirname, 'public'),
-      src: 'index.html',
-      dest: 'index.html',
-      inline: true,
-      minify: true,
-      extract: true,
-      width: 1280,
-      height: 800,
-      penthouse: {
-        blockJSRequests: false,
-      },
     }),
     new CopyWebpackPlugin({
       patterns: [

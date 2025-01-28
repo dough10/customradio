@@ -108,6 +108,7 @@ header {
 
 a {
   color: inherit;
+  margin: 0 4px;
 }
 
 .button {

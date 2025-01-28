@@ -2,7 +2,9 @@ const multer = require('multer');
 const upload = multer();
 const validator = require('validator');
 const { query, body } = require('express-validator');
+const pug = require('pug');
 
+const log = require('./../util/log.js');
 const addToDatabase = require('./endpoints/add.js');
 const getStations = require('./endpoints/stations.js');
 const streamIssue = require('./endpoints/stream-issue.js');
@@ -68,7 +70,7 @@ module.exports = (app, db, redis) => {
    * assetLinks
    */
   app.get('/.well-known/assetLinks.json', (req,res) => {
-    log(`${req.ip} -> /.well-known/assetLinks.json`);
+    log(`${req.ip} -> /.well-known/assetLinks.json ${Date.now() - req.startTime}ms`);
     res.json([]);
   });
 
@@ -81,6 +83,14 @@ module.exports = (app, db, redis) => {
    * info!
    */
   app.get('/info', info);
+
+  /**
+   * Index
+   */
+  app.get('/', (req, res) => {
+    log(`${req.ip} -> /  ${Date.now() - req.startTime}ms`);
+    res.send(pug.renderFile('./templates/index.pug'));
+  });
 
   /**
    * GET /metrics
