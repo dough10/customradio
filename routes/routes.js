@@ -92,6 +92,9 @@ module.exports = (app, db, redis, register) => {
     res.send(pug.renderFile('./templates/index.pug'));
   });
 
+  /**
+   * index.htnml redirect to /
+   */
   app.get('/index.html', (req, res) => {
     res.redirect('/');
   });
