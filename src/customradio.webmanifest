@@ -3,8 +3,8 @@
   "short_name": "customradio",
   "description": "A online radio browser that creates a text file for Hiby digital audio players.",
   "orientation": "portrait-primary",
-  "start_url": "/index.html",
-  "id": "/index.html",
+  "start_url": "/",
+  "id": "/",
   "lang": "en-US",
   "scope": "/",
   "icons": [
