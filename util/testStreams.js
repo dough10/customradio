@@ -1,4 +1,4 @@
-module.exports = {testStreams, plural};
+module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
 
 
 const {ObjectId} = require('mongodb');
@@ -160,6 +160,7 @@ async function testStreams(db, trackProgress) {
         online: stream.isLive,
         'content-type': stream.content,
         bitrate: stream.bitrate || 'Unknown',
+        icon: 'Unknown',
         homepage: stream.icyurl || 'Unknown',
         error: undefined
       }

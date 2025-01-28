@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const log = require('./util/log.js');
 const { testStreams } = require('./util/testStreams.js');
+const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./routes/middleware.js');
 const routes = require('./routes/routes.js');
 
@@ -52,4 +53,5 @@ app.listen(3000, async _ => {
   const pack = require('./package.json');
   log(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o`);
   schedule.scheduleJob('0 0 * * 0', _ => testStreams(db));
+  schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir(db));
 });
