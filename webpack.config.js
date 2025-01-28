@@ -50,10 +50,6 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: './src/worker.js',
-          to: '[name][ext]',
-        },
-        {
           from: './src/customradio.webmanifest',
           to: '[name][ext]',
         },

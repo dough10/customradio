@@ -1,34 +1,35 @@
 const fs = require('fs');
 const path = require('path');
 
-const htmlFolder = path.join(__dirname, '..', 'public');
-const workerFilePath = path.join(htmlFolder, 'worker.js');
+const src = path.join(__dirname, '..', 'src');
+const dest = path.join(__dirname, '..', 'public');
 
-let workerFileContent = fs.readFileSync(workerFilePath, 'utf8');
-let files = fs.readdirSync(htmlFolder);
-let screenshots = fs.readdirSync(path.join(htmlFolder, 'screenshots'));
+// get file lists from destination folder
+let files = fs.readdirSync(dest);
+let screenshots = fs.readdirSync(path.join(dest, 'screenshots'));
 
-/**
- * remove things that should not be in the list
- */
+// remove some paths
 [
   'worker.js',
   'bundle.min.js.LICENSE.txt',
   'screenshots'
 ].forEach(file => files.splice(files.indexOf(file),1));
 
-/**
- * correct file path strings
- */
+//correct file path strings
 files = files.map(file => `/${file}`);
-screenshots = screenshots.map(image => `/screenshots/${image}`);
-
 files.push('/');
+screenshots = screenshots.map(image => `/screenshots/${image}`);
 
 const urlsToCache = JSON.stringify([...files, ...screenshots]);
 
+// read src file
+let workerFileContent = fs.readFileSync(path.join(src, 'worker.js'), 'utf8');
+
+// add paths to file contents
 const newWorkerFileContent = workerFileContent.replace(
-  /(,urlsToCache=)\[[\s\S]*?\];/, 
-  `,urlsToCache=${urlsToCache};`
+  /(urlsToCache = )\[[\s\S]*?\];/, 
+  `urlsToCache = ${urlsToCache};`
 );
-fs.writeFileSync(workerFilePath, newWorkerFileContent, 'utf8');
+
+// write destination file
+fs.writeFileSync(path.join(dest, 'worker.js'), newWorkerFileContent, 'utf8');

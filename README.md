@@ -1,4 +1,4 @@
-# customradio V:1.11.3
+# customradio V:1.11.4
 
 An online radio station browser with the ability to export a radio.txt file for use in Hiby digital audio players.
 
@@ -44,6 +44,7 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 - **multer**: *^1.4.5-lts.1*
 - **node-schedule**: *^2.1.1*
 - **prom-client**: *^15.1.3*
+- **pug**: *^3.0.3*
 - **validator**: *^13.12.0*
 - **xml2js**: *^0.6.2*
 
@@ -61,8 +62,6 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 - **copy-webpack-plugin**: *^12.0.2*
 - **css-loader**: *^7.1.2*
 - **css-minimizer-webpack-plugin**: *^7.0.0*
-- **html-critical-webpack-plugin**: *^2.1.0*
-- **html-webpack-plugin**: *^5.6.0*
 - **jsdoc-to-markdown**: *^8.0.3*
 - **jshint**: *^2.13.6*
 - **mini-css-extract-plugin**: *^2.9.0*
