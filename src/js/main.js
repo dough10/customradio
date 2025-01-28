@@ -1153,18 +1153,19 @@ function closeDialog(el) {
 async function info() {
   const depDiv = document.querySelector('#dependencies');
   document.querySelector('#info-dialog').showModal();
-  if (depDiv.querySelectorAll('*').length) return;
+  if (depDiv.querySelectorAll('*').length > 5) return;
   loadingAnimation(depDiv);
   const response = await fetch('/info');
   const pack = await response.json();
   document.querySelector('#info-dialog>h1').textContent = `v${pack.version}`;
   const fragment = document.createDocumentFragment();
   Object.entries(pack.dependencies).forEach(([key, value]) => {
-    const p = document.createElement('p');
-    p.textContent = `${key}: ${value}`;
-    fragment.appendChild(p);
+    const li = document.createElement('li');
+    li.textContent = `${key}: ${value}`;
+    fragment.appendChild(li);
   });
-  depDiv.replaceChildren(fragment);
+  depDiv.append(fragment);
+  depDiv.querySelector('.loading').remove();
 }
 
 /**
