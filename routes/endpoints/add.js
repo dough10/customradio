@@ -43,7 +43,7 @@ module.exports = async (db, redis, req, res) => {
     });
   }
   const {url} = req.body;
-  log(`${req.ip} -> /add ${url}`);
+  log(`${req.ip} -> /add ${url} ${Date.now() - req.startTime}ms`);
   try {
     const exists = await db.findOne({
       url
@@ -57,18 +57,18 @@ module.exports = async (db, redis, req, res) => {
     }
     const status = await isLiveStream(url);
     if (!status.ok) {
-      const message = `Connection test failed: ${status.error} ${Date.now() - req.startTime}ms`;
-      log(message);
-      res.status(500).json({
+      const message = `Connection test failed: ${status.error}`;
+      log(`${message} ${Date.now() - req.startTime}ms`);
+      res.json({
         message: message
       });
       return;
     }
 
     if (!status.name) {
-      const message = `Failed getting station name ${Date.now() - req.startTime}ms`;
-      log(message);
-      res.status(500).json({
+      const message = `Failed getting station name`;
+      log(`${message} ${Date.now() - req.startTime}ms`);
+      res.json({
         message: message
       });
       return; 
@@ -96,15 +96,14 @@ module.exports = async (db, redis, req, res) => {
     };
 
     await db.insertOne(data);
-    const message = `station saved ${Date.now() - req.startTime}ms`;
-    log(message);
+    const message = `station saved`;
+    log(`${message} ${Date.now() - req.startTime}ms`);
     res.json({
       message: message
     });
   } catch (e) {
-    console.log(e)
-    const message = `Failed to add station ${Date.now() - req.startTime}ms`;
-    log(message);
+    const message = `Failed to add station`;
+    log(`${message}: ${e.message} ${Date.now() - req.startTime}ms`);
     res.status(500).json({
       message: message
     });
