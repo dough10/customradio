@@ -23,6 +23,8 @@ let screenshots = fs.readdirSync(path.join(htmlFolder, 'screenshots'));
 files = files.map(file => `/${file}`);
 screenshots = screenshots.map(image => `/screenshots/${image}`);
 
+files.push('/');
+
 const urlsToCache = JSON.stringify([...files, ...screenshots]);
 
 const newWorkerFileContent = workerFileContent.replace(
