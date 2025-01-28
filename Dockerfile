@@ -32,6 +32,7 @@ COPY --chown=node:node --from=build /usr/src/app/public ./public
 COPY --chown=node:node --from=build /usr/src/app/util ./util
 COPY --chown=node:node --from=build /usr/src/app/routes ./routes
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/src/app/templates ./templates
 
 # Expose the application port
 EXPOSE 3000/tcp
