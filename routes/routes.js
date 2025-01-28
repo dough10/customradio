@@ -92,6 +92,11 @@ module.exports = (app, db, redis, register) => {
     res.send(pug.renderFile('./templates/index.pug'));
   });
 
+  app.get('/index.html', (req, res) => {
+    log(`${req.ip} -> /  ${Date.now() - req.startTime}ms`);
+    res.send(pug.renderFile('./templates/index.pug'));
+  });
+
   /**
    * GET /metrics
    * @summary Exposes Prometheus metrics for scraping.
