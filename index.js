@@ -56,9 +56,9 @@ register.registerMetric(httpRequestCounter);
  * });
  */
 app.listen(3000, async _ => {
-
+  let db = await connector.connect();
   middleware(app, httpRequestCounter);
-  routes(app, await connector.connect(), new Redis({
+  routes(app, db, new Redis({
     host: process.env.REDIS_HOST || '127.0.0.1',
     port: process.env.REDIS_PORT || 6379,
     password: process.env.REDIS_PASSWORD || ''
