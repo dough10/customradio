@@ -64,7 +64,7 @@ module.exports = async (db, logging) => {
         stream.icyurl = await testHomepageConnection(stream.icyurl, testedHomepages);
       }
     
-      const res = await db.insertOne({
+      await db.insertOne({
         name: stream.name || entry.server_name[0] || stream.description,
         url: stream.url,
         genre: stream.icyGenre || entry.genre[0] || 'Unknown',
@@ -75,7 +75,7 @@ module.exports = async (db, logging) => {
         homepage: stream.icyurl || 'Unknown',
         error: undefined
       });
-      total += res.modifiedCount;
+      total += 1;
     }
     const stats = await dbStatistics(db);
     const now = new Date().getTime();
