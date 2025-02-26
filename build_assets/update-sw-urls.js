@@ -5,18 +5,15 @@ const src = path.join(__dirname, '..', 'src');
 const dest = path.join(__dirname, '..', 'public');
 
 // get file lists from destination folder
-let files = fs.readdirSync(dest);
 let screenshots = fs.readdirSync(path.join(dest, 'screenshots'));
 
-// remove some paths
-[
-  'worker.js',
-  'bundle.min.js.LICENSE.txt',
-  'screenshots'
-].forEach(file => files.splice(files.indexOf(file),1));
-
-//correct file path strings
-files = files.map(file => `/${file}`);
+// remove some paths and correct file paths
+const files = fs.readdirSync(dest)
+  .filter(file => ![
+    'worker.js', 
+    'screenshots'
+  ].includes(file))
+  .map(file => `/${file}`);
 files.push('/');
 screenshots = screenshots.map(image => `/screenshots/${image}`);
 
