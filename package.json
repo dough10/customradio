@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "prebuild": "sh build_assets/pre.sh",
+    "prebuild": "bash build_assets/pre.sh",
     "build": "npx webpack",
-    "postbuild": "sh build_assets/post.sh",
+    "postbuild": "bash build_assets/post.sh",
     "test-HTML": "web-test-runner \"src/tests/*.test.js\" --node-resolve",
     "test-API": "mocha",
     "version++": "node build_assets/incriment-version.js && node make-docs.js",
