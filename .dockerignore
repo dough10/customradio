@@ -15,3 +15,4 @@ test.js
 assets
 logs/*
 data/.gitignore
+templates/.gitignore
