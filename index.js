@@ -2,15 +2,15 @@ const express = require('express');
 const schedule = require('node-schedule');
 const app = express();
 const Redis = require('ioredis');
-const DbConnector = require('./util/dbConnector.js');
 const promClient = require('prom-client');
 require('dotenv').config();
 
-const Logger = require('./util/logger.js');
 const { testStreams } = require('./util/testStreams.js');
 const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./routes/middleware.js');
 const routes = require('./routes/routes.js');
+const DbConnector = require('./util/dbConnector.js');
+const Logger = require('./util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -50,11 +50,7 @@ register.registerMetric(httpRequestCounter);
  * @example
  * // Starting the server
  * app.listen(3000, async _ => {
- *   db = await connectToDb(DB_HOST);
- *   const pack = require('./package.json');
- *   log(`${pack.name} V:${pack.version}`);
  *   log('Online. o( ❛ᴗ❛ )o');
- *   schedule.scheduleJob('0 0 * * *', _ => testStreams(db));
  * });
  */
 app.listen(3000, async _ => {
