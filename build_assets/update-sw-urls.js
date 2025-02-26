@@ -14,7 +14,12 @@ const files = fs.readdirSync(dest)
     'screenshots'
   ].includes(file))
   .map(file => `/${file}`);
-files.push('/');
+
+[
+  '/',
+  '/stations',
+  'topGenres'
+].forEach(endpoint => files.push(endpoint));
 screenshots = screenshots.map(image => `/screenshots/${image}`);
 
 const urlsToCache = JSON.stringify([...files, ...screenshots]);
