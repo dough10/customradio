@@ -1,6 +1,5 @@
 const multer = require('multer');
 const upload = multer();
-const validator = require('validator');
 const { query, body } = require('express-validator');
 const pug = require('pug');
 
