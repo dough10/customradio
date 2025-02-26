@@ -22,8 +22,8 @@ replace_path() {
 
 version=$(generate_random_string 8)
 
-css_path=styles.min.$version.css
-js_path=bundle.min.$version.js
+css_path=styles.min."$version".css
+js_path=bundle.min."$version".js
 
 template=templates/index.pug
 cp src/index.pug "$template"
