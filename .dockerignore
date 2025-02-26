@@ -3,7 +3,7 @@
 .vscode
 .hintrc
 .gitignore
-html
+public
 test
 src/test
 README.md
