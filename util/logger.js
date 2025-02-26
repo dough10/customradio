@@ -19,10 +19,12 @@ function getLevel(str) {
       return 1;
     case 'warning':
       return 2;
-    case 'critical':
+    case 'error':
       return 3;
+    case 'critical':
+      return 4;
     default:
-      console.log('using default(critical) log level');
+      console.log('using default(error) log level');
       return 3;
   }
 }
@@ -73,7 +75,7 @@ class Logger {
   async info(message) {
     if (this._threshold <= 1) await this._log(this._timestamp(), 'info', message);
   }
-
+  
   /**
    * Logs a warning message if the current log level allows it.
    * 
@@ -85,13 +87,23 @@ class Logger {
   }
 
   /**
+   * Logs an error message if the current log level allows it.
+   * 
+   * @param {string} message - The message to log.
+   * @returns {Promise<void>} A promise that resolves when the log entry is written.
+   */
+  async error(message) {
+    if (this._threshold <= 3) await this._log(this._timestamp(), 'error', message);
+  }
+
+  /**
    * Logs a critical message if the current log level allows it.
    * 
    * @param {string} message - The message to log.
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async critical(message) {
-    if (this._threshold <= 3) await this._log(this._timestamp(), 'critical', message);
+    if (this._threshold <= 4) await this._log(this._timestamp(), 'critical', message);
   }
 
   /**

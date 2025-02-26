@@ -54,7 +54,10 @@ module.exports = async (req, res) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    const error = errors.array();
+    log.error(error);
+    res.status(400).json({error});
+    return; 
   }
 
   try {
@@ -64,8 +67,8 @@ module.exports = async (req, res) => {
     await saveToCollection(cspReport, 'csp-report');
     res.status(204).send();
   } catch(error) {
-    const message = `Error Saving CSP-Report: ${error.message}`
-    log.error(message);
+    const message = `Error Saving CSP-Report: ${error.message}`;
+    log.critical(message);
     res.status(500).send(message);
   }
 };

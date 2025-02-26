@@ -31,8 +31,10 @@ module.exports = async (req, res) => {
     host: req.get('host'),
     pathname: req.originalUrl
   };
+
+  const message = '╭∩╮(︶︿︶)╭∩╮';
   
-  log.info(`${req.ip} requested ${url.format(reqadd)} 404! ╭∩╮(︶︿︶)╭∩╮`);
+  log.info(`${req.ip} requested ${url.format(reqadd)} 404! ${message}`);
   
   /**
    * Save the 404 error request details to a mongodb collection.
@@ -79,7 +81,5 @@ module.exports = async (req, res) => {
   }
 
   // Respond with a 404 error and a custom message
-  res.status(404).json({
-    message: '╭∩╮(︶︿︶)╭∩╮'
-  });
+  res.status(404).json({message});
 };

@@ -23,9 +23,9 @@ const log = new Logger(logLevel);
 module.exports = async (db, req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      errors: errors.array()
-    });
+    const errors = errors.array();
+    log.error(JSON.stringify(errors));
+    return res.status(400).json({errors});
   }
 
   const {url} = req.body;
@@ -40,16 +40,16 @@ module.exports = async (db, req, res) => {
       }
     );
     if (result.matchedCount === 0) {
-      return res.status(404).json({
-        message: "Document not found"
-      });
+      const message = "Document not found";
+      log.error(message);
+      return res.status(404).json({message});
     }
     res.json({
       message: "Duplicate logged"
     });
   } catch(error) {
-    res.status(500).json({
-      message: `Failed to log error: ${entryError.message}` 
-    });
+    const message = `Failed to log error: ${entryError.message}`;
+    log.error(message);
+    res.status(500).json({message});
   }
 };

@@ -14,6 +14,6 @@ module.exports = async () => {
     log.info(`${result.deletedCount} genre entry(s) were deleted.`);
     await connector.disconnect();
   } catch(error) {
-    log.error(`Error cleaning up genres: ${error.message}`);
+    log.critical(`Error cleaning up genres: ${error.message}`);
   }
 };

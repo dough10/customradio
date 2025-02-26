@@ -14,7 +14,8 @@ module.exports = (req, res) => {
     log.info(`${req.ip} -> /info ${Date.now() - req.startTime}ms`);
     res.json({dependencies: packageJson.dependencies, version: packageJson.version});
   } catch (err) {
-    log.error('Error reading package.json:', err);
-    res.status(500).json({ error: 'An error occurred while reading the package.json file' });
+    const error = `An error occurred while reading the package.json file: ${err.message}`;
+    log.critical(error);
+    res.status(500).json({error});
   }
 };

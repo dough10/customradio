@@ -6,5 +6,5 @@ const log = new Logger(logLevel);
 
 module.exports = async (stats) => {
   await saveToCollection(stats, 'statistics');
-  log.info('database statistics saved');
+  log.debug('database statistics saved');
 };

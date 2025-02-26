@@ -51,7 +51,7 @@ module.exports = async (db) => {
     
     const testedHomepages = [];
     for (const entry of data) {
-      log.debug(`${((data.indexOf(entry) / length) * 100).toFixed(3)}%`);
+      log.debug(`Scraping Icecast Directory: ${((data.indexOf(entry) / length) * 100).toFixed(3)}%`);
       
       const url = rmRef(entry.listen_url[0]);
       const stream = await isLiveStream(url);
@@ -87,6 +87,6 @@ module.exports = async (db) => {
     log.info(`Icecast Directory scrape complete: ${total} entry${plural(total)} added over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
     await saveStats(stats);
   } catch(err) {
-    log.info(`Scrape failed: ${err.message}`);
+    log.critical(`Scrape failed: ${err.message}`);
   }
 };

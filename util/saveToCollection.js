@@ -9,7 +9,7 @@ module.exports = async (obj, collection) => {
   try{
     await db.insertOne(obj);
   } catch(error) {
-    console.error('Error saving statictics', error.message);
+    console.critical('Error saving statictics', error.message);
   }
   await connector.disconnect();
 };

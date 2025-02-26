@@ -26,9 +26,10 @@ const log = new Logger(logLevel);
 module.exports = async (db, req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      errors: errors.array()
-    });
+    const error = errors.array();
+    log.error(error);
+    res.status(400).json({error});
+    return;
   }
   const {url, error} = req.body;
   log.info(`${req.ip} -> /stream-issue ${url} ${error}`);
@@ -45,9 +46,9 @@ module.exports = async (db, req, res) => {
     res.json({
       message: "error logged"
     });
-  } catch(entryError) {
-    res.status(500).json({
-      message: `Failed to log error: ${entryError.message}` 
-    });
+  } catch(err) {
+    const message = `Failed to log error: ${entryError.message}`;
+    log.critical(message);
+    res.status(500).json({message});
   }
 };

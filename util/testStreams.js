@@ -130,7 +130,7 @@ async function testStreams(db) {
 
   for (const station of stations) {
     if (!station) continue;
-    log.debug(`${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
+    log.debug(`Updating database: ${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
     const filter = {
       _id: new ObjectId(station._id)
     };

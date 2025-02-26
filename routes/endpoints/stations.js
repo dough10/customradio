@@ -44,9 +44,9 @@ const log = new Logger(logLevel);
 module.exports = async (db, redis, req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      errors: errors.array()
-    });
+    const error =  errors.array();
+    log.error(error);
+    return res.status(400).json({error});
   }
 
   const genres = decodeURIComponent(req.query.genres).split(',').map(genre => he.decode(genre).toLowerCase());
@@ -62,7 +62,7 @@ module.exports = async (db, redis, req, res) => {
       const removed = await redis.del('genres');
       if (removed) log.info('genres cache deleted');
     } catch(error) {
-      log.info(`error deleting genres cache: ${error.message}`);
+      log.warning(`error deleting genres cache: ${error.message}`);
     }
   }
 
@@ -77,11 +77,10 @@ module.exports = async (db, redis, req, res) => {
       log.info(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} cached stations returned ${Date.now() - req.startTime}ms`);
       return res.send(stations);
     }
-  } catch (error) {
-    log.error('(╬ Ò﹏Ó) Error fetching cached stations:', error);
-    return res.status(500).json({
-      error: 'Failed to fetch cached stations (╬ Ò﹏Ó)'
-    });
+  } catch (err) {
+    const error = `(╬ Ò﹏Ó) Error fetching cached stations: ${err.message}`;
+    log.error(error);
+    return res.status(500).json({error});
   }
 
   const searchQuery = genres.map(genre => new RegExp(genre, 'i'))
@@ -123,9 +122,8 @@ module.exports = async (db, redis, req, res) => {
     res.json(stations);
     await redis.set(cacheKey, JSON.stringify(stations), 'EX', 3600);
   } catch (err) {
-    log.error('(╬ Ò﹏Ó) Error fetching stations:', err);
-    res.status(500).json({
-      error: 'Failed to fetch stations (╬ Ò﹏Ó)'
-    });
+    const error = `(╬ Ò﹏Ó) Error fetching stations: ${err.message}`;
+    log.error(error);
+    res.status(500).json({error});
   }
 };

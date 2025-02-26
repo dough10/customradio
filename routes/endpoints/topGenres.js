@@ -42,11 +42,8 @@ module.exports = async (redis, req, res) => {
       res.set('content-type', 'application/json');
       return res.send(cachedGenres);
     }
-  } catch (error) {
-    log.error('(╬ Ò﹏Ó) Error fetching cached genres:', error);
-    return res.status(500).json({
-      error: 'Failed to fetch cached genres (╬ Ò﹏Ó)'
-    });
+  } catch (err) {
+    log.warning(`(╬ Ò﹏Ó) Error fetching cached genres: ${err.message}`);
   }
 
 
@@ -76,11 +73,10 @@ module.exports = async (redis, req, res) => {
     const genreObj = topGenres.map(obj => obj._id).sort((a, b) => a.localeCompare(b));
     res.json(genreObj);
     await redis.set(cacheKey, JSON.stringify(genreObj), 'EX', 3600);
-  } catch(error) {
-    log.error('Error getting genres', error.message);
-    res.status(500).json({
-      error: `Error getting genres ${error.message}`
-    });
+  } catch(err) {
+    const error = `Error getting genres: ${err.message}`;
+    log.critical(error);
+    res.status(500).json({error});
   } finally {
     await connector.disconnect();
   }

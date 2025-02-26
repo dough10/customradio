@@ -40,9 +40,9 @@ const log = new Logger(logLevel);
 module.exports = async (db, redis, req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      errors: errors.array()
-    });
+    const error = errors.array();
+    log.error(JSON.stringify(error));
+    return res.status(400).json({error});
   }
   const {url} = req.body;
   log.info(`${req.ip} -> /add ${url} ${Date.now() - req.startTime}ms`);
@@ -51,28 +51,23 @@ module.exports = async (db, redis, req, res) => {
       url
     });
     if (exists) {
-      log.info(`station exists ${Date.now() - req.startTime}ms`);
-      res.json({
-        message: 'station exists'
-      });
+      const message = 'station exists';
+      log.info(`${message} ${Date.now() - req.startTime}ms`);
+      res.json({message});
       return;
     }
     const status = await isLiveStream(url);
     if (!status.ok) {
       const message = `Connection test failed: ${status.error}`;
-      log.info(`${message} ${Date.now() - req.startTime}ms`);
-      res.json({
-        message: message
-      });
+      log.warning(`${message}, ${Date.now() - req.startTime}ms`);
+      res.json({message});
       return;
     }
 
     if (!status.name) {
       const message = `Failed getting station name`;
-      log.info(`${message} ${Date.now() - req.startTime}ms`);
-      res.json({
-        message: message
-      });
+      log.warning(`${message}, ${Date.now() - req.startTime}ms`);
+      res.json({message});
       return; 
     }
 
@@ -81,10 +76,10 @@ module.exports = async (db, redis, req, res) => {
       const keys = await redis.keys('stations_*');
       if (keys.length > 0) {
         const removed = await redis.del(...keys);
-        if (removed) log.info(`${removed} stations cache deleted`);
+        if (removed) log.debug(`${removed} stations cache deleted`);
       }
     } catch(error) {
-      log.info(`error deleting stations cache: ${error.message}`);
+      log.warning(`error deleting stations cache: ${error.message}`);
     }
 
     const data = {
@@ -100,14 +95,10 @@ module.exports = async (db, redis, req, res) => {
     await db.insertOne(data);
     const message = `station saved`;
     log.info(`${message} ${Date.now() - req.startTime}ms`);
-    res.json({
-      message: message
-    });
+    res.json({message});
   } catch (e) {
     const message = `Failed to add station`;
-    log.info(`${message}: ${e.message} ${Date.now() - req.startTime}ms`);
-    res.status(500).json({
-      message: message
-    });
+    log.critical(`${message}: ${e.message}, ${Date.now() - req.startTime}ms`);
+    res.status(500).json({message});
   }
 };

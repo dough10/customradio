@@ -38,7 +38,7 @@ class DbConnector {
       const database = this.client.db('custom-radio');
       return database.collection(this.collection);
     } catch (err) {
-      console.error('(╬ Ò﹏Ó) Error connecting to MongoDB:', err);
+      console.critical('(╬ Ò﹏Ó) Error connecting to MongoDB:', err);
       throw err;
     }
   }
