@@ -1146,6 +1146,20 @@ function closeDialog(el) {
 }
 
 /**
+ * removes ^ if the first char in a string
+ * 
+ * @param {String} str
+ *  
+ * @returns {String} string without ^
+ */
+function rmArrow(str) {
+  if (str.charAt(0) === "^") {
+    return str.slice(1);
+  }
+  return str;
+}
+
+/**
  * populate info dialog with details about application
  * 
  * @returns {void}
@@ -1161,7 +1175,7 @@ async function info() {
   const fragment = document.createDocumentFragment();
   Object.entries(pack.dependencies).forEach(([key, value]) => {
     const li = document.createElement('li');
-    li.textContent = `${key}: ${value}`;
+    li.textContent = `${key}: ${rmArrow(value)}`;
     fragment.appendChild(li);
   });
   depDiv.append(fragment);
