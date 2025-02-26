@@ -1,4 +1,6 @@
-const log = require('../../util/log.js');
+const Logger = require('../../util/logger.js');
+
+const log = new Logger('info');
 
 module.exports = (req, res) => {
   const strings = [
@@ -13,7 +15,7 @@ module.exports = (req, res) => {
     `Allow: /$`,
     `Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml`
   ];
-  log(`${req.ip} -> /robots.txt ${Date.now() - req.startTime}ms`);
+  log.info(`${req.ip} -> /robots.txt ${Date.now() - req.startTime}ms`);
   res.type('text/plain');
   res.send(strings.join('\n'));
 };

@@ -1,6 +1,8 @@
 const url = require('url');
-const log = require('../../util/log.js');
 const saveToCollection = require('../../util/saveToCollection.js');
+const Logger = require('../../util/logger.js');
+
+const log = new Logger('info');
 
 /**
  * Express handler for 404 errors, logs request details, saves to collection, 
@@ -29,7 +31,7 @@ module.exports = async (req, res) => {
     pathname: req.originalUrl
   };
   
-  log(`${req.ip} requested ${url.format(reqadd)} 404! ╭∩╮(︶︿︶)╭∩╮`);
+  log.info(`${req.ip} requested ${url.format(reqadd)} 404! ╭∩╮(︶︿︶)╭∩╮`);
   
   /**
    * Save the 404 error request details to a mongodb collection.

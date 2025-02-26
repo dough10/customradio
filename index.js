@@ -6,12 +6,13 @@ const DbConnector = require('./util/dbConnector.js');
 const promClient = require('prom-client');
 require('dotenv').config();
 
-const log = require('./util/log.js');
+const Logger = require('./util/logger.js');
 const { testStreams } = require('./util/testStreams.js');
 const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./routes/middleware.js');
 const routes = require('./routes/routes.js');
 
+const log = new Logger('info');
 
 const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 const DB_COLLECTION = 'stations';
@@ -64,7 +65,7 @@ app.listen(3000, async _ => {
     password: process.env.REDIS_PASSWORD || ''
   }), register);
   const pack = require('./package.json');
-  log(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o`);
+  log.info(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o`);
   schedule.scheduleJob('0 0 * * 0', _ => testStreams(db));
   schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir(db));
 });

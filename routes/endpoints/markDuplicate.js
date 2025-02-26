@@ -1,6 +1,8 @@
 const {validationResult} = require('express-validator');
 
-const log = require('../../util/log.js');
+const Logger = require('../../util/logger.js');
+
+const log = new Logger('info');
 
 /**
  * endpoint for marking a station as a duplicate
@@ -26,7 +28,7 @@ module.exports = async (db, req, res) => {
   }
 
   const {url} = req.body;
-  log(`${req.ip} -> /mark-duplicate ${url}`);
+  log.info(`${req.ip} -> /mark-duplicate ${url}`);
   try {
     const result = await db.updateOne(
       {url}, 

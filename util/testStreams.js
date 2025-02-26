@@ -4,13 +4,15 @@ module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
 const {ObjectId} = require('mongodb');
 const pack = require('../package.json');
 
-const log = require('./log.js');
+const Logger = require('./logger.js');
 const isLiveStream = require('./isLiveStream.js');
 const rmRef = require('./rmRef.js');
 const dbStatistics = require('./dbStatistics.js');
 const saveStats = require('./saveStats.js');
 const useableHomapage = require('./useableHomapage.js');
 const cleanUpGenres = require('./cleanUpGenres.js');
+
+const log = new Logger('info');
 
 /**
  * Returns an 's' if the number is not equal to 1, otherwise returns an empty string.
@@ -106,14 +108,14 @@ async function testHomepageConnection(url, testedHomepages) {
  * 
  * testStreams(db)
  *   .then(() => {
- *     console.log('Streams tested and database updated successfully.');
+ *     console.log.info('Streams tested and database updated successfully.');
  *   })
  *   .catch(err => {
  *     console.error('Failed to test streams and update database:', err);
  *   });
  */
-async function testStreams(db, trackProgress) {
-  log('Updating database');
+async function testStreams(db) {
+  log.info('Updating database');
 
   const startTime = new Date().getTime();
   
@@ -127,7 +129,7 @@ async function testStreams(db, trackProgress) {
 
   for (const station of stations) {
     if (!station) continue;
-    if (trackProgress) log(`${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
+    log.debug(`${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
     const filter = {
       _id: new ObjectId(station._id)
     };
@@ -172,7 +174,7 @@ async function testStreams(db, trackProgress) {
   const ms = now - startTime;
   stats.timeCompleted = now;
   stats.duration = ms;
-  log(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
+  log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
   await saveStats(stats);
   await cleanUpGenres();
 }

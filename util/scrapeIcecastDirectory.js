@@ -7,10 +7,11 @@ const {testHomepageConnection, plural, msToHhMmSs} = require('./testStreams.js')
 const rmRef = require('./rmRef.js');
 const isLiveStream = require('./isLiveStream.js');
 const usedTypes = require("./usedTypes.js");
-const log = require('./log.js');
+const Logger = require('./logger.js');
 const dbStatistics = require('./dbStatistics.js');
 const saveStats = require('./saveStats.js');
 
+const log = new Logger('info');
 
 // data structure
 // {
@@ -23,7 +24,7 @@ const saveStats = require('./saveStats.js');
 //   current_song: [ "Coolio - Gangsta's Paradise" ],
 //   genre: [ '2000-х Музыка' ]
 // }
-module.exports = async (db, logging) => {
+module.exports = async (db) => {
   try {
     const res = await axios.get('http://dir.xiph.org/yp.xml', {
       headers: {
@@ -45,11 +46,11 @@ module.exports = async (db, logging) => {
     
     const length = data.length;
     
-    log(`Scraping Icecast Directory for new stations. ${length} stations pulled`);
+    log.info(`Scraping Icecast Directory for new stations. ${length} stations pulled`);
     
     const testedHomepages = [];
     for (const entry of data) {
-      if (logging) log(`${((data.indexOf(entry) / length) * 100).toFixed(3)}%`);
+      log.debug(`${((data.indexOf(entry) / length) * 100).toFixed(3)}%`);
       
       const url = rmRef(entry.listen_url[0]);
       const stream = await isLiveStream(url);
@@ -82,9 +83,9 @@ module.exports = async (db, logging) => {
     const ms = now - startTime;
     stats.timeCompleted = now;
     stats.duration = ms;
-    log(`Icecast Directory scrape complete: ${total} entry${plural(total)} added over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
+    log.info(`Icecast Directory scrape complete: ${total} entry${plural(total)} added over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
     await saveStats(stats);
   } catch(err) {
-    log(`Scrape failed: ${err.message}`);
+    log.info(`Scrape failed: ${err.message}`);
   }
 };

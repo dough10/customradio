@@ -2,7 +2,9 @@ require('dotenv').config();
 const {validationResult} = require('express-validator');
 
 const saveToCollection = require('../../util/saveToCollection.js');
-const log = require('../../util/log.js');
+const Logger = require('../../util/logger.js');
+
+const log = new Logger('info');
 
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports
@@ -57,12 +59,12 @@ module.exports = async (req, res) => {
   try {
     const cspReport = req.body['csp-report'];
     cspReport.time = new Date().toLocaleString();
-    log(`${req.ip} -> /csp-report ${JSON.stringify(cspReport)}`);
+    log.info(`${req.ip} -> /csp-report ${JSON.stringify(cspReport)}`);
     await saveToCollection(cspReport, 'csp-report');
     res.status(204).send();
   } catch(error) {
     const message = `Error Saving CSP-Report: ${error.message}`
-    console.error(message);
+    log.error(message);
     res.status(500).send(message);
   }
 };

@@ -4,7 +4,7 @@ const validator = require('validator');
 const { query, body } = require('express-validator');
 const pug = require('pug');
 
-const log = require('./../util/log.js');
+const Logger = require('./../util/logger.js');
 const addToDatabase = require('./endpoints/add.js');
 const getStations = require('./endpoints/stations.js');
 const streamIssue = require('./endpoints/stream-issue.js');
@@ -18,6 +18,7 @@ const topGenres = require('./endpoints/topGenres.js');
 const fourohfour = require('./endpoints/fourohfour.js');
 const info = require('./endpoints/info.js');
 
+const log = new Logger('info');
 /**
  * Middleware function to validate API access tokens.
  * 
@@ -70,7 +71,7 @@ module.exports = (app, db, redis, register) => {
    * assetLinks
    */
   app.get('/.well-known/assetLinks.json', (req,res) => {
-    log(`${req.ip} -> /.well-known/assetLinks.json ${Date.now() - req.startTime}ms`);
+    log.info(`${req.ip} -> /.well-known/assetLinks.json ${Date.now() - req.startTime}ms`);
     res.json([]);
   });
 
@@ -88,7 +89,7 @@ module.exports = (app, db, redis, register) => {
    * Index
    */
   app.get('/', (req, res) => {
-    log(`${req.ip} -> /  ${Date.now() - req.startTime}ms`);
+    log.info(`${req.ip} -> /  ${Date.now() - req.startTime}ms`);
     res.send(pug.renderFile('./templates/index.pug'));
   });
 

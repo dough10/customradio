@@ -1,6 +1,8 @@
 const {validationResult} = require('express-validator');
 
-const log = require('../../util/log.js');
+const Logger = require('../../util/logger.js');
+
+const log = new Logger('info');
 
 /**
  * An endpoint for audio stream playback error callback
@@ -28,7 +30,7 @@ module.exports = async (db, req, res) => {
     });
   }
   const {url, error} = req.body;
-  log(`${req.ip} -> /stream-issue ${url} ${error}`);
+  log.info(`${req.ip} -> /stream-issue ${url} ${error}`);
   try {
     const result = await db.updateOne(
       {url}, 

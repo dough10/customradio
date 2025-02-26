@@ -1,7 +1,10 @@
 require('dotenv').config();
 
-const log = require('../../util/log.js');
 const DbConnector = require('../../util/dbConnector.js');
+
+const Logger = require('../../util/logger.js');
+
+const log = new Logger('info');
 
 /**
  * Handles the request to retrieve the top genres from the database.
@@ -39,7 +42,7 @@ module.exports = async (redis, req, res) => {
       return res.send(cachedGenres);
     }
   } catch (error) {
-    console.error('(╬ Ò﹏Ó) Error fetching cached genres:', error);
+    log.error('(╬ Ò﹏Ó) Error fetching cached genres:', error);
     return res.status(500).json({
       error: 'Failed to fetch cached genres (╬ Ò﹏Ó)'
     });
@@ -73,7 +76,7 @@ module.exports = async (redis, req, res) => {
     res.json(genreObj);
     await redis.set(cacheKey, JSON.stringify(genreObj), 'EX', 3600);
   } catch(error) {
-    console.error('Error getting genres', error.message);
+    log.error('Error getting genres', error.message);
     res.status(500).json({
       error: `Error getting genres ${error.message}`
     });

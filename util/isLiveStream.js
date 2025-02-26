@@ -1,7 +1,9 @@
 const axios = require('axios');
 const pack = require('../package.json');
 
-const log = require('./log.js');
+const Logger = require('./logger.js');
+
+const log = new Logger('info');
 
 /**
  * An array containing default port numbers used in network protocols.
@@ -10,8 +12,8 @@ const log = require('./log.js');
  * @default
  * @example
  * // Accessing the default ports
- * console.log(defaultPorts[0]); // Output: ':80/'
- * console.log(defaultPorts[1]); // Output: ':443/'
+ * console.log.info(defaultPorts[0]); // Output: ':80/'
+ * console.log.info(defaultPorts[1]); // Output: ':443/'
  */
 const defaultPorts = [
   ':80/',
@@ -133,9 +135,9 @@ async function streamTest(url) {
  * isLiveStream('http://example.com/stream')
  *   .then(data => {
  *     if (data) {
- *       console.log('Stream is live:', data);
+ *       console.log.info('Stream is live:', data);
  *     } else {
- *       console.log('Stream is not live or an error occurred');
+ *       console.log.info('Stream is not live or an error occurred');
  *     }
  *   })
  *   .catch(err => {

@@ -1,5 +1,7 @@
-const log = require('../../util/log.js');
 const saveToCollection = require('../../util/saveToCollection.js');
+const Logger = require('../../util/logger.js');
+
+const log = new Logger('info');
 
 /**
  * logs details of the incoming request to a collection and returns a 403 status.
@@ -51,6 +53,6 @@ module.exports = async (req, res) => {
     responseTime: Date.now() - req.startTime,
     sessionId: req.session ? req.session.id : null
   }, "Suspicious User-Agent");
-  log(`${req.ip} ╭∩╮(︶︿︶)╭∩╮ FAHQ! ${Date.now() - req.startTime}ms`);
+  log.info(`${req.ip} ╭∩╮(︶︿︶)╭∩╮ FAHQ! ${Date.now() - req.startTime}ms`);
   res.status(403).send();
 };

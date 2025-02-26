@@ -1,4 +1,6 @@
-const log = require('../../util/log.js');
+const Logger = require('../../util/logger.js');
+
+const log = new Logger('info');
 
 module.exports = (req, res) => {
   const lines = [
@@ -8,7 +10,7 @@ module.exports = (req, res) => {
     '# example-network.com, account-id, RESELLER'
   ];
   
-  log(`${req.ip} -> /ads.txt ${Date.now() - req.startTime}ms`);
+  log.info(`${req.ip} -> /ads.txt ${Date.now() - req.startTime}ms`);
   res.type('text/plain');
   res.send(lines.join('\n'));
 };

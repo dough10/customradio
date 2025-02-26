@@ -1,5 +1,7 @@
 const DbConnector = require('./dbConnector.js');
-const log = require('./log.js');
+const Logger = require('./logger.js');
+
+const log = new Logger('info');
 
 module.exports = async () => {
   try{
@@ -8,9 +10,9 @@ module.exports = async () => {
     const connector = new DbConnector(url, 'genres');
     const db = await connector.connect();
     const result = await db.deleteMany({ time: { $lt: timestamp } });
-    log(`${result.deletedCount} genre entry(s) were deleted.`);
+    log.info(`${result.deletedCount} genre entry(s) were deleted.`);
     await connector.disconnect();
   } catch(error) {
-    console.error('Error cleaning up genres', error.message);
+    log.error(`Error cleaning up genres: ${error.message}`);
   }
 };

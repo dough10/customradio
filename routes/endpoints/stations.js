@@ -2,9 +2,11 @@ const { validationResult } = require('express-validator');
 const he = require('he');
 
 const usedTypes = require("../../util/usedTypes.js");
-const log = require('../../util/log.js');
 const queryString = require('../../util/queryString.js');
 const saveToCollection = require('../../util/saveToCollection.js');
+const Logger = require('../../util/logger.js');
+
+const log = new Logger('info');
 
 /**
  * Handles the request to fetch and return a list of audio stations based on query parameters.
@@ -57,9 +59,9 @@ module.exports = async (db, redis, req, res) => {
     }, 'genres');
     try {
       const removed = await redis.del('genres');
-      if (removed) log('genres cache deleted');
+      if (removed) log.info('genres cache deleted');
     } catch(error) {
-      log(`error deleting genres cache: ${error.message}`);
+      log.info(`error deleting genres cache: ${error.message}`);
     }
   }
 
@@ -71,11 +73,11 @@ module.exports = async (db, redis, req, res) => {
     if (cachedStations) {
       const stations = JSON.parse(cachedStations);
       res.set('content-type', 'application/json');
-      log(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} cached stations returned ${Date.now() - req.startTime}ms`);
+      log.info(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} cached stations returned ${Date.now() - req.startTime}ms`);
       return res.send(stations);
     }
   } catch (error) {
-    console.error('(╬ Ò﹏Ó) Error fetching cached stations:', error);
+    log.error('(╬ Ò﹏Ó) Error fetching cached stations:', error);
     return res.status(500).json({
       error: 'Failed to fetch cached stations (╬ Ò﹏Ó)'
     });
@@ -116,11 +118,11 @@ module.exports = async (db, redis, req, res) => {
     }).sort({
       name: 1
     }).toArray();    
-    log(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
+    log.info(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
     res.json(stations);
     await redis.set(cacheKey, JSON.stringify(stations), 'EX', 3600);
   } catch (err) {
-    console.error('(╬ Ò﹏Ó) Error fetching stations:', err);
+    log.error('(╬ Ò﹏Ó) Error fetching stations:', err);
     res.status(500).json({
       error: 'Failed to fetch stations (╬ Ò﹏Ó)'
     });
