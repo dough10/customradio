@@ -11,7 +11,8 @@ const Logger = require('./logger.js');
 const dbStatistics = require('./dbStatistics.js');
 const saveStats = require('./saveStats.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 // data structure
 // {

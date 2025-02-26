@@ -3,7 +3,8 @@ const {validationResult} = require('express-validator');
 const Logger = require('../../util/logger.js');
 const isLiveStream = require('../../util/isLiveStream.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 /**
  * Handles the request to add a new station to the database.

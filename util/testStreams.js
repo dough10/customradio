@@ -12,7 +12,8 @@ const saveStats = require('./saveStats.js');
 const useableHomapage = require('./useableHomapage.js');
 const cleanUpGenres = require('./cleanUpGenres.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 /**
  * Returns an 's' if the number is not equal to 1, otherwise returns an empty string.

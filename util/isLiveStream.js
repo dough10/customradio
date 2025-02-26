@@ -3,7 +3,8 @@ const pack = require('../package.json');
 
 const Logger = require('./logger.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 /**
  * An array containing default port numbers used in network protocols.

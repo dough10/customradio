@@ -4,7 +4,8 @@ const {validationResult} = require('express-validator');
 const saveToCollection = require('../../util/saveToCollection.js');
 const Logger = require('../../util/logger.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports

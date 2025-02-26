@@ -6,7 +6,8 @@ const queryString = require('../../util/queryString.js');
 const saveToCollection = require('../../util/saveToCollection.js');
 const Logger = require('../../util/logger.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 /**
  * Handles the request to fetch and return a list of audio stations based on query parameters.

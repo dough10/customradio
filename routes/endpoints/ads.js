@@ -1,6 +1,7 @@
 const Logger = require('../../util/logger.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 module.exports = (req, res) => {
   const lines = [

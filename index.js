@@ -12,7 +12,8 @@ const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./routes/middleware.js');
 const routes = require('./routes/routes.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 const DB_COLLECTION = 'stations';
@@ -65,7 +66,7 @@ app.listen(3000, async _ => {
     password: process.env.REDIS_PASSWORD || ''
   }), register);
   const pack = require('./package.json');
-  log.info(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o`);
+  log.info(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel}`);
   schedule.scheduleJob('0 0 * * 0', _ => testStreams(db));
   schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir(db));
 });

@@ -1,7 +1,8 @@
 const saveToCollection = require('../../util/saveToCollection.js');
 const Logger = require('../../util/logger.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 /**
  * logs details of the incoming request to a collection and returns a 403 status.

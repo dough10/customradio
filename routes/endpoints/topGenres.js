@@ -4,7 +4,8 @@ const DbConnector = require('../../util/dbConnector.js');
 
 const Logger = require('../../util/logger.js');
 
-const log = new Logger('info');
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
 
 /**
  * Handles the request to retrieve the top genres from the database.
