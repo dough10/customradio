@@ -52,7 +52,7 @@ module.exports = async (db, redis, req, res) => {
     });
     if (exists) {
       const message = 'station exists';
-      log.info(`${message} ${Date.now() - req.startTime}ms`);
+      log.warning(`${message} ${Date.now() - req.startTime}ms`);
       res.json({message});
       return;
     }
