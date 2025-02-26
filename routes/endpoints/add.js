@@ -79,7 +79,7 @@ module.exports = async (db, redis, req, res) => {
         if (removed) log.debug(`${removed} stations cache deleted`);
       }
     } catch(error) {
-      log.warning(`error deleting stations cache: ${error.message}`);
+      log.error(`Failed deleting stations cache: ${error.message}`);
     }
 
     const data = {
@@ -97,8 +97,8 @@ module.exports = async (db, redis, req, res) => {
     log.info(`${message} ${Date.now() - req.startTime}ms`);
     res.json({message});
   } catch (e) {
-    const message = `Failed to add station`;
-    log.critical(`${message}: ${e.message}, ${Date.now() - req.startTime}ms`);
+    const message = `Failed to add station: ${e.message}`;
+    log.critical(`${message}, ${Date.now() - req.startTime}ms`);
     res.status(500).json({message});
   }
 };
