@@ -1,6 +1,6 @@
 {
   "name": "customradio",
-  "version": "1.11.4",
+  "version": "1.11.5",
   "description": "build custion radio.txt for use on hiby audio players",
   "main": "index.js",
   "scripts": {
@@ -32,6 +32,7 @@
     "node-schedule": "^2.1.1",
     "prom-client": "^15.1.3",
     "pug": "^3.0.3",
+    "sqlite3": "^5.1.7",
     "validator": "^13.12.0",
     "xml2js": "^0.6.2"
   },
