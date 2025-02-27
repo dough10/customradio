@@ -70,12 +70,12 @@ class Stations {
     FROM stations
     WHERE content_type IN (${contentTypePlaceholders})
       AND online = 1
+      AND duplicate = 0
       AND bitrate IS NOT NULL
       AND (${nameConditions} OR ${genreConditions})
     ORDER BY name ASC;`;
     const params = [...usedTypes, ...genrePatterns, ...genrePatterns];
-      
-    console.log(query, params);
+
     return this._runQuery(query, params);
   }
 
@@ -91,10 +91,25 @@ class Stations {
     FROM stations
     WHERE content_type IN (${usedTypes.map(() => '?').join(',')})
       AND online = 1
+      AND duplicate = 0
       AND bitrate IS NOT NULL
     ORDER BY name ASC;`;
 
     return this._runQuery(query, usedTypes);
+  }
+
+  /**
+   * Mark a station as a duplicate in the database.
+   * 
+   * @param {number} id - The ID of the station to mark as a duplicate.
+   * 
+   * @returns {Promise<void>} A promise that resolves when the station is marked as a duplicate.
+   * 
+   * @throws {Error} If the query fails.
+   */
+  markDuplicate(id) {
+    const query = `UPDATE stations SET duplicate = 1 WHERE id = ?`;
+    return this._runQuery(query, [id]);
   }
 
   /**
