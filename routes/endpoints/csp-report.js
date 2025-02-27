@@ -63,7 +63,8 @@ module.exports = async (req, res) => {
   try {
     const cspReport = req.body['csp-report'];
     cspReport.time = new Date().toLocaleString();
-    log.info(`${req.ip} -> /csp-report ${JSON.stringify(cspReport)}`);
+    log.debug(JSON.stringify(cspReport));
+    log.info(`${req.ip} -> /csp-report ${Date.now() - req.startTime}ms`);
     await saveToCollection(cspReport, 'csp-report');
     res.status(204).send();
   } catch(error) {

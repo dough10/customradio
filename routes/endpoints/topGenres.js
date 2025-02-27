@@ -43,7 +43,7 @@ module.exports = async (redis, req, res) => {
       return res.send(cachedGenres);
     }
   } catch (err) {
-    log.warning(`(╬ Ò﹏Ó) Error fetching cached genres: ${err.message}`);
+    log.error(`Error fetching cached genres: ${err.message}`);
   }
 
 
