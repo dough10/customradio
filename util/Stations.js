@@ -44,7 +44,7 @@ class Stations {
    * 
    * @throws {Error} If the query fails.
    */
-  async getAllStations() {
+  getAllStations() {
     const getQuery = 'SELECT * FROM stations';
     return this._runQuery(getQuery);
   }
@@ -58,7 +58,7 @@ class Stations {
    * 
    * @throws {Error} If the query fails.
    */
-  async getStationsByGenre(genres) {
+  getStationsByGenre(genres) {
     const contentTypePlaceholders = usedTypes.map(() => '?').join(',');
     
     const genrePatterns = genres.map(g => `%${g.toLowerCase()}%`);
@@ -86,7 +86,7 @@ class Stations {
    * 
    * @throws {Error} If the query fails.
    */
-  async getOnlineStations() {
+  getOnlineStations() {
     const query = `SELECT id, name, url, bitrate, genre, icon, homepage
     FROM stations
     WHERE content_type IN (${usedTypes.map(() => '?').join(',')})
@@ -210,7 +210,7 @@ class Stations {
    * 
    * @throws {Error} If the station object, ID, or any required property is not provided.
    */
-  async updateStation(obj) {
+  updateStation(obj) {
     if (typeof obj.name !== 'string') throw new Error('Invalid type for property "name". Expected string.');
     if (typeof obj.url !== 'string') throw new Error('Invalid type for property "url". Expected string.');
     if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
@@ -254,7 +254,7 @@ class Stations {
    * 
    * @throws {Error} If the database connection cannot be closed.
    */
-  async close() {
+  close() {
     return new Promise((resolve, reject) => {
       this.db.close(err => {
         if (err) {
