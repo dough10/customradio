@@ -58,10 +58,10 @@ class Stations {
    * 
    * @throws {Error} If the query fails.
    */
-  async getStationsByGenre(genre) {
+  async getStationsByGenre(genres) {
     const contentTypePlaceholders = usedTypes.map(() => '?').join(',');
     
-    const genrePatterns = genre.map(g => `%${g.toLowerCase()}%`);
+    const genrePatterns = genres.map(g => `%${g.toLowerCase()}%`);
   
     const nameConditions = genrePatterns.map(() => 'LOWER(name) LIKE ?').join(' OR ');
     const genreConditions = genrePatterns.map(() => 'LOWER(genre) LIKE ?').join(' OR ');
@@ -113,6 +113,21 @@ class Stations {
   }
 
   /**
+   * Log an error message for a specific station in the database.
+   * 
+   * @param {number} id - The ID of the station to log the error for.
+   * @param {string} error - The error message to log.
+   * 
+   * @returns {Promise<void>} A promise that resolves when the error is logged.
+   * 
+   * @throws {Error} If the query fails.
+   */
+  logStreamError(id, error) {
+    const query = `UPDATE stations SET error = ? WHERE id = ?`;
+    return this._runQuery(query, [error, id]);
+  }
+
+  /**
    * Add a new station to the database.
    * 
    * @param {Object} obj - The station object.
@@ -132,16 +147,6 @@ class Stations {
    * @throws {Error} If the station object or URL is not provided.
    */
   async addStation(obj) {
-    if (!obj || !obj.url) throw new Error('Station object with a valid URL is required');
-
-    const existQuery = `SELECT * FROM stations WHERE url = ?`;
-    const rows = await this._runQuery(existQuery, [obj.url]);
-
-    if (rows.length > 0) {
-      return 'Station exists';
-    }
-
-    // Type checks for all properties with detailed error messages
     if (typeof obj.name !== 'string') throw new Error('Invalid type for property "name". Expected string.');
     if (typeof obj.url !== 'string') throw new Error('Invalid type for property "url". Expected string.');
     if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
@@ -152,6 +157,13 @@ class Stations {
     if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
     if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
     if (typeof obj.duplicate !== 'boolean') throw new Error('Invalid type for property "duplicate". Expected boolean.');
+
+    const existQuery = `SELECT * FROM stations WHERE url = ?`;
+    const rows = await this._runQuery(existQuery, [obj.url]);
+
+    if (rows.length > 0) {
+      return 'Station exists';
+    }
 
     const addQuery = `INSERT INTO stations (
       name, 
@@ -199,9 +211,16 @@ class Stations {
    * @throws {Error} If the station object, ID, or any required property is not provided.
    */
   async updateStation(obj) {
-    if (!obj || typeof obj.id !== 'number' || typeof obj.name !== 'string' || typeof obj.url !== 'string' || typeof obj.genre !== 'string' || typeof obj.online !== 'boolean' || typeof obj['content-type'] !== 'string' || typeof obj.bitrate !== 'number' || typeof obj.icon !== 'string' || typeof obj.homepage !== 'string' || typeof obj.error !== 'string' || typeof obj.duplicate !== 'boolean') {
-      throw new Error('Station object with valid id and all properties is required');
-    }
+    if (typeof obj.name !== 'string') throw new Error('Invalid type for property "name". Expected string.');
+    if (typeof obj.url !== 'string') throw new Error('Invalid type for property "url". Expected string.');
+    if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
+    if (typeof obj.online !== 'boolean') throw new Error('Invalid type for property "online". Expected boolean.');
+    if (typeof obj['content-type'] !== 'string') throw new Error('Invalid type for property "content-type". Expected string.');
+    if (typeof obj.bitrate !== 'number') throw new Error('Invalid type for property "bitrate". Expected number.');
+    if (typeof obj.icon !== 'string') throw new Error('Invalid type for property "icon". Expected string.');
+    if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
+    if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
+    if (typeof obj.duplicate !== 'boolean') throw new Error('Invalid type for property "duplicate". Expected boolean.');
 
     const updateQuery = `UPDATE stations SET 
       name = ?, 
