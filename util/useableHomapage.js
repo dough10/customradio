@@ -24,9 +24,11 @@ function urlDeconstruction(URL) {
 
   if (URL === 'N/A' || URL === 'http://localhost/' || URL === 'http://localhost' || URL === 'url' || URL === '(NULL)') return null;
 
-  if (URL.startsWith('ttps://')) {
-    URL = 'https://' + URL.slice(5);
-  }
+  if (URL === 'Unknown') return;
+
+  // if (URL.startsWith('https://')) {
+  //   URL = 'https://' + URL.slice(5);
+  // }
 
   const regexInvalidUrl = /^https?:\/\/(?:www\.)?$/;
   if (regexInvalidUrl.test(URL)) {
