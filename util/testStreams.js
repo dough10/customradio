@@ -1,6 +1,6 @@
 module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
 
-
+const axios = require('axios');
 const {ObjectId} = require('mongodb');
 const pack = require('../package.json');
 
@@ -85,6 +85,7 @@ async function testHomepageConnection(url, testedHomepages) {
       return homepage;
     }
   } catch(e) {
+    log.warning(`${url} failed test connection: ${e.message}`);
     return;
   }
 }
@@ -162,10 +163,10 @@ async function testStreams(db) {
         genre: stream.icyGenre || station.genre || 'Unknown',
         online: stream.isLive,
         'content-type': stream.content,
-        bitrate: stream.bitrate || 'Unknown',
+        bitrate: stream.bitrate || 0,
         icon: 'Unknown',
         homepage: stream.icyurl || 'Unknown',
-        error: undefined
+        error: ''
       }
     });
     total += res.modifiedCount;
