@@ -124,6 +124,9 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async _log(timestamp, level, message) {
+    if (typeof message === 'object') {
+      message = JSON.stringify(message, null, 2);
+    }
     const logEntry = `${timestamp} [${level}] ${message}`;
     console.log(logEntry);
 
