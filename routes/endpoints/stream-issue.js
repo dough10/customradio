@@ -39,6 +39,7 @@ module.exports = async (db, req, res) => {
       { $set: { error } }
     );
     if (result.matchedCount === 0) {
+      log.error(`Document not found: ${url}, ${error}`);
       return res.status(404).json({
         message: "Document not found"
       });
