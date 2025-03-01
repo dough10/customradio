@@ -31,7 +31,7 @@ module.exports = async (db) => {
       headers: {
         'User-Agent': `customradio.dough10.me/${pack.version}`
       },
-      timeout: 3000
+      timeout: 20000
     });
     if (!res.data) return;
     
