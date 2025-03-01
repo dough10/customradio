@@ -67,9 +67,6 @@ app.listen(3000, async _ => {
     redis.on('error', err => { 
       log.error(`Redis error: ${err}`); 
     });
-    redis.on('connect', () => {
-      log.info('Redis connected');
-    });
     
     // Set up middleware and routes
     middleware(app, httpRequestCounter);
