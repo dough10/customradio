@@ -19,6 +19,7 @@ const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
 const DB_COLLECTION = 'stations';
 const connector = new DbConnector(DB_HOST, DB_COLLECTION);
 
+// Set up Prometheus metrics
 const httpRequestCounter = new promClient.Counter({
   name: 'http_requests_total',
   help: 'Total number of HTTP requests',
@@ -54,15 +55,35 @@ register.registerMetric(httpRequestCounter);
  * });
  */
 app.listen(3000, async _ => {
-  const db = await connector.connect();
-  middleware(app, httpRequestCounter);
-  routes(app, db, new Redis({
-    host: process.env.REDIS_HOST || '127.0.0.1',
-    port: process.env.REDIS_PORT || 6379,
-    password: process.env.REDIS_PASSWORD || ''
-  }), register);
-  const pack = require('./package.json');
-  log.info(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel}`);
-  schedule.scheduleJob('0 0 * * 0', _ => testStreams(db));
-  schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir(db));
+  try {
+    // Connect to the database
+    const db = await connector.connect();
+
+    const redis = new Redis({
+      host: process.env.REDIS_HOST || '127.0.0.1',
+      port: process.env.REDIS_PORT || 6379,
+      password: process.env.REDIS_PASSWORD || ''
+    });
+    redis.on('error', err => { 
+      log.error(`Redis error: ${err}`); 
+    });
+    redis.on('connect', () => {
+      log.info('Redis connected');
+    });
+    
+    // Set up middleware and routes
+    middleware(app, httpRequestCounter);
+    routes(app, db, redis, register);
+    
+    // Log server start message
+    const pack = require('./package.json');
+    log.info(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel}`);
+    
+    // Schedule jobs
+    schedule.scheduleJob('0 0 * * 0', _ => testStreams(db));
+    schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir(db));
+  } catch (error) {
+    log.error('Failed to start server:', error);
+    process.exit(1);
+  }
 });
