@@ -980,7 +980,7 @@ async function formSubmission(ev) {
   } catch (e) {
     submit.removeAttribute('disabled');
     document.getElementById('response').innerText = 'An error occurred!';
-    console.error('Error:', e);
+    console.error(`Error: ${e.message}`);
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
   }
 }
@@ -1146,7 +1146,7 @@ function closeDialog(el) {
 }
 
 /**
- * removes ^ if the first char in a string
+ * removes ^ if it is the first char in a string
  * 
  * @param {String} str
  *  
