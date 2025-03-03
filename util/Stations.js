@@ -15,7 +15,7 @@ class Stations {
   constructor(filePath) {
     if (!filePath) throw new Error('Database file path is required');
     this.db = new sqlite3.Database(filePath, err => {
-      if (err) throw new Error('Failed creating database file');
+      if (err) throw new Error(`Failed to create database file at ${filePath}: ${err.message}`);
 
       const createTableQuery = `CREATE TABLE IF NOT EXISTS stations(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +32,7 @@ class Stations {
       )`;
 
       this.db.run(createTableQuery, error => {
-        if (error) throw new Error(`Failed creating the stations table: ${error.message}`);
+        if (error) throw new Error(`Failed to create the stations table: ${error.message}`);
       });
     });
   }
@@ -99,6 +99,18 @@ class Stations {
   }
 
   /**
+   * check if a station exists in the database.
+   * 
+   * @param {String} url 
+   * 
+   * @returns {Promise<Boolean>} A promise that resolves to true if the station exists, false otherwise.
+   */
+  exists(url) {
+    const query = `SELECT COUNT(*) AS count FROM stations WHERE url = ?`;
+    return this._runQuery(query, [url]).then(rows => rows[0].count > 0);
+  }
+
+  /**
    * Mark a station as a duplicate in the database.
    * 
    * @param {number} id - The ID of the station to mark as a duplicate.
@@ -147,16 +159,7 @@ class Stations {
    * @throws {Error} If the station object or URL is not provided.
    */
   async addStation(obj) {
-    if (typeof obj.name !== 'string') throw new Error('Invalid type for property "name". Expected string.');
-    if (typeof obj.url !== 'string') throw new Error('Invalid type for property "url". Expected string.');
-    if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
-    if (typeof obj.online !== 'boolean') throw new Error('Invalid type for property "online". Expected boolean.');
-    if (typeof obj['content-type'] !== 'string') throw new Error('Invalid type for property "content-type". Expected string.');
-    if (typeof obj.bitrate !== 'number') throw new Error('Invalid type for property "bitrate". Expected number.');
-    if (typeof obj.icon !== 'string') throw new Error('Invalid type for property "icon". Expected string.');
-    if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
-    if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
-    if (typeof obj.duplicate !== 'boolean') throw new Error('Invalid type for property "duplicate". Expected boolean.');
+    validateStation(obj);
 
     const existQuery = `SELECT * FROM stations WHERE url = ?`;
     const rows = await this._runQuery(existQuery, [obj.url]);
@@ -211,16 +214,7 @@ class Stations {
    * @throws {Error} If the station object, ID, or any required property is not provided.
    */
   updateStation(obj) {
-    if (typeof obj.name !== 'string') throw new Error('Invalid type for property "name". Expected string.');
-    if (typeof obj.url !== 'string') throw new Error('Invalid type for property "url". Expected string.');
-    if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
-    if (typeof obj.online !== 'boolean') throw new Error('Invalid type for property "online". Expected boolean.');
-    if (typeof obj['content-type'] !== 'string') throw new Error('Invalid type for property "content-type". Expected string.');
-    if (typeof obj.bitrate !== 'number') throw new Error('Invalid type for property "bitrate". Expected number.');
-    if (typeof obj.icon !== 'string') throw new Error('Invalid type for property "icon". Expected string.');
-    if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
-    if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
-    if (typeof obj.duplicate !== 'boolean') throw new Error('Invalid type for property "duplicate". Expected boolean.');
+    validateStation(obj);
 
     const updateQuery = `UPDATE stations SET 
       name = ?, 
@@ -289,6 +283,25 @@ class Stations {
       });
     });
   }
+}
+
+/**
+ * Validate station object properties.
+ * 
+ * @param {Object} obj - The station object.
+ * @throws {Error} If any property is invalid.
+ */
+function validateStation(obj) {
+  if (typeof obj.name !== 'string') throw new Error('Invalid type for property "name". Expected string.');
+  if (typeof obj.url !== 'string') throw new Error('Invalid type for property "url". Expected string.');
+  if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
+  if (typeof obj.online !== 'boolean') throw new Error('Invalid type for property "online". Expected boolean.');
+  if (typeof obj['content-type'] !== 'string') throw new Error('Invalid type for property "content-type". Expected string.');
+  if (typeof obj.bitrate !== 'number') throw new Error('Invalid type for property "bitrate". Expected number.');
+  if (typeof obj.icon !== 'string') throw new Error('Invalid type for property "icon". Expected string.');
+  if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
+  if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
+  if (typeof obj.duplicate !== 'boolean') throw new Error('Invalid type for property "duplicate". Expected boolean.');
 }
 
 module.exports = Stations;
