@@ -1,16 +1,13 @@
 module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
 
 const axios = require('axios');
-const {ObjectId} = require('mongodb');
 const pack = require('../package.json');
 
-const Logger = require('./logger.js');
 const isLiveStream = require('./isLiveStream.js');
 const rmRef = require('./rmRef.js');
-const dbStatistics = require('./dbStatistics.js');
-const saveStats = require('./saveStats.js');
 const useableHomapage = require('./useableHomapage.js');
-const cleanUpGenres = require('./cleanUpGenres.js');
+const Logger = require('./logger.js');
+const Stations = require('./Stations.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -116,67 +113,89 @@ async function testHomepageConnection(url, testedHomepages) {
  *     console.error('Failed to test streams and update database:', err);
  *   });
  */
-async function testStreams(db) {
+async function testStreams() {
   log.info('Updating database');
+  const sql = new Stations('data/customradio.db');
 
-  const startTime = new Date().getTime();
+  try {
+    const startTime = new Date().getTime();
   
-  const stations = await db.find({}).toArray();
+    const stations = await sql.getAllStations();
+    
+    let total = 0;
+    
+    const length = stations.length;
   
-  let total = 0;
+    const testedHomepages = [];
   
-  const length = stations.length;
-
-  const testedHomepages = [];
-
-  for (const station of stations) {
-    if (!station) continue;
-    log.debug(`Updating database: ${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
-    const filter = {
-      _id: new ObjectId(station._id)
-    };
-    station.url = rmRef(station.url);
-    const stream = await isLiveStream(station.url);
-
-    // stream connection test failed
-    if (!stream.ok) {
-      const res = await db.updateOne(filter, {
-        $set: {
+    for (const station of stations) {
+      if (!station) continue;
+      log.debug(`Updating database: ${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
+  
+      station.url = rmRef(station.url);
+      const stream = await isLiveStream(station.url);
+  
+      if (!stream.ok) {
+        const updatedData = {
+          name: stream.name || station.name || stream.description,
+          url: stream.url || station.url,
+          genre: stream.icyGenre || station.genre || 'Unknown',
           online: false,
-          error: stream.error
+          'content-type': stream.content || '',
+          bitrate: stream.bitrate || 0,
+          icon: 'Unknown',
+          homepage: stream.icyurl || 'Unknown',
+          error: stream.error || '',
+          duplicate: Boolean(station.duplicate) || false
         }
-      });
-      total += res.modifiedCount;
-      continue;
-    }
-
-    // ensure homepage url is usable
-    if (stream.icyurl) {
-      stream.icyurl = await testHomepageConnection(stream.icyurl, testedHomepages);
-    }
-
-    // save updates
-    const res = await db.updateOne(filter, {
-      $set: {
+  
+        try {
+          await sql.updateStation(updatedData);
+          total += 1;
+        } catch(e) {
+          log.debug(updatedData);
+          log.critical(`Error updating offline station ${station.id}: ${e.message}`);
+        }
+        continue;
+      }
+  
+      if (stream.icyurl) {
+        stream.icyurl = await testHomepageConnection(stream.icyurl, testedHomepages);
+      }
+  
+      const updatedData = {
         name: stream.name || station.name || stream.description,
         url: stream.url,
         genre: stream.icyGenre || station.genre || 'Unknown',
         online: stream.isLive,
-        'content-type': stream.content,
+        'content-type': stream.content || '',
         bitrate: stream.bitrate || 0,
         icon: 'Unknown',
         homepage: stream.icyurl || 'Unknown',
-        error: ''
+        error: stream.error || '',
+        duplicate: Boolean(station.duplicate) || false
+      };
+  
+      try {
+        await sql.updateStation(updatedData);
+        total += 1;
+      } catch(e) {
+        log.debug(updatedData);
+        log.critical(`Error updating online station ${station.id}: ${e.message}`);
       }
-    });
-    total += res.modifiedCount;
+    }
+    await sql.close();
+    const stats = await sql.dbStats();
+    const now = new Date().getTime();
+    const ms = now - startTime;
+    stats.timeCompleted = now;
+    stats.duration = ms;
+    log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(stats.duration)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
+    // await saveStats(stats);
+    // await cleanUpGenres();
+  } catch (e) {
+    log.error(`Failed stream test or database update: ${err.message}`);
+  } finally { 
+    await sql.close(); 
   }
-  const stats = await dbStatistics(db);
-  const now = new Date().getTime();
-  const ms = now - startTime;
-  stats.timeCompleted = now;
-  stats.duration = ms;
-  log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
-  await saveStats(stats);
-  await cleanUpGenres();
 }
