@@ -242,6 +242,35 @@ class Stations {
   }
 
   /**
+   * gets the number of online and total stations in the database.
+   * 
+   * @returns {Promise<{online: number, total: number}>}
+   */
+  dbStats() {
+    return new Promise((resolve, reject) => {
+      this.db.get(`SELECT COUNT(*) 
+          AS count 
+          FROM stations 
+          WHERE online = 1
+          and content_type IN (${usedTypes.map(() => '?').join(',')})`, usedTypes, (err, row) => {
+        if (err) {
+          reject(new Error(`Failed to get database statistics: ${err.message}`));
+        } else {
+          const online = row.count;
+          this.db.get(`SELECT COUNT(*) AS count FROM stations WHERE content_type IN (${usedTypes.map(() => '?').join(',')})`, usedTypes, (err, row) => {
+            if (err) {
+              reject(new Error(`Failed to get database statistics: ${err.message}`));
+            } else {
+              const total = row.count;
+              resolve({ online, total });
+            }
+          });
+        }
+      });
+    });
+  }
+
+  /**
    * Close the database connection.
    * 
    * @returns {Promise<string>} A promise that resolves to a success message.
