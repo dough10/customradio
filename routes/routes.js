@@ -146,8 +146,13 @@ module.exports = (app, db, redis, register) => {
    * @throws {express.Response} 500 - If an error occurs while adding the station to the database.
    */
   app.post('/mark-duplicate', upload.none(), [
-    body('url').trim().isURL().withMessage('Invalid URL')
-  ], (req, res) => markDuplicate(db, req, res));
+    body('id')
+      .trim()
+      .escape()
+      .isString()
+      .notEmpty()
+      .withMessage('Invalid ID paramater')
+  ], (req, res) => markDuplicate(req, res));
 
   /**
    * An endpoint for audio stream playback error callback
@@ -168,8 +173,19 @@ module.exports = (app, db, redis, register) => {
    * @throws {express.Response} 500 - If an error occurs while adding the station with the issue to the database.
    */
   app.post('/stream-issue', upload.none(), [
-    body('url').trim().isURL().withMessage('Invalid URL'),
-    body('error').trim().escape().isString().withMessage('Error meessage must be a string')
+    body('url')
+      .trim()
+      .escape()
+      .isString()
+      .isURL()
+      .notEmpty()
+      .withMessage('Invalid URL'),
+    body('error')
+      .trim()
+      .escape()
+      .isString()
+      .notEmpty()
+      .withMessage('Error meessage must be a string')
   ], (req, res) => streamIssue(db, req, res));
 
   /**
@@ -237,8 +253,9 @@ module.exports = (app, db, redis, register) => {
     query('genres')
       .trim()
       .escape()
-      .isString().withMessage('Genres must be a string'),
-  ], (req, res) => getStations(db, redis, req, res));
+      .isString()
+      .withMessage('Genres must be a string'),
+  ], (req, res) => getStations(req, res));
 
   /**
    * Handles POST requests to the '/add' endpoint.
@@ -285,8 +302,12 @@ module.exports = (app, db, redis, register) => {
    * }
    */
   app.post('/add', upload.none(), [
-    body('url').trim().isURL().withMessage('Invalid URL')
-  ], (req, res) => addToDatabase(db, redis, req, res));
+    body('url')
+      .trim()
+      .isURL()
+      .notEmpty()
+      .withMessage('Invalid URL')
+  ], (req, res) => addToDatabase(req, res));
 
   /**
    * @api {post} /csp-report Receive Content Security Policy Violation Reports
