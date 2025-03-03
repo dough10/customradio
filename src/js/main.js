@@ -628,7 +628,7 @@ function createStationElement({ id, name, url, bitrate, genre, icon, homepage })
   span.textContent = name;
 
   const div = document.createElement('div');
-  if (bitrate === 'Unknown') bitrate = '???';
+  if (bitrate === 0) bitrate = '???';
   div.textContent = `${bitrate}kbps`;
   div.title = div.textContent;
 
