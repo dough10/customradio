@@ -2,6 +2,7 @@ const {validationResult} = require('express-validator');
 
 const Logger = require('../../util/logger.js');
 const isLiveStream = require('../../util/isLiveStream.js');
+const Stations = require('../../util/Stations.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -37,20 +38,21 @@ const log = new Logger(logLevel);
  *     });
  * });
  */
-module.exports = async (db, redis, req, res) => {
+module.exports = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const error = errors.array();
-    log.error(JSON.stringify(error));
-    return res.status(400).json({error});
+    const message = errors.array()[0].msg;
+    log.error(message);
+    return res.status(400).json({message});
   }
+  const sql = new Stations('data/customradio.db');
   const {url} = req.body;
   log.info(`${req.ip} -> /add ${url} ${Date.now() - req.startTime}ms`);
   try {
-    const exists = await db.findOne({
-      url
-    });
+    const exists = await sql.exists(url);
+
     if (exists) {
+      await sql.close();
       const message = 'station exists';
       log.warning(`${message} ${Date.now() - req.startTime}ms`);
       res.json({message});
@@ -58,6 +60,7 @@ module.exports = async (db, redis, req, res) => {
     }
     const status = await isLiveStream(url);
     if (!status.ok) {
+      await sql.close();
       const message = `Connection test failed: ${status.error}`;
       log.warning(`${message}, ${Date.now() - req.startTime}ms`);
       res.json({message});
@@ -65,38 +68,33 @@ module.exports = async (db, redis, req, res) => {
     }
 
     if (!status.name) {
+      await sql.close();
       const message = `Failed getting station name`;
       log.warning(`${message}, ${Date.now() - req.startTime}ms`);
       res.json({message});
       return; 
     }
 
-    // clear stations cache
-    try {
-      const keys = await redis.keys('stations_*');
-      if (keys.length > 0) {
-        const removed = await redis.del(...keys);
-        if (removed) log.debug(`${removed} stations cache deleted`);
-      }
-    } catch(error) {
-      log.error(`Failed deleting stations cache: ${error.message}`);
-    }
-
     const data = {
       name: status.name,
       url,
       online: status.isLive,
-      genre: status.genre,
+      genre: status.genre || 'Unknown',
       'content-type': status.content,
       bitrate: status.bitrate || 'Unknown',
-      homepage: status.icyurl || 'Unknown'
+      icon: status.icon || 'Unknown',
+      homepage: status.icyurl || 'Unknown',
+      error: '',
+      duplicate: false,
     };
 
-    await db.insertOne(data);
-    const message = `station saved`;
+    const id =  await sql.addStation(data);
+    await sql.close();
+    const message = `station saved, id: ${id}`;
     log.info(`${message} ${Date.now() - req.startTime}ms`);
     res.json({message});
   } catch (e) {
+    await sql.close();
     const message = `Failed to add station: ${e.message}`;
     log.critical(`${message}, ${Date.now() - req.startTime}ms`);
     res.status(500).json({message});
