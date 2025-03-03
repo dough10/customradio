@@ -70,7 +70,7 @@ app.listen(3000, async _ => {
     
     // Set up middleware and routes
     middleware(app, httpRequestCounter);
-    routes(app, db, redis, register);
+    routes(app, redis, register);
     
     // Log server start message
     const pack = require('./package.json');

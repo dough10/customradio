@@ -52,7 +52,7 @@ function apiKeyMiddleware(req, res, next) {
   res.status(403).json({ error: 'Forbidden: Invalid Access Token' });
 }
 
-module.exports = (app, db, redis, register) => {
+module.exports = (app, redis, register) => {
   /** 
    * robots.txt
    */
@@ -186,7 +186,7 @@ module.exports = (app, db, redis, register) => {
       .isString()
       .notEmpty()
       .withMessage('Error meessage must be a string')
-  ], (req, res) => streamIssue(db, req, res));
+  ], (req, res) => streamIssue(req, res));
 
   /**
    * Handles the request to retrieve the top genres from the database.
