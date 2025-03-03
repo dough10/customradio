@@ -388,12 +388,12 @@ function openStationHomepage(homepage) {
 /**
  * marks a station as a duplicate in database for manual review
  * 
- * @param {String} url 
+ * @param {String} id - the station id
  */
-async function markDuplicate(url) {
+async function markDuplicate(id) {
   try {
     const formBody = new URLSearchParams({
-      url
+      id
     }).toString();
     const response = await fetch('/mark-duplicate', {
       method: 'POST',
@@ -426,7 +426,7 @@ async function contextMenu(ev) {
       },
       text: 'mark duplicate',
       title: 'mark station duplicate',
-      func:  _ => markDuplicate(el.dataset.url)
+      func:  _ => markDuplicate(el.id)
     }, {
       icon: {
         viewbox: '0 -960 960 960',
@@ -468,10 +468,10 @@ async function contextMenu(ev) {
  * 
  * @returns {void}
  */
-async function postStreamIssue(url, error) {
+async function postStreamIssue(id, error) {
   try {
     const formBody = new URLSearchParams({
-      url,
+      id,
       error
     }).toString();
     const response = await fetch('/stream-issue', {
@@ -511,6 +511,7 @@ async function playStream(ev) {
     if (!miniPlayer.hasAttribute('playing')) {
       miniPlayer.toggleAttribute('playing');
     }
+    player.dataset.id = el.id;
     player.src = url;
     player.load();
     await player.play();
@@ -523,7 +524,7 @@ async function playStream(ev) {
     const str = `Error playing media: ${error.message}`;
     new Toast(str, 3);
     console.error(str);
-    postStreamIssue(url, error.message);
+    postStreamIssue(el.id, error.message);
   }
   if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Play stream', url]);
 }
@@ -589,7 +590,7 @@ function createSmallButton({ icon, cssClass, func, title }) {
  * 
  * @returns {HTMLElement} li element
  */
-function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
+function createStationElement({ id, name, url, bitrate, genre, icon, homepage }) {
   const buttonData = [
     {
       icon: {
@@ -633,6 +634,7 @@ function createStationElement({ name, url, bitrate, genre, icon, homepage }) {
 
   const passive = { passive: true };
   const li = document.createElement('li');
+  li.id = id;
   li.title = `${name}: ${genre}`;
   li.dataset.name = name;
   li.dataset.url = url;
