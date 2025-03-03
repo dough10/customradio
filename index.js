@@ -77,7 +77,7 @@ app.listen(3000, async _ => {
     log.info(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel}`);
     
     // Schedule jobs
-    schedule.scheduleJob('0 0 * * 0', _ => testStreams(db));
+    schedule.scheduleJob('0 0 * * 0', _ => testStreams());
     schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir(db));
   } catch (error) {
     log.error('Failed to start server:', error);
