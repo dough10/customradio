@@ -1,10 +1,9 @@
 const { validationResult } = require('express-validator');
 const he = require('he');
 
-const usedTypes = require("../../util/usedTypes.js");
 const queryString = require('../../util/queryString.js');
-const saveToCollection = require('../../util/saveToCollection.js');
 const Logger = require('../../util/logger.js');
+const Stations = require('../../util/Stations.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -13,15 +12,15 @@ const log = new Logger(logLevel);
  * Handles the request to fetch and return a list of audio stations based on query parameters.
  * 
  * This function validates the incoming request, processes the genres from the query parameters, 
- * queries the MongoDB database for audio stations that match the specified genres and are currently online,
+ * queries the SQLite database for audio stations that match the specified genres and are currently online,
  * and then returns the results in the response. It handles errors gracefully and provides appropriate HTTP status codes.
  * 
  * @async
  * @function
  * 
- * @param {Object} db - The MongoDB database object used to query the stations.
- * @param {Object} redis - The redis cache server instance 
  * @param {Object} req - The HTTP request object containing query parameters and other request data.
+ * @param {Object} req.query - The query parameters of the request.
+ * @param {string} req.query.genres - A comma-separated list of genres to filter the stations by.
  * @param {Object} res - The HTTP response object used to send the results or error messages.
  * 
  * @returns {Promise<void>} A promise that resolves when the response has been sent.
@@ -31,7 +30,7 @@ const log = new Logger(logLevel);
  * @example
  * 
  * app.get('/stations', (req, res) => {
- *   getStations(db, redis, req, res)
+ *   getStations(req, res)
  *     .then(() => {
  *       // Response is sent from within getStations
  *     })
@@ -41,89 +40,26 @@ const log = new Logger(logLevel);
  *     });
  * });
  */
-module.exports = async (db, redis, req, res) => {
+module.exports = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error =  errors.array();
     log.error(error);
     return res.status(400).json({error});
-  }
-
-  const genres = decodeURIComponent(req.query.genres).split(',').map(genre => he.decode(genre).toLowerCase());
-
-  const genreString = genres.join(',');
-
-  if (genreString) {
-    await saveToCollection({ 
-      genres: genreString, 
-      time: new Date().getTime() 
-    }, 'genres');
-    try {
-      const removed = await redis.del('genres');
-      if (removed) log.info('genres cache deleted');
-    } catch(error) {
-      log.warning(`error deleting genres cache: ${error.message}`);
-    }
-  }
-
-  const cacheKey = `stations_${genreString}`;
-
+  }  
+  const sql = new Stations('data/customradio.db');
   try {
-    const cachedStations = await redis.get(cacheKey);
-
-    if (cachedStations) {
-      const stations = JSON.parse(cachedStations);
-      res.set('content-type', 'application/json');
-      log.info(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} cached stations returned ${Date.now() - req.startTime}ms`);
-      return res.send(stations);
-    }
-  } catch (err) {
-    const error = `(╬ Ò﹏Ó) Error fetching cached stations: ${err.message}`;
-    log.error(error);
-    return res.status(500).json({error});
-  }
-
-  const searchQuery = genres.map(genre => new RegExp(genre, 'i'))
-
-  try {
-    const stations = await db.find({
-      'content-type': usedTypes,
-      online: true,
-      bitrate: {
-        $exists: true,
-        $ne: null
-      },
-      $or: [
-        {
-          genre: {
-            $in: searchQuery
-          }
-        },
-        {
-          name: {
-            $in: searchQuery
-          }
-        }
-      ]
-    }, {
-      projection: {
-        _id: 0,
-        name: 1,
-        url: 1,
-        bitrate: 1,
-        genre: 1,
-        icon: 1,
-        homepage: 1
-      }
-    }).sort({
-      name: 1
-    }).toArray();    
+    const genres = decodeURIComponent(req.query.genres).split(',').map(genre => he.decode(genre).toLowerCase());
+  
+    const stations = await sql.getStationsByGenre(genres);
+    await sql.close();
+    
     log.info(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
     res.json(stations);
-    await redis.set(cacheKey, JSON.stringify(stations), 'EX', 3600);
   } catch (err) {
-    const error = `(╬ Ò﹏Ó) Error fetching stations: ${err.message}`;
+    const error = `Error fetching stations: ${err.message}`;
     log.error(error);
+    await sql.close();
     res.status(500).json({error});
   }
 };
