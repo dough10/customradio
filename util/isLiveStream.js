@@ -1,6 +1,11 @@
 const axios = require('axios');
 const pack = require('../package.json');
 
+const Logger = require('./logger.js');
+
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
+
 /**
  * An array containing default port numbers used in network protocols.
  * 
@@ -18,18 +23,32 @@ const defaultPorts = [
 
 
 /**
- * validate srteam URL is valid url format
+ * Validate the URL format.
  * 
- * @function
+ * @param {string} url - The URL to validate.
  * 
- * 
- * @param {String} url
- * 
- * @returns {Boolean}
+ * @returns {boolean} Returns true if the URL is valid, otherwise false.
  */
 function isValidURL(url) {
   const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
   return urlRegex.test(url);
+}
+
+/**
+ * Clean the URL by removing default ports and trailing question marks.
+ * 
+ * @param {string} url - The URL to clean.
+ * 
+ * @returns {string} The cleaned URL.
+ */
+function cleanURL(url) {
+  if (url.endsWith("?")) {
+    url = url.slice(0, -1);
+  }
+  defaultPorts.forEach(port => {
+    url = url.replace(port, '/');
+  });
+  return url;
 }
 
 /**
@@ -40,6 +59,7 @@ function isValidURL(url) {
  * returning an object with stream details if the URL points to a valid audio stream.
  *
  * @param {string} url - The URL to be tested for streaming.
+ * 
  * @returns {Promise<Object|boolean>} Returns a promise that resolves to an object containing
  * stream information (if the URL is an audio stream) or `false` if it is not an audio stream
  * or if an error occurs.
@@ -70,10 +90,14 @@ async function streamTest(url) {
     const icyurl = response.headers['icy-url'];
     const isAudioStream = content && content.startsWith('audio/');
 
-    if (!isAudioStream) return {
-      ok: false,
-      error: `invalid content-type: ${content}`
-    };
+    if (!isAudioStream) {
+      const errorMessage = `invalid content-type: ${content}`;
+      log.debug(errorMessage);
+      return {
+        ok: false,
+        error: errorMessage
+      };
+    }
 
     if (bitrate && bitrate.length > 3) bitrate = bitrate.split(',')[0];
 
@@ -81,10 +105,8 @@ async function streamTest(url) {
       name = icyurl;
     }
 
-    const ok = true;
-
     return {
-      ok,
+      ok: true,
       url,
       name,
       description,
@@ -96,6 +118,8 @@ async function streamTest(url) {
       error: ''
     };
   } catch (error) {
+    const errorMessage = `Error testing stream: ${error.message}`;
+    log.warning(errorMessage);
     return {
       ok: false,
       error: error.message || 'Unknown error occurred'
@@ -141,19 +165,19 @@ async function streamTest(url) {
  *   });
  */
 module.exports = async (url) => {
-  if (!url || typeof url !== 'string' || !isValidURL(url)) return {
-    ok: false,
-    error: `url must be a string have a value and be a value URL format: ${url}`
+  if (!url || typeof url !== 'string' || !isValidURL(url)) {
+    log.error(`Invalid URL: ${url}`);
+    return {
+      ok: false,
+      error: `url must be a string have a value and be a value URL format: ${url}`
+    }
   };
-  if (url.endsWith("?")) {
-    url = url.slice(0, -1);
-  }
-  defaultPorts.forEach(port => {
-    url = url.replace(port, '/');
-  });
+  url = cleanURL(url);
   if (url.startsWith('http://')) {
+    log.debug(`Testing https: ${url}`);
     const httpsUrl = url.replace('http://', 'https://');
     return await streamTest(httpsUrl);
   }
+  log.debug(`Testing: ${url}`);
   return await streamTest(url);
 };
