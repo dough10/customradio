@@ -133,6 +133,7 @@ async function testStreams() {
       log.debug(`Updating database: ${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
   
       station.url = rmRef(station.url);
+      
       const stream = await isLiveStream(station.url);
   
       if (!stream.ok) {
@@ -184,17 +185,16 @@ async function testStreams() {
         log.critical(`Error updating online station ${station.id}: ${e.message}`);
       }
     }
-    await sql.close();
     const stats = await sql.dbStats();
     const now = new Date().getTime();
     const ms = now - startTime;
     stats.timeCompleted = now;
     stats.duration = ms;
-    log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(stats.duration)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
+    log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(stats.duration)}. usable entrys: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
     // await saveStats(stats);
     // await cleanUpGenres();
   } catch (e) {
-    log.error(`Failed stream test or database update: ${err.message}`);
+    log.error(`Failed stream test or database update: ${e.message}`);
   } finally { 
     await sql.close(); 
   }
