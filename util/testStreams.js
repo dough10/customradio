@@ -130,7 +130,7 @@ async function testStreams() {
   
     for (const station of stations) {
       if (!station) continue;
-      log.debug(`Updating database: ${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
+      log.debug(`Update progress: ${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
   
       station.url = rmRef(station.url);
       
