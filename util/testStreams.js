@@ -53,7 +53,6 @@ function msToHhMmSs(milliseconds) {
   return `${hours > 0 ? `${hours} hours ` : ''}${minutes} minutes and ${secs} seconds`;
 }
 
-
 /**
  * breaks a string into parts and attempts to get a usable url from it
  * 
@@ -82,11 +81,36 @@ async function testHomepageConnection(url, testedHomepages) {
       return homepage;
     }
   } catch(e) {
-    log.debug(`${url} failed test connection: ${e.message}`);
+    log.debug(`${url} failed homepage test connection: ${e.message}`);
     return;
   }
 }
 
+/**
+ * Update station data in the database.
+ * 
+ * @param {Object} sql - The Stations instance.
+ * @param {Object} station - The station object.
+ * @param {Object} stream - The stream object.
+ * @param {Array} testedHomepages - The array of tested homepages.
+ * @returns {Promise<void>}
+ */
+async function updateStationData(sql, station, stream, testedHomepages) {
+  const updatedData = {
+    name: stream.name || station.name || stream.description,
+    url: stream.url || station.url,
+    genre: stream.icyGenre || station.genre || 'Unknown',
+    online: stream.isLive,
+    'content-type': stream.content || '',
+    bitrate: stream.bitrate || 0,
+    icon: 'Unknown',
+    homepage: await testHomepageConnection(stream.icyurl, testedHomepages) || 'Unknown',
+    error: stream.error || '',
+    duplicate: Boolean(station.duplicate) || false
+  };
+
+  await sql.updateStation(updatedData);
+}
 
 /**
  * Tests streams for online state and headers to update the database with stream information.
@@ -97,15 +121,13 @@ async function testHomepageConnection(url, testedHomepages) {
  * @async
  * @function
  * 
- * @param {Object} db - The MongoDB database object used to query and update records.
- * 
  * @returns {Promise<void>} A promise that resolves when the database update is complete.
  * 
  * @throws {Error} Throws an error if the database operations fail.
  * 
  * @example
  * 
- * testStreams(db)
+ * testStreams()
  *   .then(() => {
  *     console.log.info('Streams tested and database updated successfully.');
  *   })
@@ -134,55 +156,20 @@ async function testStreams() {
   
       station.url = rmRef(station.url);
       
-      const stream = await isLiveStream(station.url);
-  
-      if (!stream.ok) {
-        const updatedData = {
-          name: stream.name || station.name || stream.description,
-          url: stream.url || station.url,
-          genre: stream.icyGenre || station.genre || 'Unknown',
-          online: false,
-          'content-type': stream.content || '',
-          bitrate: stream.bitrate || 0,
-          icon: 'Unknown',
-          homepage: stream.icyurl || 'Unknown',
-          error: stream.error || '',
-          duplicate: Boolean(station.duplicate) || false
-        }
-  
-        try {
-          await sql.updateStation(updatedData);
-          total += 1;
-        } catch(e) {
-          log.debug(updatedData);
-          log.critical(`Error updating offline station ${station.id}: ${e.message}`);
-        }
-        continue;
-      }
-  
-      if (stream.icyurl) {
-        stream.icyurl = await testHomepageConnection(stream.icyurl, testedHomepages);
-      }
-  
-      const updatedData = {
-        name: stream.name || station.name || stream.description,
-        url: stream.url,
-        genre: stream.icyGenre || station.genre || 'Unknown',
-        online: stream.isLive,
-        'content-type': stream.content || '',
-        bitrate: stream.bitrate || 0,
-        icon: 'Unknown',
-        homepage: stream.icyurl || 'Unknown',
-        error: stream.error || '',
-        duplicate: Boolean(station.duplicate) || false
-      };
-  
       try {
-        await sql.updateStation(updatedData);
+        const stream = await isLiveStream(station.url);
+        // invalid url, error testing stream or is not an audio stream
+        if (!stream.ok) {
+          await updateStationData(sql, station, stream, testedHomepages);
+          total += 1;
+          continue;
+        }
+    
+        await updateStationData(sql, station, stream, testedHomepages);
         total += 1;
       } catch(e) {
-        log.debug(updatedData);
-        log.critical(`Error updating online station ${station.id}: ${e.message}`);
+        log.error(`Error testing stream ${station.id}: ${e.message}`);
+        continue;
       }
     }
     const stats = await sql.dbStats();
@@ -190,7 +177,7 @@ async function testStreams() {
     const ms = now - startTime;
     stats.timeCompleted = now;
     stats.duration = ms;
-    log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(stats.duration)}. usable entrys: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
+    log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(stats.duration)}. usable entries: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
     // await saveStats(stats);
     // await cleanUpGenres();
   } catch (e) {
