@@ -7,7 +7,7 @@ const isLiveStream = require('./isLiveStream.js');
 const rmRef = require('./rmRef.js');
 const useableHomapage = require('./useableHomapage.js');
 const Logger = require('./logger.js');
-const Stations = require('./Stations.js');
+const Stations = require('../model/Stations.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);

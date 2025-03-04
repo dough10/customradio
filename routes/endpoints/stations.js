@@ -3,7 +3,7 @@ const he = require('he');
 
 const queryString = require('../../util/queryString.js');
 const Logger = require('../../util/logger.js');
-const Stations = require('../../util/Stations.js');
+const Stations = require('../../model/Stations.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
