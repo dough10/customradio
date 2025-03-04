@@ -91,8 +91,8 @@ async function streamTest(url) {
     const isAudioStream = content && content.startsWith('audio/');
 
     if (!isAudioStream) {
-      const errorMessage = `invalid content-type: ${content}`;
-      log.debug(errorMessage);
+      const errorMessage = `Test error: ${url} - invalid content-type: ${content}`;
+      log.error(errorMessage);
       return {
         ok: false,
         error: errorMessage
@@ -101,10 +101,12 @@ async function streamTest(url) {
 
     if (bitrate && bitrate.length > 3) bitrate = bitrate.split(',')[0];
 
+    // set name to homepage if no name is found
     if (!name && icyurl || name && name.length <= 1 && icyurl) {
       name = icyurl;
     }
-    log.debug(`Stream: ${url} - ${isLive ? 'Live' : 'Not Live'} - ${name || 'Unknown'} - ${icyGenre || 'Unknown'} - ${bitrate || 'Unknown'}`);
+
+    log.debug(`Result: ${url} - ${isLive ? 'Live' : 'Not Live'} - ${name || 'Unknown'} - ${icyGenre || 'Unknown'} - ${bitrate || 'Unknown'}`);
 
     return {
       ok: true,
@@ -119,11 +121,11 @@ async function streamTest(url) {
       error: ''
     };
   } catch (error) {
-    const errorMessage = `Error testing stream: ${error.message}`;
-    log.warning(errorMessage);
+    const errorMessage = `Test error: ${url} - ${error.message}`;
+    log.error(errorMessage);
     return {
       ok: false,
-      error: error.message || 'Unknown error occurred'
+      error: error.message
     };
   }
 }
