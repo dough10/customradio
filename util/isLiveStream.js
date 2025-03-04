@@ -92,7 +92,7 @@ async function streamTest(url) {
 
     if (!isAudioStream) {
       const errorMessage = `invalid content-type: ${content}`;
-      log.debug(errorMessage);
+      log.debug(`Stream: ${url} - Not Live - ${errorMessage}`);
       return {
         ok: false,
         error: errorMessage
@@ -104,7 +104,7 @@ async function streamTest(url) {
     if (!name && icyurl || name && name.length <= 1 && icyurl) {
       name = icyurl;
     }
-    log.debug(`Stream: ${url} - ${isLive ? 'Live' : 'Not Live'} - ${name || 'Unknown'} - ${icyGenre || 'Unknown'} - ${bitrate || 'Unknown'}`);
+    log.debug(`Stream: ${url} - Live - ${name || 'Unknown'} - ${icyGenre || 'Unknown'} - ${bitrate || 'Unknown'}`);
 
     return {
       ok: true,
