@@ -16,3 +16,4 @@ assets
 logs/*
 data/.gitignore
 templates/.gitignore
+*/*-old.js
