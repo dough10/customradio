@@ -8,24 +8,33 @@ const rmRef = require('./rmRef.js');
 const isLiveStream = require('./isLiveStream.js');
 const usedTypes = require("./usedTypes.js");
 const Logger = require('./logger.js');
-const dbStatistics = require('./dbStatistics.js');
-const saveStats = require('./saveStats.js');
+const Stations = require('../model/Stations.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-// data structure
-// {
-//   server_name: [ 'radio2000x.com' ],
-//   server_type: [ 'audio/mpeg' ],
-//   bitrate: [ '256' ],
-//   samplerate: [ '0' ],
-//   channels: [ '0' ],
-//   listen_url: [ 'http://air.radio2000x.com:8020/stream' ],
-//   current_song: [ "Coolio - Gangsta's Paradise" ],
-//   genre: [ '2000-х Музыка' ]
-// }
-module.exports = async (db) => {
+
+
+/**
+ * Scrapes the Icecast directory for new stations
+ * 
+ * @returns {Promise<void>}
+ * 
+ * data structure
+ * {
+ *   server_name: [ 'radio2000x.com' ],
+ *   server_type: [ 'audio/mpeg' ],
+ *   bitrate: [ '256' ],
+ *   samplerate: [ '0' ],
+ *   channels: [ '0' ],
+ *   listen_url: [ 'http://air.radio2000x.com:8020/stream' ],
+ *   current_song: [ "Coolio - Gangsta's Paradise" ],
+ *   genre: [ '2000-х Музыка' ]
+ * }
+*/
+module.exports = async () => {
+  const sql = new Stations('data/customradio.db');
+
   try {
     const res = await axios.get('http://dir.xiph.org/yp.xml', {
       headers: {
@@ -51,7 +60,7 @@ module.exports = async (db) => {
     
     const testedHomepages = [];
     for (const entry of data) {
-      log.debug(`Scraping Icecast Directory: ${((data.indexOf(entry) / length) * 100).toFixed(3)}%`);
+      log.debug(`Scrape progress: ${((data.indexOf(entry) / length) * 100).toFixed(3)}%`);
       
       const url = rmRef(entry.listen_url[0]);
       const stream = await isLiveStream(url);
@@ -60,32 +69,31 @@ module.exports = async (db) => {
     
       if (!usedTypes.$in.includes(stream.content)) continue;
     
-      if (await db.findOne({url: stream.url})) continue;
+      if (await sql.exists(stream.url)) continue;
     
-      if (stream.icyurl) {
-        stream.icyurl = await testHomepageConnection(stream.icyurl, testedHomepages);
-      }
-    
-      await db.insertOne({
+      const result = await sql.addStation({
         name: stream.name || entry.server_name[0] || stream.description,
         url: stream.url,
         genre: stream.icyGenre || entry.genre[0] || 'Unknown',
         online: stream.isLive,
-        'content-type': stream.content,
-        bitrate: stream.bitrate || 'Unknown',
+        'content-type': stream.content || '',
+        bitrate: stream.bitrate || 0,
         icon: 'Unknown',
-        homepage: stream.icyurl || 'Unknown',
-        error: undefined
+        homepage: await testHomepageConnection(stream.icyurl, testedHomepages) || 'Unknown',
+        error:  '',
+        duplicate: false
       });
-      total += 1;
+      log.debug(`Added station: ${result}`);
+      if (result !== 'Station exists') total += 1;
     }
-    const stats = await dbStatistics(db);
+    const stats = await sql.dbStats();
     const now = new Date().getTime();
     const ms = now - startTime;
     stats.timeCompleted = now;
     stats.duration = ms;
-    log.info(`Icecast Directory scrape complete: ${total} entry${plural(total)} added over ${msToHhMmSs(ms)}. usable entrys: ${stats.usableEntrys}, online: ${stats.online}, offline: ${stats.offline}`);
-    await saveStats(stats);
+    log.info(`Icecast Directory scrape complete: ${total} entry${plural(total)} added over ${msToHhMmSs(ms)}. usable entrys: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
+    await sql.close();
+    // await saveStats(stats);
   } catch(err) {
     log.critical(`Scrape failed: ${err.message}`);
   }
