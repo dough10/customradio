@@ -20,7 +20,7 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
     > mongodb://username:password@localhost:27017
 - **TOKEN** = *access token for submissing to /csp-report endpoint*
     > proxy_set_header Authorization "Bearer abcdefg123456"
-- **LOG_LEVEL** = console and file log level: Defaults to INFO
+- **LOG_LEVEL** = *console and file log level: Defaults to INFO*
 
 ### NPM Dependencies
 
