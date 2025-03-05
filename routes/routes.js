@@ -52,7 +52,7 @@ function apiKeyMiddleware(req, res, next) {
   res.status(403).json({ error: 'Forbidden: Invalid Access Token' });
 }
 
-module.exports = (app, redis, register) => {
+module.exports = (app, register) => {
   /** 
    * robots.txt
    */
@@ -211,7 +211,7 @@ module.exports = (app, redis, register) => {
    * 
    * app.get('/topGenres', getTopGenres);
    */
-  app.get('/topGenres', (req, res) => topGenres(redis, req, res));
+  app.get('/topGenres', (req, res) => topGenres(req, res));
 
   /**
    * Handles GET requests to the '/stations' endpoint.
