@@ -1,7 +1,6 @@
 const express = require('express');
 const schedule = require('node-schedule');
 const app = express();
-const Redis = require('ioredis');
 const promClient = require('prom-client');
 require('dotenv').config();
 
@@ -45,34 +44,20 @@ register.registerMetric(httpRequestCounter);
  * 
  * @example
  * // Starting the server
- * app.listen(3000, async _ => {
- *   log('Online. o( ❛ᴗ❛ )o');
+ * app.listen(3000, _ => {
+ *   console.log('Online. o( ❛ᴗ❛ )o');
  * });
  */
-app.listen(3000, _ => {
-  try {
-    const redis = new Redis({
-      host: process.env.REDIS_HOST || '127.0.0.1',
-      port: process.env.REDIS_PORT || 6379,
-      password: process.env.REDIS_PASSWORD || ''
-    });
-    redis.on('error', err => { 
-      log.error(`Redis error: ${err}`); 
-    });
-    
-    // Set up middleware and routes
-    middleware(app, httpRequestCounter);
-    routes(app, redis, register);
-    
-    // Log server start message
-    const pack = require('./package.json');
-    log.info(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel}`);
-    
-    // Schedule jobs
-    schedule.scheduleJob('0 0 * * 0', _ => testStreams());
-    schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir());
-  } catch (error) {
-    log.error('Failed to start server:', error);
-    process.exit(1);
-  }
+app.listen(3000, _ => { 
+  // Set up middleware and routes
+  middleware(app, httpRequestCounter);
+  routes(app, register);
+  
+  // Schedule jobs
+  schedule.scheduleJob('0 0 * * 0', _ => testStreams());
+  schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir());
+  
+  // Log server start message
+  const pack = require('./package.json');
+  log.info(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel}`);
 });
