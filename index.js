@@ -9,15 +9,10 @@ const { testStreams } = require('./util/testStreams.js');
 const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./routes/middleware.js');
 const routes = require('./routes/routes.js');
-const DbConnector = require('./util/dbConnector.js');
 const Logger = require('./util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
-
-const DB_HOST = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
-const DB_COLLECTION = 'stations';
-const connector = new DbConnector(DB_HOST, DB_COLLECTION);
 
 // Set up Prometheus metrics
 const httpRequestCounter = new promClient.Counter({
@@ -54,11 +49,8 @@ register.registerMetric(httpRequestCounter);
  *   log('Online. o( ❛ᴗ❛ )o');
  * });
  */
-app.listen(3000, async _ => {
+app.listen(3000, _ => {
   try {
-    // Connect to the database
-    const db = await connector.connect();
-
     const redis = new Redis({
       host: process.env.REDIS_HOST || '127.0.0.1',
       port: process.env.REDIS_PORT || 6379,
@@ -78,7 +70,7 @@ app.listen(3000, async _ => {
     
     // Schedule jobs
     schedule.scheduleJob('0 0 * * 0', _ => testStreams());
-    schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir(db));
+    schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir());
   } catch (error) {
     log.error('Failed to start server:', error);
     process.exit(1);
