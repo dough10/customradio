@@ -40,8 +40,8 @@ app.listen(3000, _ => {
   routes(app, register);
   
   // Schedule jobs
-  schedule.scheduleJob('0 0 * * 0', _ => testStreams());
-  schedule.scheduleJob('0 12 1 * *', _ => scrapeIceDir());
+  schedule.scheduleJob('0 0 * * 0', testStreams);
+  schedule.scheduleJob('0 12 1 * *', scrapeIceDir);
   
   // Log server start message
   const pack = require('./package.json');
