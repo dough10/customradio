@@ -405,7 +405,7 @@ async function markDuplicate(id) {
     const result = await response.json();
     new Toast(result.message, 1.5);
   } catch (err) {
-    console.error('error reporting stream issue:', err);
+    console.error('error reporting stream duplicate:', err);
   }
 } 
 
