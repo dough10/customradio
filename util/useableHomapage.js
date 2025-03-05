@@ -1,7 +1,7 @@
 const url = require('url');
 
 /**
- * check for ip address
+ * Check for IPv4 address.
  * 
  * @param {String} address
  * 
@@ -13,31 +13,23 @@ function isIPv4(address) {
 }
 
 /**
- * breaks a URL into parts to be restructured
+ * Breaks a URL into parts to be restructured.
  * 
  * @param {String} URL 
  * 
- * @returns {Object}
+ * @returns {Object|null}
  */
 function urlDeconstruction(URL) {
   if (typeof URL !== 'string') return null;
 
-  if (URL === 'N/A' || URL === 'http://localhost/' || URL === 'http://localhost' || URL === 'url' || URL === '(NULL)') return null;
-
-  if (URL === 'Unknown') return;
-
-  // if (URL.startsWith('https://')) {
-  //   URL = 'https://' + URL.slice(5);
-  // }
+  const invalidURLs = ['N/A', 'http://localhost/', 'http://localhost', 'url', '(NULL)', 'Unknown'];
+  if (invalidURLs.includes(URL)) return null;
 
   const regexInvalidUrl = /^https?:\/\/(?:www\.)?$/;
-  if (regexInvalidUrl.test(URL)) {
-    return null;
-  }
+  if (regexInvalidUrl.test(URL)) return null;
 
   try {
     const parsedUrl = url.parse(URL, true);
-
     const splitHostname = parsedUrl.hostname ? parsedUrl.hostname.split('.') : [];
     let subdomain, domain, ext, ip;
 
@@ -77,7 +69,7 @@ function urlDeconstruction(URL) {
 }
 
 /**
- * url object back into a string
+ * Converts a URL object back into a string.
  * 
  * @param {Object} obj
  * 
@@ -101,17 +93,17 @@ function objectToUrl(obj) {
 }
 
 /**
- * attempts to reconstruct url to a usable form
+ * Attempts to reconstruct URL to a usable form.
  * 
- * @param {Object} obj
- *  
- * @returns {String} 
+ * @param {String} homepage
+ * 
+ * @returns {String|null}
  */
 module.exports = async (homepage) => {
   const brokenHome = urlDeconstruction(homepage);
   if (brokenHome) {
     return objectToUrl(brokenHome);
   } else {
-    return 
+    return null;
   }
 };
