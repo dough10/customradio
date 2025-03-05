@@ -1,32 +1,18 @@
 const express = require('express');
 const schedule = require('node-schedule');
 const app = express();
-const promClient = require('prom-client');
 require('dotenv').config();
 
 const { testStreams } = require('./util/testStreams.js');
 const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./routes/middleware.js');
 const routes = require('./routes/routes.js');
+const { httpRequestCounter, register } = require('./util/promClient.js');
 const Logger = require('./util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-// Set up Prometheus metrics
-const httpRequestCounter = new promClient.Counter({
-  name: 'http_requests_total',
-  help: 'Total number of HTTP requests',
-  labelNames: ['method', 'route', 'status_code']
-});
-const register = new promClient.Registry();
-register.setDefaultLabels({
-  app: 'customradio-api'
-});
-promClient.collectDefaultMetrics({
-  register
-});
-register.registerMetric(httpRequestCounter);
 
 /**
  * Starts the Express server and sets up necessary initializations.
