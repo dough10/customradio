@@ -31,22 +31,7 @@ const log = new Logger(logLevel);
  * 
  * app.get('/topGenres', getTopGenres);
  */
-module.exports = async (redis, req, res) => {
-  const cacheKey = `genres`;
-
-  try {
-    const genresCache = await redis.get(cacheKey);
-
-    if (genresCache) {
-      const cachedGenres = JSON.parse(genresCache);
-      res.set('content-type', 'application/json');
-      return res.send(cachedGenres);
-    }
-  } catch (err) {
-    log.error(`Error fetching cached genres: ${err.message}`);
-  }
-
-
+module.exports = async (req, res) => {
   const url = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
   const connector = new DbConnector(url, 'genres');
   const db = await connector.connect();
@@ -72,7 +57,6 @@ module.exports = async (redis, req, res) => {
     ]).toArray();
     const genreObj = topGenres.map(obj => obj._id).sort((a, b) => a.localeCompare(b));
     res.json(genreObj);
-    await redis.set(cacheKey, JSON.stringify(genreObj), 'EX', 3600);
   } catch(err) {
     const error = `Error getting genres: ${err.message}`;
     log.critical(error);
