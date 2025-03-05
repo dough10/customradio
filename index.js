@@ -18,9 +18,8 @@ const log = new Logger(logLevel);
  * Starts the Express server and sets up necessary initializations.
  * 
  * This function listens on port 3000 and performs the following tasks:
- * 1. Connects to the database using the provided configuration URL.
+ * 1. Schedules a recurring jobs to test streams every day at midnight and scrape Icecast DB monthly.
  * 2. Logs a message indicating that the server is online.
- * 3. Schedules a recurring job to test streams every day at midnight.
  * 
  * @function
  * @param {number} port - The port number on which the server listens.
