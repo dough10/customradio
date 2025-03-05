@@ -173,13 +173,12 @@ module.exports = (app, redis, register) => {
    * @throws {express.Response} 500 - If an error occurs while adding the station with the issue to the database.
    */
   app.post('/stream-issue', upload.none(), [
-    body('url')
+    body('id')
       .trim()
       .escape()
       .isString()
-      .isURL()
       .notEmpty()
-      .withMessage('Invalid URL'),
+      .withMessage('Invalid or missing ID paramater'),
     body('error')
       .trim()
       .escape()
