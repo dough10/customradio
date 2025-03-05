@@ -1,6 +1,8 @@
 const { validationResult } = require('express-validator');
 const he = require('he');
 
+
+const saveToCollection = require('../../util/saveToCollection.js');
 const queryString = require('../../util/queryString.js');
 const Logger = require('../../util/logger.js');
 const Stations = require('../../model/Stations.js');
@@ -50,16 +52,25 @@ module.exports = async (req, res) => {
   const sql = new Stations('data/customradio.db');
   try {
     const genres = decodeURIComponent(req.query.genres).split(',').map(genre => he.decode(genre).toLowerCase());
-  
     const stations = await sql.getStationsByGenre(genres);
-    await sql.close();
     
+    const genreString = genres.join(',');
+
+    if (genreString) {
+      log.debug(`Saving genres: ${genreString}`);
+      await saveToCollection({ 
+        genres: genreString, 
+        time: new Date().getTime() 
+      }, 'genres');
+    }
+
     log.info(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
     res.json(stations);
   } catch (err) {
     const error = `Error fetching stations: ${err.message}`;
     log.error(error);
-    await sql.close();
     res.status(500).json({error});
+  } finally {
+    sql.close();
   }
 };
