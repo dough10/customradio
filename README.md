@@ -13,20 +13,14 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 ## Requires
 
 - **MongoDB**
-- **Redis**
 
 ### Environment Variables
 
 - **DB_HOST** = *Mongodb connection url*
     > mongodb://username:password@localhost:27017
-- **REDIS_HOST** = *redis server address*
-    > 127.0.0.1
-- **REDIS_PORT** = *redis server port*
-    > 6379
-- **REDIS_PASSWORD** = *password for redis server*
-    > supersecretpassword123
 - **TOKEN** = *access token for submissing to /csp-report endpoint*
     > proxy_set_header Authorization "Bearer abcdefg123456"
+- **LOG_LEVEL** = console and file log level: Defaults to INFO
 
 ### NPM Dependencies
 
@@ -38,7 +32,6 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 - **express-validator**: *^7.1.0*
 - **he**: *^1.2.0*
 - **helmet**: *^8.0.0*
-- **ioredis**: *^5.4.1*
 - **mime-types**: *^2.1.35*
 - **mongodb**: *^6.8.0*
 - **multer**: *^1.4.5-lts.1*
