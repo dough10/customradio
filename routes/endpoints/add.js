@@ -39,7 +39,7 @@ const log = new Logger(logLevel);
 module.exports = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const message = errors.array()[0].msg;
+    const message = errors.array().map(e => e.msg).join(', ');
     log.error(message);
     return res.status(400).json({ message });
   }

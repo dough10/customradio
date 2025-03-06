@@ -45,7 +45,7 @@ const log = new Logger(logLevel);
 module.exports = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const error =  errors.array();
+    const error =  errors.array().map(e => e.msg).join(', ');
     log.error(error);
     return res.status(400).json({error});
   }  
