@@ -42,6 +42,6 @@ module.exports = async (req, res) => {
     log.error(message);
     res.status(500).json({message});
   } finally {
-    sql.close();
+    await sql.close();
   }
 };
