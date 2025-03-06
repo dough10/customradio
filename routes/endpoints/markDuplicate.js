@@ -34,7 +34,6 @@ module.exports = async (req, res) => {
   log.info(`${req.ip} -> /mark-duplicate ${id}`);
   try {
     await sql.markDuplicate(id);
-    await sql.close();
     res.json({
       message: "Duplicate logged"
     });
@@ -42,5 +41,7 @@ module.exports = async (req, res) => {
     const message = `Failed to log error: ${entryError.message}`;
     log.error(message);
     res.status(500).json({message});
+  } finally {
+    sql.close();
   }
 };

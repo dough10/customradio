@@ -52,7 +52,6 @@ module.exports = async (req, res) => {
     const exists = await sql.exists(url);
 
     if (exists) {
-      await sql.close();
       const message = 'station exists';
       log.warning(`${message} ${Date.now() - req.startTime}ms`);
       res.json({message});
@@ -60,7 +59,6 @@ module.exports = async (req, res) => {
     }
     const status = await isLiveStream(url);
     if (!status.ok) {
-      await sql.close();
       const message = `Connection test failed: ${status.error}`;
       log.warning(`${message}, ${Date.now() - req.startTime}ms`);
       res.json({message});
@@ -68,7 +66,6 @@ module.exports = async (req, res) => {
     }
 
     if (!status.name) {
-      await sql.close();
       const message = `Failed getting station name`;
       log.warning(`${message}, ${Date.now() - req.startTime}ms`);
       res.json({message});
@@ -89,14 +86,14 @@ module.exports = async (req, res) => {
     };
 
     const id =  await sql.addStation(data);
-    await sql.close();
     const message = `station saved, id: ${id}`;
     log.info(`${message} ${Date.now() - req.startTime}ms`);
     res.json({message});
   } catch (e) {
-    await sql.close();
     const message = `Failed to add station: ${e.message}`;
     log.critical(`${message}, ${Date.now() - req.startTime}ms`);
     res.status(500).json({message});
+  } finally {
+    sql.close();
   }
 };
