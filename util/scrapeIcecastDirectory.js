@@ -92,9 +92,10 @@ module.exports = async () => {
     stats.timeCompleted = now;
     stats.duration = ms;
     log.info(`Icecast Directory scrape complete: ${total} entry${plural(total)} added over ${msToHhMmSs(ms)}. usable entrys: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
-    await sql.close();
     // await saveStats(stats);
   } catch(err) {
     log.critical(`Scrape failed: ${err.message}`);
+  } finally {
+    await sql.close();
   }
 };
