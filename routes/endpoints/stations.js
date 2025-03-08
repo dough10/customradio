@@ -2,7 +2,6 @@ const { validationResult } = require('express-validator');
 const he = require('he');
 
 
-const saveToCollection = require('../../util/saveToCollection.js');
 const queryString = require('../../util/queryString.js');
 const Logger = require('../../util/logger.js');
 const Stations = require('../../model/Stations.js');
@@ -58,10 +57,7 @@ module.exports = async (req, res) => {
 
     if (genreString) {
       log.debug(`Saving genres: ${genreString}`);
-      await saveToCollection({ 
-        genres: genreString, 
-        time: new Date().getTime() 
-      }, 'genres');
+      await sql.logGenres(genres);
     }
 
     log.info(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
