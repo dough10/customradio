@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const DbConnector = require('../../util/dbConnector.js');
+const Stations = require('../../model/Stations.js');
 
 const Logger = require('../../util/logger.js');
 
@@ -32,36 +32,16 @@ const log = new Logger(logLevel);
  * app.get('/topGenres', getTopGenres);
  */
 module.exports = async (req, res) => {
-  const url = process.env.DB_HOST || 'mongodb://127.0.0.1:27017';
-  const connector = new DbConnector(url, 'genres');
-  const db = await connector.connect();
+  const sql = new Stations('data/customradio.db');
   try{
-    const topGenres = await db.aggregate([
-      {
-        $match: {
-          time: { $gt: new Date().getTime() - 1296000000 }
-        }
-      },
-      {
-        $group: {
-          _id: "$genres",
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { count: -1 }
-      },
-      {
-        $limit: 10
-      }
-    ]).toArray();
-    const genreObj = topGenres.map(obj => obj._id).sort((a, b) => a.localeCompare(b));
+    const topGenres = await sql.topGenres();
+    const genreObj = topGenres.map(obj => obj.genres).sort((a, b) => a.localeCompare(b));
     res.json(genreObj);
   } catch(err) {
     const error = `Error getting genres: ${err.message}`;
     log.critical(error);
     res.status(500).json({error});
   } finally {
-    await connector.disconnect();
+    await sql.close();
   }
 };
