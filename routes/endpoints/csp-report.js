@@ -1,7 +1,6 @@
 require('dotenv').config();
 const {validationResult} = require('express-validator');
 
-const saveToCollection = require('../../util/saveToCollection.js');
 const Logger = require('../../util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
@@ -63,9 +62,8 @@ module.exports = async (req, res) => {
   try {
     const cspReport = req.body['csp-report'];
     cspReport.time = new Date().toLocaleString();
-    log.debug(JSON.stringify(cspReport));
+    log.debug(cspReport);
     log.info(`${req.ip} -> /csp-report ${Date.now() - req.startTime}ms`);
-    await saveToCollection(cspReport, 'csp-report');
     res.status(204).send();
   } catch(error) {
     const message = `Error Saving CSP-Report: ${error.message}`;
