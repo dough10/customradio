@@ -15,3 +15,4 @@ make-docs.js
 public
 t.js
 */*-old.*
+*/*/*-old.*
