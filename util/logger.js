@@ -103,7 +103,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async critical(message) {
-    if (this._threshold <= 4) await this._log(this._timestamp(), 'critical', message);
+    await this._log(this._timestamp(), 'critical', message);
   }
 
   /**
