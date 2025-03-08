@@ -17,7 +17,7 @@ class Stations {
     this.db = new sqlite3.Database(filePath, err => {
       if (err) throw new Error(`Failed to create database file at ${filePath}: ${err.message}`);
 
-      const createTableQuery = `CREATE TABLE IF NOT EXISTS stations(
+      const createStationsTableQuery = `CREATE TABLE IF NOT EXISTS stations(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         url TEXT,
@@ -31,8 +31,18 @@ class Stations {
         duplicate BOOLEAN
       )`;
 
-      this.db.run(createTableQuery, error => {
+      this.db.run(createStationsTableQuery, error => {
         if (error) throw new Error(`Failed to create the stations table: ${error.message}`);
+      });
+
+      const createGenresTableQuery = `CREATE TABLE IF NOT EXISTS genres(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        genres TEXT
+        time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`;
+
+      this.db.run(createGenresTableQuery, error => {
+        if (error) throw new Error(`Failed to create the genres table: ${error.message}`);
       });
     });
   }
@@ -265,6 +275,38 @@ class Stations {
               resolve({ online, total });
             }
           });
+        }
+      });
+    });
+  }
+
+  /**
+   * gets the top 10 searched genres from the database.
+   * 
+   * @returns {Promise<Array>} A promise that resolves to an array of the top 10 genres.
+   */
+  topGenres() {
+    const query = `SELECT genres, COUNT(*) AS count FROM genres GROUP BY genres ORDER BY count DESC LIMIT 10`;
+    return this._runQuery(query);
+  }
+
+  /**
+   * Log a genre query in the database.
+   * 
+   * @param {string} genre - The genre to log.
+   * 
+   * @returns {Promise<number>} A promise that resolves to the ID of the logged genre.
+   * 
+   * @throws {Error} If the query fails.
+   */
+  logGenres(genre) {
+    const query = `INSERT INTO genres (genres) VALUES (?)`;
+    return new Promise((resolve, reject) => {
+      this.db.run(query, [genre], function (err) {
+        if (err) {
+          reject(new Error(`Failed to log genre: ${err.message}`));
+        } else {
+          resolve(this.lastID);
         }
       });
     });
