@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
       }, 'genres');
     }
 
-    log.info(`${req.ip} -> /stations${queryString(genres.join(','))} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
+    log.info(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
     res.json(stations);
   } catch (err) {
     const error = `Error fetching stations: ${err.message}`;
