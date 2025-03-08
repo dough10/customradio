@@ -18,7 +18,7 @@ const files = fs.readdirSync(dest)
 [
   '/',
   '/stations',
-  'topGenres'
+  '/topGenres'
 ].forEach(endpoint => files.push(endpoint));
 screenshots = screenshots.map(image => `/screenshots/${image}`);
 
