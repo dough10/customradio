@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
 
     if (genreString) {
       log.debug(`Saving genres: ${genreString}`);
-      await sql.logGenres(genres);
+      await sql.logGenres(genreString);
     }
 
     log.info(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
