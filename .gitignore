@@ -14,4 +14,4 @@ make-docs.js
 .DS*
 public
 t.js
-*/*-old.js
+*/*-old.*
