@@ -1,5 +1,5 @@
 const url = require('url');
-const saveToCollection = require('../../util/saveToCollection.js');
+
 const Logger = require('../../util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
@@ -35,34 +35,6 @@ module.exports = async (req, res) => {
   const message = '╭∩╮(︶︿︶)╭∩╮';
   
   log.info(`${req.ip} requested ${url.format(reqadd)} 404! ${message}`);
-  
-  /**
-   * Save the 404 error request details to a mongodb collection.
-   * @type {Object} 
-   * @property {string} protocol - The protocol used for the request.
-   * @property {string} host - The host in the request.
-   * @property {string} pathname - The requested URL path.
-   * @property {string} time - The timestamp when the request occurred.
-   * @property {string} ip - The IP address of the client making the request.
-   * @property {string} agent - The user-agent string from the request headers.
-   * @property {string} referer - The referer header from the request, if present.
-   * @property {string} cookies - The cookies sent with the request, if any.
-   */
-  await saveToCollection({
-    ...reqadd,
-    method: req.method,
-    query: req.query,
-    body: req.body,
-    headers: req.headers,
-    agent: req.headers['user-agent'],
-    time: new Date().toLocaleString(),
-    ip: req.ip,
-    forwardedFor: req.headers['x-forwarded-for'],
-    referer: req.headers.referer || 'No Referer',
-    cookies: req.headers.cookies || 'No Cookies',
-    responseTime: Date.now() - req.startTime,
-    sessionId: req.session ? req.session.id : null
-  }, 'fourohfour');
 
   const requestedPath = decodeURIComponent(reqadd.pathname);
 
