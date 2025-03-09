@@ -285,9 +285,10 @@ class Stations {
    * 
    * @returns {Promise<Array>} A promise that resolves to an array of the top 10 genres.
    */
-  topGenres() {
+  async topGenres() {
     const query = `SELECT genres, COUNT(*) AS count FROM genres GROUP BY genres ORDER BY count DESC LIMIT 10`;
-    return this._runQuery(query);
+    const response = await this._runQuery(query);
+    return response.map(obj => obj.genres).sort((a, b) => a.localeCompare(b));
   }
 
   /**

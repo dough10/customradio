@@ -35,8 +35,7 @@ module.exports = async (req, res) => {
   const sql = new Stations('data/customradio.db');
   try{
     const topGenres = await sql.topGenres();
-    const genreObj = topGenres.map(obj => obj.genres).sort((a, b) => a.localeCompare(b));
-    res.json(genreObj);
+    res.json(topGenres);
   } catch(err) {
     const error = `Error getting genres: ${err.message}`;
     log.critical(error);
