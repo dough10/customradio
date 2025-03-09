@@ -37,7 +37,7 @@ class Stations {
 
       const createGenresTableQuery = `CREATE TABLE IF NOT EXISTS genres(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        genres TEXT
+        genres TEXT,
         time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`;
 
