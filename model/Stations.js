@@ -295,7 +295,7 @@ class Stations {
           this.db.get(`SELECT COUNT(*) 
             AS count 
             FROM stations 
-            WHERE content_type IN (${usedTypes.map(() => '?').join(',')})`, usedTypes, (err, row) => {
+            WHERE content_type IN (${typesPlaceholder})`, usedTypes, (err, row) => {
             if (err) {
               reject(new Error(`Failed counting total stations: ${err.message}`));
             } else {
