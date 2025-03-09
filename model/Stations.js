@@ -48,7 +48,7 @@ class Stations {
   }
 
   /**
-   * Retrieve all stations from the database.
+   * Retrieve all stations.
    * 
    * @returns {Promise<Array>} A promise that resolves to an array of station objects.
    * 
@@ -60,7 +60,7 @@ class Stations {
   }
 
   /**
-   * Retrieve stations from the database by genre.
+   * Retrieve stations by genre.
    * 
    * @param {string} genre - The genre to filter stations by.
    * 
@@ -109,19 +109,20 @@ class Stations {
   }
 
   /**
-   * check if a station exists in the database.
+   * check if a station exists.
    * 
    * @param {String} url 
    * 
    * @returns {Promise<Boolean>} A promise that resolves to true if the station exists, false otherwise.
    */
-  exists(url) {
+  async exists(url) {
     const query = `SELECT COUNT(*) AS count FROM stations WHERE url = ?`;
-    return this._runQuery(query, [url]).then(rows => rows[0].count > 0);
+    const rows = await this._runQuery(query, [url]);
+    return rows[0].count > 0;
   }
 
   /**
-   * Mark a station as a duplicate in the database.
+   * Mark a station as a duplicate.
    * 
    * @param {number} id - The ID of the station to mark as a duplicate.
    * 
@@ -135,7 +136,7 @@ class Stations {
   }
 
   /**
-   * Log an error message for a specific station in the database.
+   * Log an error message for a specific station.
    * 
    * @param {number} id - The ID of the station to log the error for.
    * @param {string} error - The error message to log.
@@ -190,7 +191,18 @@ class Stations {
       error, 
       duplicate
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const values = [obj.name, obj.url, obj.genre, obj.online, obj['content-type'], obj.bitrate, obj.icon, obj.homepage, obj.error, obj.duplicate];
+    const values = [
+      obj.name,
+      obj.url,
+      obj.genre,
+      obj.online,
+      obj['content-type'],
+      obj.bitrate,
+      obj.icon,
+      obj.homepage,
+      obj.error,
+      obj.duplicate
+    ];
 
     return new Promise((resolve, reject) => {
       this.db.run(addQuery, values, function (err) {
@@ -238,7 +250,19 @@ class Stations {
       error = ?, 
       duplicate = ?
       WHERE id = ?`;
-    const values = [obj.name, obj.url, obj.genre, obj.online, obj['content-type'], obj.bitrate, obj.icon, obj.homepage, obj.error, obj.duplicate, obj.id];
+    const values = [
+      obj.name,
+      obj.url,
+      obj.genre,
+      obj.online,
+      obj['content-type'],
+      obj.bitrate,
+      obj.icon,
+      obj.homepage,
+      obj.error,
+      obj.duplicate,
+      obj.id
+    ];
 
     return new Promise((resolve, reject) => {
       this.db.run(updateQuery, values, function (err) {
@@ -252,24 +276,28 @@ class Stations {
   }
 
   /**
-   * gets the number of online and total stations in the database.
+   * gets the number of online and total stations.
    * 
    * @returns {Promise<{online: number, total: number}>}
    */
   dbStats() {
     return new Promise((resolve, reject) => {
+      const typesPlaceholder = usedTypes.map(() => '?').join(',');
       this.db.get(`SELECT COUNT(*) 
-          AS count 
-          FROM stations 
-          WHERE online = 1
-          and content_type IN (${usedTypes.map(() => '?').join(',')})`, usedTypes, (err, row) => {
+        AS count 
+        FROM stations 
+        WHERE online = 1
+        and content_type IN (${typesPlaceholder})`, usedTypes, (err, row) => {
         if (err) {
-          reject(new Error(`Failed to get database statistics: ${err.message}`));
+          reject(new Error(`Failed counting online stations: ${err.message}`));
         } else {
           const online = row.count;
-          this.db.get(`SELECT COUNT(*) AS count FROM stations WHERE content_type IN (${usedTypes.map(() => '?').join(',')})`, usedTypes, (err, row) => {
+          this.db.get(`SELECT COUNT(*) 
+            AS count 
+            FROM stations 
+            WHERE content_type IN (${usedTypes.map(() => '?').join(',')})`, usedTypes, (err, row) => {
             if (err) {
-              reject(new Error(`Failed to get database statistics: ${err.message}`));
+              reject(new Error(`Failed counting total stations: ${err.message}`));
             } else {
               const total = row.count;
               resolve({ online, total });
@@ -281,7 +309,7 @@ class Stations {
   }
 
   /**
-   * gets the top 10 searched genres from the database.
+   * returns the top 10 searched genres in alphabetical order.
    * 
    * @returns {Promise<Array>} A promise that resolves to an array of the top 10 genres.
    */
@@ -292,7 +320,7 @@ class Stations {
   }
 
   /**
-   * Log a genre query in the database.
+   * Log a genre filter query.
    * 
    * @param {string} genre - The genre to log.
    * 
