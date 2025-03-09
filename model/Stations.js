@@ -287,7 +287,7 @@ class Stations {
         AS count 
         FROM stations 
         WHERE online = 1
-        and content_type IN (${typesPlaceholder})`, usedTypes, (err, row) => {
+          and content_type IN (${typesPlaceholder})`, usedTypes, (err, row) => {
         if (err) {
           reject(new Error(`Failed counting online stations: ${err.message}`));
         } else {
@@ -314,7 +314,11 @@ class Stations {
    * @returns {Promise<Array>} A promise that resolves to an array of the top 10 genres.
    */
   async topGenres() {
-    const query = `SELECT genres, COUNT(*) AS count FROM genres GROUP BY genres ORDER BY count DESC LIMIT 10`;
+    const query = `SELECT genres, COUNT(*) 
+      AS count 
+      FROM genres 
+      GROUP BY genres 
+      ORDER BY count DESC LIMIT 10`;
     const response = await this._runQuery(query);
     return response.map(obj => obj.genres).sort((a, b) => a.localeCompare(b));
   }
