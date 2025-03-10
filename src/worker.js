@@ -36,6 +36,29 @@ async function handleStationsRequest(event) {
   return networkResponse;
 }
 
+/**
+ * Handles fetch requests for /topGenres.
+ * Returns cached response if offline.
+ * 
+ * @param {FetchEvent} event - The fetch event.
+ * @returns {Promise<Response>} The response from cache or network.
+ */
+async function handleTopGenresRequest(event) {
+  const cache = await caches.open(CACHE_VERSION);
+  try {
+    const networkResponse = await fetch(event.request);
+    const clonedResponse = networkResponse.clone();
+    await cache.put(event.request, clonedResponse);
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await cache.match(event.request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    throw error;
+  }
+}
+
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
@@ -50,7 +73,7 @@ self.addEventListener('fetch', event => {
   if (event.request.url.includes('/stations')) {
     event.respondWith(handleStationsRequest(event));
   } else if (event.request.url.includes('/topGenres')) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(handleTopGenresRequest(event));
   } else {
     event.respondWith(
       caches.match(event.request)
