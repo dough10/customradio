@@ -20,37 +20,6 @@ const info = require('./endpoints/info.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-/**
- * Middleware function to validate API access tokens.
- * 
- * This middleware checks the `Authorization` header of the incoming request for a Bearer token.
- * If the token matches the token stored in the environment variable `TOKEN`, it calls the `next` middleware function.
- * If the token is missing or incorrect, it responds with a 403 Forbidden status and an error message.
- *
- * @param {Object} req - The request object, which contains the headers and other request details.
- * @param {Object} res - The response object, used to send responses to the client.
- * @param {Function} next - The callback function to pass control to the next middleware function.
- * 
- * @throws {Error} If the token is invalid or not provided, responds with a 403 status and an error message.
- * 
- * @example
- * // Example usage in an Express.js app
- * const express = require('express');
- * const app = express();
- * 
- * app.use(apiKeyMiddleware);
- * 
- * app.get('/secure-data', (req, res) => {
- *   res.json({ data: 'This is protected data.' });
- * });
- */
-function apiKeyMiddleware(req, res, next) {
-  const key = req.headers.authorization;
-  if (key && key.split(' ')[1] === process.env.TOKEN) {
-    return next();
-  }
-  res.status(403).json({ error: 'Forbidden: Invalid Access Token' });
-}
 
 module.exports = (app, register) => {
   /** 
@@ -351,7 +320,7 @@ module.exports = (app, register) => {
    * @apiSuccessExample {json} Success-Response:
    * HTTP/1.1 204 No Content
    */
-  app.post('/csp-report', apiKeyMiddleware, upload.none(), [
+  app.post('/csp-report', upload.none(), [
     body('csp-report').isObject().withMessage('csp-report must be an object'),
     body('csp-report.document-uri').isURL().withMessage('document-uri must be a valid URL'),
     body('csp-report.referrer').optional().custom(value => {
