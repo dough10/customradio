@@ -80,16 +80,18 @@ function objectToUrl(obj) {
     return '';
   }
 
-  const protocol = obj.protocol || 'http:';
-  const subdomain = obj.subdomain ? `${obj.subdomain}.` : '';
-  const domain = obj.domain || obj.ip || '';
-  const ext = obj.ext ? `.${obj.ext}` : '';
-  const port = obj.port ? `:${obj.port}` : '';
-  const pathname = obj.pathname || '/';
-  const search = obj.search ? `?${obj.search}` : '';
-  const hash = obj.hash ? `#${obj.hash}` : '';
+  const hostname = obj.ip || (obj.subdomain ? `${obj.subdomain}.` : '') + (obj.domain || '') + (obj.ext ? `.${obj.ext}` : '');
 
-  return `${protocol}//${subdomain}${domain}${ext}${port}${pathname}${search}${hash}`;
+  const formattedUrl = url.format({
+    protocol: obj.protocol,
+    hostname: hostname,
+    port: obj.port,
+    pathname: obj.pathname,
+    search: obj.search,
+    hash: obj.hash
+  });
+
+  return formattedUrl;
 }
 
 /**
