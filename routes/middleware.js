@@ -6,10 +6,24 @@ const compression = require('compression');
 const path = require('path');
 
 module.exports = (app, httpRequestCounter) => {
-
   app.use(helmet({
-    contentSecurityPolicy: false
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://analytics.dough10.me", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
+        imgSrc: ["'self'", "data:"],
+        connectSrc: ["'self'", "*"],
+        fontSrc: ["'self'"],
+        frameSrc: ["'self'"],
+        mediaSrc: ["*"],
+        styleSrcElem: ["'self'", "'unsafe-inline'"],
+        styleSrcAttr: ["'self'", "'unsafe-inline'"],
+        reportUri: "/csp-report"
+      },
+    },
   }));
+
   app.use(compression());
   app.use(express.urlencoded({
     extended: true
