@@ -281,7 +281,7 @@ async function dlTxt() {
 
   document.body.append(link);
 
-  if (typeof _paq !== 'undefined') _paq.push(['trackLink', link.href, 'download']);
+  if (typeof _paq !== 'undefined') _paq.push(['trackLink', 'download', link.href]);
 
   link.click();
   document.body.removeChild(link);
