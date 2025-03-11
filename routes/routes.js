@@ -272,6 +272,8 @@ module.exports = (app, register) => {
   app.post('/add', upload.none(), [
     body('url')
       .trim()
+      .escape()
+      .isString()
       .isURL()
       .notEmpty()
       .withMessage('Invalid URL')
@@ -321,22 +323,49 @@ module.exports = (app, register) => {
    * HTTP/1.1 204 No Content
    */
   app.post('/csp-report', upload.none(), [
-    body('csp-report').isObject().withMessage('csp-report must be an object'),
-    body('csp-report.document-uri').isURL().withMessage('document-uri must be a valid URL'),
-    body('csp-report.referrer').optional().custom(value => {
-      if (value === '' || value === null) return true;
-      return validator.isURL(value);
-    }).withMessage('referrer must be a valid URL'),
-    body('csp-report.blocked-uri').custom(value => {
-      if (value === 'inline' || validator.isURL(value)) {
-        return true;
-      }
-      throw new Error('blocked-uri must be a valid URL or "inline"');
-    }).withMessage('blocked-uri must be a valid URL or "inline"'),
-    body('csp-report.violated-directive').isString().withMessage('violated-directive must be a string'),
-    body('csp-report.original-policy').isString().withMessage('original-policy must be a string'),
-    body('csp-report.source-file').optional().isURL().withMessage('source-file must be a valid URL'),
-    body('csp-report.status-code').isInt({ min: 100, max: 599 }).withMessage('status-code must be an integer between 100 and 599'),
+    body('csp-report')
+      .isObject()
+      .withMessage('csp-report must be an object'),
+    body('csp-report.document-uri')
+      .trim()
+      .escape()
+      .isString()
+      .isURL()
+      .withMessage('document-uri must be a valid URL'),
+    body('csp-report.referrer')
+      .optional()
+      .customSanitizer(value => value ? value.trim().escape() : value)
+      .custom(value => {
+        if (value === '' || value === null) return true;
+        return validator.isURL(value);
+      }).withMessage('referrer must be a valid URL'),
+    body('csp-report.blocked-uri')
+      .customSanitizer(value => value ? value.trim().escape() : value)
+      .custom(value => {
+        if (value === 'inline' || validator.isURL(value)) {
+          return true;
+        }
+        throw new Error('blocked-uri must be a valid URL or "inline"');
+      }).withMessage('blocked-uri must be a valid URL or "inline"'),
+    body('csp-report.violated-directive')
+      .trim()
+      .escape()
+      .isString()
+      .withMessage('violated-directive must be a string'),
+    body('csp-report.original-policy')
+      .trim()
+      .escape()
+      .isString()
+      .withMessage('original-policy must be a string'),
+    body('csp-report.source-file')
+      .optional()
+      .trim()
+      .escape()
+      .isURL()
+      .withMessage('source-file must be a valid URL'),
+    body('csp-report.status-code')
+      .isInt({ min: 100, max: 599 })
+      .withMessage('status-code must be an integer between 100 and 599'),
   ], cspReport);
 
   /**
