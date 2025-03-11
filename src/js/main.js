@@ -280,10 +280,11 @@ async function dlTxt() {
   link.download = filename;
 
   document.body.append(link);
-  link.click();
-  document.body.removeChild(link);
 
   if (typeof _paq !== 'undefined') _paq.push(['trackLink', link.href, 'download']);
+
+  link.click();
+  document.body.removeChild(link);
   URL.revokeObjectURL(link.href);
 }
 
@@ -629,7 +630,7 @@ function createStationElement({ id, name, url, bitrate, genre, icon, homepage })
 
   const div = document.createElement('div');
   if (bitrate === 0) bitrate = '???';
-  div.textContent = `${bitrate}kbps`;
+  div.textContent = `${bitrate} kbps`;
   div.title = div.textContent;
 
   const passive = { passive: true };
