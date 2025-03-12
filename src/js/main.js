@@ -745,7 +745,8 @@ function queryString(value) {
  * @returns {Array}
  */
 function currentGenres() {
-  const options = Array.from(parent.querySelectorAll('#genres>option'));
+  const parent = document.querySelector('#genres');
+  const options = Array.from(parent.querySelectorAll('option'));
   return options.map(element => element.value);
 }
 
