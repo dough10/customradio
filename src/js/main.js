@@ -735,7 +735,8 @@ function lazyLoadOnScroll(list, container) {
  * @returns {String}
  */
 function queryString(value) {
-  return (value.length === 0) ? '' : `?genres=${encodeURIComponent(value)}`;
+  const uriEncoded = encodeURIComponent(value);
+  return (value.length === 0) ? '' : `?genres=${uriEncoded}`;
 }
 
 /**
