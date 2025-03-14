@@ -10,7 +10,7 @@ An online radio station browser with the ability to export a radio.txt file for 
 
 Hosts a database of [Icecast](https://icecast.org/) stations so users can listen and add them to a custom list. Users can download the list in .txt format for use in a [Hiby](https://store.hiby.com/) digital audio player.
 
-### Environment Variables
+## Environment Variables
 
 - **LOG_LEVEL** = *console and file log level: Defaults to INFO*
 
