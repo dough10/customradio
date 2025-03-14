@@ -22,6 +22,11 @@ module.exports = (app, httpRequestCounter) => {
         reportUri: "/csp-report"
       },
     },
+    hsts: {
+      maxAge: 31536000, // 1 year in seconds
+      includeSubDomains: true,
+      preload: true
+    }
   }));
 
   app.use(compression());
