@@ -630,7 +630,7 @@ function createStationElement({ id, name, url, bitrate, genre, icon, homepage })
 
   const div = document.createElement('div');
   if (bitrate === 0) bitrate = '???';
-  div.textContent = `${bitrate} kbps`;
+  div.textContent = `${bitrate}kbps`;
   div.title = div.textContent;
 
   const passive = { passive: true };
@@ -1174,17 +1174,24 @@ async function info() {
   document.querySelector('#info-dialog').showModal();
   if (depDiv.querySelectorAll('*').length > 5) return;
   loadingAnimation(depDiv);
-  const response = await fetch('/info');
-  const pack = await response.json();
-  document.querySelector('#info-dialog>h1').textContent = `v${pack.version}`;
-  const fragment = document.createDocumentFragment();
-  Object.entries(pack.dependencies).forEach(([key, value]) => {
-    const li = document.createElement('li');
-    li.textContent = `${key}: ${rmArrow(value)}`;
-    fragment.appendChild(li);
-  });
-  depDiv.append(fragment);
-  depDiv.querySelector('.loading').remove();
+  try {
+    const response = await fetch('/info');
+    const pack = await response.json();
+    document.querySelector('#info-dialog>h1').textContent = `v${pack.version}`;
+    const fragment = document.createDocumentFragment();
+    Object.entries(pack.dependencies).forEach(([key, value]) => {
+      const li = document.createElement('li');
+      li.textContent = `${key}: ${rmArrow(value)}`;
+      fragment.appendChild(li);
+    });
+    depDiv.append(fragment);
+  } catch (error) {
+    const message = `Error fetching dependencies: ${error.message}`;
+    console.error(message);
+    new Toast(message, 3);
+  } finally {
+    depDiv.querySelector('.loading').remove();
+  }
 }
 
 /**
