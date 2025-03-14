@@ -50,6 +50,11 @@ const log = new Logger(logLevel);
  * HTTP/1.1 204 No Content
  */
 module.exports = async (req, res) => {
+  const cspReport = req.body['csp-report'];
+  cspReport.time = new Date().toLocaleString();
+  
+  log.debug(cspReport);
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -60,9 +65,6 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const cspReport = req.body['csp-report'];
-    cspReport.time = new Date().toLocaleString();
-    log.debug(cspReport);
     log.info(`${req.ip} -> /csp-report ${Date.now() - req.startTime}ms`);
     res.status(204).send();
   } catch(error) {
