@@ -23,7 +23,7 @@ module.exports = (app, httpRequestCounter) => {
       },
     },
     hsts: {
-      maxAge: 31536000, // 1 year in seconds
+      maxAge: 31536000,
       includeSubDomains: true,
       preload: true
     }
