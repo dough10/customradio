@@ -271,9 +271,6 @@ module.exports = (app, register) => {
    */
   app.post('/add', upload.none(), [
     body('url')
-      .trim()
-      .escape()
-      .isString()
       .isURL()
       .notEmpty()
       .withMessage('Invalid URL')
