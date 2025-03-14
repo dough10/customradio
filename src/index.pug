@@ -3,7 +3,7 @@ html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="author" content="dough10")
-    meta(name="copyright" content="© 2024 dough10")
+    meta(name="copyright" content="© 2025 dough10")
     meta(name="theme-color" content="#161616")
     meta(name="description" content="An online radio station browser with the ability to export .txt files for use in Hiby digital audio players")
     meta(name="keywords" content="radio.txt creator, online radio, radio.txt")
@@ -88,13 +88,13 @@ html(lang="en")
         | To use the site: <br /> 1. Filter stations by genre (e.g., hip hop, jazz), then add all the stations you would like to include in your radio.txt file.
       p
         | 2. When you are happy with your list, press "Download" and save the text file to the root directory of the storage on your Hiby player.
-      button.button.close(type="button" autofocus, title="close")
+      button.button.close(type="button" autofocus title="close")
         svg(viewBox="0 0 24 24")
           path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
         span close
 
     dialog#add
-      button.small-button.close(type="button" autofocus, title="close"))
+      button.small-button.close(type="button" autofocus title="close")
         svg(viewBox="0 0 24 24")
           path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
       div
@@ -112,7 +112,7 @@ html(lang="en")
             span add
 
     dialog#info-dialog
-      button.small-button.close(type="button" autofocus, title="close"))
+      button.small-button.close(type="button" autofocus title="close")
         svg(viewBox="0 0 24 24")
           path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
       h1 v?.?.?
@@ -150,4 +150,4 @@ html(lang="en")
         | Security contact: 
         a(href=".well-known/security.txt" target="_blank") security.txt
 
-    script(src="bundle.min.js") 
+    script(src="bundle.min.js" async) 
