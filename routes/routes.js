@@ -324,7 +324,6 @@ module.exports = (app, register) => {
       .isObject()
       .withMessage('csp-report must be an object'),
     body('csp-report.document-uri')
-      .trim()
       .escape()
       .isString()
       .isURL()
@@ -345,18 +344,15 @@ module.exports = (app, register) => {
         throw new Error('blocked-uri must be a valid URL or "inline"');
       }).withMessage('blocked-uri must be a valid URL or "inline"'),
     body('csp-report.violated-directive')
-      .trim()
       .escape()
       .isString()
       .withMessage('violated-directive must be a string'),
     body('csp-report.original-policy')
-      .trim()
       .escape()
       .isString()
       .withMessage('original-policy must be a string'),
     body('csp-report.source-file')
       .optional()
-      .trim()
       .escape()
       .isURL()
       .withMessage('source-file must be a valid URL'),
