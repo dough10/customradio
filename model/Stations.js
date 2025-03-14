@@ -2,6 +2,18 @@ const sqlite3 = require('sqlite3').verbose();
 const usedTypes = require("../util/usedTypes.js").$in;
 
 /**
+ * returns a string of placeholders for SQL queries.
+ * 
+ * @param {Array} arr 
+ * 
+ * @returns {String}
+ */
+function mapPlaceholders(arr) {
+  return arr.map(() => '?').join(',');
+}
+
+
+/**
  * Class representing a collection of radio stations.
  */
 class Stations {
@@ -69,7 +81,7 @@ class Stations {
    * @throws {Error} If the query fails.
    */
   getStationsByGenre(genres) {
-    const contentTypePlaceholders = usedTypes.map(() => '?').join(',');
+    const contentTypePlaceholders = mapPlaceholders(usedTypes);
     
     const genrePatterns = genres.map(g => `%${g.toLowerCase()}%`);
   
@@ -99,7 +111,7 @@ class Stations {
   getOnlineStations() {
     const query = `SELECT id, name, url, bitrate, genre, icon, homepage
     FROM stations
-    WHERE content_type IN (${usedTypes.map(() => '?').join(',')})
+    WHERE content_type IN (${mapPlaceholders(usedTypes)})
       AND online = 1
       AND duplicate = 0
       AND bitrate IS NOT NULL
@@ -282,7 +294,7 @@ class Stations {
    */
   dbStats() {
     return new Promise((resolve, reject) => {
-      const typesPlaceholder = usedTypes.map(() => '?').join(',');
+      const typesPlaceholder = mapPlaceholders(usedTypes);
       this.db.get(`SELECT COUNT(*) 
         AS count 
         FROM stations 
