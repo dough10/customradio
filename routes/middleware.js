@@ -10,7 +10,7 @@ module.exports = (app, httpRequestCounter) => {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://analytics.dough10.me", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "https://analytics.dough10.me"],
         styleSrc: ["'self'", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
         imgSrc: ["'self'", "data:"],
         connectSrc: ["'self'", "*"],
@@ -42,6 +42,14 @@ module.exports = (app, httpRequestCounter) => {
    */
   app.use((req, res, next) => {
     req.startTime = Date.now();
+    next();
+  });
+
+  /**
+   * middleware setting security header
+   */
+  app.use((req, res, next) => {
+    res.setHeader('X-XSS-Protection', '1; mode=block');
     next();
   });
 
