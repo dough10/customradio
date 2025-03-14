@@ -10,7 +10,7 @@ module.exports = (app, httpRequestCounter) => {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://analytics.dough10.me"],
+        scriptSrc: ["'self'", "https://analytics.dough10.me", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
         imgSrc: ["'self'", "data:"],
         connectSrc: ["'self'", "*"],
