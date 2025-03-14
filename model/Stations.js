@@ -12,7 +12,6 @@ function mapPlaceholders(arr) {
   return arr.map(() => '?').join(',');
 }
 
-
 /**
  * Class representing a collection of radio stations.
  */
@@ -42,19 +41,29 @@ class Stations {
         error TEXT,
         duplicate BOOLEAN
       )`;
-
-      this.db.run(createStationsTableQuery, error => {
-        if (error) throw new Error(`Failed to create the stations table: ${error.message}`);
-      });
-
+      
       const createGenresTableQuery = `CREATE TABLE IF NOT EXISTS genres(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         genres TEXT,
         time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`;
 
+      this.db.run(createStationsTableQuery, error => {
+        if (error) throw new Error(`Failed to create the stations table: ${error.message}`);
+      });
+
       this.db.run(createGenresTableQuery, error => {
         if (error) throw new Error(`Failed to create the genres table: ${error.message}`);
+      });
+
+      const createGenresIndexQuery = `CREATE INDEX IF NOT EXISTS idx_genres_genres ON genres(genres)`;
+      this.db.run(createGenresIndexQuery, error => {
+        if (error) throw new Error(`Failed to create index on genres table: ${error.message}`);
+      });
+
+      const createTimeIndexQuery = `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`;
+      this.db.run(createTimeIndexQuery, error => {
+        if (error) throw new Error(`Failed to create index on genres table: ${error.message}`);
       });
     });
   }
