@@ -4,13 +4,19 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const path = require('path');
+const crypto = require('crypto');
 
 module.exports = (app, httpRequestCounter) => {
+  app.use((req, res, next) => {
+    res.locals.nonce = crypto.randomBytes(16).toString('base64');
+    next();
+  });
+
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://analytics.dough10.me", "'unsafe-inline'", "'unsafe-eval'"],
+        scriptSrc: ["'self'", "https://analytics.dough10.me", (req, res) => `'nonce-${res.locals.nonce}'`],
         styleSrc: ["'self'", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
         imgSrc: ["'self'", "data:"],
         connectSrc: ["'self'", "*"],
