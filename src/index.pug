@@ -24,7 +24,8 @@ html(lang="en")
     link(rel="apple-touch-icon" href="apple-touch-icon.png")
     link(rel="icon" href="favicon.ico" type="image/x-icon")
     link(rel="preconnect" href="https://analytics.dough10.me" crossorigin)
-    link(rel="stylesheet", href="styles.min.css")
+    link(rel="preload" href="styles.min.css" as="style")
+    link(rel="stylesheet" href="styles.min.css" async)
     title radio.txt creator
     script(type="application/ld+json")
       | {"@context":"https://schema.org","@type":"WebSite","name":"radio.txt creator","url":"https://customradio.dough10.me","description":"An online radio station browser with the ability to export .txt files for use in Hiby digital audio players."}
