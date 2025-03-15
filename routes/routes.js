@@ -330,19 +330,16 @@ module.exports = (app, register) => {
       .withMessage('document-uri must be a valid URL'),
     body('csp-report.referrer')
       .optional()
-      .customSanitizer(value => value ? value.trim().escape() : value)
       .custom(value => {
-        if (value === '' || value === null) return true;
-        return validator.isURL(value);
-      }).withMessage('referrer must be a valid URL'),
-    body('csp-report.blocked-uri')
-      .customSanitizer(value => value ? value.trim().escape() : value)
-      .custom(value => {
-        if (value === 'inline' || validator.isURL(value)) {
-          return true;
-        }
-        throw new Error('blocked-uri must be a valid URL or "inline"');
-      }).withMessage('blocked-uri must be a valid URL or "inline"'),
+      if (value === '' || value === null) return true;
+      return validator.isURL(value);
+    }).withMessage('referrer must be a valid URL'),
+    body('csp-report.blocked-uri').custom(value => {
+      if (value === 'inline' || validator.isURL(value)) {
+        return true;
+      }
+      throw new Error('blocked-uri must be a valid URL or "inline"');
+    }).withMessage('blocked-uri must be a valid URL or "inline"'),
     body('csp-report.violated-directive')
       .escape()
       .isString()
