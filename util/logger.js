@@ -11,7 +11,8 @@ const { appendFile, stat, rename, readdir, unlink} = fsPromises;
  */
 function getLevel(str) {
   if (typeof str !== 'string') {
-    throw new Error('log level must be a string');
+    console.log('using default(error) log level');
+    return 3;
   }
   switch (str.toLowerCase()) {
     case 'debug':
