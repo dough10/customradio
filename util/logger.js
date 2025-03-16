@@ -1,17 +1,18 @@
 const fs = require('fs');
 const path = require('path');
-const { promisify } = require('util');
-
-const fsAppendFile = promisify(fs.appendFile);
-const fsStat = promisify(fs.stat);
+const { promises: fsPromises } = require('fs');
+const { appendFile, stat, rename, readdir, unlink} = fsPromises;
 
 /**
  * Converts the log level string to a corresponding numerical value.
  * 
- * @param {string} str - The log level as a string (e.g., 'debug', 'info', 'warning', 'critical').
+ * @param {string} str - The log level as a string (e.g., 'debug', 'info', 'error', 'warning' or 'critical').
  * @returns {number} The numerical value representing the log level.
  */
 function getLevel(str) {
+  if (typeof str !== 'string') {
+    throw new Error('log level must be a string');
+  }
   switch (str.toLowerCase()) {
     case 'debug':
       return 0;
@@ -133,7 +134,7 @@ class Logger {
     await this._rotateLogFile();
 
     this._logQueue = this._logQueue.then(() => {
-      return fsAppendFile(this._baseLogFile, `${logEntry}\n`).catch((err) => {
+      return appendFile(this._baseLogFile, `${logEntry}\n`).catch((err) => {
         console.error(`[ERROR] Failed to write log entry: ${err.message}`);
       });
     });
@@ -146,7 +147,7 @@ class Logger {
    */
   async _initializeLogFile() {
     try {
-      await fsAppendFile(this._baseLogFile, '');
+      await appendFile(this._baseLogFile, '');
     } catch (err) {
       console.error(`[ERROR] Failed to initialize log file: ${err.message}`);
     }
@@ -159,13 +160,13 @@ class Logger {
    */
   async _rotateLogFile() {
     try {
-      const stats = await fsStat(this._baseLogFile);
+      const stats = await stat(this._baseLogFile);
 
       if (stats.size > this._maxSize) {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const archiveFile = path.join(this._logDir, `customradio-${timestamp}.log`);
 
-        fs.renameSync(this._baseLogFile, archiveFile);
+        await rename(this._baseLogFile, archiveFile);
 
         this._removeOldLogFiles();
 
@@ -181,17 +182,21 @@ class Logger {
    * 
    * @returns {void}
    */
-  _removeOldLogFiles() {
-    const logFiles = fs.readdirSync(this._logDir)
-      .filter(file => file.startsWith('customradio-') && file.endsWith('.log'))
-      .map(file => path.join(this._logDir, file));
+  async _removeOldLogFiles() {
+    try {
+      const logFiles = (await readdir(this._logDir))
+        .filter(file => file.startsWith('customradio-') && file.endsWith('.log'))
+        .map(file => path.join(this._logDir, file));
 
-    logFiles.sort((a, b) => fs.statSync(a).birthtimeMs - fs.statSync(b).birthtimeMs);
+      logFiles.sort((a, b) => fs.statSync(a).birthtimeMs - fs.statSync(b).birthtimeMs);
 
-    while (logFiles.length > this._maxBackups) {
-      const fileToDelete = logFiles.shift();
-      fs.unlinkSync(fileToDelete);
-      console.log(`[INFO] Deleted old log file: ${fileToDelete}`);
+      while (logFiles.length > this._maxBackups) {
+        const fileToDelete = logFiles.shift();
+        await unlink(fileToDelete);
+        console.log(`[INFO] Deleted old log file: ${fileToDelete}`);
+      }
+    } catch (err) {
+      console.error(`[ERROR] Failed to remove old log files: ${err.message}`);
     }
   }
 }
