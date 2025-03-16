@@ -64,7 +64,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async debug(message) {
-    if (this._threshold <= 0) await this._log(this._timestamp(), 'debug', message);
+    if (this._threshold <= 0) await this._log(this._timestamp(), 'DEBUG', message);
   }
 
   /**
@@ -74,7 +74,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async info(message) {
-    if (this._threshold <= 1) await this._log(this._timestamp(), 'info', message);
+    if (this._threshold <= 1) await this._log(this._timestamp(), 'INFO', message);
   }
   
   /**
@@ -84,7 +84,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async warning(message) {
-    if (this._threshold <= 2) await this._log(this._timestamp(), 'warning', message);
+    if (this._threshold <= 2) await this._log(this._timestamp(), 'WARNING', message);
   }
 
   /**
@@ -94,7 +94,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async error(message) {
-    if (this._threshold <= 3) await this._log(this._timestamp(), 'error', message);
+    if (this._threshold <= 3) await this._log(this._timestamp(), 'ERROR', message);
   }
 
   /**
@@ -104,7 +104,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async critical(message) {
-    await this._log(this._timestamp(), 'critical', message);
+    await this._log(this._timestamp(), 'CRITICAL', message);
   }
 
   /**
@@ -135,7 +135,7 @@ class Logger {
 
     this._logQueue = this._logQueue.then(() => {
       return appendFile(this._baseLogFile, `${logEntry}\n`).catch((err) => {
-        console.error(`[ERROR] Failed to write log entry: ${err.message}`);
+        console.error(`${this._timestamp()} [CRITICAL] Failed to write log entry: ${err.message}`);
       });
     });
   }
@@ -149,7 +149,7 @@ class Logger {
     try {
       await appendFile(this._baseLogFile, '');
     } catch (err) {
-      console.error(`[ERROR] Failed to initialize log file: ${err.message}`);
+      console.error(`${this._timestamp()} [CRITICAL] Failed to initialize log file: ${err.message}`);
     }
   }
 
@@ -173,7 +173,7 @@ class Logger {
         await this._initializeLogFile();
       }
     } catch (err) {
-      console.error(`[ERROR] Failed to check log file size: ${err.message}`);
+      console.error(`${this._timestamp()} [CRITICAL] Failed to check log file size: ${err.message}`);
     }
   }
 
@@ -193,10 +193,10 @@ class Logger {
       while (logFiles.length > this._maxBackups) {
         const fileToDelete = logFiles.shift();
         await unlink(fileToDelete);
-        console.log(`[INFO] Deleted old log file: ${fileToDelete}`);
+        this.info(`Deleted old log file: ${fileToDelete}`);
       }
     } catch (err) {
-      console.error(`[ERROR] Failed to remove old log files: ${err.message}`);
+      console.error(`${this._timestamp()} [CRITICAL] Failed to remove old log files: ${err.message}`);
     }
   }
 }
