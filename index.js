@@ -44,5 +44,5 @@ app.listen(3000, _ => {
   schedule.scheduleJob('0 12 1 * *', scrapeIceDir);
   
   // Log server start message
-  log.info(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
+  console.log(`${log.timestamp()} [STARTUP] ${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
 });
