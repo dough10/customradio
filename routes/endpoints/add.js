@@ -75,7 +75,7 @@ module.exports = async (req, res) => {
       url,
       online: status.isLive,
       genre: status.genre || 'Unknown',
-      'content-type': status.content,
+      'content-type': status.content || '',
       bitrate: status.bitrate || 'Unknown',
       icon: status.icon || 'Unknown',
       homepage: status.icyurl || 'Unknown',
