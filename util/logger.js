@@ -4,30 +4,57 @@ const { promises: fsPromises } = require('fs');
 const { appendFile, stat, rename, readdir, unlink} = fsPromises;
 
 /**
+ * A mapping of log levels to their respective numeric severity values.
+ * 
+ * @constant
+ * @type {Object}
+ * @property {number} debug - The lowest log level, used for detailed debugging information.
+ * @property {number} info - Informational messages that highlight the progress of the application.
+ * @property {number} warning - A warning that indicates a potential problem or a situation that should be monitored.
+ * @property {number} error - Indicates a serious issue that needs immediate attention, but doesn't stop the application.
+ * @property {number} critical - The highest severity level, indicating a critical failure that likely causes the application to stop.
+ */
+const levels = {
+  debug: 0,
+  info: 1,
+  warning: 2,
+  error: 3,
+  critical: 4,
+};
+
+/**
  * Converts the log level string to a corresponding numerical value.
  * 
  * @param {string} str - The log level as a string (e.g., 'debug', 'info', 'error', 'warning' or 'critical').
  * @returns {number} The numerical value representing the log level.
  */
 function getLevel(str) {
-  if (typeof str !== 'string') {
-    console.log('using default(error) log level');
-    return 3;
-  }
-  switch (str.toLowerCase()) {
-    case 'debug':
-      return 0;
-    case 'info':
-      return 1;
-    case 'warning':
-      return 2;
-    case 'error':
-      return 3;
-    case 'critical':
-      return 4;
-    default:
-      console.log('using default(error) log level');
-      return 3;
+  const level = levels[str.toLowerCase()];
+  return level !== undefined ? level : 3;
+}
+
+const RETRY_LIMIT = 3;
+const RETRY_DELAY_MS = 1000;
+
+/**
+ * Helper function to retry an operation multiple times.
+ * 
+ * @param {Function} operation - The operation to retry (should return a promise).
+ * @param {number} retries - The number of retries left.
+ * @returns {Promise<void>} A promise that resolves if the operation succeeds, or rejects after all retries fail.
+ */
+async function retryOperation(operation, retries = RETRY_LIMIT) {
+  try {
+    await operation();
+  } catch (err) {
+    if (retries > 0) {
+      console.warn(`Operation failed, retrying... Attempts left: ${retries}. Error: ${err.message}`);
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+      await retryOperation(operation, retries - 1);
+    } else {
+      console.error(`Operation failed after ${RETRY_LIMIT} attempts. Error: ${err.message}`);
+      throw err;
+    }
   }
 }
 
@@ -50,10 +77,15 @@ class Logger {
     this._maxBackups = maxBackups;
 
     if (!fs.existsSync(this._logDir)) {
-      fs.mkdirSync(this._logDir);
+      fs.mkdirSync(this._logDir, {
+        recursive: true
+      });
     }
 
-    this._initializeLogFile();
+    retryOperation(() => this._initializeLogFile()).catch((err) => {
+      console.error(`${this.timestamp()} [CRITICAL] Failed to initialize log file: ${err.message}`);
+      process.exit(1);
+    });
 
     this._logQueue = Promise.resolve();
   }
@@ -65,7 +97,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async debug(message) {
-    if (this._threshold <= 0) await this._log(this._timestamp(), 'DEBUG', message);
+    await this._log(this.timestamp(), 'DEBUG', message);
   }
 
   /**
@@ -75,7 +107,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async info(message) {
-    if (this._threshold <= 1) await this._log(this._timestamp(), 'INFO', message);
+    await this._log(this.timestamp(), 'INFO', message);
   }
   
   /**
@@ -85,7 +117,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async warning(message) {
-    if (this._threshold <= 2) await this._log(this._timestamp(), 'WARNING', message);
+    await this._log(this.timestamp(), 'WARNING', message);
   }
 
   /**
@@ -95,7 +127,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async error(message) {
-    if (this._threshold <= 3) await this._log(this._timestamp(), 'ERROR', message);
+    await this._log(this.timestamp(), 'ERROR', message);
   }
 
   /**
@@ -105,7 +137,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async critical(message) {
-    await this._log(this._timestamp(), 'CRITICAL', message);
+    await this._log(this.timestamp(), 'CRITICAL', message);
   }
 
   /**
@@ -113,8 +145,17 @@ class Logger {
    * 
    * @returns {string} The formatted timestamp.
    */
-  _timestamp() {
-    return new Date().toLocaleString();
+  timestamp() {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    return formatter.format(new Date());
   }
 
   /**
@@ -126,17 +167,23 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async _log(timestamp, level, message) {
+    if (this._threshold > levels[level.toLowerCase()]) {
+      return;
+    }
     if (typeof message === 'object') {
       message = JSON.stringify(message, null, 2);
     }
     const logEntry = `${timestamp} [${level}] ${message}`;
+    
     console.log(logEntry);
 
     await this._rotateLogFile();
 
     this._logQueue = this._logQueue.then(() => {
       return appendFile(this._baseLogFile, `${logEntry}\n`).catch((err) => {
-        console.error(`${this._timestamp()} [CRITICAL] Failed to write log entry: ${err.message}`);
+        const errorMessage = `Failed to write log entry: ${err.message}`;
+        console.error(`${this.timestamp()} [CRITICAL] ${errorMessage}`);
+        throw new Error(errorMessage);
       });
     });
   }
@@ -150,7 +197,7 @@ class Logger {
     try {
       await appendFile(this._baseLogFile, '');
     } catch (err) {
-      console.error(`${this._timestamp()} [CRITICAL] Failed to initialize log file: ${err.message}`);
+      throw new Error(`Failed to initialize log file: ${err.message}`);
     }
   }
 
@@ -165,16 +212,18 @@ class Logger {
 
       if (stats.size > this._maxSize) {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const archiveFile = path.join(this._logDir, `customradio-${timestamp}.log`);
+        const archiveFile = path.join(this._logDir, `customradio-${process.pid}-${timestamp}.log`);
 
-        await rename(this._baseLogFile, archiveFile);
+        // Use retry logic for renaming the log file
+        await retryOperation(() => rename(this._baseLogFile, archiveFile));
 
         this._removeOldLogFiles();
 
-        await this._initializeLogFile();
+        // Use retry logic for initializing a new log file after rotation
+        await retryOperation(() => this._initializeLogFile());
       }
     } catch (err) {
-      console.error(`${this._timestamp()} [CRITICAL] Failed to check log file size: ${err.message}`);
+      console.error(`${this.timestamp()} [CRITICAL] Failed to check log file size: ${err.message}`);
     }
   }
 
@@ -189,7 +238,9 @@ class Logger {
         .filter(file => file.startsWith('customradio-') && file.endsWith('.log'))
         .map(file => path.join(this._logDir, file));
 
-      logFiles.sort((a, b) => fs.statSync(a).birthtimeMs - fs.statSync(b).birthtimeMs);
+      const fileStats = await Promise.all(logFiles.map(file => fsPromises.stat(file)));
+      logFiles.sort((a, b) => fileStats[logFiles.indexOf(a)].birthtimeMs - fileStats[logFiles.indexOf(b)].birthtimeMs);
+      
 
       while (logFiles.length > this._maxBackups) {
         const fileToDelete = logFiles.shift();
@@ -197,7 +248,7 @@ class Logger {
         this.info(`Deleted old log file: ${fileToDelete}`);
       }
     } catch (err) {
-      console.error(`${this._timestamp()} [CRITICAL] Failed to remove old log files: ${err.message}`);
+      console.error(`${this.timestamp()} [CRITICAL] Failed to remove old log files: ${err.message}`);
     }
   }
 }
