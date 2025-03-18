@@ -46,16 +46,16 @@ function connectionEstablished(err) {
       errorMsg: 'Failed to create the genres table'
     },
     {
-      query: `CREATE INDEX IF NOT EXISTS idx_genres_genres ON genres(genres)`,
-      errorMsg: 'Failed to create index on genres table (genres)'
-    },
-    {
       query: `CREATE INDEX IF NOT EXISTS idx_stations_url ON stations(url)`,
       errorMsg: 'Failed to create index on stations table (url)'
     },
     {
       query: `CREATE INDEX IF NOT EXISTS idx_stations_id ON stations(id)`,
       errorMsg: 'Failed to create index on stations table (id)'
+    },
+    {
+      query: `CREATE INDEX IF NOT EXISTS idx_genres_genres ON genres(genres)`,
+      errorMsg: 'Failed to create index on genres table (genres)'
     },
     {
       query: `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`,
