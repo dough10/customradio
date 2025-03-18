@@ -35,14 +35,11 @@ const log = new Logger(logLevel);
  * });
  */
 app.listen(3000, _ => { 
-  // Set up middleware and routes
   middleware(app, httpRequestCounter);
   routes(app, register);
   
-  // Schedule jobs
   schedule.scheduleJob('0 0 * * 0', testStreams);
   schedule.scheduleJob('0 12 1 * *', scrapeIceDir);
   
-  // Log server start message
   console.log(`${log.timestamp()} [STARTUP] ${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
 });
