@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const usedTypes = require("../util/usedTypes.js").$in;
+const usedTypes = require("../util/usedTypes.js");
 
 /**
  * Returns a string of placeholders for SQL queries.

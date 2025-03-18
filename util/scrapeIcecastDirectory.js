@@ -60,7 +60,7 @@ module.exports = async () => {
       const stream = await isLiveStream(url);
     
       if (!stream.ok) continue;
-      if (!usedTypes.$in.includes(stream.content)) continue;
+      if (!usedTypes.includes(stream.content)) continue;
       if (await sql.exists(stream.url)) continue;
     
       const result = await sql.addStation({

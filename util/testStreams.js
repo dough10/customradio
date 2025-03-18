@@ -1,33 +1,16 @@
+module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
+
 const axios = require('axios');
 const pack = require('../package.json');
-const url = require('url');
 
 const isLiveStream = require('./isLiveStream.js');
+const rmRef = require('./rmRef.js');
 const useableHomapage = require('./useableHomapage.js');
 const Logger = require('./logger.js');
 const Stations = require('../model/Stations.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
-
-/**
- * remove "ref" query parameter
- * 
- * @param {String} URL 
- * 
- * @returns {String} url without ref query paramater
- */
-function rmRef(urlString) {
-  const parsedUrl = url.parse(urlString, true);
-  delete parsedUrl.query.ref;
-  return url.format({
-    protocol: parsedUrl.protocol,
-    hostname: parsedUrl.hostname,
-    port: parsedUrl.port,
-    pathname: parsedUrl.pathname,
-    query: parsedUrl.query,
-  });
-}
 
 /**
  * Returns an 's' if the number is not equal to 1, otherwise returns an empty string.
