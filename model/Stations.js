@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const usedTypes = require("../util/usedTypes.js").$in;
 
 /**
- * returns a string of placeholders for SQL queries.
+ * Returns a string of placeholders for SQL queries.
  * 
  * @param {Array} arr 
  * 
@@ -65,7 +65,6 @@ function connectionEstablished(err) {
     });
   });
 }
-
 
 /**
  * Class representing a collection of radio stations.
@@ -145,7 +144,7 @@ class Stations {
   }
 
   /**
-   * check if a station exists.
+   * Check if a station exists.
    * 
    * @param {String} url 
    * 
@@ -312,7 +311,7 @@ class Stations {
   }
 
   /**
-   * gets the number of online and total stations.
+   * Gets the number of online and total stations.
    * 
    * @returns {Promise<{online: number, total: number}>}
    */
@@ -348,7 +347,7 @@ class Stations {
   
 
   /**
-   * returns the top 10 searched genres in alphabetical order.
+   * Returns the top 10 searched genres in alphabetical order.
    * 
    * @returns {Promise<Array>} A promise that resolves to an array of the top 10 genres.
    */
@@ -449,7 +448,7 @@ function validateStation(obj) {
 }
 
 /**
- * check if a URL is valid.
+ * Check if a URL is valid.
  * 
  * @param {String} url 
  * @returns {Boolean}
