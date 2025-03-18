@@ -1,13 +1,35 @@
 const { validationResult } = require('express-validator');
 const he = require('he');
 
-
-const queryString = require('../../util/queryString.js');
 const Logger = require('../../util/logger.js');
 const Stations = require('../../model/Stations.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
+
+/**
+ * Generates a query string for the given value.
+ * 
+ * This function creates a query string in the format `?genres=value` if the provided value is not an empty string.
+ * If the value is an empty string, it returns an empty string.
+ * 
+ * @function
+ * 
+ * @param {string} value - The value to be included in the query string.
+ * 
+ * @returns {string} The query string, or an empty string if the value is empty.
+ * 
+ * @example
+ * 
+ * queryString('rock');
+ * // Returns: '?genres=rock'
+ * 
+ * queryString('');
+ * // Returns: ''
+ */
+function queryString(value) {
+  return (value.length === 0) ? '' : `?genres=${value}`;
+}
 
 /**
  * Handles the request to fetch and return a list of audio stations based on query parameters.
