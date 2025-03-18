@@ -69,7 +69,7 @@ class Logger {
    * @param {number} [maxSize=5*1024*1024] - The maximum size of the log file before rotation occurs, in bytes.
    * @param {number} [maxBackups=5] - The maximum number of backup log files to retain.
    */
-  constructor(level, maxSize = 5 * 1024 * 1024, maxBackups = 5) {
+  constructor(level = '', maxSize = 5 * 1024 * 1024, maxBackups = 5) {
     this._threshold = getLevel(level);
     this._logDir = path.join(__dirname, '..', 'logs');
     this._baseLogFile = path.join(this._logDir, 'customradio.log');
