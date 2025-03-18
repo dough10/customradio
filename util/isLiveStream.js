@@ -172,7 +172,7 @@ module.exports = async (url) => {
     log.error(`Invalid URL: ${url}`);
     return {
       ok: false,
-      error: `url must be a string have a value and be a value URL format: ${url}`
+      error: `url must be a string with a valid URL format: ${url}`
     }
   };
   url = cleanURL(url);
