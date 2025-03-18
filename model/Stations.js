@@ -13,6 +13,61 @@ function mapPlaceholders(arr) {
 }
 
 /**
+ * Callback function for when the database connection is established.
+ * 
+ * @param {Error} err 
+ */
+function connectionEstablished(err) {
+  if (err) throw new Error(`Failed to create database file at ${filePath}: ${err.message}`);
+
+  const queries = [
+    {
+      query: `CREATE TABLE IF NOT EXISTS stations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        url TEXT,
+        genre TEXT,
+        online BOOLEAN,
+        content_type TEXT,
+        bitrate INTEGER,
+        icon TEXT,
+        homepage TEXT,
+        error TEXT,
+        duplicate BOOLEAN
+      )`,
+      errorMsg: 'Failed to create the stations table'
+    },
+    {
+      query: `CREATE TABLE IF NOT EXISTS genres (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        genres TEXT,
+        time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
+      errorMsg: 'Failed to create the genres table'
+    },
+    {
+      query: `CREATE INDEX IF NOT EXISTS idx_genres_genres ON genres(genres)`,
+      errorMsg: 'Failed to create index on genres table (genres)'
+    },
+    {
+      query: `CREATE INDEX IF NOT EXISTS idx_stations_url ON stations(url)`,
+      errorMsg: 'Failed to create index on stations table (url)'
+    },
+    {
+      query: `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`,
+      errorMsg: 'Failed to create index on genres table (time)'
+    }
+  ];
+
+  queries.forEach(({ query, errorMsg }) => {
+    this.db.run(query, error => {
+      if (error) throw new Error(`${errorMsg}: ${error.message}`);
+    });
+  });
+}
+
+
+/**
  * Class representing a collection of radio stations.
  */
 class Stations {
@@ -25,47 +80,7 @@ class Stations {
    */
   constructor(filePath) {
     if (!filePath) throw new Error('Database file path is required');
-    this.db = new sqlite3.Database(filePath, err => {
-      if (err) throw new Error(`Failed to create database file at ${filePath}: ${err.message}`);
-
-      const createStationsTableQuery = `CREATE TABLE IF NOT EXISTS stations(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        url TEXT,
-        genre TEXT,
-        online BOOLEAN,
-        content_type TEXT,
-        bitrate INTEGER,
-        icon TEXT,
-        homepage TEXT,
-        error TEXT,
-        duplicate BOOLEAN
-      )`;
-      
-      const createGenresTableQuery = `CREATE TABLE IF NOT EXISTS genres(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        genres TEXT,
-        time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )`;
-
-      this.db.run(createStationsTableQuery, error => {
-        if (error) throw new Error(`Failed to create the stations table: ${error.message}`);
-      });
-
-      this.db.run(createGenresTableQuery, error => {
-        if (error) throw new Error(`Failed to create the genres table: ${error.message}`);
-      });
-
-      const createGenresIndexQuery = `CREATE INDEX IF NOT EXISTS idx_genres_genres ON genres(genres)`;
-      this.db.run(createGenresIndexQuery, error => {
-        if (error) throw new Error(`Failed to create index on genres table: ${error.message}`);
-      });
-
-      const createTimeIndexQuery = `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`;
-      this.db.run(createTimeIndexQuery, error => {
-        if (error) throw new Error(`Failed to create index on genres table: ${error.message}`);
-      });
-    });
+    this.db = new sqlite3.Database(filePath, connectionEstablished.bind(this));
   }
 
   /**
@@ -419,15 +434,26 @@ class Stations {
  */
 function validateStation(obj) {
   if (typeof obj.name !== 'string') throw new Error('Invalid type for property "name". Expected string.');
-  if (typeof obj.url !== 'string') throw new Error('Invalid type for property "url". Expected string.');
+  if (!isValidURL(obj.url)) throw new Error('Invalid URL format for property "url".');
   if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
   if (typeof obj.online !== 'boolean') throw new Error('Invalid type for property "online". Expected boolean.');
   if (typeof obj['content-type'] !== 'string') throw new Error('Invalid type for property "content-type". Expected string.');
-  if (typeof obj.bitrate !== 'number') throw new Error('Invalid type for property "bitrate". Expected number.');
+  if (typeof obj.bitrate !== 'number' || obj.bitrate <= 0) throw new Error('Invalid type for property "bitrate". Expected positive number.');
   if (typeof obj.icon !== 'string') throw new Error('Invalid type for property "icon". Expected string.');
   if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
   if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
   if (typeof obj.duplicate !== 'boolean') throw new Error('Invalid type for property "duplicate". Expected boolean.');
+}
+
+/**
+ * check if a URL is valid.
+ * 
+ * @param {String} url 
+ * @returns {Boolean}
+ */
+function isValidURL(url) {
+  const regex = /^(ftp|http|https):\/\/[^ "]+$/;
+  return regex.test(url);
 }
 
 module.exports = Stations;
