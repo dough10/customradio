@@ -54,6 +54,10 @@ function connectionEstablished(err) {
       errorMsg: 'Failed to create index on stations table (url)'
     },
     {
+      query: `CREATE INDEX IF NOT EXISTS idx_stations_id ON stations(id)`,
+      errorMsg: 'Failed to create index on stations table (id)'
+    },
+    {
       query: `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`,
       errorMsg: 'Failed to create index on genres table (time)'
     }
@@ -436,7 +440,7 @@ class Stations {
  */
 function validateStation(obj) {
   if (typeof obj.name !== 'string') throw new Error('Invalid type for property "name". Expected string.');
-  if (!isValidURL(obj.url)) throw new Error('Invalid format for property "url".');
+  if (!isValidURL(obj.url)) throw new Error('Invalid format for property "url". Expected URL');
   if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
   if (typeof obj.online !== 'boolean') throw new Error('Invalid type for property "online". Expected boolean.');
   if (typeof obj['content-type'] !== 'string') throw new Error('Invalid type for property "content-type". Expected string.');
