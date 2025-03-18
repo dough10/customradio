@@ -434,7 +434,7 @@ class Stations {
  */
 function validateStation(obj) {
   if (typeof obj.name !== 'string') throw new Error('Invalid type for property "name". Expected string.');
-  if (!isValidURL(obj.url)) throw new Error('Invalid URL format for property "url".');
+  if (!isValidURL(obj.url)) throw new Error('Invalid format for property "url".');
   if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
   if (typeof obj.online !== 'boolean') throw new Error('Invalid type for property "online". Expected boolean.');
   if (typeof obj['content-type'] !== 'string') throw new Error('Invalid type for property "content-type". Expected string.');
