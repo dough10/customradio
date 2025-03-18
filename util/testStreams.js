@@ -1,5 +1,3 @@
-module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
-
 const axios = require('axios');
 const pack = require('../package.json');
 const url = require('url');
@@ -205,3 +203,5 @@ async function testStreams() {
     await sql.close(); 
   }
 }
+
+module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
