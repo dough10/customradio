@@ -316,33 +316,36 @@ class Stations {
    * 
    * @returns {Promise<{online: number, total: number}>}
    */
-  dbStats() {
-    return new Promise((resolve, reject) => {
+  async dbStats() {
+    try {
       const typesPlaceholder = mapPlaceholders(usedTypes);
-      this.db.get(`SELECT COUNT(*) 
-        AS count 
-        FROM stations 
-        WHERE online = 1
-          and content_type IN (${typesPlaceholder})`, usedTypes, (err, row) => {
-        if (err) {
-          reject(new Error(`Failed counting online stations: ${err.message}`));
-        } else {
-          const online = row.count;
-          this.db.get(`SELECT COUNT(*) 
-            AS count 
+      
+      const getCount = (condition) => {
+        return new Promise((resolve, reject) => {
+          this.db.get(`SELECT COUNT(*) AS count 
             FROM stations 
-            WHERE content_type IN (${typesPlaceholder})`, usedTypes, (err, row) => {
+            WHERE ${condition} AND content_type IN (${typesPlaceholder})`, 
+            usedTypes, (err, row) => {
             if (err) {
-              reject(new Error(`Failed counting total stations: ${err.message}`));
+              reject(new Error(`Failed counting stations: ${err.message}`));
             } else {
-              const total = row.count;
-              resolve({ online, total });
+              resolve(row.count);
             }
           });
-        }
-      });
-    });
+        });
+      };
+  
+      const online = await getCount('online = 1');
+      
+      const total = await getCount('1');
+  
+      return { online, total };
+  
+    } catch (err) {
+      throw new Error(`Error fetching stats: ${err.message}`);
+    }
   }
+  
 
   /**
    * returns the top 10 searched genres in alphabetical order.
