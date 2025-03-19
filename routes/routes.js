@@ -27,12 +27,18 @@ const log = new Logger(logLevel);
  * @returns {undefined|String}
  */
 function options() {
-  const option = { require_tld: false };
+  const option = {
+    require_tld: false,
+    require_protocol: true,
+    require_port: true
+  };
   const production = process.env.NODE_ENV === 'production';
   return production ? undefined : option; 
 }
 
 const envOptions = options();
+
+log.debug(envOptions);
 
 module.exports = (app, register) => {
   /** 
