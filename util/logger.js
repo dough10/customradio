@@ -83,7 +83,7 @@ class Logger {
     }
 
     retryOperation(() => this._initializeLogFile()).catch((err) => {
-      console.error(`${this.timestamp()} [CRITICAL] Failed to initialize log file: ${err.message}`);
+      console.error(`${this._timestamp()} [CRITICAL] Failed to initialize log file: ${err.message}`);
       process.exit(1);
     });
 
@@ -97,7 +97,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async debug(message) {
-    await this._log(this.timestamp(), 'DEBUG', message);
+    await this._log(this._timestamp(), 'DEBUG', message);
   }
 
   /**
@@ -107,7 +107,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async info(message) {
-    await this._log(this.timestamp(), 'INFO', message);
+    await this._log(this._timestamp(), 'INFO', message);
   }
   
   /**
@@ -117,7 +117,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async warning(message) {
-    await this._log(this.timestamp(), 'WARNING', message);
+    await this._log(this._timestamp(), 'WARNING', message);
   }
 
   /**
@@ -127,7 +127,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async error(message) {
-    await this._log(this.timestamp(), 'ERROR', message);
+    await this._log(this._timestamp(), 'ERROR', message);
   }
 
   /**
@@ -137,7 +137,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async critical(message) {
-    await this._log(this.timestamp(), 'CRITICAL', message);
+    await this._log(this._timestamp(), 'CRITICAL', message);
   }
 
   /**
@@ -145,7 +145,7 @@ class Logger {
    * 
    * @returns {string} The formatted timestamp.
    */
-  timestamp() {
+  _timestamp() {
     const formatter = new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: '2-digit',
@@ -182,7 +182,7 @@ class Logger {
     this._logQueue = this._logQueue.then(() => {
       return appendFile(this._baseLogFile, `${logEntry}\n`).catch((err) => {
         const errorMessage = `Failed to write log entry: ${err.message}`;
-        console.error(`${this.timestamp()} [CRITICAL] ${errorMessage}`);
+        console.error(`${this._timestamp()} [CRITICAL] ${errorMessage}`);
         throw new Error(errorMessage);
       });
     });
@@ -223,7 +223,7 @@ class Logger {
         await retryOperation(() => this._initializeLogFile());
       }
     } catch (err) {
-      console.error(`${this.timestamp()} [CRITICAL] Failed to check log file size: ${err.message}`);
+      console.error(`${this._timestamp()} [CRITICAL] Failed to check log file size: ${err.message}`);
     }
   }
 
@@ -248,7 +248,7 @@ class Logger {
         this.info(`Deleted old log file: ${fileToDelete}`);
       }
     } catch (err) {
-      console.error(`${this.timestamp()} [CRITICAL] Failed to remove old log files: ${err.message}`);
+      console.error(`${this._timestamp()} [CRITICAL] Failed to remove old log files: ${err.message}`);
     }
   }
 }
