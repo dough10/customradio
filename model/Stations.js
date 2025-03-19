@@ -15,6 +15,9 @@ function mapPlaceholders(arr) {
 /**
  * Callback function for when the database connection is established.
  * 
+ * The function is bound to the `Stations` class instance to ensure
+ * that the `this` context refers to the class instance.
+ * 
  * @param {Error} err 
  */
 function connectionEstablished(err) {
