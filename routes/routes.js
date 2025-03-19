@@ -20,6 +20,19 @@ const info = require('./endpoints/info.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
+/**
+ * enviroment options for csp report. 
+ * allows localhost as url when not in production.
+ * 
+ * @returns {undefined|String}
+ */
+function options() {
+  const option = { require_tld: false };
+  const production = process.env.NODE_ENV === 'production';
+  return production ? undefined : option; 
+}
+
+const envOptions = options();
 
 module.exports = (app, register) => {
   /** 
@@ -271,7 +284,7 @@ module.exports = (app, register) => {
    */
   app.post('/add', upload.none(), [
     body('url')
-      .isURL()
+      .isURL(envOptions)
       .notEmpty()
       .withMessage('Invalid URL')
   ], (req, res) => addToDatabase(req, res));
@@ -324,9 +337,7 @@ module.exports = (app, register) => {
       .isObject()
       .withMessage('csp-report must be an object'),
     body('csp-report.document-uri')
-      .escape()
-      .isString()
-      .isURL()
+      .isURL(envOptions)
       .withMessage('document-uri must be a valid URL'),
     body('csp-report.referrer')
       .optional()
@@ -334,12 +345,9 @@ module.exports = (app, register) => {
       if (value === '' || value === null) return true;
       return validator.isURL(value);
     }).withMessage('referrer must be a valid URL'),
-    body('csp-report.blocked-uri').custom(value => {
-      if (value === 'inline' || validator.isURL(value)) {
-        return true;
-      }
-      throw new Error('blocked-uri must be a valid URL or "inline"');
-    }).withMessage('blocked-uri must be a valid URL or "inline"'),
+    body('csp-report.blocked-uri')
+      .isURL(envOptions)
+      .withMessage('blocked-uri must be a valid URL'),
     body('csp-report.violated-directive')
       .escape()
       .isString()
@@ -350,8 +358,7 @@ module.exports = (app, register) => {
       .withMessage('original-policy must be a string'),
     body('csp-report.source-file')
       .optional()
-      .escape()
-      .isURL()
+      .isURL(envOptions)
       .withMessage('source-file must be a valid URL'),
     body('csp-report.status-code')
       .isInt({ min: 100, max: 599 })
