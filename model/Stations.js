@@ -392,15 +392,16 @@ class Stations {
    * Log a genre filter query.
    * 
    * @param {string} genre - The genre to log.
+   * @param {Date} [time=new Date()] - The time when the genre was logged. Defaults to the current date and time.
    * 
    * @returns {Promise<number>} A promise that resolves to the ID of the logged genre.
    * 
    * @throws {Error} If the query fails.
    */
-  logGenres(genre) {
-    const query = `INSERT INTO genres (genres) VALUES (?)`;
+  logGenres(genre, time = new Date()) {
+    const query = `INSERT INTO genres (genres, time) VALUES (?, ?)`;
     return this._ensureInitialized(() => new Promise((resolve, reject) => {
-      this.db.run(query, [genre], function (err) {
+      this.db.run(query, [genre, time.toISOString()], function (err) {
         if (err) {
           reject(new Error(`Failed to log genre: ${err.message}`));
         } else {
