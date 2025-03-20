@@ -977,7 +977,7 @@ async function formSubmission(ev) {
     const result = await response.json();
     document.getElementById('response').innerText = result.message;
     new Toast(result.message);
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', document.querySelector('#station-url').value || '']);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', document.querySelector('#station-url').value, result.message]);
     await sleep(2000);
     const inputElement = document.querySelector('#station-url');
     inputElement.value = '';
