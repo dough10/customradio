@@ -23,7 +23,7 @@ module.exports = (app, httpRequestCounter) => {
         fontSrc: ["'self'"],
         frameSrc: ["'self'"],
         mediaSrc: ["*"],
-        styleSrcElem: ["'self'"],
+        styleSrcElem: ["'self'", "'unsafe-inline'"],
         styleSrcAttr: ["'self'", "'unsafe-inline'"],
         reportUri: "/csp-report"
       },
