@@ -15,10 +15,10 @@ function mapPlaceholders(arr) {
 /**
  * Callback function for when the database connection is established.
  * 
- * The function is bound to the `Stations` class instance to ensure
+ * This function is bound to the `Stations` class instance to ensure
  * that the `this` context refers to the class instance.
  * 
- * @param {Error} err 
+ * @param {Error} err - The error object, if any error occurred during the connection.
  */
 function connectionEstablished(err) {
   if (err) throw new Error(`Failed to create database file at ${filePath}: ${err.message}`);
@@ -66,11 +66,19 @@ function connectionEstablished(err) {
     }
   ];
 
-  queries.forEach(({ query, errorMsg }) => {
-    this.db.run(query, error => {
-      if (error) throw new Error(`${errorMsg}: ${error.message}`);
+  return queries.reduce((promise, { query, errorMsg }) => {
+    return promise.then(() => {
+      return new Promise((resolve, reject) => {
+        this.db.run(query, error => {
+          if (error) {
+            reject(new Error(`${errorMsg}: ${error.message}`));
+          } else {
+            resolve();
+          }
+        });
+      });
     });
-  });
+  }, Promise.resolve());
 }
 
 /**
@@ -86,7 +94,19 @@ class Stations {
    */
   constructor(filePath) {
     if (!filePath) throw new Error('Database file path is required');
-    this.db = new sqlite3.Database(filePath, connectionEstablished.bind(this));
+    this.db = new sqlite3.Database(filePath);
+    this.initializationPromise = connectionEstablished.call(this);
+  }
+
+  /**
+   * Ensure the database is initialized before running a query.
+   * 
+   * @param {Function} fn - The function to run after initialization.
+   * @returns {Promise} A promise that resolves when the function completes.
+   */
+  async _ensureInitialized(fn) {
+    await this.initializationPromise;
+    return fn();
   }
 
   /**
@@ -98,7 +118,7 @@ class Stations {
    */
   getAllStations() {
     const getQuery = 'SELECT * FROM stations';
-    return this._runQuery(getQuery);
+    return this._ensureInitialized(() => this._runQuery(getQuery));
   }
 
   /**
@@ -128,7 +148,7 @@ class Stations {
     ORDER BY name ASC;`;
     const params = [...usedTypes, ...genrePatterns, ...genrePatterns];
 
-    return this._runQuery(query, params);
+    return this._ensureInitialized(() => this._runQuery(query, params));
   }
 
   /**
@@ -147,7 +167,7 @@ class Stations {
       AND bitrate IS NOT NULL
     ORDER BY name ASC;`;
 
-    return this._runQuery(query, usedTypes);
+    return this._ensureInitialized(() => this._runQuery(query, usedTypes));
   }
 
   /**
@@ -159,7 +179,7 @@ class Stations {
    */
   async exists(url) {
     const query = `SELECT COUNT(*) AS count FROM stations WHERE url = ?`;
-    const rows = await this._runQuery(query, [url]);
+    const rows = await this._ensureInitialized(() => this._runQuery(query, [url]));
     return rows[0].count > 0;
   }
 
@@ -174,7 +194,7 @@ class Stations {
    */
   markDuplicate(id) {
     const query = `UPDATE stations SET duplicate = 1 WHERE id = ?`;
-    return this._runQuery(query, [id]);
+    return this._ensureInitialized(() => this._runQuery(query, [id]));
   }
 
   /**
@@ -189,7 +209,7 @@ class Stations {
    */
   logStreamError(id, error) {
     const query = `UPDATE stations SET error = ? WHERE id = ?`;
-    return this._runQuery(query, [error, id]);
+    return this._ensureInitialized(() => this._runQuery(query, [error, id]));
   }
 
   /**
@@ -215,7 +235,7 @@ class Stations {
     validateStation(obj);
 
     const existQuery = `SELECT * FROM stations WHERE url = ?`;
-    const rows = await this._runQuery(existQuery, [obj.url]);
+    const rows = await this._ensureInitialized(() => this._runQuery(existQuery, [obj.url]));
 
     if (rows.length > 0) {
       return 'Station exists';
@@ -306,7 +326,7 @@ class Stations {
       obj.id
     ];
 
-    return new Promise((resolve, reject) => {
+    return this._ensureInitialized(() => new Promise((resolve, reject) => {
       this.db.run(updateQuery, values, function (err) {
         if (err) {
           reject(new Error(`Failed to update station: ${err.message}`));
@@ -314,7 +334,7 @@ class Stations {
           resolve('Station updated successfully.');
         }
       });
-    });
+    }));
   }
 
   /**
@@ -341,9 +361,8 @@ class Stations {
         });
       };
   
-      const online = await getCount('online = 1');
-      
-      const total = await getCount('1');
+      const online = await this._ensureInitialized(() => getCount('online = 1'));
+      const total = await this._ensureInitialized(() => getCount('1'));
   
       return { online, total };
   
@@ -365,7 +384,7 @@ class Stations {
       GROUP BY genres
       ORDER BY count DESC
       LIMIT 10;`;
-    const response = await this._runQuery(query);
+    const response = await this._ensureInitialized(() => this._runQuery(query));
     return response.map(obj => obj.genres).sort((a, b) => a.localeCompare(b));
   }
 
@@ -380,7 +399,7 @@ class Stations {
    */
   logGenres(genre) {
     const query = `INSERT INTO genres (genres) VALUES (?)`;
-    return new Promise((resolve, reject) => {
+    return this._ensureInitialized(() => new Promise((resolve, reject) => {
       this.db.run(query, [genre], function (err) {
         if (err) {
           reject(new Error(`Failed to log genre: ${err.message}`));
@@ -388,7 +407,7 @@ class Stations {
           resolve(this.lastID);
         }
       });
-    });
+    }));
   }
 
   /**
@@ -399,7 +418,7 @@ class Stations {
    * @throws {Error} If the database connection cannot be closed.
    */
   close() {
-    return new Promise((resolve, reject) => {
+    return this._ensureInitialized(() => new Promise((resolve, reject) => {
       this.db.close(err => {
         if (err) {
           reject(new Error(`Failed to close the database: ${err.message}`));
@@ -407,7 +426,7 @@ class Stations {
           resolve('Database connection closed successfully.');
         }
       });
-    });
+    }));
   }
 
   /**
@@ -447,7 +466,7 @@ function validateStation(obj) {
   if (typeof obj.genre !== 'string') throw new Error('Invalid type for property "genre". Expected string.');
   if (typeof obj.online !== 'boolean') throw new Error('Invalid type for property "online". Expected boolean.');
   if (typeof obj['content-type'] !== 'string') throw new Error('Invalid type for property "content-type". Expected string.');
-  if (typeof obj.bitrate !== 'number' || obj.bitrate <= 0) throw new Error('Invalid type for property "bitrate". Expected positive number.');
+  if (typeof obj.bitrate !== 'number' || obj.bitrate < 0) throw new Error('Invalid type for property "bitrate". Expected positive number.');
   if (typeof obj.icon !== 'string') throw new Error('Invalid type for property "icon". Expected string.');
   if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
   if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
