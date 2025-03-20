@@ -2,6 +2,7 @@ const multer = require('multer');
 const upload = multer();
 const { query, body } = require('express-validator');
 const pug = require('pug');
+const validator = require('validator');
 
 const Logger = require('./../util/logger.js');
 const addToDatabase = require('./endpoints/add.js');
@@ -287,7 +288,7 @@ module.exports = (app, register) => {
    */
   app.post('/add', upload.none(), [
     body('url')
-      .isURL(envOptions)
+      .isURL()
       .notEmpty()
       .withMessage('Invalid URL')
   ], (req, res) => addToDatabase(req, res));
@@ -346,7 +347,7 @@ module.exports = (app, register) => {
       .optional()
       .custom(value => {
       if (value === '' || value === null) return true;
-      return validator.isURL(value);
+      return validator.isURL(value, envOptions);
     }).withMessage('referrer must be a valid URL'),
     body('csp-report.blocked-uri')
       .isURL(envOptions)
