@@ -26,7 +26,7 @@ const log = new Logger(logLevel);
  * 
  * @returns {undefined|String}
  */
-function options() {
+const envOptions = (_ => {
   const option = {
     require_tld: false,
     require_protocol: true,
@@ -34,9 +34,7 @@ function options() {
   };
   const production = process.env.NODE_ENV === 'production';
   return production ? undefined : option; 
-}
-
-const envOptions = options();
+})();
 
 log.debug(envOptions);
 
