@@ -32,8 +32,7 @@ const envOptions = (_ => {
     require_protocol: true,
     require_port: true
   };
-  const production = process.env.NODE_ENV === 'production';
-  return production ? undefined : option; 
+  return process.env.NODE_ENV === 'production' ? undefined : option; 
 })();
 
 log.debug(envOptions);
