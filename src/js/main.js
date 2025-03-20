@@ -977,11 +977,11 @@ async function formSubmission(ev) {
     const result = await response.json();
     document.getElementById('response').innerText = result.message;
     new Toast(result.message);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', document.querySelector('#station-url').value || '']);
     await sleep(2000);
     const inputElement = document.querySelector('#station-url');
     inputElement.value = '';
     document.getElementById('response').innerText = '';
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', ev.target.querySelector('input').value || '']);
   } catch (e) {
     submit.removeAttribute('disabled');
     document.getElementById('response').innerText = 'An error occurred!';
@@ -1029,7 +1029,7 @@ function toggleButtonActivity() {
  */
 function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
   var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
-  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'JavaScript Error', errorMessage || '']);
+  if (typeof _paq !== 'undefined') _paq.push(['JavaScript Error', errorMessage || '']);
 }
 
 /**
