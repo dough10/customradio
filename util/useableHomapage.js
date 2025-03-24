@@ -13,6 +13,62 @@ function isIPv4(address) {
 }
 
 /**
+ * Check if the URL is invalid.
+ * 
+ * @param {String} URL
+ * 
+ * @returns {Boolean}
+ */
+function isInvalidURL(URL) {
+  const invalidURLs = ['N/A', 'http://localhost/', 'http://localhost', 'url', '(NULL)', 'Unknown'];
+  const regexInvalidUrl = /^https?:\/\/(?:www\.)?$/;
+  return invalidURLs.includes(URL) || regexInvalidUrl.test(URL);
+}
+
+/**
+ * Ensure the URL has a protocol.
+ * 
+ * @param {String} URL
+ * 
+ * @returns {String}
+ */
+function ensureProtocol(URL) {
+  if (!URL.startsWith('http://') && !URL.startsWith('https://')) {
+    return `http://${URL}`;
+  }
+  return URL;
+}
+
+/**
+ * Parse the hostname into subdomain, domain, and extension.
+ * 
+ * @param {String} hostname
+ * 
+ * @returns {Object}
+ */
+function parseHostname(hostname) {
+  const splitHostname = hostname ? hostname.split('.') : [];
+  let subdomain, domain, ext;
+
+  if (splitHostname.length > 2) {
+    const lastTwoParts = splitHostname.slice(-2).join('.');
+    if (['co.uk', 'org.uk', 'gov.uk'].includes(lastTwoParts)) {
+      domain = splitHostname.slice(0, -2).join('.');
+      ext = lastTwoParts;
+    } else {
+      subdomain = splitHostname[0];
+      domain = splitHostname[1];
+      ext = splitHostname[2];
+    }
+  } else if (splitHostname.length === 2) {
+    domain = splitHostname[0];
+    ext = splitHostname[1];
+  }
+
+  return { subdomain, domain, ext };
+}
+
+/**
  * Breaks a URL into parts to be restructured.
  * 
  * @param {String} URL 
@@ -20,39 +76,18 @@ function isIPv4(address) {
  * @returns {Object|null}
  */
 function urlDeconstruction(URL) {
-  if (typeof URL !== 'string') return null;
+  if (typeof URL !== 'string' || isInvalidURL(URL)) return null;
 
-  const invalidURLs = ['N/A', 'http://localhost/', 'http://localhost', 'url', '(NULL)', 'Unknown'];
-  if (invalidURLs.includes(URL)) return null;
-
-  const regexInvalidUrl = /^https?:\/\/(?:www\.)?$/;
-  if (regexInvalidUrl.test(URL)) return null;
+  URL = ensureProtocol(URL);
 
   try {
     const parsedUrl = url.parse(URL, true);
-    const splitHostname = parsedUrl.hostname ? parsedUrl.hostname.split('.') : [];
-    let subdomain, domain, ext, ip;
-
-    if (isIPv4(parsedUrl.hostname)) {
-      ip = parsedUrl.hostname;
-    } else if (splitHostname.length > 2) {
-      const lastTwoParts = splitHostname.slice(-2).join('.');
-      if (['co.uk', 'org.uk', 'gov.uk'].includes(lastTwoParts)) {
-        domain = splitHostname.slice(0, -2).join('.');
-        ext = lastTwoParts;
-      } else {
-        subdomain = splitHostname[0];
-        domain = splitHostname[1];
-        ext = splitHostname[2];
-      }
-    } else if (splitHostname.length === 2) {
-      domain = splitHostname[0];
-      ext = splitHostname[1];
-    }
+    const { subdomain, domain, ext } = parseHostname(parsedUrl.hostname);
+    const ip = isIPv4(parsedUrl.hostname) ? parsedUrl.hostname : null;
 
     return {
       protocol: parsedUrl.protocol || 'http:',
-      slashes: parsedUrl.slashes,
+      slashes: parsedUrl.slashes || true,
       ip,
       subdomain,
       domain,
@@ -80,6 +115,8 @@ function objectToUrl(obj) {
     return '';
   }
 
+  if (!obj.domain && !obj.ip) return null;
+
   const hostname = obj.ip || (obj.subdomain ? `${obj.subdomain}.` : '') + (obj.domain || '') + (obj.ext ? `.${obj.ext}` : '');
 
   const formattedUrl = url.format({
@@ -102,6 +139,7 @@ function objectToUrl(obj) {
  * @returns {String|null}
  */
 module.exports = (homepage) => {
+  if (!homepage) return null;
   const brokenHome = urlDeconstruction(homepage);
   if (brokenHome) {
     return objectToUrl(brokenHome);
