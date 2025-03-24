@@ -130,7 +130,8 @@ function objectToUrl(obj) {
     port: obj.port,
     pathname: obj.pathname,
     search: obj.search,
-    hash: obj.hash
+    hash: obj.hash,
+    query: obj.query
   });
 
   return formattedUrl;
