@@ -47,25 +47,30 @@ function ensureProtocol(URL) {
  * @returns {Object}
  */
 function parseHostname(hostname) {
-  const splitHostname = hostname ? hostname.split('.') : [];
-  let subdomain, domain, ext;
+  if (!hostname) return { subdomain: null, domain: null, ext: null };
 
-  if (splitHostname.length > 2) {
-    const lastTwoParts = splitHostname.slice(-2).join('.');
-    if (['co.uk', 'org.uk', 'gov.uk'].includes(lastTwoParts)) {
-      domain = splitHostname.slice(0, -2).join('.');
-      ext = lastTwoParts;
-    } else {
-      subdomain = splitHostname[0];
-      domain = splitHostname[1];
-      ext = splitHostname[2];
-    }
-  } else if (splitHostname.length === 2) {
-    domain = splitHostname[0];
-    ext = splitHostname[1];
+  const splitHostname = hostname.split('.');
+  const length = splitHostname.length;
+
+  // Handle special cases for domains like 'co.uk', 'org.uk', 'gov.uk'
+  const specialDomains = ['co.uk', 'org.uk', 'gov.uk'];
+  const lastTwoParts = splitHostname.slice(-2).join('.');
+
+  if (length > 2 && specialDomains.includes(lastTwoParts)) {
+    const remainder = splitHostname.slice(0, -2);
+    return {
+      subdomain: remainder.length > 1 ? remainder[0] : null,
+      domain: remainder.length > 1 ? remainder[1] : remainder[0],
+      ext: lastTwoParts
+    };
   }
 
-  return { subdomain, domain, ext };
+  // General case for domains
+  return {
+    subdomain: length > 2 ? splitHostname[0] : null,
+    domain: length > 1 ? splitHostname[length - 2] : splitHostname[0],
+    ext: length > 1 ? splitHostname[length - 1] : null
+  };
 }
 
 /**
