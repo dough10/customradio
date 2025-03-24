@@ -62,7 +62,7 @@ function msToHhMmSs(milliseconds) {
  * @returns {null|String}
  */
 async function testHomepageConnection(url, testedHomepages) {
-  const homepage = await useableHomapage(url);
+  const homepage = useableHomapage(url);
   if (!homepage) {
     return;
   }

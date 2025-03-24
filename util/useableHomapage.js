@@ -101,7 +101,7 @@ function objectToUrl(obj) {
  * 
  * @returns {String|null}
  */
-module.exports = async (homepage) => {
+module.exports = (homepage) => {
   const brokenHome = urlDeconstruction(homepage);
   if (brokenHome) {
     return objectToUrl(brokenHome);
