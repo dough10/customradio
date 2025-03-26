@@ -20,7 +20,16 @@ function isIPv4(address) {
  * @returns {Boolean}
  */
 function isInvalidURL(URL) {
-  const invalidURLs = ['N/A', 'http://localhost/', 'http://localhost', 'url', '(NULL)', 'Unknown'];
+  if (URL.endsWith('/')) {
+    URL = URL.slice(0, -1);
+  }
+  const invalidURLs = [
+    'N/A',
+    'http://localhost',
+    'url',
+    '(NULL)',
+    'Unknown'
+  ];
   const regexInvalidUrl = /^https?:\/\/(?:www\.)?$/;
   return invalidURLs.includes(URL) || regexInvalidUrl.test(URL);
 }

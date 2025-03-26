@@ -5,7 +5,7 @@ const pack = require('../package.json');
 
 const isLiveStream = require('./isLiveStream.js');
 const rmRef = require('./rmRef.js');
-const useableHomapage = require('./useableHomapage.js');
+const useableHomepage = require('./useableHomepage.js');
 const Logger = require('./logger.js');
 const Stations = require('../model/Stations.js');
 
@@ -62,7 +62,7 @@ function msToHhMmSs(milliseconds) {
  * @returns {null|String}
  */
 async function testHomepageConnection(url, testedHomepages) {
-  const homepage = useableHomapage(url);
+  const homepage = useableHomepage(url);
   if (!homepage) {
     return;
   }
