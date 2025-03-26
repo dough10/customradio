@@ -108,5 +108,5 @@
     });
 
   });
-  run(); // Run the tests
+  run();
 })();
