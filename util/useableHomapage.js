@@ -53,11 +53,11 @@ function parseHostname(hostname) {
   const length = splitHostname.length;
 
   const specialDomains = [
-    'co.uk', 'org.uk', 'gov.uk', 'ac.uk', 'sch.uk', 'nhs.uk', 'police.uk', 'mod.uk',
-    'com.au', 'net.au', 'org.au', 'edu.au', 'gov.au', 'asn.au', 'id.au',
-    'co.nz', 'net.nz', 'org.nz', 'govt.nz', 'ac.nz', 'school.nz',
-    'com.sg', 'net.sg', 'org.sg', 'gov.sg', 'edu.sg', 'per.sg',
-    'co.in', 'net.in', 'org.in', 'gov.in', 'ac.in', 'res.in', 'edu.in', 'mil.in'
+    'co.uk', 'org.uk', 'ac.uk', 'sch.uk', 'nhs.uk', 'mod.uk',
+    'com.au', 'net.au', 'org.au', 'edu.au', 'asn.au', 'id.au',
+    'co.nz', 'net.nz', 'org.nz', 'ac.nz', 'com.sg', 'net.sg', 
+    'org.sg', 'edu.sg', 'per.sg', 'co.in', 'net.in', 'org.in', 
+    'ac.in', 'res.in', 'edu.in', 'mil.in'
   ];
   const lastTwoParts = splitHostname.slice(-2).join('.');
 
