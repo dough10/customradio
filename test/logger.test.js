@@ -34,6 +34,12 @@ let expect;
       expect(console.log.calledWithMatch(/\[DEBUG\] Debug message/)).to.be.true;
     });
 
+    it('should not log debug messages when level is set to error', async function() {
+      logger = new Logger('error');
+      await logger.debug('Debug message');
+      expect(console.log.calledWithMatch(/\[DEBUG\] Debug message/)).to.be.false;
+    });
+
     it('should log info messages', async function() {
       await logger.info('Info message');
       expect(console.log.calledWithMatch(/\[INFO\] Info message/)).to.be.true;
