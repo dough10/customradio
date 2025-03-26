@@ -940,8 +940,12 @@ function clearPlaying() {
  * @returns {Boolean}
  */
 function isValidURL(url) {
-  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
-  return urlRegex.test(url);
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
