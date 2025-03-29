@@ -1,7 +1,6 @@
 import sleep from '../utils/sleep.js';
 import { isValidURL } from '../utils/URL.js';
-
-const CACHE_CHECK_INTERVAL = 500;
+import ToastCache from './ToastCache.js';
 
 /**
  * Toast class for displaying temporary messages to the user.
@@ -16,38 +15,47 @@ const CACHE_CHECK_INTERVAL = 500;
  * @param {String} linkText - The text to display for the link.
  */
 export default class Toast {
-  static _toastCache = [];
-  static _cacheWatcher = null;
   _timer = null;
+  toast = null;
+  link = null;
   
   constructor(message, _timeout = 3.5, link, linkText) {
-    // push toast to cache if currently displaying a toast
     if (document.querySelector('#toast')) {
-      Toast._addToCache(message, _timeout, link, linkText);
+      ToastCache.addToCache(message, _timeout, link, linkText, (msg, t, l, lt) => new Toast(msg, t, l, lt));
       return;
     }
-    // bind this to internal functions
+    
+    //bind this
     this._transitionEnd = this._transitionEnd.bind(this);
-    this._cleanUp = this._removeToast.bind(this);
     this._clicked = this._clicked.bind(this);
+    this.removeToast = this._removeToast.bind(this);
 
+    // set the timeout duration in milliseconds
     this._timeout = _timeout * 1000;
+
+    // message container
     this.toast = this._createToast();
+
+    // add content
     if (link && linkText) {
-      this.toast.append(this._createToastWithLink(message, link, linkText));
+      this.toast.append(this._createLink(message, link, linkText));
     } else {
       this.toast.textContent = message;
     }
+
+    // append to the document body
     document.querySelector('body').append(this.toast);
-    sleep(25).then(_ => requestAnimationFrame(_ => {
+    
+    //display the toast
+    sleep(25).then(() => requestAnimationFrame(() => {
       this.toast.toggleAttribute('opened');
     }));
   }
 
   /**
-   * returns a new toast html element
+   * Returns a new toast HTML element.
    * 
-   * @returns {HTMLElement} hot toast
+   * @returns {HTMLElement} The toast element.
    */
   _createToast() {
     const toast = document.createElement('div');
@@ -62,7 +70,6 @@ export default class Toast {
 
   /**
    * Creates a toast with a clickable link.
-   * If the link is invalid, only the message is displayed.
    * 
    * @param {String} message - The message to display in the toast.
    * @param {String} link - The URL or function to execute when the toast is clicked.
@@ -70,14 +77,14 @@ export default class Toast {
    * 
    * @returns {HTMLElement} The toast element with the link.
    */
-  _createToastWithLink(message, link, linkText) {
+  _createLink(message, link, linkText) {
     const mText = document.createElement('div');
     mText.textContent = message;
-    
+
     if (typeof link === 'string' && !isValidURL(link)) {
       return mText;
     }
-    
+
     const lText = document.createElement('div');
     lText.textContent = linkText;
     lText.classList.add('yellow-text');
@@ -95,9 +102,8 @@ export default class Toast {
 
   /**
    * Handles click events on the toast.
-   * Opens the link in a new tab if valid, executes the function if provided, or logs an error if invalid.
    */
-  _clicked(e) {
+  _clicked() {
     if (this.link && typeof this.link === 'string' && isValidURL(this.link)) {
       window.open(this.link, "_blank");
     } else if (this.link && typeof this.link === 'function') {
@@ -109,53 +115,32 @@ export default class Toast {
   }
 
   /**
-   * play closing animation and remove element from document
+   * Plays the closing animation and removes the element from the document.
    */
   _removeToast() {
     clearTimeout(this._timer);
     this._timer = null;
     if (!this.toast) return;
-    this.toast.removeEventListener('transitionend', this._transitionEnd);
-    this.toast.removeEventListener('click', this._clicked);
-    this.toast.addEventListener('transitionend', () => {
-      if (this.toast) this.toast.remove();
-    });
+    const remove = () => {
+      this.toast.removeEventListener('transitionend', remove, true);
+      this.toast.remove();
+      this.toast = null;
+    };
+    this.toast.removeEventListener('transitionend', this._transitionEnd, true);
+    this.toast.removeEventListener('click', this._clicked, true);
+    this.toast.addEventListener('transitionend', remove, true);
     requestAnimationFrame(() => {
       this.toast.removeAttribute('opened');
     });
   }
 
   /**
-   * called after opening animation
-   * sets up closing animation
+   * Called after the opening animation ends.
+   * Sets up a timer to close the toast after the specified timeout.
    */
   _transitionEnd() {
+    if (!this.toast) return;
+    this.toast.removeEventListener('transitionend', this._transitionEnd, true);
     this._timer = setTimeout(this._removeToast, this._timeout);
-    this.toast.removeEventListener('transitionend', this._transitionEnd);
-  }
-
-  /**
-   * Adds a toast message to the cache and starts the cache watcher if not already running.
-   * 
-   * @param {String} message - The message to display in the toast.
-   * @param {Number} timeout - The timeout duration for the toast.
-   * @param {String|Function} link - The URL or function to execute when the toast is clicked.
-   * @param {String} linkText - The text to display for the link.
-   */
-  static _addToCache(message, timeout, link, linkText) {
-    Toast._toastCache.push([message, timeout, link, linkText]);
-    if (!Toast._cacheWatcher) {
-      Toast._cacheWatcher = setInterval(() => {
-        if (!Toast._toastCache.length || document.querySelector('#toast')) {
-          return;
-        }
-        const [msg, t, l, lt] = Toast._toastCache.shift();
-        new Toast(msg, t, l, lt);
-        if (!Toast._toastCache.length) {
-          clearInterval(Toast._cacheWatcher);
-          Toast._cacheWatcher = null;
-        }
-      }, CACHE_CHECK_INTERVAL);
-    }
   }
 }
