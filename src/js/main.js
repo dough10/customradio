@@ -1,184 +1,13 @@
-export {
-  queryString,
-  stamp,
-  svgIcon,
-  createSmallButton,
-  createStationElement
-};
+import Toast from './Toast/Toast.js';
+import sleep from './utils/sleep.js';
+import { isValidURL } from './utils/URL.js';
+import { stamp } from './utils/timestamp.js';
+import { queryString } from './utils/queryString.js';
+import { createStationElement } from './utils/createStationElement.js';
+import { createSmallButton } from './utils/createSmallButton.js';
+import AudioPlayer from './utils/audio.js'; 
 
-const player = new Audio();
-
-let pauseTimer = 0;
-
-
-/**
- * wait an ammout of time
- * 
- * 
- * @param {ms} milliseconds
- * 
- * @returns {Promise<Void>} Nothing 
- */
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-
-/**
- * check if a string appears to be a URL
- * 
- * @param {String} str
- *  
- * @returns {Boolean}
- */
-function looksLikeAUrl(str) {
-  return str.startsWith('http://') || str.startsWith('https://');
-}
-
-
-const _toastCache = [];
-
-/**
- * display a toast message
- *
- * @param {String} message - text to be displayed in the toast
- * @param {Number} _timeout - in seconds  || defualt 3.5 seconds  ** optional
- * @param {String} link - url to go to when toast is clicked
- * @param {String} linkText - yellow text
- */
-class Toast {
-  constructor(message, _timeout, link, linkText) {
-    // push toast to cache if currently displaying a toast
-    if (document.querySelector('#toast')) {
-      _toastCache.push([
-        message,
-        _timeout,
-        link,
-        linkText
-      ]);
-      return;
-    }
-    // bind this to internal functions
-    this._transitionEnd = this._transitionEnd.bind(this);
-    this._cleanUp = this._cleanUp.bind(this);
-    this._clicked = this._clicked.bind(this);
-
-    // create the toast
-    this._timer = false;
-    this._timeout = _timeout * 1000 || 3500;
-    this.toast = this._createToast();
-    if (link && linkText) {
-      this.toast.append(this._withLink(message, link, linkText));
-    } else {
-      this.toast.textContent = message;
-    }
-    document.querySelector('body').append(this.toast);
-    sleep(25).then(_ => requestAnimationFrame(_ => {
-      this.toast.toggleAttribute('opened');
-    }));
-  }
-
-  /**
-   * returns a new toast html element
-   * 
-   * @returns {HTMLElement} hot toast
-   */
-  _createToast() {
-    const toast = document.createElement('div');
-    toast.id = 'toast';
-    toast.classList.add('toast');
-    toast.addEventListener('transitionend', this._transitionEnd, true);
-    toast.addEventListener('click', this._clicked, true);
-    return toast;
-  }
-
-  /**
-   * butter in the toast with some link info
-   * @param {String} message - text string
-   * @param {String} link - URL
-   * @param {String} linkText - text string
-   * 
-   * @returns {HTMLElement} link wrapper
-   */
-  _withLink(message, link, linkText) {
-    const mText = document.createElement('div');
-    mText.textContent = message;
-    
-    if (typeof link === 'string' && !looksLikeAUrl(link)) {
-      return mText;
-    }
-    
-    const lText = document.createElement('div');
-    lText.textContent = linkText;
-    lText.classList.add('yellow-text');
-
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('toast-wrapper');
-    wrapper.append(mText, lText);
-
-    this.link = link;
-
-    return wrapper;
-  }
-
-  /**
-   * event handler for toast click
-   */
-  _clicked(e) {
-    if (this.link && typeof this.link === 'string' && isValidURL(this.link)) {
-      window.open(this.link, "_blank");
-    } else if (this.link && typeof this.link === 'function') {
-      this.link();
-    } else if (this.link) {
-      console.error(`Toast "link" paramater must be a valid URL or function: Value=${this.link}, type=${typeof this.link}`);
-    }
-    this._cleanUp();
-  }
-
-  /**
-   * play closing animation and remove element from document
-   */
-  _cleanUp() {
-    if (this._timer) {
-      clearTimeout(this._timer);
-      this._timer = false;
-    }
-    this.toast.addEventListener('transitionend', _ => {
-      if (this.toast) this.toast.remove();
-    });
-    requestAnimationFrame(_ => {
-      this.toast.removeAttribute('opened');
-    });
-  }
-
-  /**
-   * called after opening animation
-   * sets up closing animation
-   */
-  _transitionEnd() {
-    this._timer = setTimeout(this._cleanUp, this._timeout);
-    this.toast.removeEventListener('transitionend', this._transitionEnd);
-  }
-}
-
-/**
- * infinite loop to look if cached toast messages to be displayed
- */
-setInterval(_ => {
-  if (!_toastCache.length) {
-    return;
-  }
-  if (document.querySelector('#toast')) {
-    return;
-  }
-  new Toast(
-    _toastCache[0][0],
-    _toastCache[0][1],
-    _toastCache[0][2],
-    _toastCache[0][3]
-  );
-  _toastCache.splice(0, 1);
-}, 500);
+const player = new AudioPlayer();
 
 /**
  * Creates a loading animation in the element passed to the input
@@ -224,40 +53,6 @@ function setSelectedCount(number) {
 }
 
 /**
- * toggles selected attribute
- * 
- * @param {Event} ev
- * 
- * @returns {void} 
- */
-function toggleSelect(ev) {
-  const el = ev.target.parentElement;
-  el.toggleAttribute('selected');
-  const all = Array.from(el.parentNode.querySelectorAll('li[selected]'));
-  const forStorage = all.map(el => el.dataset).sort((a, b) => a.name.localeCompare(b.name));
-  localStorage.setItem('selected', JSON.stringify(forStorage));
-  setSelectedCount(all.length);
-  if (el.hasAttribute('selected')) {
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', el.dataset.url]);
-  } else {
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Remove from file', el.dataset.url]);
-  }
-}
-
-/**
- * tag file with date and origin
- * 
- * @function
- * 
- * @returns {String}
- */
-function stamp() {
-  const now = new Date();
-  const formattedDate = now.toISOString().split('T')[0];
-  return `# created by ${window.location.origin} [${formattedDate}]\n`;
-}
-
-/**
  * generates a text file download from selected items
  * 
  * @function
@@ -286,378 +81,6 @@ async function dlTxt() {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(link.href);
-}
-
-/**
- * creates a button element for context menu
- * 
- * @param {Object} buttonData - Object containing button details.
- * @param {Object} buttonData.icon - Object containing SVG attributes.
- * @param {String} buttonData.icon.viewbox - The viewBox attribute for the SVG element.
- * @param {String} buttonData.icon.d - The path data for the SVG path element.
- * @param {String} buttonData.text - The text for menu button.
- * @param {String} buttonData.title = the "title" for the button
- * @param {Function} buttonData.func - The function to be called on button click.
- * 
- * @returns {HTMLElement}
- */
-function contextMenuItem({icon, text, title, func}) {
-  const txt = document.createElement('span');
-  txt.textContent = text;
-  const li = document.createElement('li');
-  li.title = title;
-  li.append(svgIcon(icon), txt);
-  li.addEventListener('click', _ => func());
-  return li;
-}
-
-/**
- * sets absolute placement properties of context menu
- * 
- * @param {HTMLElement} menu 
- * @param {Number} X 
- * @param {Number} Y 
- * @param {Number} popupHeight 
- */
-function placeMenu(menu, X, Y, popupHeight) {
-  const wHeight = window.innerHeight / 2;
-  const wWidth = window.innerWidth / 2;
-  
-  if (Y > wHeight) {
-    menu.style.top = `${Y - popupHeight}px`;
-  } else {
-    menu.style.top = `${Y}px`;
-  }
-  if (X > wWidth) {
-    menu.style.left = `${X - 250}px`;
-  } else {
-    menu.style.left = `${X + 10}px`;
-  }
-}
-
-/**
- * add event listeners to dismiss popup element
- * 
- * @param {HTMLElement} popup 
- * @param {HTMLElement} body 
- */
-function addPopupListeners(popup, body, backdrop) {
-  const dismiss = _ => {
-    body.removeEventListener('click', _ => dismiss());
-    body.removeEventListener('contextmenu', _ => dismiss());
-    popup.addEventListener('transitionend', _ => {
-      backdrop.remove();
-      popup.remove();
-    });
-    popup.removeAttribute('open');
-    backdrop.removeAttribute('visable');
-  };
-  popup.addEventListener('mouseleave', _ => dismiss());
-  body.addEventListener('click', _ => dismiss());
-  body.addEventListener('contextmenu', _ => dismiss());
-}
-
-/**
- * opens the stations homepage if present
- * 
- * @param {String} homepage 
- * 
- * @returns {void}
- */
-function openStationHomepage(homepage) {
-  if (homepage === 'Unknown') {
-    new Toast('No homepage header', 3);
-    return;
-  }
-  
-  try {
-    if (!(homepage.startsWith('https://') || homepage.startsWith('http://'))) {
-      homepage = 'http://' + homepage;
-    }
-    const url = new URL(homepage);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-      throw new Error('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
-    }
-    window.open(url.toString());
-  } catch(error) {
-    new Toast('Error opening homepage');
-    console.log(homepage);
-    console.error('error validating url:', error);
-  }
-}
-
-/**
- * marks a station as a duplicate in database for manual review
- * 
- * @param {String} id - the station id
- */
-async function markDuplicate(id) {
-  try {
-    const formBody = new URLSearchParams({
-      id
-    }).toString();
-    const response = await fetch('/mark-duplicate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formBody,
-    });
-    const result = await response.json();
-    new Toast(result.message, 1.5);
-  } catch (err) {
-    console.error('error reporting stream duplicate:', err);
-  }
-} 
-
-/**
- * opens a context menu at the click location
- * 
- * @param {Event} ev 
- */
-async function contextMenu(ev) {
-  if (ev.type === "contextmenu") ev.preventDefault();
-  const el = ev.target;
-  if (!el.dataset.name) return;
-  const buttonData = [
-    {
-      icon: {
-        viewbox: '0 -960 960 960',
-        d: 'M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z'
-      },
-      text: 'mark duplicate',
-      title: 'mark station duplicate',
-      func:  _ => markDuplicate(el.id)
-    }, {
-      icon: {
-        viewbox: '0 -960 960 960',
-        d: 'M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z'
-      },
-      text : 'homepage',
-      title: `navigate to ${el.dataset.homepage}`,
-      func: _ => openStationHomepage(el.dataset.homepage)
-    }
-  ];
-  const body = document.querySelector('body');
-  const buttons = buttonData.map(contextMenuItem);
-  const elementHeight = 40;
-  const popupHeight = elementHeight * buttonData.length;
-  const X = ev.pageX || ev.touches[0].pageX;
-  const Y = ev.pageY || ev.touches[0].pageY;
-  const popup = document.createElement('ul');
-  const backdrop = document.createElement('div');
-
-  backdrop.classList.add('backdrop');
-  popup.classList.add('context-menu');
-  popup.append(...buttons);
-  placeMenu(popup, X, Y, popupHeight);
-  body.append(popup, backdrop);
-  await sleep(10);
-  popup.addEventListener('transitionend', _ => addPopupListeners(popup, body, backdrop));
-  backdrop.toggleAttribute('visable');
-  popup.toggleAttribute('open');
-}
-
-/**
- * pushes an error to database
- * 
- * @async
- * @function
- * 
- * @param {String} url 
- * @param {Object} error 
- * 
- * @returns {void}
- */
-async function postStreamIssue(id, error) {
-  try {
-    const formBody = new URLSearchParams({
-      id,
-      error
-    }).toString();
-    const response = await fetch('/stream-issue', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formBody,
-    });
-    const result = await response.json();
-    console.log(result.message);
-  } catch (err) {
-    console.error('error reporting stream issue:', err);
-  }
-}
-
-/**
- * plays stream when button is clicked
- * 
- * reports any playback error to server where it is logged in the database
- * 
- * @async
- * @function
- * 
- * @param {Event} ev
- * 
- * @returns {void} 
- */
-async function playStream(ev) {
-  ev.preventDefault();
-  const el = ev.target.parentElement;
-  const url = el.dataset.url;
-  const miniPlayer = document.querySelector('.player');
-  try {
-    document.querySelector('#name').textContent = el.dataset.name;
-    document.querySelector('#bitrate').textContent = `${el.dataset.bitrate}kbps`;
-    if (!miniPlayer.hasAttribute('playing')) {
-      miniPlayer.toggleAttribute('playing');
-    }
-    player.dataset.id = el.id;
-    player.src = url;
-    player.load();
-    await player.play();
-    if (el.dataset.homepage !== 'Unknown') {
-      new Toast(`Playing ${el.dataset.name}`, 3, el.dataset.homepage, 'homepage');
-    } else {
-      new Toast(`Playing ${el.dataset.name}`, 3);
-    }
-  } catch (error) {
-    const str = `Error playing media: ${error.message}`;
-    new Toast(str, 3);
-    console.error(str);
-    postStreamIssue(el.id, error.message);
-  }
-  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Play stream', url]);
-}
-
-/**
- * creates an SVG icon 
- * 
- * @function
- * 
- * @param {Object} icon - Object containing SVG attributes.
- * @param {String} icon.viewbox - The viewBox attribute for the SVG element.
- * @param {String} icon.d - The path data for the SVG path element.
- * 
- * @returns {HTMLElement} SVG element with nested path
- */
-function svgIcon({ viewbox, d }) {
-  const path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-  path.setAttribute("d", d);
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
-  svg.setAttribute('fill', 'currentColor');
-  svg.setAttribute('viewBox', viewbox);
-  svg.append(path);
-  return svg;
-}
-
-/**
- * creates a HTML button with svg icon 
- * 
- * @function
- * 
- * @param {Object} buttonData - Object containing button details.
- * @param {Object} buttonData.icon - Object containing SVG attributes.
- * @param {String} buttonData.icon.viewbox - The viewBox attribute for the SVG element.
- * @param {String} buttonData.icon.d - The path data for the SVG path element.
- * @param {String} buttonData.cssClass - The CSS class to be added to the button.
- * @param {Function} buttonData.func - The function to be called on button click.
- * @param {String} buttonData.title - The button's title.
- * 
- * @returns {HTMLElement} button
- */
-function createSmallButton({ icon, cssClass, func, title }) {
-  const button = document.createElement('button');
-  button.title = title;
-  button.type = 'button';
-  button.classList.add('small-button', cssClass);
-  button.append(svgIcon(icon));
-  button.addEventListener('click', func);
-  return button;
-}
-
-/**
- * creates a list element for a online radio station
- * 
- * @function
- * 
- * @param {Object} station - Object containing station details.
- * @param {String} station.name - The name of the station.
- * @param {String} station.url - The URL of the station.
- * @param {String} station.bitrate - The bitrate of the station.
- * @param {String} station.genre - the stations return genre header
- * @param {String} station.icon - the station's icon
- * @param {String} station.homepage - the url to the stations homepage
- * 
- * @returns {HTMLElement} li element
- */
-function createStationElement({ id, name, url, bitrate, genre, icon, homepage }) {
-  const buttonData = [
-    {
-      icon: {
-        viewbox: '0 -960 960 960',
-        d: 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z'
-      },
-      cssClass: 'play',
-      func: playStream,
-      title: 'Play stream'
-    }, {
-      icon: {
-        viewbox: '0 0 24 24',
-        d: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'
-      },
-      cssClass: 'add',
-      func: toggleSelect,
-      title: 'Add to file'
-    }, {
-      icon: {
-        viewbox: '0 -960 960 960',
-        d: 'M200-440v-80h560v80H200Z'
-      },
-      cssClass: 'remove',
-      func: toggleSelect,
-      title: 'Remove from file'
-    }
-  ];
-
-  let isScrolling = false;
-  let pressTimer = 0;
-
-  const buttons = buttonData.map(createSmallButton);
-
-  const span = document.createElement('span');
-  span.textContent = name;
-
-  const div = document.createElement('div');
-  if (bitrate === 0) bitrate = '???';
-  div.textContent = `${bitrate}kbps`;
-  div.title = div.textContent;
-
-  const passive = { passive: true };
-  const li = document.createElement('li');
-  li.id = id;
-  li.title = `${name}: ${genre}`;
-  li.dataset.name = name;
-  li.dataset.url = url;
-  li.dataset.bitrate = bitrate;
-  li.dataset.genre = genre;
-  li.dataset.icon = icon;
-  li.dataset.homepage = homepage;
-  li.addEventListener('contextmenu', contextMenu);
-  li.addEventListener('touchstart', ev => {
-    isScrolling = false;
-    pressTimer = setTimeout(_ => {
-      if (!isScrolling) contextMenu(ev);
-    }, 500);
-  }, passive);
-  li.addEventListener('touchend', _ => {
-    clearTimeout(pressTimer);
-  }, passive);
-  li.addEventListener('touchmove', _ => {
-    isScrolling = true;
-  }, passive);
-  li.append(span, div, ...buttons);
-  return li;
 }
 
 /**
@@ -691,8 +114,9 @@ function lazyLoadOnScroll(list, container) {
     const slices = list.slice(ndx, ndx + pullNumber);
     const fragment = document.createDocumentFragment();
     slices.forEach(slice => {
+      const stationEl = createStationElement(slice, player);
       slice.name = slice.name.replace(/,/g, '');
-      fragment.append(createStationElement(slice));
+      fragment.append(stationEl);
     });
     container.append(fragment);
     ndx += pullNumber;
@@ -728,18 +152,6 @@ function lazyLoadOnScroll(list, container) {
 }
 
 /**
- * add query string based on length of input value 
- * 
- * @param {String} value
- * 
- * @returns {String}
- */
-function queryString(value) {
-  const uriEncoded = encodeURIComponent(value);
-  return (value.length === 0) ? '' : `?genres=${uriEncoded}`;
-}
-
-/**
  * lists genres currently in the genre filter datalist element
  * 
  * @returns {Array}
@@ -771,7 +183,7 @@ async function filterChanged(ev) {
     if (ev.loadLocal) {
       if (storedElements) {
         const localFragment = document.createDocumentFragment();
-        const elements = storedElements.map(createStationElement);
+        const elements = storedElements.map(element => createStationElement(element, player));
         elements.forEach(el => {
           el.toggleAttribute('selected');
           localFragment.append(el);
@@ -808,143 +220,6 @@ async function filterChanged(ev) {
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);
     console.error('Error fetching stations:', error);
     new Toast('Error fetching stations:', error);
-  }
-}
-
-/**
- * toggle play / pause states
- * 
- * @function
- * 
- * @returns {void}
- */
-function togglePlay() {
-  if (player.paused) {
-    player.play();
-  } else {
-    player.pause();
-  }
-}
-
-/**
- * audio buffering callback
- * 
- * @function
- * 
- * @param {void} _
- *  
- * @returns {void}
- */
-player.onwaiting = _ => {
-  const icon = document.querySelector('.player>.small-button>svg>path');
-  if (!icon) return;
-  icon.setAttribute('d', 'M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z');
-  icon.parentElement.classList.add('spin');
-};
-
-/**
- * audio playing callback
- * 
- * @function
- * 
- * @param {void} _
- *  
- * @returns {void}
- */
-player.onplaying = _ => {
-  const icon = document.querySelector('.player>.small-button>svg>path');
-  if (!icon) return;
-  icon.parentElement.classList.remove('spin');
-  icon.setAttribute('d', 'M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
-};
-
-/**
- * audio play back started
- * 
- * @function
- * 
- * @param {void} _
- *  
- * @returns {void}
- */
-player.onplay = _ => {
-  if (pauseTimer) {
-    clearTimeout(pauseTimer);
-    pauseTimer = 0;
-  }
-};
-
-/**
- * audio paused callback
- * 
- * @function
- * 
- * @param {void} _
- *  
- * @returns {void}
- */
-player.onpause = _ => {
-  pauseTimer = setTimeout(clearPlaying, 10000);
-  const icon = document.querySelector('.player>.small-button>svg>path');
-  if (!icon) return;
-  icon.parentElement.classList.remove('spin');
-  icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
-};
-
-/**
- * player.currentTime updated
- * 
- * @param {void} _
- * 
- * @returns {void} 
- */
-player.ontimeupdate = async _ => {
-  const selector = `li[data-url="${player.src}"]`;
-  const playing = document.querySelector(selector);
-
-  if (playing && playing.hasAttribute('playing')) return;
-  
-  const last = document.querySelector('#stations>li[playing]');
-  if (last) last.removeAttribute('playing');
-  
-  if (!playing) return;
-  
-  playing.toggleAttribute('playing');
-  document.querySelector('#name').addEventListener('click', _ => playing.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start'
-  }));
-};
-
-/**
- * clears interface of playing stream
- * 
- * @function
- * 
- * @returns {void}
- */
-function clearPlaying() {
-  document.querySelector('.player').removeAttribute('playing');
-  const all = document.querySelectorAll('#stations>li');
-  all.forEach(el => el.removeAttribute('playing'));
-}
-
-/**
- * validate srteam URL is valid url format
- * 
- * @function
- * 
- * 
- * @param {String} url
- * 
- * @returns {Boolean}
- */
-function isValidURL(url) {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
   }
 }
 
@@ -1047,23 +322,6 @@ function updateInstalled(newWorker) {
   if (newWorker.state !== 'installed') return;
   if (!navigator.serviceWorker.controller) return;
   new Toast('App updated', 15, _ => newWorker.postMessage({ action: 'skipWaiting' }), 'Press to refresh');
-}
-
-/**
- * attempts to check if volume can be changed. 
- * used to hide volume slider on mobile devices.
- * 
- * @param {HTMLElement} volumeElement
- * 
- * @returns {Boolean} 
- */
-async function canChangeVol() {
-  const initialVolume = player.volume;
-  player.volume = 0.1;
-  await sleep(100);
-  const volumeChanged = player.volume !== initialVolume;
-  player.volume = initialVolume;
-  return volumeChanged;
 }
 
 /**
@@ -1221,21 +479,6 @@ function addDialogInteractions() {
 }
 
 /**
- * player volume slider
- */
-function setupVolSlider() {
-  const slider = document.querySelector('#vol>input');
-  slider.value = Number(localStorage.getItem('volume')) || 100;
-  player.volume =  slider.value / 100;
-  let changeTimer = 0;
-  slider.addEventListener('input', _ => {
-    player.volume = slider.value / 100;
-    if (changeTimer) clearTimeout(changeTimer);
-    changeTimer = setTimeout(_ => localStorage.setItem('volume', slider.value), 1000);
-  });
-}
-
-/**
  * service worker
  */
 async function callServiceWorker() {
@@ -1256,6 +499,8 @@ window.onload = async () => {
     await callServiceWorker()
   }
 
+  player.load();
+
   addDialogInteractions();
   
   const dlButton = document.querySelector('#download');
@@ -1270,9 +515,6 @@ window.onload = async () => {
     filter.value = '';
     filterChanged({ target: filter});
   });
-  
-  document.querySelector('body').append(player);
-  document.querySelector('.player>.small-button').addEventListener('click', togglePlay);
 
   const wrapper = document.querySelector('.wrapper');
   const toTop = document.querySelector('.to-top');
@@ -1288,27 +530,6 @@ window.onload = async () => {
   const inputElement = document.querySelector('#station-url');
   inputElement.oninput = toggleButtonActivity;
 
-  if (await canChangeVol()) {
-    setupVolSlider()
-  } else {
-    const volumeElement = document.querySelector('#vol');
-    volumeElement.style.display = 'none';
-  }
-
-  window.addEventListener('offline', _ => {
-    const playerElement = document.querySelector('.player');
-    if (playerElement.hasAttribute('playing')) {
-      new Toast('Disconnected: attempting reconnect', 1.5);
-    }
-  });
-
-  window.addEventListener('online', _ => {
-    const playerElement = document.querySelector('.player');
-    if (playerElement.hasAttribute('playing')) {
-      new Toast('Reconnected: attempting to restart play', 1.5);
-      player.play();
-    }
-  });
 
   // matomo 
   const alert = document.querySelector('#alert');
@@ -1352,8 +573,11 @@ window.onload = async () => {
   });
 };
 
-
-window.onerror = (message, url, lineNumber, columnNumber, error) => {
-  reportErrorToMatomo(message, url, lineNumber, columnNumber, error);
-  return true;
+export {
+  createSmallButton
 };
+
+// window.onerror = (message, url, lineNumber, columnNumber, error) => {
+//   reportErrorToMatomo(message, url, lineNumber, columnNumber, error);
+//   return true;
+// };

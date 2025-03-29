@@ -1,5 +1,5 @@
 import { expect } from '@open-wc/testing';
-import { svgIcon } from '../js/main.js';
+import { svgIcon } from '../utils/createSVGIcon.js';
 
 /* jshint -W030 */
 describe('svgIcon', () => {
