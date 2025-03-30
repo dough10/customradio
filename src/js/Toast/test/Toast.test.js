@@ -1,20 +1,17 @@
 import { expect } from '@open-wc/testing';
 import sinon from 'sinon';
 import Toast from '../Toast.js';
-import sleep from '../../utils/sleep.js';
 import ToastCache from '../ToastCache.js';
 
 describe('Toast', () => {
   let body;
 
   beforeEach(() => {
-    // Clear the DOM before each test
     document.body.innerHTML = '';
     body = document.body;
   });
 
   afterEach(() => {
-    // Restore all Sinon stubs and spies
     sinon.restore();
     document.body.innerHTML = '';
   });
@@ -33,13 +30,10 @@ describe('Toast', () => {
     const message1 = 'First message';
     const message2 = 'Second message';
 
-    // Stub ToastCache.addToCache
     const addToCacheStub = sinon.stub(ToastCache, 'addToCache');
 
-    // Create the first toast
     new Toast(message1);
 
-    // Create the second toast while the first is still displayed
     new Toast(message2);
 
     expect(addToCacheStub).to.have.been.calledWith(
@@ -58,15 +52,31 @@ describe('Toast', () => {
 
     const windowOpenStub = sinon.stub(window, 'open');
 
-    // Create the toast
     const toast = new Toast(message, 3.5, link, linkText);
 
-    // Simulate a click event
     const clickEvent = new MouseEvent('click');
     toast.toast.querySelector('div').dispatchEvent(clickEvent);
 
-    // Assertions
     expect(windowOpenStub).to.have.been.calledWith(link, '_blank');
+
+    windowOpenStub.restore();
+  });
+
+  it('should handle an invalid link click', async () => {
+    const message = 'Test message';
+    const invalidLink = 'invalid-url';
+    const linkText = 'Click here';
+
+    const windowOpenStub = sinon.stub(window, 'open');
+    const errorStub = sinon.stub(console, 'error');
+
+    const toast = new Toast(message, 3.5, invalidLink, linkText);
+
+    const clickEvent = new MouseEvent('click');
+    toast.toast.querySelector('div').dispatchEvent(clickEvent);
+
+    expect(windowOpenStub).not.to.have.been.called;
+    // expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
 
     windowOpenStub.restore();
   });
@@ -76,14 +86,11 @@ describe('Toast', () => {
     const link = sinon.stub().returns('Function executed');
     const linkText = 'Click here';
 
-
-    // Create the toast
     const toast = new Toast(message, 3.5, link, linkText);
 
     const clickEvent = new MouseEvent('click');
     toast.toast.querySelector('div').dispatchEvent(clickEvent);
 
-    // // Assertions
     expect(link).returned('Function executed');
   });
 

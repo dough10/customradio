@@ -15,9 +15,6 @@ import ToastCache from './ToastCache.js';
  * @param {String} linkText - The text to display for the link.
  */
 export default class Toast {
-  _timer = null;
-  toast = null;
-  link = null;
   
   constructor(message, _timeout = 3.5, link, linkText) {
     if (document.querySelector('#toast')) {
@@ -49,6 +46,7 @@ export default class Toast {
     //display the toast
     sleep(25).then(() => requestAnimationFrame(() => {
       this.toast.toggleAttribute('opened');
+      console.log(`Toast displayed: ${message}`);
     }));
   }
 
@@ -119,12 +117,10 @@ export default class Toast {
    */
   _removeToast() {
     clearTimeout(this._timer);
-    this._timer = null;
     if (!this.toast) return;
     const remove = () => {
       this.toast.removeEventListener('transitionend', remove, true);
       this.toast.remove();
-      this.toast = null;
     };
     this.toast.removeEventListener('transitionend', this._transitionEnd, true);
     this.toast.removeEventListener('click', this._clicked, true);
