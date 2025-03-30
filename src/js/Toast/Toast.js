@@ -1,5 +1,5 @@
 import sleep from '../utils/sleep.js';
-import { isValidURL } from '../utils/URL.js';
+import isValidURL from '../utils/URL.js';
 import ToastCache from './ToastCache.js';
 
 /**

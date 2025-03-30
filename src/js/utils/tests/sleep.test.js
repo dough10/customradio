@@ -1,5 +1,5 @@
 import { expect } from '@open-wc/testing';
-import sleep from '../utils/sleep.js';
+import sleep from '../sleep.js';
 
 describe('sleep', () => {
   it('should resolve after the specified time', async () => {

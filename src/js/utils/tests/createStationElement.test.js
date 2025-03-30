@@ -1,5 +1,5 @@
 import { expect, fixture, html } from '@open-wc/testing';
-import { createStationElement } from '../utils/createStationElement.js';
+import { createStationElement } from '../createStationElement.js';
 
 /* jshint -W030 */
 describe('createStationElement', () => {

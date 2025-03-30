@@ -4,7 +4,7 @@
  * @param {String} url - URL string
  * @returns {Boolean} true if valid URL, false otherwise
  */
-function isValidURL(url) {
+export default function isValidURL(url) {
   try {
     new URL(url);
     return true;
@@ -12,5 +12,3 @@ function isValidURL(url) {
     return false;
   }
 }
-
-export { isValidURL };

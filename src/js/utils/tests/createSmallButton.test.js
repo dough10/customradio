@@ -1,5 +1,5 @@
 import { expect, fixture, html } from '@open-wc/testing';
-import { createSmallButton } from '../utils/createSmallButton.js';
+import { createSmallButton } from '../createSmallButton.js';
 
 /* jshint -W030 */
 describe('createSmallButton', () => {
