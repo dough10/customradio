@@ -15,7 +15,6 @@ import ToastCache from './ToastCache.js';
  * @param {String} linkText - The text to display for the link.
  */
 export default class Toast {
-  
   constructor(message, _timeout = 3.5, link, linkText) {
     if (document.querySelector('#toast')) {
       ToastCache.addToCache(message, _timeout, link, linkText, (msg, t, l, lt) => new Toast(msg, t, l, lt));
@@ -33,6 +32,8 @@ export default class Toast {
     // message container
     this.toast = this._createToast();
 
+    this.link = link;
+
     // add content
     if (link && linkText) {
       this.toast.append(this._createLink(message, link, linkText));
@@ -46,7 +47,7 @@ export default class Toast {
     //display the toast
     sleep(25).then(() => requestAnimationFrame(() => {
       this.toast.toggleAttribute('opened');
-      console.log(`Toast displayed: ${message}`);
+      // console.log(`Toast displayed: ${message}`);
     }));
   }
 
@@ -80,7 +81,10 @@ export default class Toast {
     mText.textContent = message;
 
     if (typeof link === 'string' && !isValidURL(link)) {
-      return mText;
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('toast-wrapper');
+      wrapper.append(mText);
+      return wrapper;
     }
 
     const lText = document.createElement('div');
@@ -92,8 +96,6 @@ export default class Toast {
     wrapper.setAttribute('role', 'link');
     wrapper.setAttribute('aria-label', `Link: ${linkText}`);
     wrapper.append(mText, lText);
-
-    this.link = link;
 
     return wrapper;
   }

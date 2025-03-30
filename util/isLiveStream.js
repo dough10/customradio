@@ -1,6 +1,7 @@
 const axios = require('axios');
 const pack = require('../package.json');
 
+const isValidURL = require('./isValidURL.js');
 const Logger = require('./logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
@@ -20,19 +21,6 @@ const defaultPorts = [
   ':80/',
   ':443/'
 ];
-
-
-/**
- * Validate the URL format.
- * 
- * @param {string} url - The URL to validate.
- * 
- * @returns {boolean} Returns true if the URL is valid, otherwise false.
- */
-function isValidURL(url) {
-  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
-  return urlRegex.test(url);
-}
 
 /**
  * Clean the URL by removing default ports and trailing question marks.

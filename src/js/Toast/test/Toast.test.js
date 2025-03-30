@@ -26,7 +26,7 @@ describe('Toast', () => {
     expect(body.contains(toast)).to.be.true;
   });
 
-  it('should add a toast to the cache if one is already displayed', () => {
+  it('should add a toast to the cache if a Toast is already displayed', () => {
     const message1 = 'First message';
     const message2 = 'Second message';
 
@@ -55,7 +55,7 @@ describe('Toast', () => {
     const toast = new Toast(message, 3.5, link, linkText);
 
     const clickEvent = new MouseEvent('click');
-    toast.toast.querySelector('div').dispatchEvent(clickEvent);
+    toast.toast.dispatchEvent(clickEvent);
 
     expect(windowOpenStub).to.have.been.calledWith(link, '_blank');
 
@@ -76,9 +76,69 @@ describe('Toast', () => {
     toast.toast.querySelector('div').dispatchEvent(clickEvent);
 
     expect(windowOpenStub).not.to.have.been.called;
-    // expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
+    expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
 
     windowOpenStub.restore();
+  });
+
+  it('should handle an empty string as an invalid link', async () => {
+    const message = 'Test message';
+    const invalidLink = '';
+    const linkText = 'Click here';
+
+    const windowOpenStub = sinon.stub(window, 'open');
+    const errorStub = sinon.stub(console, 'error');
+
+    const toast = new Toast(message, 3.5, invalidLink, linkText);
+
+    const clickEvent = new MouseEvent('click');
+    toast.toast.dispatchEvent(clickEvent);
+
+    expect(windowOpenStub).not.to.have.been.called;
+    expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
+
+    windowOpenStub.restore();
+    errorStub.restore();
+  });
+
+  it('should handle null as an invalid link', async () => {
+    const message = 'Test message';
+    const invalidLink = null;
+    const linkText = 'Click here';
+
+    const windowOpenStub = sinon.stub(window, 'open');
+    const errorStub = sinon.stub(console, 'error');
+
+    const toast = new Toast(message, 3.5, invalidLink, linkText);
+
+    const clickEvent = new MouseEvent('click');
+    toast.toast.dispatchEvent(clickEvent);
+
+    expect(windowOpenStub).not.to.have.been.called;
+    expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
+
+    windowOpenStub.restore();
+    errorStub.restore();
+  });
+
+  it('should handle undefined as an invalid link', async () => {
+    const message = 'Test message';
+    const invalidLink = undefined;
+    const linkText = 'Click here';
+
+    const windowOpenStub = sinon.stub(window, 'open');
+    const errorStub = sinon.stub(console, 'error');
+
+    const toast = new Toast(message, 3.5, invalidLink, linkText);
+
+    const clickEvent = new MouseEvent('click');
+    toast.toast.dispatchEvent(clickEvent);
+
+    expect(windowOpenStub).not.to.have.been.called;
+    expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
+
+    windowOpenStub.restore();
+    errorStub.restore();
   });
 
   it('should handle an link as function', async () => {
@@ -89,7 +149,7 @@ describe('Toast', () => {
     const toast = new Toast(message, 3.5, link, linkText);
 
     const clickEvent = new MouseEvent('click');
-    toast.toast.querySelector('div').dispatchEvent(clickEvent);
+    toast.toast.dispatchEvent(clickEvent);
 
     expect(link).returned('Function executed');
   });

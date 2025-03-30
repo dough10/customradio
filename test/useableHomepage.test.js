@@ -10,7 +10,7 @@
     });
     
     it('should return null for an invalid homepage', function() {
-      const homepage = 'N/A';
+      const homepage = 'Unknown';
       const result = useableHomepage(homepage);
       expect(result).to.be.null;
     });

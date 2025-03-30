@@ -1,4 +1,5 @@
 const url = require('url');
+const isValidURL = require('./isValidURL.js');
 
 /**
  * Check for IPv4 address.
@@ -19,19 +20,15 @@ function isIPv4(address) {
  * 
  * @returns {Boolean}
  */
-function isInvalidURL(URL) {
+function isNotValidURL(URL) {
   if (URL.endsWith('/')) {
     URL = URL.slice(0, -1);
   }
   const invalidURLs = [
-    'N/A',
-    'http://localhost',
-    'url',
-    '(NULL)',
-    'Unknown'
+    'http://Unknown',
+    'http://localhost'
   ];
-  const regexInvalidUrl = /^https?:\/\/(?:www\.)?$/;
-  return invalidURLs.includes(URL) || regexInvalidUrl.test(URL);
+  return invalidURLs.includes(URL) || !isValidURL(URL);
 }
 
 /**
@@ -94,9 +91,11 @@ function parseHostname(hostname) {
  * @returns {Object|null}
  */
 function urlDeconstruction(URL) {
-  if (typeof URL !== 'string' || isInvalidURL(URL)) return null;
+  if (typeof URL !== 'string') return null;
 
   URL = ensureProtocol(URL);
+
+  if (isNotValidURL(URL)) return null;
 
   try {
     const parsedUrl = url.parse(URL, true);
