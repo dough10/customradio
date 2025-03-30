@@ -35,5 +35,26 @@ describe('createSmallButton', () => {
     button.click();
     expect(clicked).to.be.true;
   });
+
+  it('button does not fire event when clicked if diabled', async () => {
+    const icon = { viewbox: '0 0 24 24', d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' };
+    const cssClass = 'test-class';
+    const title = 'Test Button';
+    const func = () => { console.log('Button clicked'); };
+
+    const button = createSmallButton({ icon, cssClass, func, title });
+    
+    // Disable the button
+    button.disabled = true;
+
+    // Check the click event listener
+    let clicked = false;
+    button.addEventListener('click', () => {
+      clicked = true;
+    });
+
+    button.click(); // Simulate a click
+    expect(clicked).to.be.false; // Should not fire the event
+  });
 });
 /* jshint +W030 */
