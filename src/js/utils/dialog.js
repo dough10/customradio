@@ -45,9 +45,11 @@ function toggleButtonActivity() {
 async function formSubmission(ev) {
   ev.preventDefault();
 
+  
   const submit = document.querySelector('#submit-stream');
   submit.setAttribute('disabled', true);
-
+  
+  const responseElement = document.querySelector('#response');
   const fData = new FormData(ev.target);
 
   try {
@@ -55,9 +57,8 @@ async function formSubmission(ev) {
       method: 'POST',
       body: fData,
     });
-
     const result = await response.json();
-    document.getElementById('response').innerText = result.message;
+    responseElement.textContent = result.message;
     new Toast(result.message);
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', document.querySelector('#station-url').value, result.message]);
     await sleep(2000);
@@ -66,7 +67,7 @@ async function formSubmission(ev) {
     document.getElementById('response').innerText = '';
   } catch (e) {
     submit.removeAttribute('disabled');
-    document.getElementById('response').innerText = 'An error occurred!';
+    responseElement.textContent = 'An error occurred!';
     console.error(`Error: ${e.message}`);
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
   }
@@ -131,20 +132,28 @@ function wobbleDialog(event) {
  * @returns {void}
  */
 async function info() {
+  const dialog = document.querySelector('#info-dialog');
   const depDiv = document.querySelector('#dependencies');
-  document.querySelector('#info-dialog').showModal();
+
+  dialog.showModal();
+
   if (depDiv.querySelectorAll('*').length > 5) return;
+
   loadingAnimation(depDiv);
+
   try {
     const response = await fetch('/info');
     const pack = await response.json();
-    document.querySelector('#info-dialog>h1').textContent = `v${pack.version}`;
+
+    dialog.querySelector('h1').textContent = `v${pack.version}`;
+
     const fragment = document.createDocumentFragment();
-    Object.entries(pack.dependencies).forEach(([key, value]) => {
+    Object.entries(pack.dependencies).map(([key, value]) => {
       const li = document.createElement('li');
       li.textContent = `${key}: ${rmArrow(value)}`;
-      fragment.appendChild(li);
-    });
+      return li;
+    }).forEach(li => fragment.appendChild(li));
+
     depDiv.append(fragment);
   } catch (error) {
     const message = `Error fetching dependencies: ${error.message}`;
@@ -176,11 +185,11 @@ export default function addDialogInteractions() {
   const addButton = document.querySelector('#add_button');
   addButton.addEventListener('click', _ => add.showModal());
 
-  // add stream dialog form submission
+  // submit button for add stream dialog form submission
   const form = document.querySelector('#add-stream');
   form.addEventListener('submit', formSubmission);
 
-  // toggle button activity on Valid URL input
+  // toggle submit button activity on Valid URL input
   const inputElement = document.querySelector('#station-url');
   inputElement.oninput = toggleButtonActivity;
 }
