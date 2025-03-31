@@ -37,7 +37,8 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 - **@babel/core**: *7.24.9*
 - **@babel/preset-env**: *7.24.8*
 - **@open-wc/testing**: *4.0.0*
-- **@web/test-runner**: *0.18.2*
+- **@web/test-runner**: *0.18.3*
+- **@web/test-runner-playwright**: *0.11.0*
 - **@webpack-cli/generators**: *3.0.7*
 - **axios-mock-adapter**: *2.0.0*
 - **babel-loader**: *9.1.3*
@@ -50,6 +51,8 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 - **jshint**: *2.13.6*
 - **mini-css-extract-plugin**: *2.9.0*
 - **mocha**: *10.7.3*
+- **mongodb**: *6.15.0*
+- **sinon**: *19.0.4*
 - **terser-webpack-plugin**: *5.3.10*
 - **version-incrementer**: *0.1.1*
 - **webpack**: *5.93.0*
