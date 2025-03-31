@@ -197,8 +197,6 @@ async function contextMenu(ev) {
   const backdrop = document.createElement('div');
 
   backdrop.classList.add('backdrop');
-  popup.classList.add('context-menu');
-  popup.setAttribute('role', 'menu');
   popup.append(...buttons);
   placeMenu(popup, X, Y, popupHeight);
   body.append(popup, backdrop);

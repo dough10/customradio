@@ -22,7 +22,6 @@ function createSmallButton({ icon, cssClass, func, title }) {
   button.classList.add('small-button', cssClass);
   button.append(svgIcon(icon));
   button.addEventListener('click', func);
-  button.setAttribute('role', 'menuitem');
   return button;
 }
 
