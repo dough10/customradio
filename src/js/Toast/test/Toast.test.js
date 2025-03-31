@@ -45,7 +45,7 @@ describe('Toast', () => {
     );
   });
 
-  it('should handle a valid link click', async () => {
+  it('should handle a valid link click by dismiaaing toast and opening link', async () => {
     const message = 'Test message';
     const link = 'https://example.com';
     const linkText = 'Click here';
@@ -59,10 +59,16 @@ describe('Toast', () => {
 
     expect(windowOpenStub).to.have.been.calledWith(link, '_blank');
 
+    const transitionEndEvent = new Event('transitionend');
+    toast.toast.dispatchEvent(transitionEndEvent);
+
+    const toastEl = document.querySelector('#toast');
+    expect(toastEl).to.not.exist;
+
     windowOpenStub.restore();
   });
 
-  it('should handle an invalid link click', async () => {
+  it('should handle an invalid link click by dismissing toast', async () => {
     const message = 'Test message';
     const invalidLink = 'invalid-url';
     const linkText = 'Click here';
@@ -73,15 +79,22 @@ describe('Toast', () => {
     const toast = new Toast(message, 3.5, invalidLink, linkText);
 
     const clickEvent = new MouseEvent('click');
-    toast.toast.querySelector('div').dispatchEvent(clickEvent);
+    toast.toast.dispatchEvent(clickEvent);
 
     expect(windowOpenStub).not.to.have.been.called;
     expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
 
+    const transitionEndEvent = new Event('transitionend');
+    toast.toast.dispatchEvent(transitionEndEvent);
+
+    const toastEl = document.querySelector('#toast');
+    expect(toastEl).to.not.exist;
+
     windowOpenStub.restore();
+    errorStub.restore();
   });
 
-  it('should handle an empty string as an invalid link', async () => {
+  it('should handle an empty string as an invalid link by dismissing toast', async () => {
     const message = 'Test message';
     const invalidLink = '';
     const linkText = 'Click here';
@@ -95,13 +108,19 @@ describe('Toast', () => {
     toast.toast.dispatchEvent(clickEvent);
 
     expect(windowOpenStub).not.to.have.been.called;
-    expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
+    expect(errorStub).not.to.have.been.called;
+
+    const transitionEndEvent = new Event('transitionend');
+    toast.toast.dispatchEvent(transitionEndEvent);
+
+    const toastEl = document.querySelector('#toast');
+    expect(toastEl).to.not.exist;
 
     windowOpenStub.restore();
     errorStub.restore();
   });
 
-  it('should handle null as an invalid link', async () => {
+  it('should handle null as a link by dismissing toast', async () => {
     const message = 'Test message';
     const invalidLink = null;
     const linkText = 'Click here';
@@ -115,13 +134,19 @@ describe('Toast', () => {
     toast.toast.dispatchEvent(clickEvent);
 
     expect(windowOpenStub).not.to.have.been.called;
-    expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
+    expect(errorStub).not.to.have.been.called;
+
+    const transitionEndEvent = new Event('transitionend');
+    toast.toast.dispatchEvent(transitionEndEvent);
+
+    const toastEl = document.querySelector('#toast');
+    expect(toastEl).to.not.exist;
 
     windowOpenStub.restore();
     errorStub.restore();
   });
 
-  it('should handle undefined as an invalid link', async () => {
+  it('should handle undefined as a invalid link and dismiss toast', async () => {
     const message = 'Test message';
     const invalidLink = undefined;
     const linkText = 'Click here';
@@ -135,7 +160,13 @@ describe('Toast', () => {
     toast.toast.dispatchEvent(clickEvent);
 
     expect(windowOpenStub).not.to.have.been.called;
-    expect(errorStub).to.have.been.calledWith(`Invalid "link" parameter in Toast. Message: "${message}", Link: "${invalidLink}", Type: ${typeof invalidLink}`);
+    expect(errorStub).not.to.have.been.called;
+
+    const transitionEndEvent = new Event('transitionend');
+    toast.toast.dispatchEvent(transitionEndEvent);
+
+    const toastEl = document.querySelector('#toast');
+    expect(toastEl).to.not.exist;
 
     windowOpenStub.restore();
     errorStub.restore();
@@ -152,6 +183,13 @@ describe('Toast', () => {
     toast.toast.dispatchEvent(clickEvent);
 
     expect(link).returned('Function executed');
+
+    const transitionEndEvent = new Event('transitionend');
+    toast.toast.dispatchEvent(transitionEndEvent);
+
+    const toastEl = document.querySelector('#toast');
+    expect(toastEl).to.not.exist;
+
   });
 
   it('should clean up event listeners when the toast is removed', () => {
