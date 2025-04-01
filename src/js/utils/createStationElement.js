@@ -244,26 +244,27 @@ function toggleSelect(ev) {
  */
 async function playStream(ev, player) {
   ev.preventDefault();
+
   const el = ev.target.parentElement;
+  const id = el.id; 
   const url = el.dataset.url;
-  const miniPlayer = document.querySelector('.player');
+  const name = el.dataset.name;
+  const bitrate = Number(el.dataset.bitrate);
+  const homepage = el.dataset.homepage;
+  const stream = { id, url, name, bitrate };
+
   try {
-    document.querySelector('#name').textContent = el.dataset.name;
-    document.querySelector('#bitrate').textContent = `${el.dataset.bitrate}kbps`;
-    if (!miniPlayer.hasAttribute('playing')) {
-      miniPlayer.toggleAttribute('playing');
-    }
-    player.playStream({ id: el.id, url });
-    if (el.dataset.homepage !== 'Unknown') {
-      new Toast(`Playing ${el.dataset.name}`, 3, el.dataset.homepage, 'homepage');
+    player.playStream(stream);
+    if (homepage === 'Unknown') {
+      new Toast(`Playing ${name}`, 3);
     } else {
-      new Toast(`Playing ${el.dataset.name}`, 3);
+      new Toast(`Playing ${name}`, 3, homepage, 'homepage');
     }
   } catch (error) {
     const str = `Error playing media: ${error.message}`;
     new Toast(str, 3);
     console.error(str);
-    postStreamIssue(el.id, error.message);
+    postStreamIssue(id, error.message);
   }
   if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Play stream', url]);
 }

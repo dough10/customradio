@@ -165,10 +165,19 @@ export default class AudioPlayer {
    * @param {Object} station
    * @param {String} station.id - The id of the station. 
    * @param {String} station.url - The url of the station.
+   * @param {String} station.name - staion's name
+   * @param {Number} station.bitrate - streams bitrate
    * 
    * @returns {void} 
    */
-  playStream({id, url}) {
+  playStream({id, url, name, bitrate}) {
+    const miniPlayer = document.querySelector('.player');
+    document.querySelector('#name').textContent = name;
+    document.querySelector('#bitrate').textContent = `${bitrate}kbps`;
+    if (!miniPlayer.hasAttribute('playing')) {
+      miniPlayer.toggleAttribute('playing');
+    }
+
     this.player.dataset.id = id;
     this.player.src = url;
     this.player.load();
