@@ -11,17 +11,12 @@ describe('createStationElement', () => {
       <div id="count"></div>
       <button id="download" disabled></button>
       <div class="player">
-        <span id="name">station name</span>
-        <label id="vol">
-          <span>Volume</span>
-          <input type="range" min="0" max="100" aria-label="Volume control" role="slider">
-        </label>
+        <span id="name">
+          station name
+        </span>
         <span id="bitrate">
           0kbps
         </span>
-        <div class="small-button player-big">
-          <svg viewBox="0 -960 960 960" id="play-button"><path fill="currentColor" d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z"></path></svg>
-        </div>
       </div>
     `;
   });
