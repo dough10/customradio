@@ -2,6 +2,7 @@ import Toast from '../Toast/Toast.js'
 import { svgIcon } from './createSVGIcon.js';
 import { createSmallButton } from './createSmallButton.js';
 import sleep from './sleep.js';
+import setSelectedCount from './setSelectedCount.js';
 
 const ELEMENT_HEIGHT = 40;
 const LONG_PRESS_DURATION = 500;
@@ -197,6 +198,7 @@ async function contextMenu(ev) {
   const backdrop = document.createElement('div');
 
   backdrop.classList.add('backdrop');
+  popup.classList.add('context-menu');
   popup.append(...buttons);
   placeMenu(popup, X, Y, popupHeight);
   body.append(popup, backdrop);
@@ -236,6 +238,7 @@ function toggleSelect(ev) {
  * @function
  * 
  * @param {Event} ev
+ * @param {Object} player - The audio player instance to control playback.
  * 
  * @returns {void} 
  */
@@ -271,12 +274,14 @@ async function playStream(ev, player) {
  * @function
  * 
  * @param {Object} station - Object containing station details.
+ * @param {String} station.id - The unique identifier for the station.
  * @param {String} station.name - The name of the station.
  * @param {String} station.url - The URL of the station.
  * @param {String} station.bitrate - The bitrate of the station.
  * @param {String} station.genre - the stations return genre header
  * @param {String} station.icon - the station's icon
  * @param {String} station.homepage - the url to the stations homepage
+ * @param {Object} player - The audio player instance to control playback.
  * 
  * @returns {HTMLElement} li element
  */
@@ -332,19 +337,24 @@ function createStationElement({ id, name, url, bitrate, genre, icon, homepage },
   li.dataset.genre = genre;
   li.dataset.icon = icon;
   li.dataset.homepage = homepage;
+
   li.addEventListener('contextmenu', contextMenu);
+
   li.addEventListener('touchstart', ev => {
     isScrolling = false;
     pressTimer = setTimeout(_ => {
       if (!isScrolling) contextMenu(ev);
     }, LONG_PRESS_DURATION);
   }, passive);
+
   li.addEventListener('touchend', _ => {
     clearTimeout(pressTimer);
   }, passive);
+
   li.addEventListener('touchmove', _ => {
     isScrolling = true;
   }, passive);
+
   li.append(span, div, ...buttons);
   return li;
 }

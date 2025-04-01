@@ -1,4 +1,4 @@
-import { expect, fixture, html } from '@open-wc/testing';
+import { expect } from '@open-wc/testing';
 import { createSmallButton } from '../createSmallButton.js';
 
 /* jshint -W030 */
@@ -44,17 +44,15 @@ describe('createSmallButton', () => {
 
     const button = createSmallButton({ icon, cssClass, func, title });
     
-    // Disable the button
-    button.disabled = true;
+    button.toggleAttribute('disabled');
 
-    // Check the click event listener
     let clicked = false;
     button.addEventListener('click', () => {
       clicked = true;
     });
 
-    button.click(); // Simulate a click
-    expect(clicked).to.be.false; // Should not fire the event
+    button.click();
+    expect(clicked).to.be.false;
   });
 });
 /* jshint +W030 */
