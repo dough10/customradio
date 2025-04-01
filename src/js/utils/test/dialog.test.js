@@ -122,22 +122,21 @@ describe('addDialogInteractions', () => {
     fetchStub.restore();
   });
 
-  // it('should handle form submission errors and display an error message', async () => {
-  //   const fetchStub = sinon.stub(window, 'fetch').rejects(new Error('Network error'));
-  //   const toastStub = sinon.stub(Toast.prototype, 'constructor');
+  it('should handle form submission errors and display an error message', async () => {
+    const fetchStub = sinon.stub(window, 'fetch').rejects(new Error('Network error'));
 
-  //   inputElement.value = 'https://example.com';
-  //   submitButton.removeAttribute('disabled');
+    inputElement.value = 'https://example.com';
+    inputElement.dispatchEvent(new Event('input'));
 
-  //   const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-  //   form.dispatchEvent(submitEvent);
+    expect(submitButton.hasAttribute('disabled')).to.be.false;
+    
+    submitButton.click();
 
-  //   await Promise.resolve(); // Wait for the async error handling
+    await new Promise(resolve => setTimeout(resolve, 0));
 
-  //   expect(fetchStub).to.have.been.calledOnceWith('/add');
-  //   expect(toastStub).to.have.been.calledWith('An error occurred!');
-  //   expect(submitButton.hasAttribute('disabled')).to.be.false;
+    expect(fetchStub).to.have.been.calledOnceWith('/add');
+    expect(addDialog.querySelector('#response').textContent).to.equal('An error occurred!');
 
-  //   fetchStub.restore();
-  // });
+    fetchStub.restore();
+  });
 });
