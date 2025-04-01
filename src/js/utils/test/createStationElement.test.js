@@ -148,8 +148,6 @@ describe('createStationElement', () => {
     menuItems[1].click();
     expect(windowOpenStub.calledOnce, 'should call window.open once').to.be.true;
     expect(windowOpenStub.calledWith(homepage), 'should open the correct homepage').to.be.true;
-    
-    // console.log(document.body.innerHTML);
 
     fetchStub.restore();
     windowOpenStub.restore();
