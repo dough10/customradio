@@ -5,12 +5,10 @@ describe('stamp function', () => {
   let OriginalDate;
 
   before(() => {
-    // Save the original Date object
     OriginalDate = Date;
   });
 
   beforeEach(() => {
-    // Stub the Date object to return a fixed date
     const fixedDate = new Date('2024-08-01T00:00:00Z');
     globalThis.Date = class extends OriginalDate {
       constructor() {
@@ -20,7 +18,6 @@ describe('stamp function', () => {
   });
 
   afterEach(() => {
-    // Restore the original Date object
     globalThis.Date = OriginalDate;
   });
 
@@ -28,7 +25,6 @@ describe('stamp function', () => {
     const formattedDate = new Date().toISOString().split('T')[0];
     const expectedOutput = `# created by http://localhost:8000 [${formattedDate}]\n`;
 
-    // Call the function and check the result
     const result = stamp();
     expect(result).to.equal(expectedOutput);
   });
