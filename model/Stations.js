@@ -337,32 +337,31 @@ class Stations {
     }));
   }
 
+  _getCount(condition) {
+    const typesPlaceholder = mapPlaceholders(usedTypes);
+    return new Promise((resolve, reject) => {
+      this.db.get(`SELECT COUNT(*) AS count 
+        FROM stations 
+        WHERE ${condition} AND content_type IN (${typesPlaceholder})`, 
+        usedTypes, (err, row) => {
+        if (err) {
+          reject(new Error(`Failed counting stations: ${err.message}`));
+        } else {
+          resolve(row.count);
+        }
+      });
+    });
+  }
+
   /**
    * Gets the number of online and total stations.
    * 
    * @returns {Promise<{online: number, total: number}>}
    */
   async dbStats() {
-    try {
-      const typesPlaceholder = mapPlaceholders(usedTypes);
-      
-      const getCount = (condition) => {
-        return new Promise((resolve, reject) => {
-          this.db.get(`SELECT COUNT(*) AS count 
-            FROM stations 
-            WHERE ${condition} AND content_type IN (${typesPlaceholder})`, 
-            usedTypes, (err, row) => {
-            if (err) {
-              reject(new Error(`Failed counting stations: ${err.message}`));
-            } else {
-              resolve(row.count);
-            }
-          });
-        });
-      };
-  
-      const online = await this._ensureInitialized(() => getCount('online = 1'));
-      const total = await this._ensureInitialized(() => getCount('1'));
+    try {  
+      const online = await this._ensureInitialized(() => this._getCount('online = 1'));
+      const total = await this._ensureInitialized(() => this._getCount('1'));
   
       return { online, total };
   
