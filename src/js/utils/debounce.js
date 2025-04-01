@@ -1,5 +1,5 @@
 /**
- * keep function from running too often
+ * ensure that a function is only called once
  * 
  * @param {Function} func 
  * @param {Number} delay 
