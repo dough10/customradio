@@ -47,7 +47,7 @@ export default class Toast {
     //display the toast
     sleep(25).then(() => requestAnimationFrame(() => {
       this.toast.toggleAttribute('opened');
-      // console.log(`Toast displayed: ${message}`);
+      console.log(message);
     }));
   }
 
