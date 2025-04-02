@@ -61,6 +61,28 @@ describe('createStationElement', () => {
     expect(div.textContent, 'bitrate container has correct bitrate').to.equal(`${bitrate}kbps`);
     expect(div.title, 'bitrate container title attribute was set').to.equal(`${bitrate}kbps`);
   });
+  
+  it('should use ??? if bitrate = Number 0', () => {
+    const bitrate0Station = {
+      name, url, bitrate: 0, id, genre, icon, homepage
+    };
+    li = createStationElement(bitrate0Station, player);
+    const div = li.querySelector('div');
+    expect(div, 'bitrate container was created').to.exist;
+    expect(div.textContent, 'bitrate container has correct bitrate').to.equal(`???kbps`);
+    expect(div.title, 'bitrate container title attribute was set').to.equal(`???kbps`);
+  });
+
+  it('should use ??? if bitrate = String "0"', () => {
+    const bitrate0Station = {
+      name, url, bitrate: '0', id, genre, icon, homepage
+    };
+    li = createStationElement(bitrate0Station, player);
+    const div = li.querySelector('div');
+    expect(div, 'bitrate container was created').to.exist;
+    expect(div.textContent, 'bitrate container has correct bitrate').to.equal(`???kbps`);
+    expect(div.title, 'bitrate container title attribute was set').to.equal(`???kbps`);
+  });
 
   it('adds correct event listeners to the li element', () => {
     const expectedEvents = ['contextmenu', 'touchstart', 'touchend', 'touchmove'];

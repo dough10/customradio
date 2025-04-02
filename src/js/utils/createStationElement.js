@@ -219,7 +219,7 @@ function toggleSelect(ev) {
   const el = ev.target.parentElement;
   el.toggleAttribute('selected');
   const all = Array.from(el.parentNode.querySelectorAll('li[selected]'));
-  const forStorage = all.map(el => el.dataset).sort((a, b) => a.name.localeCompare(b.name));
+  const forStorage = all.map(el => {return {id: el.id, ...el.dataset}}).sort((a, b) => a.name.localeCompare(b.name));
   localStorage.setItem('selected', JSON.stringify(forStorage));
   setSelectedCount(all.length);
   if (el.hasAttribute('selected')) {
@@ -314,6 +314,8 @@ function createStationElement({ id, name, url, bitrate, genre, icon, homepage },
       title: 'Remove from file'
     }
   ];
+
+  if (typeof bitrate !== 'number') bitrate = Number(bitrate);
 
   let isScrolling = false;
   let pressTimer = 0;
