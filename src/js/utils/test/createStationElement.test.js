@@ -37,7 +37,6 @@ describe('createStationElement', () => {
   });
 
   it('creates an li element with the correct attributes', () => {
-    expect(li.tagName, 'has correct tag name').to.equal('LI');
     expect(li instanceof HTMLLIElement, 'li is an instance of HTMLLIElement').to.be.true;
     expect(li.id, 'has id').to.equal(id);
     expect(li.dataset, 'li has dataset').to.exist;
@@ -74,26 +73,36 @@ describe('createStationElement', () => {
   });
 
   it('creates buttons with correct attributes and functionality', () => {
+    const countEl = document.querySelector('#count');
+    const downloadButton = document.querySelector('#download');
     const buttons = li.querySelectorAll('button');
+
     expect(buttons.length, 'has correct number of buttons').to.equal(3);
 
-    const buttonTitles = ['Play stream', 'Add to file', 'Remove from file'];
     buttons.forEach((button, index) => {
-      expect(button.title).to.equal(buttonTitles[index]);
       expect(button.classList.contains('small-button')).to.be.true;
-
+      
       const clickSpy = Sinon.spy(button, 'click');
       button.click();
       expect(clickSpy.calledOnce, `button ${index + 1} should respond to click`).to.be.true;
+      switch (index) {
+        case 0: 
+          expect(button.title).to.equal('Play stream');
+          expect(player.playStream.calledWith({ id, url, name, bitrate }), 'should call playStream with correct parameters').to.be.true;
+          break;
+        case 1:
+          expect(button.title).to.equal('Add to file');
+          expect(countEl.textContent).to.equal('1 station selected');
+          expect(downloadButton.hasAttribute('disabled'), 'should enabled download button').to.be.false;
+          break;
+        case 2:
+          expect(button.title).to.equal('Remove from file');
+          expect(countEl.textContent).to.equal('0 stations selected');
+          expect(downloadButton.hasAttribute('disabled'), 'should disabled download button').to.be.true;
+          break;
+      }
       clickSpy.restore();
     });
-
-    expect(player.playStream.calledWith({
-      id,
-      url,
-      name,
-      bitrate
-    }), 'should call playStream with correct parameters').to.be.true;
   });
 
   it('handles contextmenu event and creates context menu', () => {
