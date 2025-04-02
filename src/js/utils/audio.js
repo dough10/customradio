@@ -171,9 +171,9 @@ export default class AudioPlayer {
    * @returns {void} 
    */
   playStream({id, url, name, bitrate}) {
-    const miniPlayer = document.querySelector('.player');
     document.querySelector('#name').textContent = name;
     document.querySelector('#bitrate').textContent = `${bitrate}kbps`;
+    const miniPlayer = document.querySelector('.player');
     if (!miniPlayer.hasAttribute('playing')) {
       miniPlayer.toggleAttribute('playing');
     }
