@@ -324,8 +324,7 @@ function createStationElement({ id, name, url, bitrate, genre, icon, homepage },
   span.textContent = name;
 
   const div = document.createElement('div');
-  if (bitrate === 0) bitrate = '???';
-  div.textContent = `${bitrate}kbps`;
+  div.textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
   div.title = div.textContent;
 
   const passive = { passive: true };
