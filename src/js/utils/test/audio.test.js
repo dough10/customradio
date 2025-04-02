@@ -42,8 +42,10 @@ describe('AudioPlayer', () => {
     Sinon.restore();
   });
 
-  it('should toggle play/pause state', () => {
-    // Stub the play and pause methods
+  it('should toggle play/pause state', async () => {
+    const icon = document.querySelector('.player>.small-button>svg>path');
+
+
     const playStub = Sinon.stub(audioPlayer.player, 'play').callsFake(() => {
       Object.defineProperty(audioPlayer.player, 'paused', { value: false, configurable: true });
     });
@@ -51,13 +53,11 @@ describe('AudioPlayer', () => {
       Object.defineProperty(audioPlayer.player, 'paused', { value: true, configurable: true });
     });
   
-    // Simulate play
     Object.defineProperty(audioPlayer.player, 'paused', { value: true, configurable: true });
     audioPlayer._togglePlay();
     expect(playStub.calledOnce).to.be.true;
     expect(audioPlayer.player.paused).to.be.false;
-  
-    // Simulate pause
+    
     Object.defineProperty(audioPlayer.player, 'paused', { value: false, configurable: true });
     audioPlayer._togglePlay();
     expect(pauseStub.calledOnce).to.be.true;
@@ -75,7 +75,6 @@ describe('AudioPlayer', () => {
   });
 
   it('should handle online state and restart playback', () => {
-    const toastStub = Sinon.stub(Toast.prototype, 'constructor');
     const playStub = Sinon.stub(audioPlayer.player, 'play');
     playerElement.setAttribute('playing', '');
 
@@ -93,6 +92,19 @@ describe('AudioPlayer', () => {
     expect(setTimeoutStub.calledOnce).to.be.true;
     expect(clearPlayingStub.calledOnce).to.be.true;
   });
+  
+  it('should play a stream and update the player state', () => {
+    const playStub = Sinon.stub(audioPlayer.player, 'play');
+    const station = { id: 'station1', url: 'http://example.com/stream1', name: 'Test Station', bitrate: 128 };
+    
+    audioPlayer.playStream(station);
+    
+    expect(audioPlayer.player.dataset.id).to.equal('station1');
+    expect(audioPlayer.player.src).to.equal('http://example.com/stream1');
+    expect(document.querySelector('#name').textContent).to.equal('Test Station');
+    expect(document.querySelector('#bitrate').textContent).to.equal('128kbps');
+    expect(playStub.calledOnce).to.be.true;
+  });
 
   it('should update the playing state on time update', () => {
     const currentPlayingElement = document.querySelector('li[data-url="http://example.com/stream1"]');
@@ -103,20 +115,7 @@ describe('AudioPlayer', () => {
     expect(currentPlayingElement.hasAttribute('playing')).to.be.true;
   });
 
-  it('should play a stream and update the player state', () => {
-    const playStub = Sinon.stub(audioPlayer.player, 'play');
-    const station = { id: 'station1', url: 'http://example.com/stream1', name: 'Test Station', bitrate: 128 };
-
-    audioPlayer.playStream(station);
-
-    expect(audioPlayer.player.dataset.id).to.equal('station1');
-    expect(audioPlayer.player.src).to.equal('http://example.com/stream1');
-    expect(document.querySelector('#name').textContent).to.equal('Test Station');
-    expect(document.querySelector('#bitrate').textContent).to.equal('128kbps');
-    expect(playStub.calledOnce).to.be.true;
-  });
-
-  it('should handle buffering state', () => {
+  it('should handle a buffering state', () => {
     const icon = document.querySelector('.player>.small-button>svg>path');
 
     audioPlayer._onwaiting();
@@ -125,12 +124,21 @@ describe('AudioPlayer', () => {
     expect(icon.parentElement.classList.contains('spin')).to.be.true;
   });
 
-  it('should handle playing state', () => {
+  it('should handle a playing state', () => {
     const icon = document.querySelector('.player>.small-button>svg>path');
 
     audioPlayer._onplaying();
 
     expect(icon.getAttribute('d')).to.equal('M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
+    expect(icon.parentElement.classList.contains('spin')).to.be.false;
+  });
+
+  it('should handle a plause state', () => {
+    const icon = document.querySelector('.player>.small-button>svg>path');
+
+    audioPlayer._onpause();
+
+    expect(icon.getAttribute('d')).to.equal('M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
     expect(icon.parentElement.classList.contains('spin')).to.be.false;
   });
 });
