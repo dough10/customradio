@@ -1,5 +1,5 @@
 import { expect } from '@open-wc/testing';
-import { stamp } from '../timestamp.js';
+import stamp from '../timestamp.js';
 
 describe('stamp function', () => {
   let OriginalDate;
