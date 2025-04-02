@@ -1,45 +1,15 @@
 import Toast from './Toast/Toast.js';
 import sleep from './utils/sleep.js';
-import { stamp } from './utils/timestamp.js';
 import { queryString } from './utils/queryString.js';
 import { createStationElement } from './utils/createStationElement.js';
 import AudioPlayer from './utils/audio.js'; 
 import loadingAnimation from './utils/5dots.js';
 import addDialogInteractions from './utils/dialog.js';
 import setSelectedCount from './utils/setSelectedCount.js';
+import serviceworkerLoader from './utils/serviceworkerload.js';
+import downloadTextfile from './utils/downloadTextfile.js';
 
 const player = new AudioPlayer();
-
-/**
- * generates a text file download from selected items
- * 
- * @function
- * 
- * @returns {void}
- */
-async function dlTxt() {
-  const container = document.querySelector('#stations');
-  const elements = Array.from(container.querySelectorAll('li[selected]'));
-  const str = elements.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name))
-    .map(el => `${el.dataset.name}, ${el.dataset.url}`).join('\n');
-
-  const blob = new Blob([`${stamp()}\n${str}`], {
-    type: 'text/plain'
-  });
-
-  const filename = 'radio.txt';
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-
-  document.body.append(link);
-
-  if (typeof _paq !== 'undefined') _paq.push(['trackLink', 'download', link.href]);
-
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(link.href);
-}
 
 /**
  * calculate how many station elements can fit in the current browser window height
@@ -202,42 +172,6 @@ function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
 }
 
 /**
- * An update was installed for the active service worker
- * 
- * @param {Object} newWorker 
- * 
- * @returns {void}
- */
-function updateInstalled(newWorker) {
-  if (newWorker.state !== 'installed') return;
-  if (!navigator.serviceWorker.controller) return;
-  new Toast('App updated', 15, _ => newWorker.postMessage({ action: 'skipWaiting' }), 'Press to refresh');
-}
-
-/**
- * An update was found to the service worker cache
- * 
- * @param {Object} worker
- */
-function updateFound(worker) {
-  const newWorker = worker.installing;
-  newWorker.onstatechange = _ => updateInstalled(newWorker);
-}
-
-/**
- * service worker controller changed
- * 
- * @returns {void}
- */
-let refreshing = false;
-function controllerChange() {
-  if (refreshing) return;
-  refreshing = true;
-  console.log('Controller has changed, reloading the page...');
-  window.location.reload(true);
-}
-
-/**
  * creates a datalist element
  * 
  * @param {String} str 
@@ -264,32 +198,17 @@ async function loadGenres() {
 }
 
 /**
- * service worker
- */
-async function callServiceWorker() {
-  try {
-    navigator.serviceWorker.addEventListener('controllerchange', controllerChange);
-    const worker = await navigator.serviceWorker.register('/worker.js', { scope: '/' });
-    worker.onupdatefound = () => updateFound(worker);
-  } catch (error) {
-    console.log('ServiceWorker registration failed: ', error);
-  }
-}
-
-/**
  * window loaded
  */
 window.onload = async () => {
-  if ('serviceWorker' in navigator) {
-    await callServiceWorker()
-  }
+  await serviceworkerLoader();
 
   player.load();
 
   addDialogInteractions();
   
   const dlButton = document.querySelector('#download');
-  dlButton.addEventListener('click', dlTxt);
+  dlButton.addEventListener('click', downloadTextfile);
   
   const filter = document.querySelector('#filter');
   filter.addEventListener('change', filterChanged);
