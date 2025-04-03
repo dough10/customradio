@@ -3,81 +3,14 @@ import sleep from './utils/sleep.js';
 import { queryString } from './utils/queryString.js';
 import { createStationElement } from './utils/createStationElement.js';
 import AudioPlayer from './utils/audio.js'; 
-import loadingAnimation from './utils/5dots.js';
+import insertLoadingAnimation from './utils/5dots.js';
 import addDialogInteractions from './utils/dialog.js';
 import setSelectedCount from './utils/setSelectedCount.js';
 import serviceworkerLoader from './utils/serviceworkerload.js';
 import downloadTextfile from './utils/downloadTextfile.js';
+import LazyLoader from './utils/LazyLoader.js';
 
 const player = new AudioPlayer();
-
-/**
- * calculate how many station elements can fit in the current browser window height
- * 
- * @returns {Number} number of elements that will fit in browser window height
- */
-function getPullCount() {
-  return Math.round(window.innerHeight / 58);
-}
-
-/**
- * load more stations to the UI when user scrolls to end of loaded content
- * 
- * @function
- * 
- * @param {Array} list 
- * @param {HTMLElement} container
- * 
- * @returns {void} 
- */
-function lazyLoadOnScroll(list, container) {
-  let ndx = 0;
-  let pullNumber = getPullCount();
-  let loading = false;
-  let lastTop = 0;
-
-  function load() {
-    if (loading || ndx >= list.length) return;
-    loading = true;
-    const slices = list.slice(ndx, ndx + pullNumber);
-    const fragment = document.createDocumentFragment();
-    slices.forEach(slice => {
-      const stationEl = createStationElement(slice, player);
-      slice.name = slice.name.replace(/,/g, '');
-      fragment.append(stationEl);
-    });
-    container.append(fragment);
-    ndx += pullNumber;
-    loading = false;
-  }
-
-  window.addEventListener('resize', _ => {
-    const adjusted = getPullCount();
-    if (adjusted > pullNumber) {
-      pullNumber = adjusted;
-      load();
-    }
-  });
-
-  const parent = container.parentElement;
-  const toTop = document.querySelector('.to-top');
-
-  parent.onscroll = _ => {
-    if (parent.scrollTop < lastTop) {
-      toTop.classList.add('hidden');
-    } else if (parent.scrollTop > 0) {
-      toTop.classList.remove('hidden');
-    } else {
-      toTop.classList.add('hidden');
-    }
-    lastTop = parent.scrollTop;
-    if (parent.scrollTop / (parent.scrollHeight - parent.clientHeight) >= 0.8) {
-      load();
-    }
-  };
-
-  load();
-}
 
 /**
  * lists genres currently in the genre filter datalist element
@@ -88,6 +21,24 @@ function currentGenres() {
   const parent = document.querySelector('#genres');
   const options = Array.from(parent.querySelectorAll('option'));
   return options.map(element => element.value);
+}
+
+/**
+ * populates a container with "selected" station elements
+ * also updates the "selected" count UI
+ * 
+ * @param {Array} stationList
+ * @param {HTMLElement} container 
+ */
+function populateContainerWithSelected(stationList, container) {
+  const localFragment = document.createDocumentFragment();
+  stationList.forEach(element => {
+    const stationElement = createStationElement(element, player);
+    stationElement.toggleAttribute('selected');
+    localFragment.append(stationElement);
+  });
+  setSelectedCount(stationList.length);
+  container.append(localFragment);
 }
 
 /**
@@ -105,49 +56,82 @@ async function filterChanged(ev) {
   const stationCount = document.querySelector('#station-count');
   const countParent = stationCount.parentElement;
   try {
+    // loading 
     countParent.style.display = 'none';
-    loadingAnimation(container);
+    insertLoadingAnimation(container);
+
+    // localstorage
     let storedElements = JSON.parse(localStorage.getItem('selected'));
+
+    // variable sent with a filterChange call to determine if localstorage load is needed
     if (ev.loadLocal) {
+      // push station elements from localstorage to dom
       if (storedElements) {
-        const localFragment = document.createDocumentFragment();
-        const elements = storedElements.map(element => createStationElement(element, player));
-        elements.forEach(el => {
-          el.toggleAttribute('selected');
-          localFragment.append(el);
-        });
-        setSelectedCount(elements.length);
-        container.append(localFragment);
+        populateContainerWithSelected(storedElements, container);
       }
+
+      // recently searched genres
       await loadGenres();
     }
+
+    // station list from api
     const res = await fetch(`${window.location.origin}/stations${queryString(ev.target.value)}`);
     if (res.status !== 200) {
       return;
     }
     const stations = await res.json();
+
+    // get list of selected stations from DOM
     const selectedElements = Array.from(container.querySelectorAll('li[selected]'))
       .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
-    const selectedUrls = new Set(selectedElements.map(el => el.dataset.url));
+
+    // create a list for comparison to prevent duplicate stations in DOM tree
+    const selectedUrls = new Set(selectedElements.map(el => el.dataset.url)); 
+
+    // remove stations already listed from API response data
     const list = stations.filter(station => !selectedUrls.has(station.url));
+
+    // update UI removing all previous elements and replacing with the new list of selected elements
+    // maybe really inefficent to load from localstorage and add to DOM and then immediatly replace with the same elements
+    // (this also removes the loading element)
     const fragment = document.createDocumentFragment();
     fragment.append(...selectedElements);
     container.scrollTop = 0;
     container.replaceChildren(fragment);
-    lazyLoadOnScroll(list, container);
+
+    // append additonal elements, load more when scrolled to 80% of page height
+    const toTop = document.querySelector('.to-top');
+    let lastTop = 0;
+    const toggleDisplayOnScroll = parent => {
+      if (parent.scrollTop < lastTop) {
+        toTop.classList.add('hidden');
+      } else if (parent.scrollTop > 0) {
+        toTop.classList.remove('hidden');
+      } else {
+        toTop.classList.add('hidden');
+      }
+      lastTop = parent.scrollTop;
+    };
+    new LazyLoader(list, container, player, toggleDisplayOnScroll);
+    
+    // update station count and display it
     stationCount.textContent = `${stations.length} results`;
     countParent.style.removeProperty('display');
+
+    // update recently searched genres
     if (ev.target.value.length && !currentGenres().includes(ev.target.value)) {
       await loadGenres();
     }
+
+    // analytics
     if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', ev.target.value || '']);
   } catch (error) {
     const loadingEl = document.querySelector('.loading');
     if (loadingEl) loadingEl.remove();
     countParent.style.removeProperty('display');
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);
-    console.error('Error fetching stations:', error);
-    new Toast('Error fetching stations:', error);
+    console.error('Error fetching stations:', error.message);
+    new Toast(`Error fetching stations: ${error.message}`);
   }
 }
 
@@ -208,7 +192,7 @@ window.onload = async () => {
   addDialogInteractions();
   
   const dlButton = document.querySelector('#download');
-  dlButton.addEventListener('click', downloadTextfile);
+  dlButton.addEventListener('click', _ => downloadTextfile());
   
   const filter = document.querySelector('#filter');
   filter.addEventListener('change', filterChanged);
