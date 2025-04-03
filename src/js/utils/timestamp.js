@@ -5,7 +5,7 @@
  * 
  * @returns {String}
  */
-export default function stamp() {
+export default function timestamp() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
   return `# created by ${window.location.origin} [${formattedDate}]\n`;
