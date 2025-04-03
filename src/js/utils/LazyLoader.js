@@ -1,4 +1,4 @@
-import { createStationElement } from './createStationElement.js';
+import { createStationElement as defaultStationCreator } from './createStationElement.js';
 
 /**
  * calculate how many station elements can fit in the current browser window height
@@ -18,6 +18,7 @@ function getPullCount() {
  * @param {HTMLElement} container container to append elements
  * @param {Class} player AudioPlayer.js instance
  * @param {Function} scrollFUnc scroll callback
+ * @param {Function} createStationElement mockable function for testing
  * 
  * @returns {void} 
  */
@@ -25,33 +26,43 @@ export default class LazyLoader {
   _ndx = 0;
   _pullNumber = getPullCount();
   _loading = false;
-  _lastTop = 0;
 
-  constructor(list , container, player, scrollFunc) {
+  constructor(list , container, player, scrollFunc, createStationElement = defaultStationCreator) {
     this._list = list;
     this._container = container;
     this._player = player;
-
-    // adjust pull number if screen size changes
-    window.addEventListener('resize', _ => {
-      const adjusted = getPullCount();
-      if (adjusted > pullNumber) {
-        pullNumber = adjusted;
-        this._load();
-      }
-    });
+    this._createStationElement = createStationElement;
+    this._scrollFunc = scrollFunc;
+    this._resizeHandler = this._onResize.bind(this);
+    this._scrollHandler = this._onScroll.bind(this)
 
     const parent = container.parentElement; 
-
-    parent.onscroll = _ => {
-      if (scrollFunc && typeof scrollFunc === 'function') scrollFunc(this._lastTop);
-      if (parent.scrollTop / (parent.scrollHeight - parent.clientHeight) >= 0.8) {
-        this._load();
-      }
-      this._lastTop = parent.scrollTop;
-    };
-
+    parent.addEventListener('scroll', this._scrollHandler);
+    window.addEventListener('resize', this._resizeHandler);
     this._load();
+  }
+  
+  /**
+   * user scrolled the parent container
+   */
+  _onScroll() {
+    const parent = this._container.parentElement; 
+    if (this._scrollFunc && typeof this._scrollFunc === 'function') this._scrollFunc(parent);
+    if (parent.scrollTop / (parent.scrollHeight - parent.clientHeight) >= 0.8) {
+      this._load();
+    }
+  }
+
+  /**
+   * window was resized by user
+   * will adjust the pull count based on screen size
+   */
+  _onResize() {
+    const adjusted = getPullCount();
+    if (adjusted > this._pullNumber) {
+      this._pullNumber = adjusted;
+      this._load();
+    }
   }
 
   /**
@@ -62,9 +73,15 @@ export default class LazyLoader {
   _load() {
     if (this._loading || this._ndx >= this._list.length) return;
     this._loading = true;
-    this._populateContainer(this._list.slice(this._ndx, this._ndx + this._pullNumber), this._container);
-    this._ndx += this._pullNumber;
-    this._loading = false;    
+    try{
+      const stations = this._list.slice(this._ndx, this._ndx + this._pullNumber)
+      this._populateContainer(stations, this._container);
+      this._ndx += this._pullNumber;    
+    } catch(e) {
+      console.error('Error loading items:', error);
+    } finally {
+      this._loading = false;
+    }
   }
 
   /**
@@ -76,8 +93,17 @@ export default class LazyLoader {
   _populateContainer(stationList, container) {
     const fragment = document.createDocumentFragment();
     stationList.forEach(station => {
-      fragment.append(createStationElement(station, this._player));
+      fragment.append(this._createStationElement(station, this._player));
     });
     container.append(fragment);
+  }
+
+  /**
+   * remove listeners for da memoryz
+   */
+  destroy() {
+    window.removeEventListener('resize', this._resizeHandler);
+    const parent = this._container.parentElement;
+    parent.removeEventListener('scroll', this._scrollHandler);
   }
 }
