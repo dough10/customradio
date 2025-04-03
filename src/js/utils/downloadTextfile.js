@@ -1,4 +1,4 @@
-import stamp from './timestamp.js';
+import timestamp from './timestamp.js';
 
 /**
  * Generates a text file download from selected items
@@ -7,12 +7,12 @@ import stamp from './timestamp.js';
  * @param {Function} [scopedStamp] - Optional custom stamp function for testing
  * @returns {void}
  */
-export default async function downloadTextfile(scopedStamp = stamp) {
+export default async function downloadTextfile(scopedStamp = timestamp) {
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
   const str = elements
     .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name))
-    .map((el) => `${el.dataset.name}, ${el.dataset.url}`)
+    .map((el) => `${el.dataset.name.replace(/,/g, '')}, ${el.dataset.url}`)
     .join('\n');
 
   const blob = new Blob([`${scopedStamp()}\n${str}`], {
