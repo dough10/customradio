@@ -1,5 +1,5 @@
 import { expect } from '@open-wc/testing';
-import stamp from '../timestamp.js';
+import timestamp from '../timestamp.js';
 
 describe('stamp function', () => {
   let OriginalDate;
@@ -25,7 +25,7 @@ describe('stamp function', () => {
     const formattedDate = new Date().toISOString().split('T')[0];
     const expectedOutput = `# created by http://localhost:8000 [${formattedDate}]\n`;
 
-    const result = stamp();
+    const result = timestamp();
     expect(result).to.equal(expectedOutput);
   });
 });
