@@ -11,6 +11,7 @@ import downloadTextfile from './utils/downloadTextfile.js';
 import LazyLoader from './utils/LazyLoader.js';
 
 const player = new AudioPlayer();
+let lzldr;
 
 /**
  * lists genres currently in the genre filter datalist element
@@ -56,6 +57,11 @@ async function filterChanged(ev) {
   const stationCount = document.querySelector('#station-count');
   const countParent = stationCount.parentElement;
   try {
+    if (lzldr) {
+      lzldr.destroy();
+      lzldr = null;
+    }
+
     // loading 
     countParent.style.display = 'none';
     insertLoadingAnimation(container);
@@ -112,7 +118,7 @@ async function filterChanged(ev) {
       }
       lastTop = parent.scrollTop;
     };
-    new LazyLoader(list, container, player, toggleDisplayOnScroll);
+    lzldr = new LazyLoader(list, container, player, toggleDisplayOnScroll);
     
     // update station count and display it
     stationCount.textContent = `${stations.length} results`;
