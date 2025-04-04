@@ -98,9 +98,9 @@ describe('createStationElement', () => {
     const countEl = document.querySelector('#count');
     const downloadButton = document.querySelector('#download');
     const buttons = li.querySelectorAll('button');
-
+    
     expect(buttons.length, 'has correct number of buttons').to.equal(3);
-
+    
     buttons.forEach((button, index) => {
       expect(button.classList.contains('small-button')).to.be.true;
       
@@ -115,11 +115,13 @@ describe('createStationElement', () => {
         case 1:
           expect(button.title).to.equal('Add to file');
           expect(countEl.textContent).to.equal('1 station selected');
+          expect(document.querySelectorAll('#stations>li[selected]').length, 'should have 1 selected station').to.equal(1);
           expect(downloadButton.hasAttribute('disabled'), 'should enabled download button').to.be.false;
           break;
         case 2:
           expect(button.title).to.equal('Remove from file');
           expect(countEl.textContent).to.equal('0 stations selected');
+          expect(document.querySelectorAll('#stations>li[selected]').length, 'should have 0 selected station').to.equal(0);
           expect(downloadButton.hasAttribute('disabled'), 'should disabled download button').to.be.true;
           break;
       }
