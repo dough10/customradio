@@ -202,7 +202,7 @@ export default class CustomRadioApp {
     document.querySelector('.reset').addEventListener('click', _ => {
       if (filter.value === '') return;
       filter.value = '';
-      filterChanged({ target: filter});
+      this._filterChanged({ target: filter});
     });
     
     const wrapper = document.querySelector('.wrapper');
