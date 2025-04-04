@@ -158,14 +158,13 @@ export default class CustomRadioApp {
       const list = stations.filter(station => !selectedUrls.has(station.url));
   
       // update UI removing all previous elements and replacing with the new list of selected elements
-      // maybe really inefficent to load from localstorage and add to DOM and then immediatly replace with the same elements
       // (this also removes the loading element)
       const fragment = document.createDocumentFragment();
       fragment.append(...selectedElements);
       container.scrollTop = 0;
       container.replaceChildren(fragment);
   
-      // append additonal elements, load more when scrolled to 80% of page height
+      // append additonal "unselected" elements, load more elements when scrolled to 80% or > page height
       this._lzldr = new LazyLoader(list, container, this._player, this._toggleDisplayOnScroll);
       
       // update station count and display it
