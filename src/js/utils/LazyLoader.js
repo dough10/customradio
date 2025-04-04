@@ -1,4 +1,5 @@
 import { createStationElement as defaultStationCreator } from './createStationElement.js';
+import debounce from './debounce.js';
 
 /**
  * calculate how many station elements can fit in the current browser window height
@@ -17,7 +18,7 @@ function getPullCount() {
  * @param {Array} list list of stations
  * @param {HTMLElement} container container to append elements
  * @param {Class} player AudioPlayer.js instance
- * @param {Function} scrollFUnc scroll callback
+ * @param {Function} scrollFunc scroll callback
  * @param {Function} createStationElement mockable function for testing
  * 
  * @returns {void} 
@@ -27,16 +28,19 @@ export default class LazyLoader {
   _pullNumber = getPullCount();
   _loading = false;
 
-  constructor(list , container, player, scrollFunc, createStationElement = defaultStationCreator) {
+  constructor(list, container, player, scrollFunc, createStationElement = defaultStationCreator) {
     this._list = list;
     this._container = container;
     this._player = player;
     this._createStationElement = createStationElement;
     this._scrollFunc = scrollFunc;
-    this._resizeHandler = this._onResize.bind(this);
-    this._scrollHandler = this._onScroll.bind(this)
 
-    const parent = container.parentElement; 
+    // bind this to the class instance
+    this._resizeHandler = this._onResize.bind(this);
+    this._scrollHandler = this._onScroll.bind(this);
+    this._load = this._load.bind(this);
+
+    const parent = this._container.parentElement; 
     parent.addEventListener('scroll', this._scrollHandler);
     window.addEventListener('resize', this._resizeHandler);
     this._load();
@@ -58,10 +62,11 @@ export default class LazyLoader {
    * will adjust the pull count based on screen size
    */
   _onResize() {
+    const loadFunc = debounce(this._load, 100);
     const adjusted = getPullCount();
     if (adjusted > this._pullNumber) {
       this._pullNumber = adjusted;
-      this._load();
+      loadFunc();
     }
   }
 
@@ -74,7 +79,7 @@ export default class LazyLoader {
     if (this._loading || this._ndx >= this._list.length) return;
     this._loading = true;
     try{
-      const stations = this._list.slice(this._ndx, this._ndx + this._pullNumber)
+      const stations = this._list.slice(this._ndx, this._ndx + this._pullNumber);
       this._populateContainer(stations, this._container);
       this._ndx += this._pullNumber;    
     } catch(e) {
