@@ -1,4 +1,3 @@
-import { createStationElement as defaultStationCreator } from './createStationElement.js';
 import debounce from './debounce.js';
 import populateContainer from './populateContainer.js';
 
@@ -19,8 +18,7 @@ function getPullCount() {
  * @param {Array} list list of stations
  * @param {HTMLElement} container container to append elements
  * @param {Class} player AudioPlayer.js instance
- * @param {Function} scrollFunc scroll callback
- * @param {Function} createStationElement mockable function for testing
+ * @param {Function} scrollFunc scroll callback function
  * 
  * @returns {void} 
  */
@@ -29,17 +27,18 @@ export default class LazyLoader {
   _pullNumber = getPullCount();
   _loading = false;
 
-  constructor(list, container, player, scrollFunc, createStationElement = defaultStationCreator) {
+  constructor(list, container, player, scrollFunc) {
     this._list = list;
     this._container = container;
     this._player = player;
-    this._createStationElement = createStationElement;
     this._scrollFunc = scrollFunc;
 
     // bind this to the class instance
     this._resizeHandler = this._onResize.bind(this);
     this._scrollHandler = this._onScroll.bind(this);
     this._load = this._load.bind(this);
+
+    this._debouncedLoad = debounce(this._load, 100);
 
     const parent = this._container.parentElement; 
     parent.addEventListener('scroll', this._scrollHandler);
@@ -63,11 +62,10 @@ export default class LazyLoader {
    * will adjust the pull count based on screen size
    */
   _onResize() {
-    const loadFunc = debounce(this._load, 100);
     const adjusted = getPullCount();
     if (adjusted > this._pullNumber) {
       this._pullNumber = adjusted;
-      loadFunc();
+      this._debouncedLoad();
     }
   }
 

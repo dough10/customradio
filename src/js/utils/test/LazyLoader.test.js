@@ -32,9 +32,6 @@ describe('LazyLoader', () => {
 
     // Mock scroll callback
     scrollFunc = Sinon.spy();
-
-    // Mock createStationElement
-    mockCreateStationElement = Sinon.stub().callsFake(() => document.createElement('div'));
   });
 
   afterEach(() => {
@@ -43,11 +40,10 @@ describe('LazyLoader', () => {
   });
 
   it('should load initial elements on instantiation', () => {
-    new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    new LazyLoader(list, container, player, scrollFunc);
 
     const pullCount = Math.round(window.innerHeight / 58);
     expect(container.children.length).to.equal(pullCount);
-    expect(mockCreateStationElement.callCount).to.equal(pullCount);
   });
 
   // it('should load more elements when scrolling near the bottom', () => {
