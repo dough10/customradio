@@ -4,12 +4,12 @@ import AudioPlayer from './audio.js';
 import loadServiceWorker from './loadServiceWorker.js';
 import initDialogInteractions from './dialog.js';
 import Toast from '../Toast/Toast.js';
-import { createStationElement } from './createStationElement.js';
 import setSelectedCount from './setSelectedCount.js';
 import queryString from './queryString.js';
 import LazyLoader from './LazyLoader.js';
 import sleep from './sleep.js';
 import initAnalytics from './analytics.js';
+import populateContainer from './populateContainer.js';
 
 export default class CustomRadioApp {
   // lazyloader instance
@@ -26,7 +26,6 @@ export default class CustomRadioApp {
     this._loadGenres = this._loadGenres.bind(this);
     this._createOption = this._createOption.bind(this);
     this._toggleDisplayOnScroll = this._toggleDisplayOnScroll.bind(this);
-    this._populateContainerWithSelected = this._populateContainerWithSelected.bind(this);
   }
 
   /**
@@ -64,24 +63,6 @@ export default class CustomRadioApp {
     const option = document.createElement('option');
     option.value = str;
     return option;
-  } 
-
-  /**
-   * populates a container with "selected" station elements
-   * also updates the "selected" count UI
-   * 
-   * @param {Array} stationList
-   * @param {HTMLElement} container 
-   */
-  _populateContainerWithSelected(stationList, container) {
-    const localFragment = document.createDocumentFragment();
-    stationList.forEach(element => {
-      const stationElement = createStationElement(element, this._player);
-      stationElement.toggleAttribute('selected');
-      localFragment.append(stationElement);
-    });
-    setSelectedCount(stationList.length);
-    container.append(localFragment);
   }
 
   /**
@@ -132,7 +113,8 @@ export default class CustomRadioApp {
       if (ev.loadLocal) {
         // push station elements from localstorage to dom
         if (storedElements) {
-          this._populateContainerWithSelected(storedElements, container);
+          populateContainer(container, storedElements, this._player, true);
+          setSelectedCount(storedElements.length);
         }
   
         // recently searched genres
@@ -189,9 +171,31 @@ export default class CustomRadioApp {
   }
 
   /**
-   * initializes the app
+   * shows a greeting dialog to the user
+   * 
+   * @returns {void}
    */
-  async init() {
+  async _greetUser() {
+    let hasBeenGreeted = Number(localStorage.getItem('greeted'))
+    const greetingElement = document.querySelector('#greeting');
+
+    await sleep(100);
+
+    if (hasBeenGreeted) {
+      greetingElement.remove();
+      return;
+    }
+    greetingElement.showModal();
+    greetingElement.addEventListener('transitionend', e => {
+      if (greetingElement.hasAttribute('open')) return;
+      greetingElement.remove();
+    });
+  }
+
+  /**
+   * attaches listeners to the form elements
+   */
+  _attachFormListeners() {
     const dlButton = document.querySelector('#download');
     dlButton.addEventListener('click', _ => downloadTextfile());
     
@@ -204,6 +208,15 @@ export default class CustomRadioApp {
       filter.value = '';
       this._filterChanged({ target: filter});
     });
+  }
+
+  /**
+   * initializes the app
+   */
+  async init() {
+    loadServiceWorker();
+
+    this._attachFormListeners();
     
     const wrapper = document.querySelector('.wrapper');
     const toTop = document.querySelector('.to-top');
@@ -215,24 +228,10 @@ export default class CustomRadioApp {
     
     this._player.init();
 
-    loadServiceWorker();
-
     initDialogInteractions();
 
-    let greeted = Number(localStorage.getItem('greeted'))
-
-    await sleep(100);
-    const greeting = document.querySelector('#greeting');
-    if (greeted) {
-      greeting.remove();
-    } else {
-      greeting.showModal();
-    }
-    greeting.addEventListener('transitionend', e => {
-      if (greeting.hasAttribute('open')) return;
-      greeting.remove();
-    });
-
     initAnalytics();
+
+    this._greetUser();
   }
 }

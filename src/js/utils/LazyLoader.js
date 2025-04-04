@@ -1,5 +1,6 @@
 import { createStationElement as defaultStationCreator } from './createStationElement.js';
 import debounce from './debounce.js';
+import populateContainer from './populateContainer.js';
 
 /**
  * calculate how many station elements can fit in the current browser window height
@@ -80,27 +81,13 @@ export default class LazyLoader {
     this._loading = true;
     try{
       const stations = this._list.slice(this._ndx, this._ndx + this._pullNumber);
-      this._populateContainer(stations, this._container);
+      populateContainer(this._container, stations, this._player);
       this._ndx += this._pullNumber;    
     } catch(e) {
       console.error('Error loading items:', error);
     } finally {
       this._loading = false;
     }
-  }
-
-  /**
-   * populate container with station elements
-   * 
-   * @param {Array} stationList 
-   * @param {HTMLElement} container 
-   */
-  _populateContainer(stationList, container) {
-    const fragment = document.createDocumentFragment();
-    stationList.forEach(station => {
-      fragment.append(this._createStationElement(station, this._player));
-    });
-    container.append(fragment);
   }
 
   /**
