@@ -226,8 +226,6 @@ const saveToLocalStorage = debounce((data) => {
  * @returns {void} 
  */
 function toggleSelect(ev) {
-  
-  
   // toggle selected attribute
   const el = ev.target.parentElement;
   el.toggleAttribute('selected');
@@ -238,6 +236,7 @@ function toggleSelect(ev) {
   setSelectedCount(all.length);
   
   // store selected stations in localstorage
+  el.dataset.bitrate = Number(el.dataset.bitrate);
   const forStorage = all.map(el => {return {id: el.id, ...el.dataset}}).sort((a, b) => a.name.localeCompare(b.name));
   saveToLocalStorage(forStorage);
 
