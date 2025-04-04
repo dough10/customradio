@@ -68,7 +68,7 @@ describe('AudioPlayer', () => {
     const volumeElement = document.querySelector('#vol');
     const canChangeVolStub = Sinon.stub(audioPlayer, '_canChangeVol').resolves(false);
 
-    await audioPlayer.load();
+    await audioPlayer.init();
 
     expect(volumeElement.style.display).to.equal('none');
     expect(canChangeVolStub.calledOnce).to.be.true;
