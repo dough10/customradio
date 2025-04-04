@@ -1,5 +1,5 @@
 import { expect } from '@open-wc/testing';
-import { queryString } from '../queryString.js';
+import queryString from '../queryString.js';
 
 describe('attaches query string', () => {
   

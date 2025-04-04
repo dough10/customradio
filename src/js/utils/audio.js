@@ -229,7 +229,7 @@ export default class AudioPlayer {
   /**
    * loads player into document
    */
-  async load() {
+  async init() {
     document.querySelector('body').append(this.player);
     document.querySelector('.player>.small-button').addEventListener('click', this._togglePlay.bind(this));
 

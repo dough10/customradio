@@ -167,7 +167,7 @@ async function info() {
 /**
  * dialog interactions
  */
-export default function addDialogInteractions() {
+export default function initDialogInteractions() {
   // animation telling user to click the x
   const dialogs = document.querySelectorAll('dialog');
   dialogs.forEach(dialog => dialog.addEventListener('click', wobbleDialog));

@@ -49,7 +49,7 @@ async function callServiceWorker() {
   }
 }
 
-export default async function load() {
+export default async function loadServiceWorker() {
   if ('serviceWorker' in navigator) {
     await callServiceWorker()
   }

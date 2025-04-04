@@ -5,9 +5,7 @@
  * 
  * @returns {String}
  */
-function queryString(value) {
+export default function queryString(value) {
   const uriEncoded = encodeURIComponent(value);
   return (value.length === 0) ? '' : `?genres=${uriEncoded}`;
 }
-
-export { queryString };
