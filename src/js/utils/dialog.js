@@ -42,7 +42,7 @@ function toggleButtonActivity() {
  * 
  * @throws {Error} - Throws an error if the fetch request fails.
  */
-async function formSubmission(ev) {
+async function submitStation(ev) {
   ev.preventDefault();
 
   
@@ -148,11 +148,11 @@ async function info() {
     dialog.querySelector('h1').textContent = `v${pack.version}`;
 
     const fragment = document.createDocumentFragment();
-    Object.entries(pack.dependencies).map(([key, value]) => {
+    Object.entries(pack.dependencies).forEach(([key, value]) => {
       const li = document.createElement('li');
       li.textContent = `${key}: ${rmArrow(value)}`;
-      return li;
-    }).forEach(li => fragment.appendChild(li));
+      fragment.appendChild(li);
+    });
 
     depDiv.append(fragment);
   } catch (error) {
@@ -186,8 +186,8 @@ export default function initDialogInteractions() {
   addButton.addEventListener('click', _ => add.showModal());
 
   // submit button for add stream dialog form submission
-  const form = document.querySelector('#add-stream');
-  form.addEventListener('submit', formSubmission);
+  const submitButton = document.querySelector('#add-stream');
+  submitButton.addEventListener('submit', submitStation);
 
   // toggle submit button activity on Valid URL input
   const inputElement = document.querySelector('#station-url');
