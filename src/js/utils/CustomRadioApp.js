@@ -8,12 +8,17 @@ import { createStationElement } from './createStationElement.js';
 import setSelectedCount from './setSelectedCount.js';
 import queryString from './queryString.js';
 import LazyLoader from './LazyLoader.js';
+import sleep from './sleep.js';
+import initAnalytics from './analytics.js';
 
 export default class CustomRadioApp {
+  // lazyloader instance
   _lzldr = null;
+  // last known scroll position
   _lastTop = 0;
   
   constructor() {
+    // cache top button for scroll performance
     this._toTop = document.querySelector('.to-top');
 
     this._player = new AudioPlayer();
@@ -187,7 +192,7 @@ export default class CustomRadioApp {
   /**
    * initializes the app
    */
-  init() {
+  async init() {
     const dlButton = document.querySelector('#download');
     dlButton.addEventListener('click', _ => downloadTextfile());
     
@@ -214,5 +219,21 @@ export default class CustomRadioApp {
     loadServiceWorker();
 
     initDialogInteractions();
+
+    let greeted = Number(localStorage.getItem('greeted'))
+
+    await sleep(100);
+    const greeting = document.querySelector('#greeting');
+    if (greeted) {
+      greeting.remove();
+    } else {
+      greeting.showModal();
+    }
+    greeting.addEventListener('transitionend', e => {
+      if (greeting.hasAttribute('open')) return;
+      greeting.remove();
+    });
+
+    initAnalytics();
   }
 }
