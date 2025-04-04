@@ -18,6 +18,9 @@ function reportErrorToMatomo(message, url, lineNumber, columnNumber, error) {
   if (typeof _paq !== 'undefined') _paq.push(['JavaScript Error', errorMessage || '']);
 }
 
+/**
+ * Initializes the alert and handles dismiss action.
+ */
 export default async function init() {
   const alert = document.querySelector('#alert');
   document.querySelector('.alert>.yellow-text').addEventListener('click', async _ => {
