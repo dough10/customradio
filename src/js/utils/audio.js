@@ -6,6 +6,15 @@ const PAUSE_TIMER_DURATION = 10000;
 const VOLUME_DEBOUNCE_DURATION = 1000;
 
 /**
+ * saves volume to local storage
+ * 
+ * @param {Number} value - volume value
+ */
+const saveVolume = debounce(value => {
+  localStorage.setItem('volume', value);
+}, VOLUME_DEBOUNCE_DURATION);
+
+/**
  * AudioPlayer class
  */
 export default class AudioPlayer {
@@ -134,10 +143,6 @@ export default class AudioPlayer {
     const slider = document.querySelector('#vol>input');
     slider.value = Number(localStorage.getItem('volume')) || 100;
     this.player.volume = slider.value / 100;
-
-    const saveVolume = debounce(value => {
-      localStorage.setItem('volume', value);
-    }, VOLUME_DEBOUNCE_DURATION);
 
     slider.addEventListener('input', _ => {
       this.player.volume = slider.value / 100;
