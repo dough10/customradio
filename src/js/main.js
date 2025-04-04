@@ -14,7 +14,7 @@ const player = new AudioPlayer();
 let lzldr;
 
 /**
- * lists genres currently in the genre filter datalist element
+ * lists genres currently in the genre filters <datalist> element
  * 
  * @returns {Array}
  */
@@ -57,12 +57,13 @@ async function filterChanged(ev) {
   const stationCount = document.querySelector('#station-count');
   const countParent = stationCount.parentElement;
   try {
+    // remove lazyloader
     if (lzldr) {
       lzldr.destroy();
       lzldr = null;
     }
 
-    // loading 
+    // loading animation
     countParent.style.display = 'none';
     insertLoadingAnimation(container);
 
@@ -83,6 +84,7 @@ async function filterChanged(ev) {
     // station list from api
     const res = await fetch(`${window.location.origin}/stations${queryString(ev.target.value)}`);
     if (res.status !== 200) {
+      new Toast(`Error fetching stations: ${res.statusText}`);
       return;
     }
     const stations = await res.json();
