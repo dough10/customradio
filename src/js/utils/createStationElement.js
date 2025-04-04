@@ -3,6 +3,7 @@ import { svgIcon } from './createSVGIcon.js';
 import { createSmallButton } from './createSmallButton.js';
 import sleep from './sleep.js';
 import setSelectedCount from './setSelectedCount.js';
+import debounce from './debounce.js';
 
 const ELEMENT_HEIGHT = 40;
 const LONG_PRESS_DURATION = 500;
@@ -209,6 +210,15 @@ async function contextMenu(ev) {
 }
 
 /**
+ * saves selected stations to localstorage
+ * 
+ * @param {Array} data - Array of selected stations.
+ */
+const saveToLocalStorage = debounce((data) => {
+  localStorage.setItem('selected', JSON.stringify(data));
+}, 1000);
+
+/**
  * toggles selected attribute
  * 
  * @param {Event} ev
@@ -216,12 +226,22 @@ async function contextMenu(ev) {
  * @returns {void} 
  */
 function toggleSelect(ev) {
+  
+  
+  // toggle selected attribute
   const el = ev.target.parentElement;
   el.toggleAttribute('selected');
+  
+  // get all selected elements
+  // update selected count
   const all = Array.from(el.parentNode.querySelectorAll('li[selected]'));
-  const forStorage = all.map(el => {return {id: el.id, ...el.dataset}}).sort((a, b) => a.name.localeCompare(b.name));
-  localStorage.setItem('selected', JSON.stringify(forStorage));
   setSelectedCount(all.length);
+  
+  // store selected stations in localstorage
+  const forStorage = all.map(el => {return {id: el.id, ...el.dataset}}).sort((a, b) => a.name.localeCompare(b.name));
+  saveToLocalStorage(forStorage);
+
+  // track event
   if (el.hasAttribute('selected')) {
     if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', el.dataset.url]);
   } else {
