@@ -12,7 +12,7 @@ export default function populateContainer(container, stationList, player, select
   const localFragment = document.createDocumentFragment();
   stationList.forEach(element => {
     const stationElement = createStationElement(element, player);
-    if (selected) stationElement.toggleAttribute('selected');
+    if (element.selected) stationElement.toggleAttribute('selected');
     localFragment.append(stationElement);
   });
   container.append(localFragment);
