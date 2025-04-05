@@ -9,7 +9,6 @@ import queryString from './queryString.js';
 import LazyLoader from './LazyLoader.js';
 import sleep from './sleep.js';
 import initAnalytics from './analytics.js';
-import populateContainer from './populateContainer.js';
 
 export default class CustomRadioApp {
   // lazyloader instance
@@ -106,20 +105,108 @@ export default class CustomRadioApp {
   }
 
   /**
+   * gets selected stations from localstorage or from the DOM
+   * 
+   * @param {Boolean} loadFromLocal load stations from localstorage
+   * @param {HTMLElement} container html element to search for "selected" stations
+   */
+  _getSelectedStations(loadFromLocal, container) {
+    if (loadFromLocal) {
+      const storedElements = JSON.parse(localStorage.getItem('selected')) || [];
+      return storedElements.map(obj => ({ ...obj, selected: true }));
+    }
+    return Array.from(container.querySelectorAll('li[selected]'))
+    .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name))
+    .map(el => ({
+      id: el.id,
+      ...el.dataset,
+      selected: true
+    }));
+  }
+
+  /**
+   * filters the stations by removing the selected stations
+   * 
+   * @param {Array} selected list of selected stations
+   * @param {Array} stations bulk list of stations to filter
+   * 
+   * @returns {Array} filtered stations
+   */
+  _removeSelected(selected, stations) {
+    const selectedUrls = new Set(selected.map(({ url }) => url));
+    return stations.filter(({ url }) => !selectedUrls.has(url));
+  }
+
+  /**
+   * gets stations from the server
+   * and updates the UI with counts
+   * 
+   * @param {String} genreFilter genres to filter by
+   * @param {Boolean} loadFromLocal if load from localstorage
+   * @param {HTMLElement} container html element containing "selected" stations
+   * 
+   * @returns {Promise({selected: Array, list: Array})}
+   */
+  async _getStations(genreFilter, loadFromLocal, container) {
+    // stations that are added to the download list
+    const selected = this._getSelectedStations(loadFromLocal, container);
+
+    // fetch bulk station list
+    const res = await fetch(`${window.location.origin}/stations${queryString(genreFilter)}`);
+    if (res.status !== 200) {
+      new Toast(`Error fetching stations: ${res.statusText}`);
+      return;
+    }
+    
+    // removes any duplicate station already in selected list
+    const list = this._removeSelected(selected, await res.json());
+
+    // update UI with stations counts
+    setSelectedCount(selected.length);
+    const stationCount = document.querySelector('#station-count');
+    stationCount.textContent = `${list.length} results`;
+
+    return [...selected, ...list];
+  }
+
+  /**
+   * creates a loading animation
+   */
+  _loadingStart(container) {
+    insertLoadingAnimation(container);
+    const stationCount = document.querySelector('#station-count');
+    stationCount.parentElement.style.display = 'none';
+  }
+
+  /**
+   * removes the loading animation
+   */
+  _loadingEnd() {
+    const loadingEl = document.querySelector('.loading');
+    if (loadingEl) loadingEl.remove();
+    const stationCount = document.querySelector('#station-count');
+    stationCount.parentElement.style.removeProperty('display');
+  }
+
+  /**
    * filter db request by user entered genres
    * 
    * @function
    * 
-   * @param {Event} ev 
+   * @param {Event} ev
+   * @param {HTMLElement} ev.target filter input element
+   * @param {String} ev.target.value user input
+   * @param {Boolean} ev.loadLocal load from localstorage
    * 
    * @returns {void}
    */
   async _filterChanged(ev) {
     ev.target.blur();
     const container = document.querySelector('#stations');
-    const stationCount = document.querySelector('#station-count');
-    const countParent = stationCount.parentElement;
     
+    // loading animation
+    this._loadingStart(container);
+
     try {
       // remove lazyloader
       if (this._lzldr) {
@@ -127,59 +214,15 @@ export default class CustomRadioApp {
         this._lzldr = null;
       }
       
-      // loading animation
-      countParent.style.display = 'none';
-      insertLoadingAnimation(container);
-      
-      // localstorage
-      let storedElements = JSON.parse(localStorage.getItem('selected'));
-      
-      // variable sent with a filterChange call to determine if localstorage load is needed
-      if (ev.loadLocal) {
-        // push station elements from localstorage to dom
-        if (storedElements) {
-          populateContainer(container, storedElements, this._player, true);
-          setSelectedCount(storedElements.length);
-        }
-        
-        // recently searched genres
-        await this._loadGenres();
-      }
-      
-      // station list from api
-      const res = await fetch(`${window.location.origin}/stations${queryString(ev.target.value)}`);
-      if (res.status !== 200) {
-        new Toast(`Error fetching stations: ${res.statusText}`);
-        return;
-      }
-      const stations = await res.json();
-      
-      // get list of selected stations from DOM
-      const selectedElements = Array.from(container.querySelectorAll('li[selected]'))
-      .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
-      
-      // create a list for comparison to prevent duplicate stations in DOM tree
-      const selectedUrls = new Set(selectedElements.map(el => el.dataset.url)); 
-      
-      // remove stations already listed from API response data
-      const list = stations.filter(station => !selectedUrls.has(station.url));
-      
-      // update UI removing all previous elements and replacing with the new list of selected elements
-      // (this also removes the loading element)
-      const fragment = document.createDocumentFragment();
-      fragment.append(...selectedElements);
-      container.scrollTop = 0;
-      container.replaceChildren(fragment);
+      const stations = await this._getStations(ev.target.value, ev.loadLocal, container);
   
-      // append additonal "unselected" elements, load more elements when scrolled to 80% or > page height
-      this._lzldr = new LazyLoader(list, container, this._player, this._toggleDisplayOnScroll);
-      
-      // update station count and display it
-      stationCount.textContent = `${stations.length} results`;
+      // push items to the UI and load more elements when scrolled to 80% or > of the pages height
+      this._lzldr = new LazyLoader(stations, container, this._player, this._toggleDisplayOnScroll);
   
-      // update recently searched genres
-      if (ev.target.value.length && !this._currentGenres().includes(ev.target.value)) {
-        await this._loadGenres();
+      // if a genre was searched and not in the list, load the genres
+      const isNewGenreSearch = ev.target.value.length && !this._currentGenres().includes(ev.target.value);
+      if (isNewGenreSearch || ev.loadLocal) {
+        this._loadGenres();
       }
   
       // analytics
@@ -187,19 +230,16 @@ export default class CustomRadioApp {
         _paq.push(['trackEvent', 'Filter', ev.target.value || '']);
       }
     } catch (error) {
-      // remove loading animation
-      const loadingEl = document.querySelector('.loading');
-      if (loadingEl) loadingEl.remove();
-      
       // log error
-      console.error('Error fetching stations:', error.message);
-      new Toast(`Error fetching stations: ${error.message}`);
-      
+      const errorMessage = `Error fetching stations: ${error.message}`;
+      console.error(errorMessage);
+      new Toast(errorMessage);
+      this._lzldr = null;
       // analytics
       if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);
     } finally {
-      // show count element
-      countParent.style.removeProperty('display');
+      // remove loading animation
+      this._loadingEnd();      
     }
   }
 
@@ -219,24 +259,27 @@ export default class CustomRadioApp {
       return;
     }
     greetingElement.showModal();
-    greetingElement.addEventListener('transitionend', e => {
-      if (greetingElement.hasAttribute('open')) return;
-      greetingElement.remove();
+    // remove after closing
+    greetingElement.addEventListener('transitionend', () => {
+      if (!greetingElement.hasAttribute('open')) greetingElement.remove();
     });
   }
 
   /**
-   * attaches listeners to the form elements
+   * attaches listeners
    */
-  _attachFormListeners() {
+  _attachListeners() {
     const dlButton = document.querySelector('#download');
     dlButton.addEventListener('click', this._downloadHandler);
     
     const filter = document.querySelector('#filter');
     filter.addEventListener('change', this._filterChanged);
-    this._filterChanged({ target: filter, loadLocal: true });
     
-    document.querySelector('.reset').addEventListener('click', this._resetHandler);
+    const resetButton = document.querySelector('.reset');
+    resetButton.addEventListener('click', this._resetHandler);
+
+    const toTop = document.querySelector('.to-top');
+    toTop.addEventListener('click', this._toTopHandler);
   }
 
   /**
@@ -267,19 +310,15 @@ export default class CustomRadioApp {
    * initializes the app
    */
   async init() {
-    loadServiceWorker();
-
-    this._attachFormListeners();
-    
-    const toTop = document.querySelector('.to-top');
-    toTop.addEventListener('click', this._toTopHandler);
-    
-    this._player.init();
-
-    initDialogInteractions();
-
     initAnalytics();
-
+    loadServiceWorker();
+    this._attachListeners();
+    initDialogInteractions();
+    this._player.init();
+    this._filterChanged({ 
+      target: document.querySelector('#filter'), 
+      loadLocal: true 
+    });
     this._greetUser();
   }
 }
