@@ -108,8 +108,8 @@ describe('AudioPlayer', () => {
 
   it('should update the playing state on time update', () => {
     const currentPlayingElement = document.querySelector('li[data-url="http://example.com/stream1"]');
-    audioPlayer.currentPlayingElement = currentPlayingElement;
 
+    audioPlayer.player.src = 'http://example.com/stream1';
     audioPlayer._ontimeupdate();
 
     expect(currentPlayingElement.hasAttribute('playing')).to.be.true;
