@@ -4,10 +4,11 @@ import timestamp from './timestamp.js';
  * Generates a text file download from selected items
  *
  * @function
+ * @param {Event} _ - The event object
  * @param {Function} [scopedStamp] - Optional custom stamp function for testing
  * @returns {void}
  */
-export default async function downloadTextfile(scopedStamp = timestamp) {
+export default async function downloadTextfile(_, scopedStamp = timestamp) {
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
   const str = elements
