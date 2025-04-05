@@ -237,7 +237,10 @@ function toggleSelect(ev) {
   
   // store selected stations in localstorage
   el.dataset.bitrate = Number(el.dataset.bitrate);
-  const forStorage = all.map(el => {return {id: el.id, ...el.dataset}}).sort((a, b) => a.name.localeCompare(b.name));
+  const forStorage = all
+  .map(el => {return {id: el.id, ...el.dataset}})
+  .sort((a, b) => a.name.localeCompare(b.name));
+  
   saveToLocalStorage(forStorage);
 
   // track event
