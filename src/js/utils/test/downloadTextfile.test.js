@@ -35,7 +35,7 @@ describe('downloadTextfile', () => {
     const removeChildSpy = Sinon.spy(document.body, 'removeChild');
 
     // Call the function with the mocked stamp
-    await downloadTextfile(mockStamp);
+    await downloadTextfile(null, mockStamp);
 
     // Verify that appendChild was called
     expect(appendSpy.calledOnce, 'append was not called').to.be.true;
