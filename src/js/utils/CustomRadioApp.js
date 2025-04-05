@@ -26,6 +26,30 @@ export default class CustomRadioApp {
     this._loadGenres = this._loadGenres.bind(this);
     this._createOption = this._createOption.bind(this);
     this._toggleDisplayOnScroll = this._toggleDisplayOnScroll.bind(this);
+    this._resetHandler = this._resetHandler.bind(this);
+    this._toTopHandler = this._toTopHandler.bind(this);
+
+    this._downloadHandler = downloadTextfile;
+  }
+
+  /**
+   * resets the filter input
+   */
+  _resetHandler() {
+    const filter = document.querySelector('#filter');
+    filter.value = '';
+    this._filterChanged({ target: filter });
+  }
+
+  /**
+   * scrolls to the top of the page
+   */
+  _toTopHandler() {
+    const wrapper = document.querySelector('.wrapper');
+    wrapper.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 
   /**
@@ -36,7 +60,7 @@ export default class CustomRadioApp {
     if (res.status !== 200) {
       console.error('failed loading genres');
     }
-    const jsonData = await res.json()
+    const jsonData = await res.json();
     const options = jsonData.map(this._createOption);
     document.querySelector('#genres').replaceChildren(...options);
   }
@@ -53,7 +77,7 @@ export default class CustomRadioApp {
   }
 
   /**
-   * creates a datalist element
+   * creates a datalist option element
    * 
    * @param {String} str 
    * 
@@ -95,20 +119,21 @@ export default class CustomRadioApp {
     const container = document.querySelector('#stations');
     const stationCount = document.querySelector('#station-count');
     const countParent = stationCount.parentElement;
+    
     try {
       // remove lazyloader
       if (this._lzldr) {
         this._lzldr.destroy();
         this._lzldr = null;
       }
-  
+      
       // loading animation
       countParent.style.display = 'none';
       insertLoadingAnimation(container);
-  
+      
       // localstorage
       let storedElements = JSON.parse(localStorage.getItem('selected'));
-  
+      
       // variable sent with a filterChange call to determine if localstorage load is needed
       if (ev.loadLocal) {
         // push station elements from localstorage to dom
@@ -116,11 +141,11 @@ export default class CustomRadioApp {
           populateContainer(container, storedElements, this._player, true);
           setSelectedCount(storedElements.length);
         }
-  
+        
         // recently searched genres
         await this._loadGenres();
       }
-  
+      
       // station list from api
       const res = await fetch(`${window.location.origin}/stations${queryString(ev.target.value)}`);
       if (res.status !== 200) {
@@ -128,17 +153,17 @@ export default class CustomRadioApp {
         return;
       }
       const stations = await res.json();
-  
+      
       // get list of selected stations from DOM
       const selectedElements = Array.from(container.querySelectorAll('li[selected]'))
-        .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
-  
+      .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+      
       // create a list for comparison to prevent duplicate stations in DOM tree
       const selectedUrls = new Set(selectedElements.map(el => el.dataset.url)); 
-  
+      
       // remove stations already listed from API response data
       const list = stations.filter(station => !selectedUrls.has(station.url));
-  
+      
       // update UI removing all previous elements and replacing with the new list of selected elements
       // (this also removes the loading element)
       const fragment = document.createDocumentFragment();
@@ -151,7 +176,6 @@ export default class CustomRadioApp {
       
       // update station count and display it
       stationCount.textContent = `${stations.length} results`;
-      countParent.style.removeProperty('display');
   
       // update recently searched genres
       if (ev.target.value.length && !this._currentGenres().includes(ev.target.value)) {
@@ -159,14 +183,23 @@ export default class CustomRadioApp {
       }
   
       // analytics
-      if (typeof _paq !== 'undefined' && ev.target.value.length) _paq.push(['trackEvent', 'Filter', ev.target.value || '']);
+      if (typeof _paq !== 'undefined' && ev.target.value.length) {
+        _paq.push(['trackEvent', 'Filter', ev.target.value || '']);
+      }
     } catch (error) {
+      // remove loading animation
       const loadingEl = document.querySelector('.loading');
       if (loadingEl) loadingEl.remove();
-      countParent.style.removeProperty('display');
-      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);
+      
+      // log error
       console.error('Error fetching stations:', error.message);
       new Toast(`Error fetching stations: ${error.message}`);
+      
+      // analytics
+      if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);
+    } finally {
+      // show count element
+      countParent.style.removeProperty('display');
     }
   }
 
@@ -176,7 +209,7 @@ export default class CustomRadioApp {
    * @returns {void}
    */
   async _greetUser() {
-    let hasBeenGreeted = Number(localStorage.getItem('greeted'))
+    const hasBeenGreeted = Number(localStorage.getItem('greeted'))
     const greetingElement = document.querySelector('#greeting');
 
     await sleep(100);
@@ -197,17 +230,37 @@ export default class CustomRadioApp {
    */
   _attachFormListeners() {
     const dlButton = document.querySelector('#download');
-    dlButton.addEventListener('click', _ => downloadTextfile());
+    dlButton.addEventListener('click', this._downloadHandler);
     
     const filter = document.querySelector('#filter');
     filter.addEventListener('change', this._filterChanged);
     this._filterChanged({ target: filter, loadLocal: true });
     
-    document.querySelector('.reset').addEventListener('click', _ => {
-      if (filter.value === '') return;
-      filter.value = '';
-      this._filterChanged({ target: filter});
-    });
+    document.querySelector('.reset').addEventListener('click', this._resetHandler);
+  }
+
+  /**
+   * destroys the app
+   *  1. removes listeners
+   *  2. destroys lazyloader
+   */
+  destroy() {
+    const dlButton = document.querySelector('#download');
+    dlButton.removeEventListener('click', this._downloadHandler);
+  
+    const filter = document.querySelector('#filter');
+    filter.removeEventListener('change', this._filterChanged);
+  
+    const resetButton = document.querySelector('.reset');
+    resetButton.removeEventListener('click', this._resetHandler);
+  
+    const toTop = document.querySelector('.to-top');
+    toTop.removeEventListener('click', this._toTopHandler);
+  
+    if (this._lzldr) {
+      this._lzldr.destroy();
+      this._lzldr = null;
+    }
   }
 
   /**
@@ -218,13 +271,8 @@ export default class CustomRadioApp {
 
     this._attachFormListeners();
     
-    const wrapper = document.querySelector('.wrapper');
     const toTop = document.querySelector('.to-top');
-    
-    toTop.addEventListener('click', _ => wrapper.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    }));
+    toTop.addEventListener('click', this._toTopHandler);
     
     this._player.init();
 
