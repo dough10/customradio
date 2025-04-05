@@ -1,5 +1,5 @@
 import debounce from './debounce.js';
-import populateContainer from './populateContainer.js';
+import { createStationElement } from './createStationElement';
 
 /**
  * calculate how many station elements can fit in the current browser window height
@@ -26,6 +26,7 @@ export default class LazyLoader {
   _ndx = 0;
   _pullNumber = getPullCount();
   _loading = false;
+  _scrollThreshold = 0.8;
 
   constructor(list, container, player, scrollFunc) {
     this._list = list;
@@ -52,7 +53,7 @@ export default class LazyLoader {
   _onScroll() {
     const parent = this._container.parentElement; 
     if (this._scrollFunc && typeof this._scrollFunc === 'function') this._scrollFunc(parent);
-    if (parent.scrollTop / (parent.scrollHeight - parent.clientHeight) >= 0.8) {
+    if (parent.scrollTop / (parent.scrollHeight - parent.clientHeight) >= this._scrollThreshold) {
       this._load();
     }
   }
@@ -70,6 +71,22 @@ export default class LazyLoader {
   }
 
   /**
+   * Populates a container with station elements
+   * 
+   * @param {HTMLElement} container - The container to populate.
+   * @param {Array} stationList - The list of stations to add.
+   */
+  _populateContainer(stationList) {
+    const localFragment = document.createDocumentFragment();
+    stationList.forEach(element => {
+      const stationElement = createStationElement(element, this._player);
+      if (element.selected) stationElement.toggleAttribute('selected');
+      localFragment.append(stationElement);
+    });
+    this._container.append(localFragment);
+  }
+
+  /**
    * push more elements
    * 
    * @returns {void}
@@ -79,10 +96,10 @@ export default class LazyLoader {
     this._loading = true;
     try{
       const stations = this._list.slice(this._ndx, this._ndx + this._pullNumber);
-      populateContainer(this._container, stations, this._player);
+      this._populateContainer(stations);
       this._ndx += this._pullNumber;    
     } catch(e) {
-      console.error('Error loading items:', error);
+      console.error(`Error loading items: ${e}`);
     } finally {
       this._loading = false;
     }
