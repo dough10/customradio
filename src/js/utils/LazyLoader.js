@@ -1,13 +1,16 @@
 import debounce from './debounce.js';
 import { createStationElement } from './createStationElement';
 
+const ELEMENT_HEIGHT = 58;
+const SCROLL_THRESHOLD = 0.7;
+
 /**
  * calculate how many station elements can fit in the current browser window height
  * 
  * @returns {Number} number of elements that will fit in browser window height
  */
 function getPullCount() {
-  return Math.round(window.innerHeight / 58);
+  return Math.round(window.innerHeight / ELEMENT_HEIGHT);
 }
 
 /**
@@ -26,7 +29,7 @@ export default class LazyLoader {
   _ndx = 0;
   _pullNumber = getPullCount();
   _loading = false;
-  _scrollThreshold = 0.8;
+  _scrollThreshold = SCROLL_THRESHOLD;
 
   constructor(list, container, player, scrollFunc) {
     this._list = list;
