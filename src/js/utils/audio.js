@@ -74,8 +74,6 @@ export default class AudioPlayer {
       clearTimeout(this.pauseTimer);
       this.pauseTimer = 0;
     }
-    const selector = `li[data-url="${this.player.src}"]`;
-    this.currentPlayingElement = document.querySelector(selector);
   }
 
   /**
@@ -101,6 +99,8 @@ export default class AudioPlayer {
    * @returns {void} 
    */
   _ontimeupdate() {
+    this.currentPlayingElement = document.querySelector(`li[data-url="${this.player.src}"]`);
+
     if (this.currentPlayingElement && this.currentPlayingElement.hasAttribute('playing')) return;
     
     const last = document.querySelector('#stations>li[playing]');
@@ -200,6 +200,7 @@ export default class AudioPlayer {
     document.querySelector('.player').removeAttribute('playing');
     const all = document.querySelectorAll('#stations>li');
     all.forEach(el => el.removeAttribute('playing'));
+    this.currentPlayingElement = null;
   }
 
   /**
