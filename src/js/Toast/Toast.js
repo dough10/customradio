@@ -24,7 +24,7 @@ export default class Toast {
     //bind this
     this._transitionEnd = this._transitionEnd.bind(this);
     this._clicked = this._clicked.bind(this);
-    this.removeToast = this._cleanupToast.bind(this);
+    this._cleanupToast = this._cleanupToast.bind(this);
     this._mouseIn = this._mouseIn.bind(this);
     this._mouseOut = this._mouseOut.bind(this);
     this._removeToast = this._removeToast.bind(this);
