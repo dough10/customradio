@@ -165,6 +165,27 @@ export default class AudioPlayer {
   }
 
   /**
+   * get currently playing info from server
+   * 
+   * @param {String} url
+   * 
+   * @returns {String}
+   */
+  async _getTrackData(url) {
+    if (!url) return;
+    try {
+      const parsed = new URL(url);
+      console.log(parsed);
+      const res = await fetch(`${parsed.origin}/currentsong`);
+      if (res.status !== 200) return;
+      const playing = await res.text();
+      if (playing) document.querySelector('#name').textContent = playing;
+    } catch(e) {
+      console.error(`error getting now playing: ${e}`);
+    }
+  }
+
+  /**
    * play
    * 
    * @param {Object} station
