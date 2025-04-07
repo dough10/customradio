@@ -56,18 +56,14 @@ function msToHhMmSs(milliseconds) {
 /**
  * breaks a string into parts and attempts to get a usable url from it
  * 
- * @param {String} url 
- * @param {String[]} testedHomepages 
+ * @param {String} url
  * 
  * @returns {null|String}
  */
-async function testHomepageConnection(url, testedHomepages) {
+async function testHomepageConnection(url) {
   const homepage = useableHomepage(url);
   if (!homepage) {
     return;
-  }
-  if (testedHomepages.includes(homepage)) {
-    return homepage;
   }
   try {
     const response = await axios.head(homepage, {
@@ -76,8 +72,7 @@ async function testHomepageConnection(url, testedHomepages) {
       },
       timeout: 3000
     });
-    if (response.status >= 200 && response.status < 300 && response.headers['content-type'] === 'text/html') {
-      testedHomepages.push(homepage);
+    if (response.status >= 200 && response.status < 300 && response.headers['content-type'].includes('text/html')) {
       return homepage;
     }
   } catch(e) {
@@ -92,10 +87,9 @@ async function testHomepageConnection(url, testedHomepages) {
  * @param {Object} sql - The Stations instance.
  * @param {Object} station - The station object.
  * @param {Object} stream - The stream object.
- * @param {Array} testedHomepages - The array of tested homepages.
  * @returns {Promise<void>}
  */
-async function updateStationData(sql, station, stream, testedHomepages) {
+async function updateStationData(sql, station, stream) {
   const updatedData = {
     name: stream.name || station.name || stream.description,
     url: stream.url || station.url,
@@ -104,7 +98,7 @@ async function updateStationData(sql, station, stream, testedHomepages) {
     'content-type': stream.content || station['content-type'] || 'Unknown',
     bitrate: stream.bitrate || 0,
     icon: 'Unknown',
-    homepage: await testHomepageConnection(stream.icyurl, testedHomepages) || 'Unknown',
+    homepage: await testHomepageConnection(stream.icyurl) || 'Unknown',
     error: stream.error || '',
     duplicate: Boolean(station.duplicate) || false
   };
@@ -148,8 +142,6 @@ async function testStreams() {
     
     const length = stations.length;
   
-    const testedHomepages = [];
-  
     for (const station of stations) {
       if (!station) continue;
       log.debug(`Update progress: ${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
@@ -160,12 +152,10 @@ async function testStreams() {
         const stream = await isLiveStream(station.url);
         // invalid url, error testing stream or is not an audio stream
         if (!stream.ok) {
-          await updateStationData(sql, station, stream, testedHomepages);
-          total += 1;
           continue;
         }
     
-        await updateStationData(sql, station, stream, testedHomepages);
+        await updateStationData(sql, station, stream);
         total += 1;
       } catch(e) {
         log.error(`Error testing stream ${station.id}: ${e.message}`);
