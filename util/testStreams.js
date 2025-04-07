@@ -102,7 +102,7 @@ async function updateStationData(sql, station, stream) {
     'content-type': stream.content || station['content-type'] || 'Unknown',
     bitrate: stream.bitrate || 0,
     icon: 'Unknown',
-    homepage: await testHomepageConnection(stream.icyurl) || 'Unknown',
+    homepage: await retry(() => testHomepageConnection(stream.icyurl)) || 'Unknown',
     error: stream.error || '',
     duplicate: Boolean(station.duplicate) || false
   };
