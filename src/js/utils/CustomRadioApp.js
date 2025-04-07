@@ -145,7 +145,7 @@ export default class CustomRadioApp {
    * @param {Boolean} loadFromLocal if load from localstorage
    * @param {HTMLElement} container html element containing "selected" stations
    * 
-   * @returns {Promise({selected: Array, list: Array})}
+   * @returns {Promise(Array[objects])}
    */
   async _getStations(genreFilter, loadFromLocal, container) {
     // stations that are added to the download list
