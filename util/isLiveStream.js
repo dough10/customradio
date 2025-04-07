@@ -3,6 +3,7 @@ const pack = require('../package.json');
 
 const isValidURL = require('./isValidURL.js');
 const Logger = require('./logger.js');
+const retry = require('./retry.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -80,7 +81,7 @@ async function streamTest(url) {
 
     if (!isAudioStream) {
       const errorMessage = `Test error: ${url} - invalid content-type: ${content}`;
-      log.error(errorMessage);
+      log.debug(errorMessage);
       return {
         ok: false,
         error: errorMessage
@@ -88,6 +89,8 @@ async function streamTest(url) {
     }
 
     if (bitrate && bitrate.length > 3) bitrate = bitrate.split(',')[0];
+    bitrate = Number(bitrate);
+    if (isNaN(bitrate)) bitrate = 'Unknown';
 
     // set name to homepage if no name is found
     if (!name && icyurl || name && name.length <= 1 && icyurl) {
@@ -110,7 +113,7 @@ async function streamTest(url) {
     };
   } catch (error) {
     const errorMessage = `Test error: ${url} - ${error.message}`;
-    log.error(errorMessage);
+    log.debug(errorMessage);
     return {
       ok: false,
       error: error.message
@@ -161,14 +164,23 @@ module.exports = async (url) => {
     return {
       ok: false,
       error: `url must be a string with a valid URL format: ${url}`
-    }
-  };
-  url = cleanURL(url);
-  if (url.startsWith('http://')) {
-    log.debug(`Testing https: ${url}`);
-    const httpsUrl = url.replace('http://', 'https://');
-    return await streamTest(httpsUrl);
+    };
   }
+
+  url = cleanURL(url);
+
+  // Always test HTTPS first
+  if (url.startsWith('http://')) {
+    const httpsUrl = url.replace('http://', 'https://');
+    try {
+      log.debug(`Testing HTTPS: ${httpsUrl}`);
+      return await retry(() => streamTest(httpsUrl));
+    } catch (error) {
+      log.error(`HTTPS test failed for ${httpsUrl}: ${error.message}`);
+      log.debug(`Falling back to HTTP: ${url}`);
+    }
+  }
+
   log.debug(`Testing: ${url}`);
-  return await streamTest(url);
+  return await retry(() => streamTest(url));
 };

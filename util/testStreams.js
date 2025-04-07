@@ -2,12 +2,16 @@ module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
 
 const axios = require('axios');
 const pack = require('../package.json');
+const pLimit = require('p-limit');
 
 const isLiveStream = require('./isLiveStream.js');
 const rmRef = require('./rmRef.js');
 const useableHomepage = require('./useableHomepage.js');
 const Logger = require('./logger.js');
 const Stations = require('../model/Stations.js');
+const retry = require('./retry.js');
+
+const limit = pLimit(5);
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -107,6 +111,28 @@ async function updateStationData(sql, station, stream) {
 }
 
 /**
+ * Compares station and stream objects to check if data has changed.
+ * 
+ * @param {Object} station - The station object from the database.
+ * @param {Object} stream - The stream object from the live stream check.
+ * 
+ * @returns {Boolean} - Returns true if the data is unchanged, false otherwise.
+ */
+function isStationDataUnchanged(station, stream) {
+  return (
+    station.name === (stream.name || station.name || stream.description) &&
+    station.url === (stream.url || station.url) &&
+    station.genre === (stream.icyGenre || station.genre || 'Unknown') &&
+    station.online === (stream.isLive || false) &&
+    station['content-type'] === (stream.content || station['content-type'] || 'Unknown') &&
+    station.bitrate === (stream.bitrate || 0) &&
+    station.homepage === (stream.icyurl || station.homepage || 'Unknown') &&
+    station.error === (stream.error || '') &&
+    station.duplicate === Boolean(station.duplicate)
+  );
+}
+
+/**
  * Tests streams for online state and headers to update the database with stream information.
  * 
  * This function queries the database for all station records, checks the online status and metadata
@@ -139,36 +165,35 @@ async function testStreams() {
     const stations = await sql.getAllStations();
     
     let total = 0;
-    
+
+    let counter = 0;
+
     const length = stations.length;
-  
-    for (const station of stations) {
-      if (!station) continue;
-      log.debug(`Update progress: ${((stations.indexOf(station) / length) * 100).toFixed(3)}%`);
-  
-      station.url = rmRef(station.url);
-      
-      try {
-        const stream = await isLiveStream(station.url);
-        // invalid url, error testing stream or is not an audio stream
-        if (!stream.ok) {
-          continue;
-        }
-    
-        await updateStationData(sql, station, stream);
-        total += 1;
-      } catch(e) {
-        log.error(`Error testing stream ${station.id}: ${e.message}`);
-        continue;
-      }
-    }
+
+    await Promise.all(
+      stations.map(station =>
+        limit(async () => {
+          counter++;
+          log.debug(`Update progress: ${((counter / length) * 100).toFixed(3)}%`);
+          if (!station) return;
+          try {
+            const stream = await retry(() => isLiveStream(station.url));
+            if (isStationDataUnchanged(station, stream)) {
+              return;
+            }
+            await updateStationData(sql, station, stream);
+            total++;
+          } catch (e) {
+            log.debug(`Error testing stream for station ID ${station.id}: ${e.message}`);
+          }
+        })
+      )
+    );
     const stats = await sql.dbStats();
     const now = new Date().getTime();
     const ms = now - startTime;
-    stats.timeCompleted = now;
-    stats.duration = ms;
-    log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(stats.duration)}. usable entries: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
-    // await saveStats(stats);
+
+    log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entries: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
     // await cleanUpGenres();
   } catch (e) {
     log.error(`Failed stream test or database update: ${e.message}`);
