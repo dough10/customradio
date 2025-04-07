@@ -324,7 +324,6 @@ ul {
   justify-content: center;
   align-items: center;
   border-top: var(--seperator-line);
-  transition: background-color var(--animate-500, 500ms) linear;
 }
 
 #stations>li>span {
