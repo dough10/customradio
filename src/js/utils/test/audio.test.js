@@ -1,6 +1,6 @@
 import { expect } from '@open-wc/testing';
 import Sinon from 'sinon';
-import AudioPlayer from '../audio.js';
+import AudioPlayer from '../AudioPlayer.js';
 import Toast from '../../Toast/Toast.js';
 
 describe('AudioPlayer', () => {
