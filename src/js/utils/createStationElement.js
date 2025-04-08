@@ -265,6 +265,7 @@ function toggleSelect(ev) {
  * @returns {void} 
  */
 async function playStream(ev, player) {
+  ev.target.blur();
   ev.preventDefault();
 
   const el = ev.target.parentElement;
