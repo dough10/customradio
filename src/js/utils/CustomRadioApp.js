@@ -9,16 +9,31 @@ import queryString from './queryString.js';
 import LazyLoader from './LazyLoader.js';
 import sleep from './sleep.js';
 import initAnalytics from './analytics.js';
+import retryFetch from './retryFetch.js';
+import debounce from './debounce.js';
 
 export default class CustomRadioApp {
   // lazyloader instance
   _lzldr = null;
   // last known scroll position
   _lastTop = 0;
+
+  // HTMLElement selectors
+  _selectors = {
+    filter: '#filter',
+    toTop: '.to-top',
+    genres: '#genres',
+    stationCount: '#station-count',
+    stationsContainer: '#stations',
+    downloadButton: '#download',
+    resetButton: '.reset',
+    wrapper: '.wrapper',
+    greetingElement: '#greeting'
+  };
   
   constructor() {
     // cache top button for scroll performance
-    this._toTop = document.querySelector('.to-top');
+    this._toTop = document.querySelector(this._selectors.toTop);
 
     this._player = new AudioPlayer();
     this._filterChanged = this._filterChanged.bind(this);
@@ -27,7 +42,7 @@ export default class CustomRadioApp {
     this._toggleDisplayOnScroll = this._toggleDisplayOnScroll.bind(this);
     this._resetHandler = this._resetHandler.bind(this);
     this._toTopHandler = this._toTopHandler.bind(this);
-
+    this._bouncedFilter = debounce(this._filterChanged, 150);
     this._downloadHandler = downloadTextfile;
   }
 
@@ -35,7 +50,11 @@ export default class CustomRadioApp {
    * resets the filter input
    */
   _resetHandler() {
-    const filter = document.querySelector('#filter');
+    const filter = document.querySelector(this._selectors.filter);
+    if (!filter) {
+      console.error('Filter element not found.');
+      return;
+    }
     filter.value = '';
     this._filterChanged({ target: filter });
   }
@@ -44,7 +63,7 @@ export default class CustomRadioApp {
    * scrolls to the top of the page
    */
   _toTopHandler() {
-    const wrapper = document.querySelector('.wrapper');
+    const wrapper = document.querySelector(this._selectors.wrapper);
     wrapper.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -55,13 +74,13 @@ export default class CustomRadioApp {
    * loads genres into a datalist element
    */
   async _loadGenres() {
-    const res = await fetch(`${window.location.origin}/topGenres`);
+    const res = await retryFetch(`${window.location.origin}/topGenres`);
     if (res.status !== 200) {
       console.error('failed loading genres');
     }
     const jsonData = await res.json();
     const options = jsonData.map(this._createOption);
-    document.querySelector('#genres').replaceChildren(...options);
+    document.querySelector(this._selectors.genres).replaceChildren(...options);
   }
 
   /**
@@ -70,7 +89,7 @@ export default class CustomRadioApp {
    * @returns {Array} list of genres
    */
   _currentGenres() {
-    const parent = document.querySelector('#genres');
+    const parent = document.querySelector(this._selectors.genres);
     const options = Array.from(parent.querySelectorAll('option'));
     return options.map(element => element.value);
   }
@@ -132,7 +151,7 @@ export default class CustomRadioApp {
    * 
    * @returns {Array} filtered stations
    */
-  _removeSelected(selected, stations) {
+  _removeSelectedFromList(selected, stations) {
     const selectedUrls = new Set(selected.map(({ url }) => url));
     return stations.filter(({ url }) => !selectedUrls.has(url));
   }
@@ -152,18 +171,18 @@ export default class CustomRadioApp {
     const selected = this._getSelectedStations(loadFromLocal, container);
 
     // fetch bulk station list
-    const res = await fetch(`${window.location.origin}/stations${queryString(genreFilter)}`);
+    const res = await retryFetch(`${window.location.origin}/stations${queryString(genreFilter)}`);
     if (res.status !== 200) {
       new Toast(`Error fetching stations: ${res.statusText}`);
       return;
     }
     
     // removes any duplicate station already in selected list
-    const list = this._removeSelected(selected, await res.json());
+    const list = this._removeSelectedFromList(selected, await res.json());
 
     // update UI with stations counts
     setSelectedCount(selected.length);
-    const stationCount = document.querySelector('#station-count');
+    const stationCount = document.querySelector(this._selectors.stationCount);
     stationCount.textContent = `${list.length} results`;
 
     return [...selected, ...list];
@@ -174,7 +193,7 @@ export default class CustomRadioApp {
    */
   _loadingStart(container) {
     insertLoadingAnimation(container);
-    const stationCount = document.querySelector('#station-count');
+    const stationCount = document.querySelector(this._selectors.stationCount);
     stationCount.parentElement.style.display = 'none';
   }
 
@@ -184,7 +203,7 @@ export default class CustomRadioApp {
   _loadingEnd() {
     const loadingEl = document.querySelector('.loading');
     if (loadingEl) loadingEl.remove();
-    const stationCount = document.querySelector('#station-count');
+    const stationCount = document.querySelector(this._selectors.stationCount);
     stationCount.parentElement.style.removeProperty('display');
   }
 
@@ -202,7 +221,14 @@ export default class CustomRadioApp {
    */
   async _filterChanged(ev) {
     ev.target.blur();
-    const container = document.querySelector('#stations');
+
+    const userInput = ev.target.value.trim();
+    if (userInput && !userInput.match(/^[a-zA-Z0-9\s@\-_.",'&]+$/)) {
+      new Toast('Invalid input. Please enter valid genres.');
+      return;
+    }
+
+    const container = document.querySelector(this._selectors.stationsContainer);
     
     // loading animation
     this._loadingStart(container);
@@ -214,20 +240,20 @@ export default class CustomRadioApp {
         this._lzldr = null;
       }
       
-      const stations = await this._getStations(ev.target.value, ev.loadLocal, container);
+      const stations = await this._getStations(userInput, ev.loadLocal, container);
   
       // push items to the UI and load more elements when scrolled to 80% or > of the pages height
       this._lzldr = new LazyLoader(stations, container, this._player, this._toggleDisplayOnScroll);
   
       // if a genre was searched and not in the list, load the genres
-      const isNewGenreSearch = ev.target.value.length && !this._currentGenres().includes(ev.target.value);
+      const isNewGenreSearch = userInput.length && !this._currentGenres().includes(userInput);
       if (isNewGenreSearch || ev.loadLocal) {
         this._loadGenres();
       }
   
       // analytics
-      if (typeof _paq !== 'undefined' && ev.target.value.length) {
-        _paq.push(['trackEvent', 'Filter', ev.target.value || '']);
+      if (typeof _paq !== 'undefined' && userInput.length) {
+        _paq.push(['trackEvent', 'Filter', userInput || '']);
       }
     } catch (error) {
       // log error
@@ -250,7 +276,7 @@ export default class CustomRadioApp {
    */
   async _greetUser() {
     const hasBeenGreeted = Number(localStorage.getItem('greeted'))
-    const greetingElement = document.querySelector('#greeting');
+    const greetingElement = document.querySelector(this._selectors.greetingElement);
 
     await sleep(100);
 
@@ -269,16 +295,16 @@ export default class CustomRadioApp {
    * attaches listeners
    */
   _attachListeners() {
-    const dlButton = document.querySelector('#download');
+    const dlButton = document.querySelector(this._selectors.downloadButton);
     dlButton.addEventListener('click', this._downloadHandler);
     
-    const filter = document.querySelector('#filter');
-    filter.addEventListener('change', this._filterChanged);
+    const filter = document.querySelector(this._selectors.filter);
+    filter.addEventListener('change', this._bouncedFilter);
     
-    const resetButton = document.querySelector('.reset');
+    const resetButton = document.querySelector(this._selectors.resetButton);
     resetButton.addEventListener('click', this._resetHandler);
 
-    const toTop = document.querySelector('.to-top');
+    const toTop = document.querySelector(this._selectors.toTop);
     toTop.addEventListener('click', this._toTopHandler);
   }
 
@@ -288,16 +314,16 @@ export default class CustomRadioApp {
    *  2. destroys lazyloader
    */
   destroy() {
-    const dlButton = document.querySelector('#download');
+    const dlButton = document.querySelector(this._selectors.downloadButton);
     dlButton.removeEventListener('click', this._downloadHandler);
   
-    const filter = document.querySelector('#filter');
-    filter.removeEventListener('change', this._filterChanged);
+    const filter = document.querySelector(this._selectors.filter);
+    filter.removeEventListener('change', this._bouncedFilter);
   
-    const resetButton = document.querySelector('.reset');
+    const resetButton = document.querySelector(this._selectors.resetButton);
     resetButton.removeEventListener('click', this._resetHandler);
   
-    const toTop = document.querySelector('.to-top');
+    const toTop = document.querySelector(this._selectors.toTop);
     toTop.removeEventListener('click', this._toTopHandler);
   
     if (this._lzldr) {
@@ -316,7 +342,7 @@ export default class CustomRadioApp {
     initDialogInteractions();
     this._player.init();
     this._filterChanged({ 
-      target: document.querySelector('#filter'), 
+      target: document.querySelector(this._selectors.filter), 
       loadLocal: true 
     });
     this._greetUser();
