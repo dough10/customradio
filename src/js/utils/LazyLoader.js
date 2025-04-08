@@ -10,7 +10,7 @@ const SCROLL_THRESHOLD = 0.7;
  * @returns {Number} number of elements that will fit in browser window height
  */
 function getPullCount() {
-  return Math.round(window.innerHeight / ELEMENT_HEIGHT) + 3;
+  return Math.round(window.innerHeight / ELEMENT_HEIGHT);
 }
 
 /**
