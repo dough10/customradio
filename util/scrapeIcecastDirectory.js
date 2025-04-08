@@ -63,6 +63,8 @@ module.exports = async () => {
           
           try{
             const url = rmRef(entry.listen_url[0]);
+            if (await sql.exists(url)) return;
+            
             const stream = await isLiveStream(url);
           
             if (!stream.ok) return;
