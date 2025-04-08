@@ -176,6 +176,7 @@ export default class Toast {
   _removeToast() {
     this.toast.removeEventListener('transitionend', this._removeToast, true);
     this.toast.remove();
+    this.toast = null;
   }
 
   /**
