@@ -167,7 +167,7 @@ async function info() {
 /**
  * dialog interactions
  */
-export default function initDialogInteractions() {
+function initDialogInteractions() {
   // animation telling user to click the x
   const dialogs = document.querySelectorAll('dialog');
   dialogs.forEach(dialog => dialog.addEventListener('click', wobbleDialog));
@@ -193,3 +193,38 @@ export default function initDialogInteractions() {
   const inputElement = document.querySelector('#station-url');
   inputElement.oninput = toggleButtonActivity;
 }
+
+/**
+ * Cleans up and removes all event listeners added by `initDialogInteractions`.
+ */
+function destroyDialogInteractions() {
+  // Remove wobble animation listeners
+  const dialogs = document.querySelectorAll('dialog');
+  dialogs.forEach(dialog => dialog.removeEventListener('click', wobbleDialog));
+
+  // Remove close dialog listeners
+  document.querySelectorAll('dialog>.close').forEach(el => {
+    el.removeEventListener('click', _ => closeDialog(el));
+  });
+
+  // Remove info dialog listener
+  const infoButton = document.querySelector('#info');
+  infoButton.removeEventListener('click', info);
+
+  // Remove add dialog listener
+  const addButton = document.querySelector('#add_button');
+  addButton.removeEventListener('click', _ => {
+    const add = document.querySelector('#add');
+    if (add) add.showModal();
+  });
+
+  // Remove submit button listener
+  const submitButton = document.querySelector('#add-stream');
+  submitButton.removeEventListener('submit', submitStation);
+
+  // Remove input element listener
+  const inputElement = document.querySelector('#station-url');
+  inputElement.oninput = null;
+}
+
+export {initDialogInteractions, destroyDialogInteractions};

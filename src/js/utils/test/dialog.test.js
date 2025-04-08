@@ -1,6 +1,6 @@
 import { expect } from '@open-wc/testing';
 import sinon from 'sinon';
-import addDialogInteractions from '../dialog.js';
+import {addDialogInteractions} from '../dialog.js';
 import Toast from '../../Toast/Toast.js';
 import loadingAnimation from '../5dots.js';
 
