@@ -1,6 +1,6 @@
 import { expect } from '@open-wc/testing';
 import sinon from 'sinon';
-import {addDialogInteractions} from '../dialog.js';
+import {initDialogInteractions} from '../dialog.js';
 import Toast from '../../Toast/Toast.js';
 import loadingAnimation from '../5dots.js';
 
@@ -35,7 +35,7 @@ describe('addDialogInteractions', () => {
     submitButton = document.querySelector('#submit-stream');
 
     // Initialize dialog interactions
-    addDialogInteractions();
+    initDialogInteractions();
   });
 
   afterEach(() => {
