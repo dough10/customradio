@@ -1,8 +1,8 @@
 import downloadTextfile from './downloadTextfile.js';
 import insertLoadingAnimation from './5dots.js';
-import AudioPlayer from './audio.js';
+import AudioPlayer from './AudioPlayer.js';
 import loadServiceWorker from './loadServiceWorker.js';
-import initDialogInteractions from './dialog.js';
+import {initDialogInteractions, destroyDialogInteractions} from './dialog.js';
 import Toast from '../Toast/Toast.js';
 import setSelectedCount from './setSelectedCount.js';
 import queryString from './queryString.js';
@@ -326,6 +326,10 @@ export default class CustomRadioApp {
     const toTop = document.querySelector(this._selectors.toTop);
     toTop.removeEventListener('click', this._toTopHandler);
   
+    this._player.destroy();
+
+    destroyDialogInteractions();
+
     if (this._lzldr) {
       this._lzldr.destroy();
       this._lzldr = null;
