@@ -39,6 +39,7 @@ export default class CustomRadioApp {
       onFilterChange: this._filterChanged.bind(this),
       onReset: this._resetFilter.bind(this)
     });
+    
     this._filterChanged({ 
       target: document.querySelector(this._selectors.filter), 
       loadLocal: true 
@@ -49,12 +50,15 @@ export default class CustomRadioApp {
    * destroys the app
    */
   destroy() {
+    this._player.destroy();
+    
     this._uiManager.detachListeners({
       onFilterChange: this._filterChanged.bind(this),
       onReset: this._resetFilter.bind(this)
     });
-    this._player.destroy();
+    
     destroyDialogInteractions();
+    
     if (this._lzldr) {
       this._lzldr.destroy();
     }
