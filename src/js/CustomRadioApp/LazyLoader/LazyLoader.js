@@ -42,8 +42,6 @@ export default class LazyLoader {
     this._scrollHandler = this._onScroll.bind(this);
     this._debouncedLoad = debounce(this._load.bind(this), 100);
 
-    container.replaceChildren();
-
     const parent = this._container.parentElement; 
     parent.addEventListener('scroll', this._scrollHandler);
     window.addEventListener('resize', this._resizeHandler);
