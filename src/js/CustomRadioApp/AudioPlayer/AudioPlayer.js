@@ -123,14 +123,17 @@ export default class AudioPlayer {
    */
   _ontimeupdate() {
     this.currentPlayingElement = document.querySelector(`#stations>li[data-url="${this.player.src}"]`);
-
+    
+    // already marked as playing
     if (this.currentPlayingElement && this.currentPlayingElement.hasAttribute('playing')) return;
     
+    // unmark last stream
     const last = document.querySelector('#stations>li[playing]');
     if (last) last.removeAttribute('playing');
     
+    // playback stopped
     if (!this.currentPlayingElement) return;
-    
+
     this.currentPlayingElement.toggleAttribute('playing');
   }
 
