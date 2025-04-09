@@ -25,6 +25,7 @@ module.exports = (app, httpRequestCounter) => {
         mediaSrc: ["*"],
         styleSrcElem: ["'self'", "'unsafe-inline'"],
         styleSrcAttr: ["'self'", "'unsafe-inline'"],
+        scriptSrcAttr: ["'self'", "'unsafe-inline'"],
         reportUri: "/csp-report"
       },
     },
