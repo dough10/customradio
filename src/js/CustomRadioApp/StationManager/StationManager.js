@@ -33,6 +33,10 @@ async function retryFetch(url, options = {}, retries = 3) {
 
 /**
  * manages connection with API, localstorage, selected managment
+ * 
+ * @class
+ * 
+ * @param apiBaseUrl application base url
  */
 export default class StationManager {
   constructor(apiBaseUrl) {
