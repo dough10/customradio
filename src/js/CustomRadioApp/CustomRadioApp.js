@@ -117,6 +117,9 @@ export default class CustomRadioApp {
       // update UI with stations counts
       this._uiManager.setCounts(selected.length, list.length);
   
+      // remove children leaving only the loading element created with this._uiManager.loadingStart ^
+      container.replaceChildren(document.querySelector('.loading'));
+
       // push items to the UI and load more elements when scrolled to 80% or > of the pages height
       this._lzldr = new LazyLoader([...selected, ...list], container, this._player, this._uiManager.toggleDisplayOnScroll);
   
