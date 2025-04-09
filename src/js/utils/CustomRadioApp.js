@@ -2,7 +2,7 @@ import loadServiceWorker from './loadServiceWorker.js';
 import AudioPlayer from './AudioPlayer.js';
 import Toast from '../Toast/Toast.js';
 import LazyLoader from './LazyLoader.js';
-import Analytics from './analytics.js';
+import Analytics from './Analytics.js';
 import UIManager from './UIManager.js';
 import StationManager from './StationManager.js';
 
