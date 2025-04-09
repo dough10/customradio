@@ -164,10 +164,33 @@ async function info() {
   }
 }
 
+
+/**
+ * shows a greeting dialog to the user
+ * 
+ * @returns {void}
+ */
+async function greetUser() {
+  const hasBeenGreeted = Number(localStorage.getItem('greeted'))
+  const greetingElement = document.querySelector('#greeting');
+
+  if (hasBeenGreeted) {
+    greetingElement.remove();
+    return;
+  }
+  greetingElement.showModal();
+  // remove after closing
+  greetingElement.addEventListener('transitionend', () => {
+    if (!greetingElement.hasAttribute('open')) greetingElement.remove();
+  });
+}
+
 /**
  * dialog interactions
  */
 function initDialogInteractions() {
+  greetUser();
+
   // animation telling user to click the x
   const dialogs = document.querySelectorAll('dialog');
   dialogs.forEach(dialog => dialog.addEventListener('click', wobbleDialog));
