@@ -4,7 +4,7 @@ import timestamp from './timestamp.js';
  * Generates a text file download from selected items
  *
  * @function
- * @param {Event} _ - The event object
+ * @param {Event} ev - The event object
  * @param {Function} [scopedStamp] - Optional custom stamp function for testing
  * @returns {void}
  */
@@ -17,7 +17,7 @@ export default async function downloadTextfile(ev, scopedStamp = timestamp) {
     .join('\n');
 
   const blob = new Blob([`${scopedStamp()}\n${str}`], {
-    type: 'text/plain',
+    type: 'text/plain; charset=utf-8',
   });
 
   const filename = 'radio.txt';
