@@ -16,6 +16,8 @@ const saveVolume = debounce(value => {
 
 /**
  * AudioPlayer class
+ * responsable for managing HTML <audio> element
+ * as well as managing UI elements for the audio tag
  */
 export default class AudioPlayer {
   _selectors = {
