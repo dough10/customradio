@@ -33,6 +33,5 @@ replace_path bundle.min.js "./$js_path" $template
 
 mv public/styles.min.css public/"$css_path"
 mv public/bundle.min.js public/"$js_path"
-mv public/bundle.min.js.LICENSE.txt public/"$js_path".LICENSE.txt
 
 node build_assets/update-sw-urls
