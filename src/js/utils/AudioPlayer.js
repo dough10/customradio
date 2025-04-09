@@ -37,6 +37,10 @@ export default class AudioPlayer {
     this.player.onplay = this._onplay.bind(this);
     this.player.onpause = this._onpause.bind(this);
     this.player.ontimeupdate = this._ontimeupdate.bind(this);
+
+    this._handleOnline = this._handleOnline.bind(this);
+    this._handleOffline = this._handleOffline.bind(this)
+    this._clearPlaying = this._clearPlaying.bind(this);
     this._togglePlay = this._togglePlay.bind(this);
     this._scrollToStation = this._scrollToStation.bind(this);
     this._setVolume = this._setVolume.bind(this);
@@ -306,15 +310,15 @@ export default class AudioPlayer {
    * remove event listeners
    */
   destroy() {
-    window.removeEventListener('offline', this._handleOffline.bind(this));
+    window.removeEventListener('offline', this._handleOffline);
   
-    window.removeEventListener('online', this._handleOnline.bind(this));
+    window.removeEventListener('online', this._handleOnline);
 
     window.removeEventListener('keypress', this._onKeyPress);
 
     document.querySelector(this._selectors.name).removeEventListener('click', this._scrollToStation);
 
-    document.querySelector(this._selectors.smallButton).removEventListener('click', this._togglePlay);
+    document.querySelector(this._selectors.smallButton).removeEventListener('click', this._togglePlay);
     
     document.querySelector('#vol>input').removeEventListener('input', this._setVolume);
   }
@@ -334,9 +338,9 @@ export default class AudioPlayer {
       volumeElement.style.display = 'none';
     }
     
-    window.addEventListener('offline', this._handleOffline.bind(this));
+    window.addEventListener('offline', this._handleOffline);
     
-    window.addEventListener('online', this._handleOnline.bind(this));
+    window.addEventListener('online', this._handleOnline);
     
     window.addEventListener('keypress', this._onKeyPress);
     
