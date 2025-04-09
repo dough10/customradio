@@ -16,8 +16,7 @@ export default class CustomRadioApp {
     stationsContainer: '#stations',
     downloadButton: '#download',
     resetButton: '.reset',
-    wrapper: '.wrapper',
-    greetingElement: '#greeting'
+    wrapper: '.wrapper'
   };
   
   constructor() {
