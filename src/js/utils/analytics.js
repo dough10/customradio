@@ -20,16 +20,16 @@ export default class Analytics {
   }
 
   _checkContainer() {
-    if (this._isDismissed) {
-      this._dismissAlert();
-      return;
-    }
-
     // element was already dismissed
     const hasChildren = document.querySelectorAll('#matomo-opt-out>*').length > 0;
     
     // element has yet to populate
     if (!hasChildren) return;
+
+    if (this._isDismissed) {
+      this._dismissAlert();
+      return;
+    }
 
     // element is populate and ready open
     if (!this._alert.hasAttribute('open')) {
