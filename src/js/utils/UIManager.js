@@ -33,8 +33,6 @@ export default class UIManager {
   attachListeners({ onFilterChange, onReset }) {
     initDialogInteractions();
 
-    this._greetUser();
-
     const filter = document.querySelector(this._selectors.filter);
     filter.addEventListener('change', onFilterChange);
 
@@ -119,26 +117,6 @@ export default class UIManager {
   async loadGenres(genres) {
     const options = genres.map(createOption);
     document.querySelector(this._selectors.genres).replaceChildren(...options);
-  }
-
-  /**
-   * shows a greeting dialog to the user
-   * 
-   * @returns {void}
-   */
-  async _greetUser() {
-    const hasBeenGreeted = Number(localStorage.getItem('greeted'))
-    const greetingElement = document.querySelector(this._selectors.greetingElement);
-
-    if (hasBeenGreeted) {
-      greetingElement.remove();
-      return;
-    }
-    greetingElement.showModal();
-    // remove after closing
-    greetingElement.addEventListener('transitionend', () => {
-      if (!greetingElement.hasAttribute('open')) greetingElement.remove();
-    });
   }
 
   /**
