@@ -8,7 +8,7 @@
     "prebuild": "bash build_assets/pre.sh",
     "build": "npx webpack",
     "postbuild": "bash build_assets/post.sh",
-    "test": "web-test-runner \"src/js/utils/test/*.test.js\" \"src/js/Toast/test/*.test.js\" --node-resolve && mocha",
+    "test": "web-test-runner \"src/js/CustomRadioApp/*/test/*.test.js\" --node-resolve && mocha",
     "version++": "node build_assets/incriment-version.js && node make-docs.js",
     "build-docker": "sh build_assets/build-container.sh \"registry.dough10.me/customradio\"",
     "docs": "node make-docs.js"
