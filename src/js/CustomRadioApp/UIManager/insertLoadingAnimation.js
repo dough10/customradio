@@ -5,7 +5,7 @@
  * 
  * @returns {void}
  */
-export default function loadingAnimation(parent) {
+export default function insertLoadingAnimation(parent) {
   if (parent.querySelector('.loading')) return;
   const div = document.createElement('div');
   div.classList.add('loading');
