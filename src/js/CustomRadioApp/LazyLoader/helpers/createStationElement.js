@@ -1,8 +1,8 @@
-import Toast from '../Toast/Toast.js'
+import Toast from '../../Toast/Toast.js'
 import svgIcon from './createSVGIcon.js';
 import createSmallButton from './createSmallButton.js';
-import sleep from '../utils/sleep.js';
-import debounce from '../utils/debounce.js';
+import sleep from '../../utils/sleep.js';
+import debounce from '../../utils/debounce.js';
 
 const ELEMENT_HEIGHT = 40;
 const LONG_PRESS_DURATION = 500;

@@ -1,5 +1,5 @@
 import debounce from '../utils/debounce.js';
-import createStationElement from './createStationElement.js';
+import createStationElement from './helpers/createStationElement.js';
 
 const ELEMENT_HEIGHT = 58;
 const SCROLL_THRESHOLD = 0.7;

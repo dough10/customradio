@@ -1,5 +1,5 @@
 import { expect } from '@open-wc/testing';
-import loadingAnimation from '../insertLoadingAnimation.js';
+import loadingAnimation from '../helpers/insertLoadingAnimation.js';
 
 describe('loadingAnimation', () => {
   let parent;

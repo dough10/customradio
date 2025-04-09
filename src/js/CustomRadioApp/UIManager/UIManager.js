@@ -1,7 +1,7 @@
-import Analytics from './Analytics.js';
-import {initDialogInteractions, destroyDialogInteractions} from './dialog.js';
-import insertLoadingAnimation from './insertLoadingAnimation.js';
-import downloadTextfile from './downloadTextfile.js';
+import Analytics from './helpers/Analytics.js';
+import {initDialogInteractions, destroyDialogInteractions} from './helpers/dialog.js';
+import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
+import downloadTextfile from './helpers/downloadTextfile.js';
 
 /**
  * creates a datalist option element

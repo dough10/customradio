@@ -1,7 +1,7 @@
 import loadingAnimation from './insertLoadingAnimation.js';
-import Toast from '../Toast/Toast.js';
-import sleep from '../utils/sleep.js';
-import isValidURL from '../utils/URL.js';
+import Toast from '../../Toast/Toast.js';
+import sleep from '../../utils/sleep.js';
+import isValidURL from '../../utils/URL.js';
 
 
 /**

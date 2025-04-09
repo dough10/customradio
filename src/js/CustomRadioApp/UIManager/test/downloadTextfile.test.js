@@ -1,6 +1,6 @@
 import { expect } from '@open-wc/testing';
 import Sinon from 'sinon';
-import downloadTextfile from '../downloadTextfile.js';
+import downloadTextfile from '../helpers/downloadTextfile.js';
 
 describe('downloadTextfile', () => {
   let container;
