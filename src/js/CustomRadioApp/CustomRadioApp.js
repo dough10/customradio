@@ -1,11 +1,13 @@
-import loadServiceWorker from './loadServiceWorker.js';
-import AudioPlayer from './AudioPlayer.js';
-import Toast from '../Toast/Toast.js';
-import LazyLoader from './LazyLoader.js';
-import Analytics from './Analytics.js';
-import UIManager from './UIManager.js';
-import StationManager from './StationManager.js';
+import loadServiceWorker from './utils/loadServiceWorker.js';
+import AudioPlayer from './AudioPlayer/AudioPlayer.js';
+import Toast from './Toast/Toast.js';
+import LazyLoader from './LazyLoader/LazyLoader.js';
+import UIManager from './UIManager/UIManager.js';
+import StationManager from './StationManager/StationManager.js';
 
+/**
+ * customradio.dough10.me
+ */
 export default class CustomRadioApp {
   // HTMLElement selectors
   _selectors = {
@@ -23,14 +25,14 @@ export default class CustomRadioApp {
     this._uiManager = new UIManager(this._selectors);
     this._stationManager = new StationManager(window.location.origin);
     this._player = new AudioPlayer();
-    this._analytics = new Analytics();
   }
 
   /**
    * initializes the app
    */
-  async init() {
+  init() {
     loadServiceWorker();
+
     this._player.init();
 
     this._uiManager.attachListeners({
@@ -53,7 +55,6 @@ export default class CustomRadioApp {
     });
     this._player.destroy();
     destroyDialogInteractions();
-    this._analytics.destroy();
     if (this._lzldr) {
       this._lzldr.destroy();
     }

@@ -1,4 +1,4 @@
-import CustomRadioApp from './utils/CustomRadioApp.js';
+import CustomRadioApp from './CustomRadioApp/CustomRadioApp.js';
 
 const app = new CustomRadioApp();
 

@@ -1,5 +1,35 @@
-import queryString from './queryString.js';
-import retryFetch from './retryFetch.js';
+/**
+ * add query string based on length of input value 
+ * 
+ * @param {String} value
+ * 
+ * @returns {String}
+ */
+function queryString(value) {
+  const uriEncoded = encodeURIComponent(value);
+  return (value.length === 0) ? '' : `?genres=${uriEncoded}`;
+}
+
+/**
+ * retry 
+ * 
+ * @param {String} url 
+ * @param {Object} options 
+ * @param {Number} retries 
+ * 
+ * @returns {Object}
+ */
+async function retryFetch(url, options = {}, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      return res;
+    } catch (err) {
+      if (i === retries - 1) throw err;
+    }
+  }
+}
 
 /**
  * manages connection with API, localstorage, selected managment

@@ -2,7 +2,7 @@ import { expect } from '@open-wc/testing';
 import sinon from 'sinon';
 import {initDialogInteractions} from '../dialog.js';
 import Toast from '../../Toast/Toast.js';
-import loadingAnimation from '../5dots.js';
+import loadingAnimation from '../insertLoadingAnimation.js';
 
 describe('addDialogInteractions', () => {
   let dialog, addDialog, closeButton, addButton, form, inputElement, submitButton;

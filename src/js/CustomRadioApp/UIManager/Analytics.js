@@ -4,6 +4,9 @@ export default class Analytics {
 
   _isDismissed = Number(localStorage.getItem('dismissed'));
 
+  /**
+   * functions controling #alert element and matomo
+   */
   constructor() {
     this._dismissAlert = this._dismissAlert.bind(this);
     this._removeAlert = this._removeAlert.bind(this);

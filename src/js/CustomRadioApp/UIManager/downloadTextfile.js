@@ -8,7 +8,7 @@ import timestamp from './timestamp.js';
  * @param {Function} [scopedStamp] - Optional custom stamp function for testing
  * @returns {void}
  */
-export default async function downloadTextfile(_, scopedStamp = timestamp) {
+export default async function downloadTextfile(ev, scopedStamp = timestamp) {
   const container = document.querySelector('#stations');
   const elements = Array.from(container.querySelectorAll('li[selected]'));
   const str = elements

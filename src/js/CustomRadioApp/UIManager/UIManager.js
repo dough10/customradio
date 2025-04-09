@@ -1,5 +1,7 @@
+import Analytics from './Analytics.js';
 import {initDialogInteractions, destroyDialogInteractions} from './dialog.js';
-import insertLoadingAnimation from './5dots.js';
+import insertLoadingAnimation from './insertLoadingAnimation.js';
+import downloadTextfile from './downloadTextfile.js';
 
 /**
  * creates a datalist option element
@@ -14,23 +16,27 @@ function createOption(str) {
   return option;
 }
 
+/**
+ * manages UI elements
+ */
 export default class UIManager {
   constructor(selectors) {
     this._selectors = selectors;
     this._lastTop = 0;
     this._toTop = document.querySelector(this._selectors.toTop);
-
     this.toggleDisplayOnScroll = this.toggleDisplayOnScroll.bind(this);
   }
-
+  
   /**
    * attach UI listeners
    * 
    * @param {Object} param0
    * @param {Function} param0.onFilterChange
    * @param {Function} param0.onReset 
-   */
-  attachListeners({ onFilterChange, onReset }) {
+  */
+ attachListeners({ onFilterChange, onReset }) {
+    this._analytics = new Analytics();
+
     initDialogInteractions();
 
     const filter = document.querySelector(this._selectors.filter);
@@ -41,6 +47,9 @@ export default class UIManager {
 
     const toTop = document.querySelector(this._selectors.toTop);
     toTop.addEventListener('click', this._toTopHandler.bind(this));
+
+    const dlButton = document.querySelector(this._selectors.downloadButton);
+    dlButton.addEventListener('click', downloadTextfile);
   }
 
   /**
@@ -51,6 +60,8 @@ export default class UIManager {
    * @param {Function} param0.onReset 
    */
   detachListeners({ onFilterChange, onReset }) {
+    this._analytics.destroy();
+
     destroyDialogInteractions();
 
     const filter = document.querySelector(this._selectors.filter);
@@ -61,6 +72,9 @@ export default class UIManager {
 
     const toTop = document.querySelector(this._selectors.toTop);
     toTop.removeEventListener('click', this._toTopHandler.bind(this));
+
+    const dlButton = document.querySelector(this._selectors.downloadButton);
+    dlButton.removeEventListener('click', downloadTextfile);
   }
 
   /**

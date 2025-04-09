@@ -1,7 +1,7 @@
-import loadingAnimation from './5dots.js';
+import loadingAnimation from './insertLoadingAnimation.js';
 import Toast from '../Toast/Toast.js';
-import sleep from './sleep.js';
-import isValidURL from './URL.js';
+import sleep from '../utils/sleep.js';
+import isValidURL from '../utils/URL.js';
 
 
 /**
@@ -170,14 +170,17 @@ async function info() {
  * 
  * @returns {void}
  */
-async function greetUser() {
-  const hasBeenGreeted = Number(localStorage.getItem('greeted'))
+function greetUser() {
+  const hasBeenGreeted = Number(localStorage.getItem('greeted'));
   const greetingElement = document.querySelector('#greeting');
 
   if (hasBeenGreeted) {
     greetingElement.remove();
     return;
   }
+
+  if (!greetingElement) return;
+
   greetingElement.showModal();
   // remove after closing
   greetingElement.addEventListener('transitionend', () => {

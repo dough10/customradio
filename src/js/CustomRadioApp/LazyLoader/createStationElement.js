@@ -1,12 +1,24 @@
 import Toast from '../Toast/Toast.js'
 import { svgIcon } from './createSVGIcon.js';
 import { createSmallButton } from './createSmallButton.js';
-import sleep from './sleep.js';
-import setSelectedCount from './setSelectedCount.js';
-import debounce from './debounce.js';
+import sleep from '../utils/sleep.js';
+import debounce from '../utils/debounce.js';
 
 const ELEMENT_HEIGHT = 40;
 const LONG_PRESS_DURATION = 500;
+
+function setSelectedCount(selected) {
+  const count = document.querySelector('#count');
+  const dlButton = document.querySelector('#download');
+  count.textContent = `${selected} station${selected === 1 ? '' : 's'} selected`;
+  if (selected > 0) {
+    dlButton.removeAttribute('disabled');
+  } else {
+    if (!dlButton.hasAttribute('disabled')) {
+      dlButton.toggleAttribute('disabled');
+    }
+  }
+}
 
 /**
  * opens the stations homepage if present

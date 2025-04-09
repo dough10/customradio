@@ -1,6 +1,6 @@
 import Toast from '../Toast/Toast.js';
-import sleep from './sleep.js';
-import debounce from './debounce.js';
+import sleep from '../utils/sleep.js';
+import debounce from '../utils/debounce.js';
 
 const PAUSE_TIMER_DURATION = 10000;
 const VOLUME_DEBOUNCE_DURATION = 1000;
