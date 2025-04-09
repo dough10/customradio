@@ -1,5 +1,5 @@
 import debounce from '../utils/debounce.js';
-import { createStationElement } from './createStationElement.js';
+import createStationElement from './createStationElement.js';
 
 const ELEMENT_HEIGHT = 58;
 const SCROLL_THRESHOLD = 0.7;
@@ -40,9 +40,7 @@ export default class LazyLoader {
     // bind this to the class instance
     this._resizeHandler = this._onResize.bind(this);
     this._scrollHandler = this._onScroll.bind(this);
-    this._load = this._load.bind(this);
-
-    this._debouncedLoad = debounce(this._load, 100);
+    this._debouncedLoad = debounce(this._load.bind(this), 100);
 
     container.replaceChildren();
 

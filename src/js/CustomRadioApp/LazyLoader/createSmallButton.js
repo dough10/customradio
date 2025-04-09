@@ -1,4 +1,4 @@
-import {svgIcon} from './createSVGIcon.js';
+import svgIcon from './createSVGIcon.js';
 
 /**
  * creates a HTML button with svg icon 
@@ -15,7 +15,7 @@ import {svgIcon} from './createSVGIcon.js';
  * 
  * @returns {HTMLElement} button
  */
-function createSmallButton({ icon, cssClass, func, title }) {
+export default function createSmallButton({ icon, cssClass, func, title }) {
   const button = document.createElement('button');
   button.title = title;
   button.type = 'button';
@@ -24,5 +24,3 @@ function createSmallButton({ icon, cssClass, func, title }) {
   button.addEventListener('click', func);
   return button;
 }
-
-export {createSmallButton};

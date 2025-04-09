@@ -1,6 +1,6 @@
 import Toast from '../Toast/Toast.js'
-import { svgIcon } from './createSVGIcon.js';
-import { createSmallButton } from './createSmallButton.js';
+import svgIcon from './createSVGIcon.js';
+import createSmallButton from './createSmallButton.js';
 import sleep from '../utils/sleep.js';
 import debounce from '../utils/debounce.js';
 
@@ -321,7 +321,7 @@ async function playStream(ev, player) {
  * 
  * @returns {HTMLElement} li element
  */
-function createStationElement({ id, name, url, bitrate, genre, icon, homepage }, player) {
+export default function createStationElement({ id, name, url, bitrate, genre, icon, homepage }, player) {
   const buttonData = [
     {
       icon: {
@@ -395,5 +395,3 @@ function createStationElement({ id, name, url, bitrate, genre, icon, homepage },
   li.append(span, div, ...buttons);
   return li;
 }
-
-export {createStationElement}
