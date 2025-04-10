@@ -57,8 +57,6 @@ export default class CustomRadioApp {
       onReset: this._resetFilter.bind(this)
     });
     
-    destroyDialogInteractions();
-    
     if (this._lzldr) {
       this._lzldr.destroy();
     }
