@@ -160,10 +160,7 @@ export default class UIManager {
    */
   loadingEnd() {
     const loadingEl = document.querySelector('.loading');
-    if (loadingEl) {
-      loadingEl.remove();
-      loadingEl = null;
-    }
+    if (loadingEl) loadingEl.remove();
     const stationCount = document.querySelector(this._selectors.stationCount);
     stationCount.parentElement.style.removeProperty('display');
   }
