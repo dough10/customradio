@@ -1,0 +1,15 @@
+module.exports = {
+  clickDismiss: 'Click to dismiss',
+  title: 'radio.txt creator',
+  intro: 'A website for creating a custom radio.txt for use with ',
+  hibyLink: 'Hiby digital audio players',
+  siteUse: 'To use the site',
+  step1: 'Filter stations by name or genre (e.g., somafm, hip hop, jazz), then add all the stations you would like to include in your radio.txt file.',
+  step2: 'When you are happy with your list, press "Download" and save the text file to the root directory of the storage on your Hiby player.',
+  filterLabel: 'Filter by name or genre',
+  downloadButtonText: 'download',
+  closeButtonText: 'close',
+  volume: 'Volume',
+  thanks: 'Thank you for using the site. Please report any security concerns to the contact information below.',
+  securityContact: 'Security contact',
+};
