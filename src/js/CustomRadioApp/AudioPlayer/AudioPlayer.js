@@ -302,10 +302,10 @@ export default class AudioPlayer {
    * @param {Event} ev 
    */
   _onKeyPress(ev) {
-    ev.preventDefault();
     const button = ev.code;
     switch (button) {
       case 'Space': 
+        ev.preventDefault();
         if (this.player.src) this._bouncedToggle();
         break;
     }
