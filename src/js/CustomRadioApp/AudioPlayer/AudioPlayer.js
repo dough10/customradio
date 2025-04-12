@@ -34,6 +34,7 @@ export default class AudioPlayer {
   constructor() {
     this.player = new Audio();
     this.pauseTimer = 0;
+    this._OGTitle = document.title;
 
     this.player.onwaiting = this._onwaiting.bind(this);
     this.player.onplaying = this._onplaying.bind(this);
@@ -94,6 +95,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onplay() {
+    document.title = `Playing: ${document.querySelector(this._selectors.name).textContent}`;
     if (this.pauseTimer) {
       clearTimeout(this.pauseTimer);
       this.pauseTimer = 0;
@@ -108,6 +110,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onpause() {
+    document.title = this._OGTitle;
     this.pauseTimer = setTimeout(this._clearPlaying, PAUSE_TIMER_DURATION);
     const icon = document.querySelector(this._selectors.icon);
     if (!icon) return;
@@ -245,7 +248,8 @@ export default class AudioPlayer {
       new Toast('Invalid station data. Unable to play stream.', 3);
       return;
     }
-
+    
+    document.title = `Playing: ${name}`;
     document.querySelector(this._selectors.name).textContent = name;
     document.querySelector(this._selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
     
