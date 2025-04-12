@@ -27,7 +27,7 @@ COPY --chown=node:node --from=build /usr/src/app/templates ./templates
 COPY --chown=node:node --from=build /usr/src/app/logs ./logs
 COPY --chown=node:node --from=build /usr/src/app/data ./data
 COPY --chown=node:node --from=build /usr/src/app/model ./model
-
+COPY --chown=node:node --from=build /usr/src/app/locales ./locales
 EXPOSE 3000/tcp
 
 CMD ["dumb-init", "node", "index.js"]
