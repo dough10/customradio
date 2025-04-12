@@ -2,7 +2,7 @@ import Analytics from './helpers/Analytics.js';
 import {initDialogInteractions, destroyDialogInteractions} from './helpers/dialog.js';
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
-import ColapsingHeader from './ColapsingHeader/ColapsingHeader.js';
+import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import toggleActiveState from '../utils/toggleActiveState.js';
 
 /**
@@ -27,7 +27,7 @@ export default class UIManager {
     this._lastTop = 0;
     this._toTop = document.querySelector(this._selectors.toTop);
     this.toggleDisplayOnScroll = this.toggleDisplayOnScroll.bind(this);
-    this.header = new ColapsingHeader();
+    this.header = new CollapsingHeader();
   }
   
   /**
@@ -106,7 +106,7 @@ export default class UIManager {
   setCounts(selected, total) {
     toggleActiveState(document.querySelector(this._selectors.downloadButton), selected);
     const stationCount = document.querySelector(this._selectors.stationCount);
-    stationCount.textContent = `${total} results`;
+    stationCount.textContent = total;
   }
 
   /**
