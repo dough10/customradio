@@ -27,7 +27,7 @@ html(lang=lang)
     link(rel="preload" href="styles.min.css" as="style")
     link(rel="stylesheet" href="styles.min.css" async)
     script(type="text/javascript", defer) var _paq = window._paq = window._paq || []; _paq.push(["trackPageView"]); _paq.push(["enableLinkTracking"]); (function() { var a = "https://analytics.dough10.me/"; _paq.push(["setTrackerUrl", a + "matomo.php"]); _paq.push(["setSiteId", "2"]); var e = document, t = e.createElement("script"), p = e.getElementsByTagName("script")[0]; t.async = true; t.src = a + "matomo.js"; p.parentNode.insertBefore(t, p);})();
-    title radio.txt creator
+    title #{title}
     script(type="application/ld+json")
       | {"@context":"https://schema.org","@type":"WebSite","name":"radio.txt creator","url":"https://customradio.dough10.me","description":"An online radio station browser with the ability to export .txt files for use in Hiby digital audio players."}
   
@@ -74,7 +74,7 @@ html(lang=lang)
       svg(viewBox="0 0 24 24")
         path(fill="currentColor" d="M15,20H9V12H4.16L12,4.16L19.84,12H15V20Z")
 
-    button#add_button.fab(type="button" title="add station")
+    button#add_button.fab(type="button" title=addStation)
       svg(viewBox="0 0 24 24")
         path(fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z")
 
@@ -98,17 +98,17 @@ html(lang=lang)
         svg(viewBox="0 0 24 24")
           path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
       div
-        h1 add station
-        p URL should be an Icecast server with a content type of "audio/mpeg" or "audio/mp3"
-        p The API will get the other information from the stream headers.
+        h1 #{addStation}
+        p #{addCase1}
+        p #{addCase2}
         form#add-stream.form-group
-          input(placeholder="Station URL:" type="url" id="station-url" name="url" required)
-          label(for="station-url") Station URL:
+          input(placeholder=stationURL type="url" id="station-url" name="url" required)
+          label(for="station-url") #{stationURL}:
           div#response
-          button#submit-stream.button(type="submit" disabled)
+          button#submit-stream.button(type="submit" disabled, title=addButtonText)
             svg(viewBox="0 0 24 24")
               path(fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z")
-            span add
+            span #{addButtonText}
 
     dialog#info-dialog
       button.small-button.close(type="button" autofocus title=closeButtonText)
