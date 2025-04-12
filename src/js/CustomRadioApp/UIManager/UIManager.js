@@ -3,6 +3,7 @@ import {initDialogInteractions, destroyDialogInteractions} from './helpers/dialo
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
 import ColapsingHeader from './ColapsingHeader/ColapsingHeader.js';
+import toggleActiveState from '../utils/toggleActiveState.js';
 
 /**
  * creates a datalist option element
@@ -103,14 +104,7 @@ export default class UIManager {
    * @param {Number} total 
    */
   setCounts(selected, total) {
-    const dlButton = document.querySelector(this._selectors.downloadButton);
-    if (selected > 0) {
-      dlButton.removeAttribute('disabled');
-    } else {
-      if (!dlButton.hasAttribute('disabled')) {
-        dlButton.toggleAttribute('disabled');
-      }
-    }
+    toggleActiveState(document.querySelector(this._selectors.downloadButton), selected);
     const stationCount = document.querySelector(this._selectors.stationCount);
     stationCount.textContent = `${total} results`;
   }
