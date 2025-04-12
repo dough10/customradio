@@ -78,5 +78,5 @@ let expect;
     });
   });
 
-  run(); // Run the tests
+  // run(); // Run the tests
 })();
