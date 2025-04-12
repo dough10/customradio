@@ -1,4 +1,5 @@
 export default class ColapsingHeader {
+  _originalHeight = 128;
   // size in px to shrink header
   _shrinkHeaderBy = 64;
   // slowing factor.
@@ -18,20 +19,20 @@ export default class ColapsingHeader {
 
   scroll(scrollTop) {
     const transform = this._calculateTransform(scrollTop);
-    const opacity = transform / 64;
+    const opacity = transform / this._shrinkHeaderBy;
+    
     this.input.style.opacity = 1 - opacity;
     this.header.style.transform = `translateY(-${transform}px)`;
     this.infoButton.style.transform = `translateY(${transform / 1.5}px)`;
-    this.wrapper.style.top = `${128 - transform}px`;
+    this.wrapper.style.top = `${this._originalHeight - transform}px`;
+  
     if (window.innerWidth < 450) {
       this.infoButton.style.opacity = opacity;
-      if (opacity === 0) {
-        this.infoButton.style.display = 'none';
-      } else {
-        this.infoButton.style.display = 'flex';
+      this.infoButton.style.display = opacity === 0 ? 'none' : 'flex';
+    } else {
+      if (this.infoButton.style.opacity !== '1') {
+        this.infoButton.style.opacity = 1;
       }
-    } else if (this.infoButton.style.opacity !== 1) {
-      this.infoButton.style.opacity = 1
     }
   }
 }
