@@ -27,7 +27,8 @@ export default class AudioPlayer {
     volume: '#vol',
     smallButton: '.player>.small-button',
     stations: '#stations>li',
-    icon: '.player>.small-button>svg>path'
+    icon: '.player>.small-button>svg>path',
+    filter: '#filter'
   };
 
   constructor() {
@@ -137,7 +138,13 @@ export default class AudioPlayer {
     this.currentPlayingElement.toggleAttribute('playing');
   }
 
+  /**
+   * scrolls UI to current playing station if in list
+   * 
+   * @returns {void}
+   */
   _scrollToStation() {
+    if (!this.currentPlayingElement) return;
     this.currentPlayingElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
@@ -302,6 +309,8 @@ export default class AudioPlayer {
    * @param {Event} ev 
    */
   _onKeyPress(ev) {
+    const filter = document.querySelector(this._selectors.filter);
+    if (document.activeElement === filter) return;
     const button = ev.code;
     switch (button) {
       case 'Space': 
