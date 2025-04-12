@@ -78,11 +78,11 @@ module.exports = (app, register) => {
    */
   app.get('/', (req, res) => {
     const lang = req.headers['accept-language']?.split(',')[0].split('-')[0];
-    setLanguage(lang);
-    log.info(`${req.ip} -> /?lang=${lang}  ${Date.now() - req.startTime}ms`);
+    const loadedLang = setLanguage(lang);
+    log.info(`${req.ip} -> /?lang=${loadedLang}  ${Date.now() - req.startTime}ms`);
     res.send(
       pug.renderFile('./templates/index.pug', {
-        lang: lang,
+        lang: loadedLang,
         title: t('title'),
         intro: t('intro'),
         hibyLink: t('hibyLink'),
@@ -95,7 +95,12 @@ module.exports = (app, register) => {
         volume: t('volume'),
         thanks: t('thanks'),
         securityContact: t('securityContact'),
-        clickDismiss: t('clickDismiss')
+        clickDismiss: t('clickDismiss'),
+        addStation: t('addStation'),
+        addCase1: t('addCase1'),
+        addCase2: t('addCase2'),
+        stationURL: t('stationURL'),
+        addButtonText: t('addButtonText')
       })
     );
   });
