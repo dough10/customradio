@@ -2,6 +2,7 @@ import Analytics from './helpers/Analytics.js';
 import {initDialogInteractions, destroyDialogInteractions} from './helpers/dialog.js';
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
+import ColapsingHeader from './ColapsingHeader/ColapsingHeader.js';
 
 /**
  * creates a datalist option element
@@ -25,6 +26,7 @@ export default class UIManager {
     this._lastTop = 0;
     this._toTop = document.querySelector(this._selectors.toTop);
     this.toggleDisplayOnScroll = this.toggleDisplayOnScroll.bind(this);
+    this.header = new ColapsingHeader();
   }
   
   /**
@@ -83,6 +85,7 @@ export default class UIManager {
    * @param {HTMLElement} parent 
    */
   toggleDisplayOnScroll(parent) {
+    this.header.scroll(parent.scrollTop);
     if (parent.scrollTop < this._lastTop) {
       this._toTop.classList.add('hidden');
     } else if (parent.scrollTop > 0) {
