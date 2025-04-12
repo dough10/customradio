@@ -1,3 +1,12 @@
 import '../src/css/reset.css';
+import '../src/css/input-text.css';
+import '../src/css/input-range.css';
+import '../src/css/dialog.css';
+import '../src/css/loading-circles.css';
+import '../src/css/button.css';
+import '../src/css/small-button.css';
+import '../src/css/fab.css';
+import '../src/css/Toast.css';
+import '../src/css/Alert.css';
 import '../src/css/base.css';
 import '../src/js/main.js';
