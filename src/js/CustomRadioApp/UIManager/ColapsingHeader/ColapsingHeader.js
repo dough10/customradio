@@ -13,7 +13,7 @@ export default class ColapsingHeader {
   }
 
   _calculateTransform(scrollTop) {
-    return Math.min(scrollTop / this._factor, this._minHeaderHeight);
+    return Math.min(scrollTop / this._factor, this._shrinkHeaderBy);
   }
 
   scroll(scrollTop) {
