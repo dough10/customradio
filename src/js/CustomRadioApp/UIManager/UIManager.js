@@ -103,9 +103,7 @@ export default class UIManager {
    * @param {Number} total 
    */
   setCounts(selected, total) {
-    const count = document.querySelector('#count');
     const dlButton = document.querySelector(this._selectors.downloadButton);
-    count.textContent = `${selected} station${selected === 1 ? '' : 's'} selected`;
     if (selected > 0) {
       dlButton.removeAttribute('disabled');
     } else {
@@ -155,7 +153,7 @@ export default class UIManager {
   loadingStart(container) {
     insertLoadingAnimation(container);
     const stationCount = document.querySelector(this._selectors.stationCount);
-    stationCount.parentElement.style.display = 'none';
+    stationCount.style.display = 'none';
   }
 
   /**
@@ -165,7 +163,7 @@ export default class UIManager {
     const loadingEl = document.querySelector('.loading');
     if (loadingEl) loadingEl.remove();
     const stationCount = document.querySelector(this._selectors.stationCount);
-    stationCount.parentElement.style.removeProperty('display');
+    stationCount.style.removeProperty('display');
   }
 
   /**

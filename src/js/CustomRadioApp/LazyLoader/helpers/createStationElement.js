@@ -7,10 +7,8 @@ import debounce from '../../utils/debounce.js';
 const ELEMENT_HEIGHT = 40;
 const LONG_PRESS_DURATION = 500;
 
-function setSelectedCount(selected) {
-  const count = document.querySelector('#count');
+function toggleDLButton(selected) {
   const dlButton = document.querySelector('#download');
-  count.textContent = `${selected} station${selected === 1 ? '' : 's'} selected`;
   if (selected > 0) {
     dlButton.removeAttribute('disabled');
   } else {
@@ -245,7 +243,7 @@ function toggleSelect(ev) {
   // get all selected elements
   // update selected count
   const all = Array.from(el.parentNode.querySelectorAll('li[selected]'));
-  setSelectedCount(all.length);
+  toggleDLButton(all.length);
   
   // store selected stations in localstorage
   el.dataset.bitrate = Number(el.dataset.bitrate);
