@@ -1,5 +1,5 @@
 doctype html
-html(lang="en")
+html(lang=lang)
   head
     meta(charset="UTF-8")
     meta(name="author" content="dough10")
@@ -36,34 +36,34 @@ html(lang="en")
       #reset-text
         #matomo-opt-out
         script(defer type="text/javascript" src="https://analytics.dough10.me/index.php?module=CoreAdminHome&action=optOutJS&divId=matomo-opt-out&language=auto&showIntro=1")
-      .yellow-text Click to dismiss
+      .yellow-text(title=clickDismiss) #{clickDismiss}
 
     header
       .form-group
-        input.w93(placeholder="Filter by genre:" type="text" id="filter" name="filter" list="genres")
-        label(for="filter") Filter by name or genre:
+        input.w93(placeholder=filterLabel type="text" id="filter" name="filter" list="genres")
+        label(for="filter") #{filterLabel}:
         button(type="button" class="small-button reset" title="reset")
           svg(viewBox="0 0 24 24")
             path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
         datalist#genres
 
-      button.button(type="button" id="download" disabled title="download text file")
+      button.button(type="button" id="download" disabled title=downloadButtonText)
         svg(viewBox="0 -960 960 960")
           path(fill="currentColor" d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z")
-        span download
+        span #{downloadButtonText}
 
       button#info.small-button(title="Info")
         svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor")
           path(d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z")
 
     main.wrapper
-      div#station-count 0 results
+      div#station-count 0
       ul#stations
 
     .player
       span#name station name
       label#vol
-        span Volume
+        span #{volume}
         input(type="range" min="0" max="100" aria-label="Volume control" role='slider')
       span#bitrate 0kbps
       .small-button.player-big
@@ -79,27 +79,27 @@ html(lang="en")
         path(fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z")
 
     dialog#greeting
-      h1 radio.txt creator
+      h1 #{title}
       p
-        | A website for creating a custom radio.txt for use with 
-        a(href="https://store.hiby.com/collections/music-player" target="_blank") Hiby digital audio players.
+        | #{intro} 
+        a(href="https://store.hiby.com/collections/music-player" target="_blank") #{hibyLink}
       p
-        | To use the site: <br /> 1. Filter stations by name or genre (e.g., somafm, hip hop, jazz), then add all the stations you would like to include in your radio.txt file.
+        | #{siteUse}: <br /> 
+        | 1. #{step1}
       p
-        | 2. When you are happy with your list, press "Download" and save the text file to the root directory of the storage on your Hiby player.
-      button.button.close(type="button" autofocus title="close")
+        | 2. #{step2}
+      button.button.close(type="button" autofocus title=closeButtonText)
         svg(viewBox="0 0 24 24")
           path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
-        span close
+        span #{closeButtonText}
 
     dialog#add
-      button.small-button.close(type="button" autofocus title="close")
+      button.small-button.close(type="button" autofocus title=closeButtonText)
         svg(viewBox="0 0 24 24")
           path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
       div
         h1 add station
-        p
-          | URL should be an Icecast server with a content type of "audio/mpeg" or "audio/mp3"
+        p URL should be an Icecast server with a content type of "audio/mpeg" or "audio/mp3"
         p The API will get the other information from the stream headers.
         form#add-stream.form-group
           input(placeholder="Station URL:" type="url" id="station-url" name="url" required)
@@ -111,12 +111,12 @@ html(lang="en")
             span add
 
     dialog#info-dialog
-      button.small-button.close(type="button" autofocus title="close")
+      button.small-button.close(type="button" autofocus title=closeButtonText)
         svg(viewBox="0 0 24 24")
           path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
       h1 v?.?.?
       .scrollable
-        .margin-bottom-24 Thank you for using the site. Please report any security concerns to the contact information below.
+        .margin-bottom-24 #{thanks}
         b Frontend:
         ul 
           li
@@ -146,7 +146,7 @@ html(lang="en")
         a(href="https://github.com/dough10" target="_blank") github.com/dough10
       br
       span
-        | Security contact: 
+        | #{securityContact}: 
         a(href=".well-known/security.txt" target="_blank") security.txt
 
     script(src="bundle.min.js" async) 
