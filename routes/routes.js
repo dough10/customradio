@@ -100,7 +100,8 @@ module.exports = (app, register) => {
         addCase1: t('addCase1'),
         addCase2: t('addCase2'),
         stationURL: t('stationURL'),
-        addButtonText: t('addButtonText')
+        addButtonText: t('addButtonText'),
+        stations: t('stations')
       })
     );
   });
