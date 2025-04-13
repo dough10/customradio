@@ -7,12 +7,12 @@ export const en = {
   homepageTitle: homepage => `navigate to ${homepage}`, 
   markDup: 'mark duplicate',
   dupTitle: 'mark station duplicate',
-  playingError: error => `Error playing media ${error}`,
-  noHome: 'No homepage header',
+  playingError: error => `Error playing media: ${error}`,
+  noHome: 'No homepage',
   errorHome: error => `Error opening homepage: ${error}`,
   offline: 'Disconnected: attempting reconnect',
   online: 'Reconnected: attempting to restart play',
   playTitle: 'Play stream',
   addTitle: 'Add to file', 
   removeTitle: 'Remove from file'
-}
+};

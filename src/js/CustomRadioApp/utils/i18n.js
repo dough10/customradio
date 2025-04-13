@@ -1,8 +1,12 @@
 // i18n.js
 import { en } from './lang/en.js';
 import { es } from './lang/es.js';
+import { fr } from './lang/fr.js';
+import { zh } from './lang/zh.js';
+import { ru } from './lang/ru.js';
+import { it } from './lang/it.js';
 
-const languages = { en, es };
+const languages = { en, es, fr, zh, ru, it };
 
 let currentLang = 'en';
 
