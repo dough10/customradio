@@ -20,7 +20,7 @@
   pointer-events: all;
   justify-content: center;
   align-items: center;
-  transition: background-color var(--animate-150, 150ms) linear;
+  transition: background var(--animate-150, 150ms) linear;
   transform: translate3d(0, 0, 0);
   flex-direction: row;
   border: none;
