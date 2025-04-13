@@ -20,5 +20,7 @@ module.exports = {
   addCase1: 'La URL debe ser un servidor Icecast con un tipo de contenido "audio/mpeg" o "audio/mp3"',
   addCase2: 'La API obtendrá el resto de la información de los encabezados de transmisión.',
   stationURL: 'URL de la estación',
-  addButtonText: 'agregar'
+  addButtonText: 'agregar',
+
+  stations: 'estaciones'
 };

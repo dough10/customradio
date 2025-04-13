@@ -20,5 +20,7 @@ module.exports = {
   addCase1: 'URL should be an Icecast server with a content type of "audio/mpeg" or "audio/mp3"',
   addCase2: 'The API will get the other information from the stream headers.',
   stationURL: 'Station URL',
-  addButtonText: 'add'
+  addButtonText: 'add',
+
+  stations: 'stations'
 };
