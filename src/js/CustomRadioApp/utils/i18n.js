@@ -5,8 +5,9 @@ import { fr } from './lang/fr.js';
 import { zh } from './lang/zh.js';
 import { ru } from './lang/ru.js';
 import { it } from './lang/it.js';
+import { de } from './lang/de.js';
 
-const languages = { en, es, fr, zh, ru, it };
+const languages = { en, es, fr, zh, ru, it, de };
 
 let currentLang = 'en';
 
