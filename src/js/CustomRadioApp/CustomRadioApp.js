@@ -4,6 +4,7 @@ import Toast from './Toast/Toast.js';
 import LazyLoader from './LazyLoader/LazyLoader.js';
 import UIManager from './UIManager/UIManager.js';
 import StationManager from './StationManager/StationManager.js';
+import { setLanguage, t } from './utils/i18n.js';
 
 /**
  * customradio.dough10.me
@@ -22,6 +23,9 @@ export default class CustomRadioApp {
   };
   
   constructor() {
+    const lang = navigator.language.split('-')[0];
+    setLanguage(lang);
+    
     this._uiManager = new UIManager(this._selectors);
     this._stationManager = new StationManager(window.location.origin);
     this._player = new AudioPlayer();
@@ -92,7 +96,7 @@ export default class CustomRadioApp {
 
     const userInput = ev.target.value.trim();
     if (userInput && !userInput.match(/^[a-zA-Z0-9\s@\-_.",'&]+$/)) {
-      new Toast('Invalid input. Please enter valid genres.');
+      new Toast(t('genreError'));
       return;
     }
 
@@ -138,7 +142,7 @@ export default class CustomRadioApp {
       }
     } catch (error) {
       // log error
-      const errorMessage = `Error fetching stations: ${error.message}`;
+      const errorMessage = t('stationsError', error.message);
       console.error(errorMessage);
       new Toast(errorMessage);
       this._lzldr = null;

@@ -1,6 +1,7 @@
 import svgIcon from './createSVGIcon.js';
 import sleep from '../../utils/sleep.js';
 import Toast from '../../Toast/Toast.js';
+import { t } from '../../utils/i18n.js';
 
 const ELEMENT_HEIGHT = 40;
 
@@ -20,16 +21,16 @@ export default async function contextMenu(ev) {
         viewbox: '0 -960 960 960',
         d: 'M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z'
       },
-      text: 'mark duplicate',
-      title: 'mark station duplicate',
+      text: t('markDup'),
+      title: t('dupTitle'),
       func:  _ => markDuplicate(el.id)
     }, {
       icon: {
         viewbox: '0 -960 960 960',
         d: 'M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z'
       },
-      text : 'homepage',
-      title: `navigate to ${el.dataset.homepage}`,
+      text : t('homepage'),
+      title: t('homepageTitle', el.dataset.homepage),
       func: _ => openStationHomepage(el.dataset.homepage)
     }
   ];
@@ -84,7 +85,7 @@ function contextMenuItem({icon, text, title, func}) {
  */
 function openStationHomepage(homepage) {
   if (homepage === 'Unknown') {
-    new Toast('No homepage header', 3);
+    new Toast(t('noHome'), 3);
     return;
   }
   
@@ -98,7 +99,7 @@ function openStationHomepage(homepage) {
     }
     window.open(url.toString());
   } catch(error) {
-    new Toast('Error opening homepage');
+    new Toast(t('errorHome', error.message));
     console.log(homepage);
     console.error('error validating url:', error);
   }

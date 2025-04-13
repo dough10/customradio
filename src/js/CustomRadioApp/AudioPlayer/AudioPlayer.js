@@ -1,6 +1,7 @@
 import Toast from '../Toast/Toast.js';
 import sleep from '../utils/sleep.js';
 import debounce from '../utils/debounce.js';
+import { t } from '../utils/i18n.js';
 
 const PAUSE_TIMER_DURATION = 10000;
 const VOLUME_DEBOUNCE_DURATION = 1000;
@@ -105,7 +106,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onplay() {
-    document.title = `Playing: ${document.querySelector(this._selectors.name).textContent}`;
+    document.title = t('playing', document.querySelector(this._selectors.name).textContent);
     if (this.pauseTimer) {
       clearTimeout(this.pauseTimer);
       this.pauseTimer = 0;
@@ -259,7 +260,7 @@ export default class AudioPlayer {
       return;
     }
     
-    document.title = `Playing: ${name}`;
+    document.title = t('playing', name);
     document.querySelector(this._selectors.name).textContent = name;
     document.querySelector(this._selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
     
@@ -298,7 +299,7 @@ export default class AudioPlayer {
   _handleOffline() {
     const playerElement = document.querySelector(this._selectors.player);
     if (playerElement.hasAttribute('playing')) {
-      new Toast('Disconnected: attempting reconnect', 1.5);
+      new Toast(t('offline'), 1.5);
     }
   }
 
@@ -312,7 +313,7 @@ export default class AudioPlayer {
   _handleOnline() {
     const playerElement = document.querySelector(this._selectors.player);
     if (playerElement.hasAttribute('playing')) {
-      new Toast('Reconnected: attempting to restart play', 1.5);
+      new Toast(t('online'), 1.5);
       this.player.play();
     }
   }

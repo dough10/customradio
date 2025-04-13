@@ -3,6 +3,7 @@ import createSmallButton from './createSmallButton.js';
 import debounce from '../../utils/debounce.js';
 import contextMenu from './contextMenu.js';
 import toggleActiveState from '../../utils/toggleActiveState.js';
+import { t } from '../../utils/i18n.js';
 
 const LONG_PRESS_DURATION = 500;
 
@@ -107,12 +108,12 @@ async function playStream(ev, player) {
   try {
     player.playStream(stream);
     if (homepage === 'Unknown') {
-      new Toast(`Playing ${name}`, 3);
+      new Toast(t('playing', name), 3);
     } else {
-      new Toast(`Playing ${name}`, 3, homepage, 'homepage');
+      new Toast(t('playing', name), 3, homepage, t('homepage'));
     }
   } catch (error) {
-    const str = `Error playing media: ${error.message}`;
+    const str = t('playingError', error.message);
     new Toast(str, 3);
     console.error(str);
     postStreamIssue(id, error.message);

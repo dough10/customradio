@@ -4,6 +4,7 @@ import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import toggleActiveState from '../utils/toggleActiveState.js';
+import { t } from '../utils/i18n.js';
 
 /**
  * creates a datalist option element
@@ -44,6 +45,7 @@ export default class UIManager {
 
     const filter = document.querySelector(this._selectors.filter);
     filter.addEventListener('change', onFilterChange);
+    filter.addEventListener('focus', console.log);
 
     const resetButton = document.querySelector(this._selectors.resetButton);
     resetButton.addEventListener('click', onReset);
@@ -106,7 +108,7 @@ export default class UIManager {
   setCounts(selected, total) {
     toggleActiveState(document.querySelector(this._selectors.downloadButton), selected);
     const stationCount = document.querySelector(this._selectors.stationCount);
-    stationCount.textContent = total;
+    stationCount.textContent = t('stations', total);
   }
 
   /**
