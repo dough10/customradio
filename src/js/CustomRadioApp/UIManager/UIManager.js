@@ -45,7 +45,7 @@ export default class UIManager {
 
     const filter = document.querySelector(this._selectors.filter);
     filter.addEventListener('change', onFilterChange);
-    filter.addEventListener('focus', console.log);
+    filter.addEventListener('focus', this._filterFocus.bind(this));
 
     const resetButton = document.querySelector(this._selectors.resetButton);
     resetButton.addEventListener('click', onReset);
@@ -71,6 +71,7 @@ export default class UIManager {
 
     const filter = document.querySelector(this._selectors.filter);
     filter.removeEventListener('change', onFilterChange);
+    filter.removeEventListener('focus', this._filterFocus.bind(this));
 
     const resetButton = document.querySelector(this._selectors.resetButton);
     resetButton.removeEventListener('click', onReset);
@@ -80,6 +81,18 @@ export default class UIManager {
 
     const dlButton = document.querySelector(this._selectors.downloadButton);
     dlButton.removeEventListener('click', downloadTextfile);
+  }
+
+  /**
+   * scroll to top of page if user focuses input while sctolltop not = 0
+   * 
+   * @param {Event} ev 
+   */
+  _filterFocus(ev) {
+    const wrapper = document.querySelector(this._selectors.wrapper);
+    if (document.activeElement === ev.target && wrapper.scrollTop !== 0) {
+      wrapper.scrollTop = 0;
+    }
   }
 
   /**
