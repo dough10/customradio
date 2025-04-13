@@ -27,9 +27,6 @@ export default class ColapsingHeader {
 
     /** @type {HTMLElement|null} Main content wrapper */
     this.wrapper = document.querySelector('.wrapper');
-    
-    /** @type {Boolean} is user on mobile */
-    this._isMobile = window.innerWidth < 450;
   }
 
   /**
@@ -41,6 +38,7 @@ export default class ColapsingHeader {
    * @returns {{ transform: number, opacity: number }} Object containing calculated values.
    */
   _calculateAnimation(scrollTop) {
+    this._isMobile = window.innerWidth < 450;
     const factor = this._isMobile ? this._factor * 1.5 : this._factor;
     const transform = Math.min(scrollTop / factor, this._shrinkHeaderBy);
     return {
@@ -58,7 +56,7 @@ export default class ColapsingHeader {
    * @returns {void}
    */
   scroll(scrollTop) {
-    const { transform, opacity, isMobile } = this._calculateAnimation(scrollTop);
+    const { transform, opacity } = this._calculateAnimation(scrollTop);
 
     requestAnimationFrame(() => {
       if (this.input) this.input.style.opacity = 1 - opacity;
