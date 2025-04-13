@@ -2,6 +2,7 @@ const {validationResult} = require('express-validator');
 
 const Logger = require('../../util/logger.js');
 const Stations = require('../../model/Stations.js');
+const { t } = require('../../util/i18n.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -35,10 +36,10 @@ module.exports = async (req, res) => {
   try {
     await sql.markDuplicate(id);
     res.json({
-      message: "Duplicate logged"
+      message: t('dupLogged')
     });
   } catch(error) {
-    const message = `Failed to log error: ${entryError.message}`;
+    const message = t('dupLogFail', entryError.message);
     log.error(message);
     res.status(500).json({message});
   } finally {

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const {validationResult} = require('express-validator');
 
+const { t } = require('../../util/i18n.js');
 const Logger = require('../../util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
@@ -68,7 +69,7 @@ module.exports = async (req, res) => {
     log.info(`${req.ip} -> /csp-report ${Date.now() - req.startTime}ms`);
     res.status(204).send();
   } catch(error) {
-    const message = `Error Saving CSP-Report: ${error.message}`;
+    const message = t('cspError', error.message);
     log.critical(message);
     res.status(500).send(message);
   }

@@ -1,7 +1,7 @@
 require('dotenv').config();
 
+const { t } = require('../../util/i18n.js');
 const Stations = require('../../model/Stations.js');
-
 const Logger = require('../../util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
     const topGenres = await sql.topGenres();
     res.json(topGenres);
   } catch(err) {
-    const error = `Error getting genres: ${err.message}`;
+    const error = t('genresFail', err.message);
     log.critical(error);
     res.status(500).json({error});
   } finally {
