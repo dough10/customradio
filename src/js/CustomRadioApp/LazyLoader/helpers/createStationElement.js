@@ -147,7 +147,7 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
       },
       cssClass: 'play',
       func: ev => playStream(ev, player),
-      title: 'Play stream'
+      title: t('playTitle')
     }, {
       icon: {
         viewbox: '0 0 24 24',
@@ -155,7 +155,7 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
       },
       cssClass: 'add',
       func: toggleSelect,
-      title: 'Add to file'
+      title: t('addTitle')
     }, {
       icon: {
         viewbox: '0 -960 960 960',
@@ -163,7 +163,7 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
       },
       cssClass: 'remove',
       func: toggleSelect,
-      title: 'Remove from file'
+      title: t('removeTitle')
     }
   ];
 
