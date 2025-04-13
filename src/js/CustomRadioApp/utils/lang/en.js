@@ -2,7 +2,7 @@ export const en = {
   stations: (count) => `${count} stations`,
   genreError: 'Invalid input. Please enter valid genre.',
   stationsError: (error) => `Error fetching stations: ${error}`,
-  playing: (name) => `Playing ${name}`,
+  playing: (name) => `Playing: ${name}`,
   homepage: 'homepage',
   homepageTitle: (homepage) => `navigate to ${homepage}`, 
   markDup: 'mark duplicate',
@@ -11,5 +11,8 @@ export const en = {
   noHome: 'No homepage header',
   errorHome: (error) => `Error opening homepage: ${error}`,
   offline: 'Disconnected: attempting reconnect',
-  online: 'Reconnected: attempting to restart play'
+  online: 'Reconnected: attempting to restart play',
+  playTitle: 'Play stream',
+  addTitle: 'Add to file', 
+  removeTitle: 'Remove from file'
 }
