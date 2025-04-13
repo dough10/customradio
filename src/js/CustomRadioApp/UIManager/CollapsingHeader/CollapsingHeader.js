@@ -1,38 +1,81 @@
+/**
+ * Class representing a scroll-responsive collapsing header.
+ * Shrinks the header and adjusts element visibility based on scroll position,
+ * with mobile-responsive adjustments for better UX on smaller screens.
+ */
 export default class ColapsingHeader {
-  _originalHeight = 128;
-  // size in px to shrink header
+  /** @private @type {number} Maximum amount to shrink the header by (in px) */
   _shrinkHeaderBy = 64;
-  // slowing factor.
-  // factor px scrolled = 1 px header reduction
+
+  /**
+   * @private
+   * @type {number}
+   * Controls how fast the header collapses.
+   * (scrollTop / factor = shrink amount in px)
+   */
   _factor = 5;
 
   constructor() {
+    /** @type {HTMLElement|null} Header element */
     this.header = document.querySelector('header');
+
+    /** @type {HTMLElement|null} Input container element */
     this.input = document.querySelector('.form-group');
+
+    /** @type {HTMLElement|null} Info button element */
     this.infoButton = document.querySelector('#info');
+
+    /** @type {HTMLElement|null} Main content wrapper */
     this.wrapper = document.querySelector('.wrapper');
-  }
-
-  _calculateTransform(scrollTop) {
-    return Math.min(scrollTop / this._factor, this._shrinkHeaderBy);
-  }
-
-  scroll(scrollTop) {
-    const transform = this._calculateTransform(scrollTop);
-    const opacity = transform / this._shrinkHeaderBy;
     
-    this.input.style.opacity = 1 - opacity;
-    this.header.style.transform = `translateY(-${transform}px)`;
-    this.infoButton.style.transform = `translateY(${transform / 1.5}px)`;
-    this.wrapper.style.top = `${this._originalHeight - transform}px`;
-  
-    if (window.innerWidth < 450) {
-      this.infoButton.style.opacity = opacity;
-      this.infoButton.style.display = opacity === 0 ? 'none' : 'flex';
-    } else {
-      if (this.infoButton.style.opacity !== '1') {
-        this.infoButton.style.opacity = 1;
+    /** @type {Boolean} is user on mobile */
+    this._isMobile = window.innerWidth < 450;
+  }
+
+  /**
+   * Calculates the transform distance and opacity based on scroll position.
+   * Values are adjusted for mobile screens for smoother behavior.
+   *
+   * @private
+   * @param {number} scrollTop - Current vertical scroll position.
+   * @returns {{ transform: number, opacity: number }} Object containing calculated values.
+   */
+  _calculateAnimation(scrollTop) {
+    const factor = this._isMobile ? this._factor * 1.5 : this._factor;
+    const transform = Math.min(scrollTop / factor, this._shrinkHeaderBy);
+    return {
+      transform,
+      opacity: transform / this._shrinkHeaderBy
+    };
+  }
+
+  /**
+   * Handles visual updates based on scroll position.
+   * Applies transform and opacity to header, input, info button, and wrapper.
+   * Adjusts behavior based on screen width for mobile responsiveness.
+   *
+   * @param {number} scrollTop - The current scroll offset from the top.
+   * @returns {void}
+   */
+  scroll(scrollTop) {
+    const { transform, opacity, isMobile } = this._calculateAnimation(scrollTop);
+
+    requestAnimationFrame(() => {
+      if (this.input) this.input.style.opacity = 1 - opacity;
+      if (this.header) this.header.style.transform = `translateY(-${transform}px)`;
+      if (this.wrapper) this.wrapper.style.transform = `translateY(-${transform}px)`;
+
+      if (this.infoButton) {
+        this.infoButton.style.transform = `translateY(${transform / 1.5}px)`;
+
+        if (this._isMobile) {
+          this.infoButton.style.opacity = opacity.toFixed(2);
+          this.infoButton.style.display = opacity < 0.05 ? 'none' : 'flex';
+        } else {
+          this.infoButton.style.opacity = '1';
+          this.infoButton.style.display = 'flex';
+        }
       }
-    }
+    });
   }
 }
