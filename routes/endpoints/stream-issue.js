@@ -41,10 +41,9 @@ module.exports = async (req, res) => {
     res.json({
       message: t('errorLog')
     });
-  } catch(err) {
-    const message = t('errorLogFail', entryError.message);
-    log.critical(message);
-    res.status(500).json({message});
+  } catch(error) {
+    log.critical(`Failed to log error: ${error.message}`);
+    res.status(500).json({message: t('errorLogFail', error.message)});
   } finally {
     await sql.close();
   }

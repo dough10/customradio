@@ -69,8 +69,7 @@ module.exports = async (req, res) => {
     log.info(`${req.ip} -> /csp-report ${Date.now() - req.startTime}ms`);
     res.status(204).send();
   } catch(error) {
-    const message = t('cspError', error.message);
-    log.critical(message);
-    res.status(500).send(message);
+    log.critical(`Error Saving CSP-Report: ${error.message}`);
+    res.status(500).send(t('cspError', error.message));
   }
 };

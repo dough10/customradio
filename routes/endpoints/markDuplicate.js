@@ -39,9 +39,8 @@ module.exports = async (req, res) => {
       message: t('dupLogged')
     });
   } catch(error) {
-    const message = t('dupLogFail', entryError.message);
-    log.error(message);
-    res.status(500).json({message});
+    log.error(`Failed to log error: ${error.message}`);
+    res.status(500).json({message: t('dupLogFail', error.message)});
   } finally {
     await sql.close();
   }
