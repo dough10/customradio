@@ -22,5 +22,23 @@ module.exports = {
   stationURL: 'Station URL',
   addButtonText: 'add',
 
-  stations: 'stations'
+  stations: 'stations',
+
+  stationExists: 'Station already exists',
+  conTestFailed: error => `Connection test failed: ${error}`,
+  noName: 'Failed to retrieve station name',
+  stationSaved: id => `Station saved, ID: ${id}`,
+  addFail: error => `Failed to add station: ${error}`,
+
+  dupLogged: 'Duplicate logged',
+  dupLogFail: error => `Failed to log error: ${error}`,
+
+  cspError: error => `Error Saving CSP-Report: ${error}`,
+
+  stationsFail: error => `Error fetching stations: ${error}`,
+
+  errorLog: 'error logged',
+  errorLogFail: error => `Failed to log error: ${error}`,
+
+  genresFail: error => `Error getting genres: ${error}`
 };
