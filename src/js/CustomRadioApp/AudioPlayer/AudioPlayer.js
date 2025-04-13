@@ -28,13 +28,23 @@ export default class AudioPlayer {
     smallButton: '.player>.small-button',
     stations: '#stations>li',
     icon: '.player>.small-button>svg>path',
-    filter: '#filter'
+    filter: '#filter',
+    info: '#info',
+    add: '#add_button',
+    downloadButton: '#download'
   };
 
   constructor() {
     this.player = new Audio();
     this.pauseTimer = 0;
     this._OGTitle = document.title;
+
+    this._interactive = [
+      document.querySelector(this._selectors.filter),
+      document.querySelector(this._selectors.info),
+      document.querySelector(this._selectors.add),
+      document.querySelector(this._selectors.downloadButton),
+    ];
 
     this.player.onwaiting = this._onwaiting.bind(this);
     this.player.onplaying = this._onplaying.bind(this);
@@ -313,8 +323,9 @@ export default class AudioPlayer {
    * @param {Event} ev 
    */
   _onKeyPress(ev) {
-    const filter = document.querySelector(this._selectors.filter);
-    if (document.activeElement === filter) return;
+    if (this._interactive.includes(document.activeElement)) return;
+    const dialogs = Array.from(document.querySelectorAll('dialog'));
+    if (dialogs.some(dialog => dialog.open)) return;
     const button = ev.code;
     switch (button) {
       case 'Space': 
