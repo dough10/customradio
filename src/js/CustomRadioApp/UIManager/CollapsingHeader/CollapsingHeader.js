@@ -35,6 +35,7 @@ export default class ColapsingHeader {
     /** @type {HTMLElement|null} Main content wrapper */
     this.wrapper = document.querySelector('.wrapper');
 
+    /** recalculate header on window resize */
     window.addEventListener('resize', this.scroll.bind(this));
   }
 

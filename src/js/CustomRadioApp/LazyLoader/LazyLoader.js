@@ -14,7 +14,7 @@ function getPullCount() {
 }
 
 /**
- * load more stations to the UI when user scrolls to end of loaded content
+ * load more stations to the UI when user scrolls to the end of loaded content
  * 
  * @class
  * 
