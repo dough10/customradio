@@ -13,7 +13,7 @@ module.exports = {
   downloadButtonText: 'download',
   volume: 'Volume',
 
-  thanks: 'Thank you for using the site. Please report any security concerns to the contact information below.',
+  thanks: 'If you find this site useful and want to support its upkeep, you can make a contribution. Your support helps with hosting and continued development. Thanks',
   securityContact: 'Security contact',
 
   addStation: 'add station',
