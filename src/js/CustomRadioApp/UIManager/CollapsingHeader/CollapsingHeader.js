@@ -15,6 +15,13 @@ export default class ColapsingHeader {
    */
   _factor = 5;
 
+    /**
+   * @private
+   * @type {number}
+   * ammount of header that needs to be hidden before info button begins to fade in
+   */
+  _mobileInfoFadeDelay = 32;
+
   constructor() {
     /** @type {HTMLElement|null} Header element */
     this.header = document.querySelector('header');
@@ -59,7 +66,7 @@ export default class ColapsingHeader {
     const { transform, opacity } = this._calculateAnimation(scrollTop);
 
     requestAnimationFrame(() => {
-      if (this.input) this.input.style.opacity = 1 - opacity;
+      if (this.input) this.input.style.opacity = (1 - opacity).toFixed(2);
       if (this.header) this.header.style.transform = `translateY(-${transform}px)`;
       if (this.wrapper) this.wrapper.style.transform = `translateY(-${transform}px)`;
 
@@ -67,8 +74,11 @@ export default class ColapsingHeader {
         this.infoButton.style.transform = `translateY(${transform / 1.5}px)`;
 
         if (this._isMobile) {
-          this.infoButton.style.opacity = opacity.toFixed(2);
-          this.infoButton.style.display = opacity < 0.05 ? 'none' : 'flex';
+          const adjustedOpacity = (transform - this._mobileInfoFadeDelay) / (this._shrinkHeaderBy - this._mobileInfoFadeDelay);
+          const finalOpacity = Math.max(0, Math.min(1, adjustedOpacity));
+
+          this.infoButton.style.opacity = finalOpacity.toFixed(2);
+          this.infoButton.style.display = finalOpacity < 0.05 ? 'none' : 'flex';
         } else {
           this.infoButton.style.opacity = '1';
           this.infoButton.style.display = 'flex';
