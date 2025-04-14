@@ -64,6 +64,7 @@
 
 #stations>li[playing] {
   background: rgba(var(--pop-rgb), 0.4);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 #stations>li[playing]>.play {
