@@ -61,7 +61,7 @@ module.exports = async (req, res) => {
     const status = await isLiveStream(url);
     if (!status.ok) {
       log.warning(`Connection test failed: ${status.error}, ${Date.now() - req.startTime}ms`);
-      return res.status(400).json({ message: t('conTextFailed', status.error)});
+      return res.status(400).json({ message: t('conTestFailed', status.error)});
     }
 
     if (!status.name) {
