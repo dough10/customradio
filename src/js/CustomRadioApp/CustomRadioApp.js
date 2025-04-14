@@ -141,10 +141,8 @@ export default class CustomRadioApp {
         _paq.push(['trackEvent', 'Filter', userInput || '']);
       }
     } catch (error) {
-      // log error
-      const errorMessage = t('stationsError', error.message);
-      console.error(errorMessage);
-      new Toast(errorMessage);
+      console.error(`Error fetching stations: ${error.message}`);
+      new Toast(t('stationsError', error.message));
       this._lzldr = null;
       
       // analytics

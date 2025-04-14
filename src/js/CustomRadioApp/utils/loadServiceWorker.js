@@ -1,4 +1,5 @@
-import Toast from '../Toast/Toast.js'
+import Toast from '../Toast/Toast.js';
+import { t } from './i18n.js';
 
 /**
  * An update was installed for the active service worker
@@ -10,7 +11,12 @@ import Toast from '../Toast/Toast.js'
 function updateInstalled(newWorker) {
   if (newWorker.state !== 'installed') return;
   if (!navigator.serviceWorker.controller) return;
-  new Toast('App updated', 15, _ => newWorker.postMessage({ action: 'skipWaiting' }), 'Press to refresh');
+  new Toast(
+    t('appUpdated'),
+    15, 
+    _ => newWorker.postMessage({ action: 'skipWaiting' }), 
+    t('pressToRefresh')
+  );
 }
 
 /**
