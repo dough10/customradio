@@ -66,7 +66,7 @@ export default class AudioPlayer {
     this.player.onerror = _ => {
       const error = this.player.error;
       const message = error ? error.message : 'Unknown error';
-      new Toast(`Audio Error: ${message} (Station: ${this.player.dataset.id || 'Unknown'})`, 3);
+      new Toast(t('playingError', message), 3);
     };
   }
 
@@ -256,7 +256,7 @@ export default class AudioPlayer {
   playStream({id, url, name, bitrate}) {
     if (!id || !url || !name) {
       console.error('Invalid station data:', { id, url, name, bitrate });
-      new Toast('Invalid station data. Unable to play stream.', 3);
+      new Toast(t('invalidStation'), 3);
       return;
     }
     

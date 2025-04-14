@@ -10,9 +10,12 @@ export const en = {
   playingError: error => `Error playing media: ${error}`,
   noHome: 'No homepage',
   errorHome: error => `Error opening homepage: ${error}`,
+
+  invalidStation: `Invalid station data. Unable to play stream.`,
   offline: 'Disconnected: attempting reconnect',
   online: 'Reconnected: attempting to restart play',
+
   playTitle: 'Play stream',
   addTitle: 'Add to file', 
-  removeTitle: 'Remove from file'
+  removeTitle: 'Remove from file',
 };
