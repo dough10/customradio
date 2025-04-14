@@ -67,6 +67,8 @@ export default class UIManager {
   detachListeners({ onFilterChange, onReset }) {
     this._analytics.destroy();
 
+    this.header.destroy();
+
     destroyDialogInteractions();
 
     const filter = document.querySelector(this._selectors.filter);
