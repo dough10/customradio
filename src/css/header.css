@@ -40,11 +40,12 @@ header {
 
 .form-group {
   position: relative;
-  padding: 15px 0 0;
+  padding: 10px 0 0;
   margin: 10px auto 0.3em auto;
   min-width: 19em;
   display: flex;
   flex-direction: column;
+  will-change: opacity;
   transition: opacity 0.2s ease-out;
 }
 
