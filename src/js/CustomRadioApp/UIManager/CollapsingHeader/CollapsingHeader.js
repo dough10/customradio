@@ -34,6 +34,15 @@ export default class ColapsingHeader {
 
     /** @type {HTMLElement|null} Main content wrapper */
     this.wrapper = document.querySelector('.wrapper');
+
+    window.addEventListener('resize', this.scroll.bind(this));
+  }
+
+  /**
+   * remove resize event listener
+   */
+  destroy() {
+    window.removeEventListener('resize', this.scroll.bind(this));
   }
 
   /**
@@ -52,6 +61,18 @@ export default class ColapsingHeader {
       transform,
       opacity: transform / this._shrinkHeaderBy
     };
+  }
+
+  /**
+   * calculate opacity for info button based on ammount of header hidden
+   * 
+   * @param {Number} transform 
+   * 
+   * @returns {Number}
+   */
+  _mobileOpacity(transform) {
+    const adjustedOpacity = (transform - this._mobileInfoFadeDelay) / (this._shrinkHeaderBy - this._mobileInfoFadeDelay);
+    return Math.max(0, Math.min(1, adjustedOpacity));
   }
 
   /**
@@ -74,11 +95,10 @@ export default class ColapsingHeader {
         this.infoButton.style.transform = `translateY(${transform / 1.5}px)`;
 
         if (this._isMobile) {
-          const adjustedOpacity = (transform - this._mobileInfoFadeDelay) / (this._shrinkHeaderBy - this._mobileInfoFadeDelay);
-          const finalOpacity = Math.max(0, Math.min(1, adjustedOpacity));
+          const infoOpacity = this._mobileOpacity(transform);
 
-          this.infoButton.style.opacity = finalOpacity.toFixed(2);
-          this.infoButton.style.display = finalOpacity < 0.05 ? 'none' : 'flex';
+          this.infoButton.style.opacity = infoOpacity.toFixed(2);
+          this.infoButton.style.display = infoOpacity < 0.05 ? 'none' : 'flex';
         } else {
           this.infoButton.style.opacity = '1';
           this.infoButton.style.display = 'flex';
