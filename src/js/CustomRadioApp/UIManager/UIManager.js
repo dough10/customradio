@@ -50,8 +50,7 @@ export default class UIManager {
     const resetButton = document.querySelector(this._selectors.resetButton);
     resetButton.addEventListener('click', onReset);
 
-    const toTop = document.querySelector(this._selectors.toTop);
-    toTop.addEventListener('click', this._toTopHandler.bind(this));
+    this._toTop.addEventListener('click', this._toTopHandler.bind(this));
 
     const dlButton = document.querySelector(this._selectors.downloadButton);
     dlButton.addEventListener('click', downloadTextfile);
@@ -78,8 +77,7 @@ export default class UIManager {
     const resetButton = document.querySelector(this._selectors.resetButton);
     resetButton.removeEventListener('click', onReset);
 
-    const toTop = document.querySelector(this._selectors.toTop);
-    toTop.removeEventListener('click', this._toTopHandler.bind(this));
+    this._toTop.removeEventListener('click', this._toTopHandler.bind(this));
 
     const dlButton = document.querySelector(this._selectors.downloadButton);
     dlButton.removeEventListener('click', downloadTextfile);
