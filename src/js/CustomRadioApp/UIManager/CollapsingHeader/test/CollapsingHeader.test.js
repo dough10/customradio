@@ -3,7 +3,9 @@ import sinon from 'sinon';
 import CollapsingHeader from '../CollapsingHeader';
 
 describe('CollapsingHeader', () => {
+  let clock;
   beforeEach(() => {
+    clock = sinon.useFakeTimers();
     document.body.innerHTML = `
       <header>
         <div class="form-group"></div>
@@ -15,6 +17,7 @@ describe('CollapsingHeader', () => {
 
   afterEach(() => {
     document.body.innerHTML = '';
+    clock.restore();
     sinon.restore();
   });
 
@@ -29,7 +32,6 @@ describe('CollapsingHeader', () => {
   it('should attach resize listener', () => {
     const listenerSpy = sinon.spy(window, 'addEventListener');
     new CollapsingHeader();
-    expect(listenerSpy, 'should call addEventListener').to.have.been.calledOnce;
     expect(listenerSpy, 'should add a resize listener').to.have.been.calledOnceWith('resize', sinon.match.func);
     listenerSpy.restore();
   });
@@ -38,7 +40,6 @@ describe('CollapsingHeader', () => {
     const listenerSpy = sinon.spy(window, 'removeEventListener');
     const header = new CollapsingHeader();
     header.destroy();
-    expect(listenerSpy, 'should call removeEventListener').to.have.been.calledOnce;
     expect(listenerSpy, 'should remove a resize listener').to.have.been.calledOnceWith('resize', sinon.match.func);
     listenerSpy.restore();
   });
@@ -84,7 +85,8 @@ describe('CollapsingHeader', () => {
     const scrollTop = 100;
     header.scroll(scrollTop);
   
-    await new Promise(requestAnimationFrame);
+    clock.tick(16);
+    await Promise.resolve(); 
   
     const expectedTransform = Math.min(scrollTop / header._factor, header._shrinkHeaderBy);
     const expectedOpacity = expectedTransform / header._shrinkHeaderBy;
@@ -103,20 +105,24 @@ describe('CollapsingHeader', () => {
   
     const scrollTop = 100; // 20px of header is offscreen fade in begins at > 160
     header.scroll(scrollTop);
-    await new Promise(requestAnimationFrame);
+
+    clock.tick(16);
+    await Promise.resolve(); 
   
-    expect(header.infoButton.style.opacity).to.equal('0');
-    expect(header.infoButton.style.display).to.equal('none');
+    expect(header.infoButton.style.opacity, 'should not change opacity').to.equal('0');
+    expect(header.infoButton.style.display, 'should not change display').to.equal('none');
   });
   
-  it('should fade in info button when transform is above fade delay', async () => {
+  it('should show info button when transform is above fade delay', async () => {
     sinon.stub(window, 'innerWidth').value(375);
     const header = new CollapsingHeader();
   
     const scrollTop = 320;  // header is fully collapsed
     header.scroll(scrollTop);
-    await new Promise(requestAnimationFrame);
-  
+
+    clock.tick(16);
+    await Promise.resolve(); 
+
     expect(header.infoButton.style.opacity, 'should change opacity').to.not.equal('0');
     expect(header.infoButton.style.display, 'should change display').to.equal('flex');
   });
