@@ -105,13 +105,7 @@ export default class CustomRadioApp {
     // loading animation
     this._uiManager.loadingStart(container);
 
-    try {
-      // remove lazyloader
-      if (this._lzldr) {
-        this._lzldr.destroy();
-        this._lzldr = null;
-      }
-      
+    try {      
       // get stations added to the download list
       const selected = this._stationManager.getSelectedStations(ev.loadLocal, container);
 
@@ -124,10 +118,15 @@ export default class CustomRadioApp {
       this._uiManager.setCounts(selected.length, list.length);
   
       // remove children leaving only the loading element created with this._uiManager.loadingStart ^
+      // finally block removes the loading element
       container.replaceChildren(document.querySelector('.loading'));
 
       // push items to the UI and load more elements when scrolled to 80% or > of the pages height
-      this._lzldr = new LazyLoader([...selected, ...list], container, this._player, this._uiManager.toggleDisplayOnScroll);
+      if (this._lzldr) {
+        this._lzldr.reset([...selected, ...list]);
+      } else {
+        this._lzldr = new LazyLoader([...selected, ...list], container, this._player, this._uiManager.onScroll);
+      }
   
       // if a genre was searched and not in the list, load the genres
       const isNewGenreSearch = userInput.length && !this._uiManager.currentGenres().includes(userInput);
@@ -143,7 +142,10 @@ export default class CustomRadioApp {
     } catch (error) {
       console.error(`Error fetching stations: ${error.message}`);
       new Toast(t('stationsError', error.message));
-      this._lzldr = null;
+      if (this._lzldr) {
+        this._lzldr.destroy();
+        this._lzldr = null;
+      }
       
       // analytics
       if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);
