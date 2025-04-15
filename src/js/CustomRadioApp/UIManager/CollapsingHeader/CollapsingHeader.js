@@ -3,24 +3,31 @@
  * Shrinks the header and adjusts element visibility based on scroll position,
  * with mobile-responsive adjustments for better UX on smaller screens.
  */
-export default class ColapsingHeader {
-  /** @private @type {number} Maximum amount to shrink the header by (in px) */
+export default class CollapsingHeader {
+  /** @private @type {Number} Maximum amount to shrink the header by (in px) */
   _shrinkHeaderBy = 64;
 
   /**
    * @private
-   * @type {number}
+   * @type {Number}
    * Controls how fast the header collapses.
    * (scrollTop / factor = shrink amount in px)
    */
   _factor = 5;
 
-    /**
+  /**
    * @private
-   * @type {number}
+   * @type {Number}
    * ammount of header that needs to be hidden before info button begins to fade in
    */
   _mobileInfoFadeDelay = 32;
+
+  /**
+   * @private
+   * @type {Number}
+   * extra dappener for header collapse when on mobile
+   */
+  _mobileMultiplier = 1.5;
 
   constructor() {
     /** @type {HTMLElement|null} Header element */
@@ -56,7 +63,7 @@ export default class ColapsingHeader {
    */
   _calculateAnimation(scrollTop) {
     this._isMobile = window.innerWidth < 450;
-    const factor = this._isMobile ? this._factor * 1.5 : this._factor;
+    const factor = this._isMobile ? this._factor * this._mobileMultiplier : this._factor;
     const transform = Math.min(scrollTop / factor, this._shrinkHeaderBy);
     return {
       transform,
@@ -93,7 +100,8 @@ export default class ColapsingHeader {
       if (this.wrapper) this.wrapper.style.transform = `translateY(-${transform}px)`;
 
       if (this.infoButton) {
-        this.infoButton.style.transform = `translateY(${transform / 1.5}px)`;
+        // the 1.5 seems to land the info button center of the collapsed header
+        this.infoButton.style.transform = `translateY(${(transform / 1.5).toFixed(2)}px)`;
 
         if (this._isMobile) {
           const infoOpacity = this._mobileOpacity(transform);
