@@ -43,14 +43,14 @@ export default class CollapsingHeader {
     this.wrapper = document.querySelector('.wrapper');
 
     /** recalculate header on window resize */
-    window.addEventListener('resize', this.scroll.bind(this));
+    window.addEventListener('resize', _ => this.scroll(this.wrapper.scrollTop));
   }
 
   /**
    * remove resize event listener
    */
   destroy() {
-    window.removeEventListener('resize', this.scroll.bind(this));
+    window.removeEventListener('resize', _ => this.scroll(this.wrapper.scrollTop));
   }
 
   /**
