@@ -3,9 +3,9 @@ module.exports = {
 
   title: 'Creador de radio.txt',
   intro: 'Un sitio web para crear un archivo radio.txt personalizado para usar con ',
-  hibyLink: 'Reproductores de audio digital Hiby',
+  hibyLink: 'reproductores de audio digital Hiby',
   siteUse: 'Para usar el sitio',
-  step1: 'Filtra emisoras por nombre o género (por ejemplo: somafm, hip hop, jazz), luego añade todas las emisoras que quieras incluir en tu archivo radio.txt.',
+  step1: 'Filtra estaciones por nombre o género (por ejemplo, somafm, hip hop, jazz), luego agrega todas las estaciones que quieras incluir en tu archivo radio.txt.',
   step2: 'Cuando estés satisfecho con tu lista, presiona "Descargar" y guarda el archivo de texto en el directorio raíz del almacenamiento de tu reproductor Hiby.',
   closeButtonText: 'cerrar',
 
@@ -13,32 +13,32 @@ module.exports = {
   downloadButtonText: 'descargar',
   volume: 'Volumen',
 
-  thanks: 'Gracias por usar el sitio. Por favor, reporta cualquier problema de seguridad usando la información de contacto a continuación.',
+  thanks: 'Si encuentras útil este sitio y deseas apoyar su mantenimiento, puedes hacer una contribución. Tu apoyo ayuda con el alojamiento y el desarrollo continuo. ¡Gracias!',
   securityContact: 'Contacto de seguridad',
 
-  addStation: 'añadir emisora',
+  addStation: 'agregar estación',
   addCase1: 'La URL debe ser un servidor Icecast con un tipo de contenido "audio/mpeg" o "audio/mp3".',
-  addCase2: 'La API obtendrá la otra información desde las cabeceras del stream.',
-  stationURL: 'URL de la emisora',
-  addButtonText: 'añadir',
+  addCase2: 'La API obtendrá la otra información de las cabeceras del stream.',
+  stationURL: 'URL de la estación',
+  addButtonText: 'agregar',
 
-  stations: 'emisoras',
+  stations: 'estaciones',
 
-  stationExists: 'La emisora ya existe',
-  conTestFailed: error => `Prueba de conexión fallida: ${error}`,
-  noName: 'No se pudo obtener el nombre de la emisora',
-  stationSaved: id => `Emisora guardada, ID: ${id}`,
-  addFail: error => `No se pudo añadir la emisora: ${error}`,
+  stationExists: 'La estación ya existe',
+  conTestFailed: error => `Error en la prueba de conexión: ${error}`,
+  noName: 'No se pudo obtener el nombre de la estación',
+  stationSaved: id => `Estación guardada, ID: ${id}`,
+  addFail: error => `Error al agregar la estación: ${error}`,
 
   dupLogged: 'Duplicado registrado',
-  dupLogFail: error => `Error al registrar el duplicado: ${error}`,
+  dupLogFail: error => `Error al registrar el error: ${error}`,
 
   cspError: error => `Error al guardar el informe CSP: ${error}`,
 
-  stationsFail: error => `Error al obtener las emisoras: ${error}`,
+  stationsFail: error => `Error al obtener estaciones: ${error}`,
 
   errorLog: 'error registrado',
   errorLogFail: error => `Error al registrar el error: ${error}`,
 
-  genresFail: error => `Error al obtener los géneros: ${error}`
+  genresFail: error => `Error al obtener géneros: ${error}`
 };
