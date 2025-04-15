@@ -27,7 +27,7 @@ export default class UIManager {
     this._selectors = selectors;
     this._lastTop = 0;
     this._toTop = document.querySelector(this._selectors.toTop);
-    this.toggleDisplayOnScroll = this.toggleDisplayOnScroll.bind(this);
+    this.onScroll = this.onScroll.bind(this);
     this.header = new CollapsingHeader();
   }
   
@@ -98,19 +98,26 @@ export default class UIManager {
   /**
    * toggles the display of the "to top" button on scroll
    * 
+   * @public
+   * @function 
    * @param {HTMLElement} parent 
    */
-  toggleDisplayOnScroll(parent) {
-    this.header.scroll(parent.scrollTop);
-    if (parent.scrollTop < this._lastTop) {
+  onScroll(parent) {
+    const scrollTop = parent.scrollTop;
+    this.header.scroll(scrollTop);
+  
+    const atTop = scrollTop === 0;
+    const scrollingUp = scrollTop < this._lastTop;
+  
+    if (atTop || scrollingUp) {
       this._toTop.classList.add('hidden');
-    } else if (parent.scrollTop > 0) {
-      this._toTop.classList.remove('hidden');
     } else {
-      this._toTop.classList.add('hidden');
+      this._toTop.classList.remove('hidden');
     }
-    this._lastTop = parent.scrollTop;
+  
+    this._lastTop = scrollTop;
   }
+  
 
   /**
    * sets the station counts in the UI
