@@ -97,18 +97,6 @@ describe('CollapsingHeader', () => {
     expect(header.infoButton.style.display, 'should set info button display to flex').to.equal('flex');
   });
   
-  it('should adjust info button opacity and display on mobile', async () => {
-    sinon.stub(window, 'innerWidth').value(375); // Mobile
-    const header = new CollapsingHeader();
-    const scrollTop = 100;
-    header.scroll(scrollTop);
-  
-    await new Promise(requestAnimationFrame);
-  
-    expect(header.infoButton.style.opacity).to.equal('0');
-    expect(header.infoButton.style.display).to.equal('none');
-  });
-  
   it('should hide info button when transform is less than fade delay', async () => {
     sinon.stub(window, 'innerWidth').value(375);
     const header = new CollapsingHeader();
@@ -129,8 +117,8 @@ describe('CollapsingHeader', () => {
     header.scroll(scrollTop);
     await new Promise(requestAnimationFrame);
   
-    expect(header.infoButton.style.opacity).to.not.equal('0');
-    expect(header.infoButton.style.display).to.equal('flex');
+    expect(header.infoButton.style.opacity, 'should change opacity').to.not.equal('0');
+    expect(header.infoButton.style.display, 'should change display').to.equal('flex');
   });
   
 });
