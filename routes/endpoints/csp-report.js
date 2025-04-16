@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
 
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
-    log.error(error);
+    log.error(`${req.ip} -> ${error}`);
     res.status(400).json({error});
     return; 
   }
