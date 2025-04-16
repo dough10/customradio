@@ -134,8 +134,6 @@ class Stations {
     const contentTypePlaceholders = mapPlaceholders(usedTypes);
     
     const genrePatterns = genres.map(g => `%${g.toLowerCase()}%`);
-
-    console.log(genres, genrePatterns)
   
     const nameConditions = genrePatterns.map(() => 'LOWER(name) LIKE ?').join(' OR ');
     const genreConditions = genrePatterns.map(() => "LOWER(REPLACE(REPLACE(genre, '&', 'and'), '-', '')) LIKE ?").join(' OR ');
