@@ -63,6 +63,7 @@ export default class CustomRadioApp {
     
     if (this._lzldr) {
       this._lzldr.destroy();
+      this._lzldr = null;
     }
   }
 
@@ -125,7 +126,12 @@ export default class CustomRadioApp {
       if (this._lzldr) {
         this._lzldr.reset([...selected, ...list]);
       } else {
-        this._lzldr = new LazyLoader([...selected, ...list], container, this._player, this._uiManager.onScroll);
+        this._lzldr = new LazyLoader(
+          [...selected, ...list], 
+          container, 
+          this._player, 
+          this._uiManager.onScroll
+        );
       }
   
       // if a genre was searched and not in the list, load the genres
@@ -140,12 +146,15 @@ export default class CustomRadioApp {
         _paq.push(['trackEvent', 'Filter', userInput || '']);
       }
     } catch (error) {
-      console.error(`Error fetching stations: ${error.message}`);
-      new Toast(t('stationsError', error.message));
       if (this._lzldr) {
         this._lzldr.destroy();
         this._lzldr = null;
       }
+
+      // english error message
+      console.error(`Error fetching stations: ${error.message}`);
+      // user language translated toast message
+      new Toast(t('stationsError', error.message));
       
       // analytics
       if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);
