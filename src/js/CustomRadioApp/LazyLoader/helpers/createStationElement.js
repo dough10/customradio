@@ -45,7 +45,7 @@ async function postStreamIssue(id, error) {
  */
 const saveToLocalStorage = debounce((data) => {
   localStorage.setItem('selected', JSON.stringify(data));
-}, 1000);
+}, 300);
 
 /**
  * toggles selected attribute
