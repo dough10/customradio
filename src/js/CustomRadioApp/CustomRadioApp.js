@@ -5,6 +5,7 @@ import LazyLoader from './LazyLoader/LazyLoader.js';
 import UIManager from './UIManager/UIManager.js';
 import StationManager from './StationManager/StationManager.js';
 import { setLanguage, t } from './utils/i18n.js';
+import normalizeInput from './utils/normalizeInput.js';
 
 /**
  * customradio.dough10.me
@@ -95,7 +96,7 @@ export default class CustomRadioApp {
   async _filterChanged(ev) {
     ev.target.blur();
 
-    const userInput = ev.target.value.trim();
+    const userInput = normalizeInput(ev.target.value.trim());
 
     const container = document.querySelector(this._selectors.stationsContainer);
     
