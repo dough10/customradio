@@ -96,10 +96,6 @@ export default class CustomRadioApp {
     ev.target.blur();
 
     const userInput = ev.target.value.trim();
-    // if (userInput && !userInput.match(/^[a-zA-Z0-9\s@\-_.",'&]+$/)) {
-    //   new Toast(t('genreError'));
-    //   return;
-    // }
 
     const container = document.querySelector(this._selectors.stationsContainer);
     
