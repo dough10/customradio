@@ -1,0 +1,70 @@
+.toast {
+  background: #323232;
+  padding: 16px;
+  display: inline-block;
+  font-size: 14px;
+  text-align: left;
+  position: absolute;
+  border-radius: 3px;
+  bottom: 8px;
+  left: 8px;
+  color: #fff;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  min-width: 200px;
+  cursor: pointer;
+  overflow: visible;
+  opacity: 0;
+  transition: all var(--animate-150, 150ms) cubic-bezier(.33, .17, .85, 1.1);
+  transform: translateY(80px) translate3d(0, 0, 0);
+}
+
+.toast[opened] {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.player[playing]~.toast {
+  bottom: 80px;
+}
+
+.toast:after {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity var(--animate-150, 150ms) cubic-bezier(.33, .17, .85, 1.1);
+  box-shadow: 0 8px 10px 1px rgba(0, 0, 0, .14), 0 3px 14px 2px rgba(0, 0, 0, .12), 0 5px 5px -3px rgba(0, 0, 0, .4);
+  content: ' ';
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.toast:hover:after {
+  opacity: 1;
+}
+
+.toast>* {
+  pointer-events: none;
+}
+
+.toast-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+}
+
+.toast-wrapper>div:first-child {
+  max-width: 280px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.toast .yellow-text {
+  color: yellow;
+  margin-left: 24px;
+}

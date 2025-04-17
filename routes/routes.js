@@ -17,6 +17,7 @@ const ads = require('./endpoints/ads.js');
 const topGenres = require('./endpoints/topGenres.js');
 const fourohfour = require('./endpoints/fourohfour.js');
 const info = require('./endpoints/info.js');
+const { setLanguage, t } = require('../util/i18n.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -76,8 +77,33 @@ module.exports = (app, register) => {
    * Index
    */
   app.get('/', (req, res) => {
-    log.info(`${req.ip} -> /  ${Date.now() - req.startTime}ms`);
-    res.send(pug.renderFile('./templates/index.pug'));
+    const lang = req.headers['accept-language']?.split(',')[0].split('-')[0];
+    const loadedLang = setLanguage(lang);
+    log.info(`${req.ip} -> /?lang=${loadedLang}  ${Date.now() - req.startTime}ms`);
+    res.send(
+      pug.renderFile('./templates/index.pug', {
+        lang: loadedLang,
+        title: t('title'),
+        intro: t('intro'),
+        hibyLink: t('hibyLink'),
+        siteUse: t('siteUse'),
+        step1: t('step1'),
+        step2: t('step2'),
+        filterLabel: t('filterLabel'),
+        closeButtonText: t('closeButtonText'),
+        downloadButtonText: t('downloadButtonText'),
+        volume: t('volume'),
+        thanks: t('thanks'),
+        securityContact: t('securityContact'),
+        clickDismiss: t('clickDismiss'),
+        addStation: t('addStation'),
+        addCase1: t('addCase1'),
+        addCase2: t('addCase2'),
+        stationURL: t('stationURL'),
+        addButtonText: t('addButtonText'),
+        stations: t('stations')
+      })
+    );
   });
 
   /**

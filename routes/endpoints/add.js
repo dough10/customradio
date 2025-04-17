@@ -1,7 +1,9 @@
 const { validationResult } = require('express-validator');
+
 const Logger = require('../../util/logger.js');
 const isLiveStream = require('../../util/isLiveStream.js');
 const Stations = require('../../model/Stations.js');
+const { t } = require('../../util/i18n.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -52,22 +54,19 @@ module.exports = async (req, res) => {
     const exists = await sql.exists(url);
 
     if (exists) {
-      const message = 'Station already exists';
-      log.warning(`${message} ${Date.now() - req.startTime}ms`);
-      return res.status(409).json({ message });
+      log.warning(`Station already exists ${Date.now() - req.startTime}ms`);
+      return res.status(409).json({ message: t('stationExists') });
     }
 
     const status = await isLiveStream(url);
     if (!status.ok) {
-      const message = `Connection test failed: ${status.error}`;
-      log.warning(`${message}, ${Date.now() - req.startTime}ms`);
-      return res.status(400).json({ message });
+      log.warning(`Connection test failed: ${status.error}, ${Date.now() - req.startTime}ms`);
+      return res.status(400).json({ message: t('conTestFailed', status.error)});
     }
 
     if (!status.name) {
-      const message = 'Failed to retrieve station name';
-      log.warning(`${message}, ${Date.now() - req.startTime}ms`);
-      return res.status(400).json({ message });
+      log.warning(`Failed to retrieve station name, ${Date.now() - req.startTime}ms`);
+      return res.status(400).json({ messag: t('noName') });
     }
 
     const data = {
@@ -84,13 +83,11 @@ module.exports = async (req, res) => {
     };
 
     const id = await sql.addStation(data);
-    const message = `Station saved, ID: ${id}`;
     log.info(`${message} ${Date.now() - req.startTime}ms`);
-    res.status(201).json({ message });
+    res.status(201).json({ message: t('stationSaved', id) });
   } catch (e) {
-    const message = `Failed to add station: ${e.message}`;
-    log.critical(`${message}, ${Date.now() - req.startTime}ms`);
-    res.status(500).json({ message });
+    log.critical(`Failed to add station: ${e.message}, ${Date.now() - req.startTime}ms`);
+    res.status(500).json({ message: t('addFail', e.message) });
   } finally {
     await sql.close();
   }

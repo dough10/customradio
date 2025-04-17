@@ -4,6 +4,8 @@ import Toast from './Toast/Toast.js';
 import LazyLoader from './LazyLoader/LazyLoader.js';
 import UIManager from './UIManager/UIManager.js';
 import StationManager from './StationManager/StationManager.js';
+import { setLanguage, t } from './utils/i18n.js';
+import normalizeMemo from './utils/normalizeMemo.js';
 
 /**
  * customradio.dough10.me
@@ -22,6 +24,9 @@ export default class CustomRadioApp {
   };
   
   constructor() {
+    const lang = navigator.language.split('-')[0];
+    setLanguage(lang);
+    
     this._uiManager = new UIManager(this._selectors);
     this._stationManager = new StationManager(window.location.origin);
     this._player = new AudioPlayer();
@@ -59,6 +64,7 @@ export default class CustomRadioApp {
     
     if (this._lzldr) {
       this._lzldr.destroy();
+      this._lzldr = null;
     }
   }
 
@@ -90,25 +96,16 @@ export default class CustomRadioApp {
   async _filterChanged(ev) {
     ev.target.blur();
 
-    const userInput = ev.target.value.trim();
-    if (userInput && !userInput.match(/^[a-zA-Z0-9\s@\-_.",'&]+$/)) {
-      new Toast('Invalid input. Please enter valid genres.');
-      return;
-    }
+    // Continue with fetch — empty userInput means "show all"
+    const userInput = normalizeMemo(ev?.target?.value?.trim?.() || '');
 
     const container = document.querySelector(this._selectors.stationsContainer);
     
     // loading animation
     this._uiManager.loadingStart(container);
 
-    try {
-      // remove lazyloader
-      if (this._lzldr) {
-        this._lzldr.destroy();
-        this._lzldr = null;
-      }
-      
-      // get stations added to the download list
+    try {      
+      // get stations added to the download list from localstorage or already in container
       const selected = this._stationManager.getSelectedStations(ev.loadLocal, container);
 
       const stations = await this._stationManager.fetchStations(userInput);
@@ -120,13 +117,24 @@ export default class CustomRadioApp {
       this._uiManager.setCounts(selected.length, list.length);
   
       // remove children leaving only the loading element created with this._uiManager.loadingStart ^
+      // finally block removes the loading element
       container.replaceChildren(document.querySelector('.loading'));
 
       // push items to the UI and load more elements when scrolled to 80% or > of the pages height
-      this._lzldr = new LazyLoader([...selected, ...list], container, this._player, this._uiManager.toggleDisplayOnScroll);
+      if (this._lzldr) {
+        this._lzldr.reset([...selected, ...list]);
+      } else {
+        this._lzldr = new LazyLoader(
+          [...selected, ...list], 
+          container, 
+          this._player, 
+          this._uiManager.onScroll
+        );
+      }
   
-      // if a genre was searched and not in the list, load the genres
-      const isNewGenreSearch = userInput.length && !this._uiManager.currentGenres().includes(userInput);
+      // if a genre was searched and not in the current datalist, load the genres from API again
+      const currentGenres = this._uiManager.currentGenres();
+      const isNewGenreSearch = userInput.length && !currentGenres.includes(userInput);
       if (isNewGenreSearch || ev.loadLocal) {
         const genreList = await this._stationManager.getGenres();
         this._uiManager.loadGenres(genreList);
@@ -137,11 +145,15 @@ export default class CustomRadioApp {
         _paq.push(['trackEvent', 'Filter', userInput || '']);
       }
     } catch (error) {
-      // log error
-      const errorMessage = `Error fetching stations: ${error.message}`;
-      console.error(errorMessage);
-      new Toast(errorMessage);
-      this._lzldr = null;
+      if (this._lzldr) {
+        this._lzldr.destroy();
+        this._lzldr = null;
+      }
+
+      // english error message
+      console.error(`Error fetching stations: ${error.message}`);
+      // user language translated toast message
+      new Toast(t('stationsError', error.message));
       
       // analytics
       if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Fetch Error', error || 'Could not get Message']);

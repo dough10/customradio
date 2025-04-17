@@ -14,7 +14,7 @@ function getPullCount() {
 }
 
 /**
- * load more stations to the UI when user scrolls to end of loaded content
+ * load more stations to the UI when user scrolls to the end of loaded content
  * 
  * @class
  * 
@@ -36,14 +36,18 @@ export default class LazyLoader {
     this._container = container;
     this._player = player;
     this._scrollFunc = scrollFunc;
+    this._parent = this._container.parentElement;
 
     // bind this to the class instance
     this._resizeHandler = this._onResize.bind(this);
     this._scrollHandler = this._onScroll.bind(this);
     this._debouncedLoad = debounce(this._load.bind(this), 100);
 
-    const parent = this._container.parentElement; 
-    parent.addEventListener('scroll', this._scrollHandler);
+    if (!this._parent) {
+      throw new Error('LazyLoader: container must have a parent element.');
+    }
+
+    this._parent.addEventListener('scroll', this._scrollHandler, { passive: true });
     window.addEventListener('resize', this._resizeHandler);
     this._load();
   }
@@ -52,9 +56,10 @@ export default class LazyLoader {
    * user scrolled the parent container
    */
   _onScroll() {
-    const parent = this._container.parentElement; 
-    if (this._scrollFunc && typeof this._scrollFunc === 'function') this._scrollFunc(parent);
-    if (parent.scrollTop / (parent.scrollHeight - parent.clientHeight) >= this._scrollThreshold) {
+    this._scrollFunc?.(this._parent);
+    const screenHeight = this._parent.scrollHeight - this._parent.clientHeight;
+    const scrollRatio = this._parent.scrollTop / screenHeight;
+    if (scrollRatio >= this._scrollThreshold) {
       this._load();
     }
   }
@@ -100,18 +105,29 @@ export default class LazyLoader {
       this._populateContainer(stations);
       this._ndx += this._pullNumber;    
     } catch(e) {
-      console.error(`Error loading items: ${e}`);
+      console.error('Error loading items', e);
     } finally {
       this._loading = false;
     }
   }
 
   /**
+   * resets LazyLoader to initial state
+   * 
+   * @param {Array} newList 
+   */
+  reset(newList = []) {
+    this._list = newList;
+    this._ndx = 0;
+    this._pullNumber = getPullCount();
+    this._load();
+  }  
+
+  /**
    * remove listeners for da memoryz
    */
   destroy() {
     window.removeEventListener('resize', this._resizeHandler);
-    const parent = this._container.parentElement;
-    parent.removeEventListener('scroll', this._scrollHandler);
+    this._parent.removeEventListener('scroll', this._scrollHandler);
   }
 }

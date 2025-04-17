@@ -1,5 +1,6 @@
 const {validationResult} = require('express-validator');
 
+const { t } = require('../../util/i18n.js');
 const Logger = require('../../util/logger.js');
 const Stations = require('../../model/Stations.js');
 
@@ -38,12 +39,11 @@ module.exports = async (req, res) => {
   try {
     await sql.logStreamError(id, error);
     res.json({
-      message: "error logged"
+      message: t('errorLog')
     });
-  } catch(err) {
-    const message = `Failed to log error: ${entryError.message}`;
-    log.critical(message);
-    res.status(500).json({message});
+  } catch(error) {
+    log.critical(`Failed to log error: ${error.message}`);
+    res.status(500).json({message: t('errorLogFail', error.message)});
   } finally {
     await sql.close();
   }

@@ -2,6 +2,10 @@ import Analytics from './helpers/Analytics.js';
 import {initDialogInteractions, destroyDialogInteractions} from './helpers/dialog.js';
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
+import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
+import toggleActiveState from '../utils/toggleActiveState.js';
+import { t } from '../utils/i18n.js';
+import normalizeMemo from '../utils/normalizeMemo.js';
 
 /**
  * creates a datalist option element
@@ -24,7 +28,8 @@ export default class UIManager {
     this._selectors = selectors;
     this._lastTop = 0;
     this._toTop = document.querySelector(this._selectors.toTop);
-    this.toggleDisplayOnScroll = this.toggleDisplayOnScroll.bind(this);
+    this.onScroll = this.onScroll.bind(this);
+    this.header = new CollapsingHeader();
   }
   
   /**
@@ -41,15 +46,17 @@ export default class UIManager {
 
     const filter = document.querySelector(this._selectors.filter);
     filter.addEventListener('change', onFilterChange);
+    filter.addEventListener('focus', this._filterFocus.bind(this));
 
     const resetButton = document.querySelector(this._selectors.resetButton);
     resetButton.addEventListener('click', onReset);
 
-    const toTop = document.querySelector(this._selectors.toTop);
-    toTop.addEventListener('click', this._toTopHandler.bind(this));
+    this._toTop.addEventListener('click', this._toTopHandler.bind(this));
 
     const dlButton = document.querySelector(this._selectors.downloadButton);
     dlButton.addEventListener('click', downloadTextfile);
+
+    // document.addEventListener('keydown', this._keyDown.bind(this));    
   }
 
   /**
@@ -62,36 +69,71 @@ export default class UIManager {
   detachListeners({ onFilterChange, onReset }) {
     this._analytics.destroy();
 
+    this.header.destroy();
+
     destroyDialogInteractions();
 
     const filter = document.querySelector(this._selectors.filter);
     filter.removeEventListener('change', onFilterChange);
+    filter.removeEventListener('focus', this._filterFocus.bind(this));
 
     const resetButton = document.querySelector(this._selectors.resetButton);
     resetButton.removeEventListener('click', onReset);
 
-    const toTop = document.querySelector(this._selectors.toTop);
-    toTop.removeEventListener('click', this._toTopHandler.bind(this));
+    this._toTop.removeEventListener('click', this._toTopHandler.bind(this));
 
     const dlButton = document.querySelector(this._selectors.downloadButton);
     dlButton.removeEventListener('click', downloadTextfile);
+
+    // document.addEventListener('keydown', this._keyDown.bind(this));
+  }
+
+  /**
+   * listen for alt + ˙ key
+   * 
+   * @param {Event} event 
+   */
+  _keyDown(event) {
+    if (event.altKey && event.key.toLowerCase() === '˙') {
+      this.toggleSelectedVisability();
+    }
+  }
+
+  /**
+   * scroll to top of page if user focuses input while sctolltop not = 0
+   * 
+   * @param {Event} ev 
+   */
+  _filterFocus(ev) {
+    const wrapper = document.querySelector(this._selectors.wrapper);
+    if (document.activeElement === ev.target && wrapper.scrollTop !== 0) {
+      wrapper.scrollTop = 0;
+    }
   }
 
   /**
    * toggles the display of the "to top" button on scroll
    * 
+   * @public
+   * @function 
    * @param {HTMLElement} parent 
    */
-  toggleDisplayOnScroll(parent) {
-    if (parent.scrollTop < this._lastTop) {
+  onScroll(parent) {
+    const scrollTop = parent.scrollTop;
+    this.header.scroll(scrollTop);
+  
+    const atTop = scrollTop === 0;
+    const scrollingUp = scrollTop < this._lastTop;
+  
+    if (atTop || scrollingUp) {
       this._toTop.classList.add('hidden');
-    } else if (parent.scrollTop > 0) {
-      this._toTop.classList.remove('hidden');
     } else {
-      this._toTop.classList.add('hidden');
+      this._toTop.classList.remove('hidden');
     }
-    this._lastTop = parent.scrollTop;
+  
+    this._lastTop = scrollTop;
   }
+  
 
   /**
    * sets the station counts in the UI
@@ -100,24 +142,15 @@ export default class UIManager {
    * @param {Number} total 
    */
   setCounts(selected, total) {
-    const count = document.querySelector('#count');
-    const dlButton = document.querySelector(this._selectors.downloadButton);
-    count.textContent = `${selected} station${selected === 1 ? '' : 's'} selected`;
-    if (selected > 0) {
-      dlButton.removeAttribute('disabled');
-    } else {
-      if (!dlButton.hasAttribute('disabled')) {
-        dlButton.toggleAttribute('disabled');
-      }
-    }
+    toggleActiveState(document.querySelector(this._selectors.downloadButton), selected);
     const stationCount = document.querySelector(this._selectors.stationCount);
-    stationCount.textContent = `${total} results`;
+    stationCount.textContent = t('stations', total);
   }
 
   /**
    * gets the current genres from the UI
    * 
-   * @returns {Array} list of genres
+   * @returns {Array<String>} List of normalized genre values
    */
   currentGenres() {
     const parent = document.querySelector(this._selectors.genres);
@@ -152,7 +185,7 @@ export default class UIManager {
   loadingStart(container) {
     insertLoadingAnimation(container);
     const stationCount = document.querySelector(this._selectors.stationCount);
-    stationCount.parentElement.style.display = 'none';
+    stationCount.style.display = 'none';
   }
 
   /**
@@ -162,7 +195,7 @@ export default class UIManager {
     const loadingEl = document.querySelector('.loading');
     if (loadingEl) loadingEl.remove();
     const stationCount = document.querySelector(this._selectors.stationCount);
-    stationCount.parentElement.style.removeProperty('display');
+    stationCount.style.removeProperty('display');
   }
 
   /**
@@ -172,11 +205,7 @@ export default class UIManager {
     const selected = document.querySelectorAll('#stations>li[selected]');
     const current = selected[0].style.display;
     selected.forEach(el => {
-      if (current === 'none') {
-        el.style.display = 'flex';
-      } else {
-        el.style.display = 'none';
-      }
+      el.style.display = current === 'none' ? 'flex' : 'none';
     });
   }
 }

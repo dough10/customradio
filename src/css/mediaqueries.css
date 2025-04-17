@@ -1,0 +1,34 @@
+@media screen and (max-width: 600px) {
+  .alert {
+    display: inline-block;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  #name {
+    max-width: var(--max-width-small);
+  }
+
+  #vol {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  #name {
+    max-width: var(--max-width-xsmall);
+  }
+
+  #info {
+    opacity: 0;
+    display: none;
+  }
+
+  #bitrate {
+    display: none;
+  }
+
+  .toast-wrapper>div:first-child {
+    max-width: 200px;
+  }
+}

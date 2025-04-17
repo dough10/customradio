@@ -1,0 +1,107 @@
+@keyframes hide-it {
+  from {
+    display: block;
+    opacity: 1
+  }
+
+  to {
+    display: none;
+    opacity: 0;
+  }
+}
+
+@keyframes show-it {
+  from {
+    display: none;
+    opacity: 0;
+  }
+
+  to {
+    display: block;
+    opacity: 1
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+@keyframes dots {
+  0% {
+    transform: scale3d(0, 0, 0);
+  }
+
+  15% {
+    transform: scale3d(1, 1, 1);
+  }
+
+  100% {
+    transform: scale3d(0, 0, 0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes get-attention {
+  0% {
+    transform: scale(1);
+    color: inherit;
+  }
+  50% {
+    transform: scale(1.5);
+    color: var(--pop-color);
+  }
+  100% {
+    transform: scale(1);
+    color: inherit;
+  }
+}
+
+@keyframes get-button-attention {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes get-dialog-attention {
+  0% {
+    transform: scale(1) translateX(-50%) translateY(-50%);
+  }
+  50% {
+    transform: scale(1.05) translateX(-48%) translateY(-48%);
+  }
+  100% {
+    transform: scale(1) translateX(-50%) translateY(-50%);
+  }
+  
+}

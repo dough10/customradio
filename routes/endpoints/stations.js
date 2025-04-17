@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const he = require('he');
 
+const { t } = require('../../util/i18n.js');
 const Logger = require('../../util/logger.js');
 const Stations = require('../../model/Stations.js');
 
@@ -84,10 +85,9 @@ module.exports = async (req, res) => {
 
     log.info(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
     res.json(stations);
-  } catch (err) {
-    const error = `Error fetching stations: ${err.message}`;
-    log.error(error);
-    res.status(500).json({error});
+  } catch (error) {
+    log.error(`Error fetching stations: ${error.message}`);
+    res.status(500).json({error: t('stationsFail', error.message)});
   } finally {
     await sql.close();
   }

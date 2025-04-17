@@ -1,6 +1,7 @@
 import Toast from '../Toast/Toast.js';
 import sleep from '../utils/sleep.js';
 import debounce from '../utils/debounce.js';
+import { t } from '../utils/i18n.js';
 
 const PAUSE_TIMER_DURATION = 10000;
 const VOLUME_DEBOUNCE_DURATION = 1000;
@@ -27,12 +28,24 @@ export default class AudioPlayer {
     volume: '#vol',
     smallButton: '.player>.small-button',
     stations: '#stations>li',
-    icon: '.player>.small-button>svg>path'
+    icon: '.player>.small-button>svg>path',
+    filter: '#filter',
+    info: '#info',
+    add: '#add_button',
+    downloadButton: '#download'
   };
 
   constructor() {
     this.player = new Audio();
     this.pauseTimer = 0;
+    this._OGTitle = document.title;
+
+    this._interactive = [
+      document.querySelector(this._selectors.filter),
+      document.querySelector(this._selectors.info),
+      document.querySelector(this._selectors.add),
+      document.querySelector(this._selectors.downloadButton),
+    ];
 
     this.player.onwaiting = this._onwaiting.bind(this);
     this.player.onplaying = this._onplaying.bind(this);
@@ -53,7 +66,7 @@ export default class AudioPlayer {
     this.player.onerror = _ => {
       const error = this.player.error;
       const message = error ? error.message : 'Unknown error';
-      new Toast(`Audio Error: ${message} (Station: ${this.player.dataset.id || 'Unknown'})`, 3);
+      new Toast(t('playingError', message), 3);
     };
   }
 
@@ -93,6 +106,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onplay() {
+    document.title = t('playing', document.querySelector(this._selectors.name).textContent);
     if (this.pauseTimer) {
       clearTimeout(this.pauseTimer);
       this.pauseTimer = 0;
@@ -107,6 +121,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onpause() {
+    document.title = this._OGTitle;
     this.pauseTimer = setTimeout(this._clearPlaying, PAUSE_TIMER_DURATION);
     const icon = document.querySelector(this._selectors.icon);
     if (!icon) return;
@@ -137,7 +152,13 @@ export default class AudioPlayer {
     this.currentPlayingElement.toggleAttribute('playing');
   }
 
+  /**
+   * scrolls UI to current playing station if in list
+   * 
+   * @returns {void}
+   */
   _scrollToStation() {
+    if (!this.currentPlayingElement) return;
     this.currentPlayingElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
@@ -235,10 +256,11 @@ export default class AudioPlayer {
   playStream({id, url, name, bitrate}) {
     if (!id || !url || !name) {
       console.error('Invalid station data:', { id, url, name, bitrate });
-      new Toast('Invalid station data. Unable to play stream.', 3);
+      new Toast(t('invalidStation'), 3);
       return;
     }
-
+    
+    document.title = t('playing', name);
     document.querySelector(this._selectors.name).textContent = name;
     document.querySelector(this._selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
     
@@ -277,7 +299,7 @@ export default class AudioPlayer {
   _handleOffline() {
     const playerElement = document.querySelector(this._selectors.player);
     if (playerElement.hasAttribute('playing')) {
-      new Toast('Disconnected: attempting reconnect', 1.5);
+      new Toast(t('offline'), 1.5);
     }
   }
 
@@ -291,7 +313,7 @@ export default class AudioPlayer {
   _handleOnline() {
     const playerElement = document.querySelector(this._selectors.player);
     if (playerElement.hasAttribute('playing')) {
-      new Toast('Reconnected: attempting to restart play', 1.5);
+      new Toast(t('online'), 1.5);
       this.player.play();
     }
   }
@@ -302,6 +324,9 @@ export default class AudioPlayer {
    * @param {Event} ev 
    */
   _onKeyPress(ev) {
+    if (this._interactive.includes(document.activeElement)) return;
+    const dialogs = Array.from(document.querySelectorAll('dialog'));
+    if (dialogs.some(dialog => dialog.open)) return;
     const button = ev.code;
     switch (button) {
       case 'Space': 
