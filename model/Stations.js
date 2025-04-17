@@ -337,6 +337,13 @@ class Stations {
     }));
   }
 
+  /**
+   * counts stations the meet the input condition
+   * 
+   * @param {String} condition
+   * 
+   * @returns {Number|Error} count or error
+   */
   _getCount(condition) {
     const typesPlaceholder = mapPlaceholders(usedTypes);
     return new Promise((resolve, reject) => {
@@ -458,6 +465,7 @@ class Stations {
  * Validate station object properties.
  * 
  * @param {Object} obj - The station object.
+ * 
  * @throws {Error} If any property is invalid.
  */
 function validateStation(obj) {
@@ -477,6 +485,7 @@ function validateStation(obj) {
  * Check if a URL is valid.
  * 
  * @param {String} url 
+ * 
  * @returns {Boolean}
  */
 function isValidURL(url) {
