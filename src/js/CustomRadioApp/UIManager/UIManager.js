@@ -5,6 +5,7 @@ import downloadTextfile from './helpers/downloadTextfile.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import toggleActiveState from '../utils/toggleActiveState.js';
 import { t } from '../utils/i18n.js';
+import normalizeMemo from '../utils/normalizeMemo.js';
 
 /**
  * creates a datalist option element
@@ -54,6 +55,8 @@ export default class UIManager {
 
     const dlButton = document.querySelector(this._selectors.downloadButton);
     dlButton.addEventListener('click', downloadTextfile);
+
+    // document.addEventListener('keydown', this._keyDown.bind(this));    
   }
 
   /**
@@ -81,6 +84,19 @@ export default class UIManager {
 
     const dlButton = document.querySelector(this._selectors.downloadButton);
     dlButton.removeEventListener('click', downloadTextfile);
+
+    // document.addEventListener('keydown', this._keyDown.bind(this));
+  }
+
+  /**
+   * listen for alt + ˙ key
+   * 
+   * @param {Event} event 
+   */
+  _keyDown(event) {
+    if (event.altKey && event.key.toLowerCase() === '˙') {
+      this.toggleSelectedVisability();
+    }
   }
 
   /**
@@ -134,7 +150,7 @@ export default class UIManager {
   /**
    * gets the current genres from the UI
    * 
-   * @returns {Array} list of genres
+   * @returns {Array<String>} List of normalized genre values
    */
   currentGenres() {
     const parent = document.querySelector(this._selectors.genres);
@@ -189,11 +205,7 @@ export default class UIManager {
     const selected = document.querySelectorAll('#stations>li[selected]');
     const current = selected[0].style.display;
     selected.forEach(el => {
-      if (current === 'none') {
-        el.style.display = 'flex';
-      } else {
-        el.style.display = 'none';
-      }
+      el.style.display = current === 'none' ? 'flex' : 'none';
     });
   }
 }
