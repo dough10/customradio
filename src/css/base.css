@@ -79,7 +79,7 @@ body {
   overflow-x: hidden;
   position: fixed;
   top: 128px;
-  bottom: -128px;
+  bottom: -64px;
   left: 0;
   right: 0;
   will-change: transform;
