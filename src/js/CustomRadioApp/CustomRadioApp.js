@@ -121,16 +121,12 @@ export default class CustomRadioApp {
       container.replaceChildren(document.querySelector('.loading'));
 
       // push items to the UI and load more elements when scrolled to 80% or > of the pages height
-      if (this._lzldr) {
-        this._lzldr.reset([...selected, ...list]);
-      } else {
-        this._lzldr = new LazyLoader(
-          [...selected, ...list], 
-          container, 
-          this._player, 
-          this._uiManager.onScroll
-        );
-      }
+      this._lzldr ? this._lzldr.reset([...selected, ...list]) : this._lzldr = new LazyLoader(
+        [...selected, ...list], 
+        container, 
+        this._player, 
+        this._uiManager.onScroll
+      );
   
       // if a genre was searched and not in the current datalist, load the genres from API again
       const currentGenres = this._uiManager.currentGenres();

@@ -214,11 +214,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _togglePlay() {
-    if (this.player.paused) {
-      this.player.play();
-    } else {
-      this.player.pause();
-    }
+    this.player.paused ? this.player.play() : this.player.pause();
   }
 
   /**
