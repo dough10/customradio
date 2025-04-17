@@ -73,6 +73,7 @@ export default class AudioPlayer {
   /**
    * audio buffering callback
    * 
+   * @private
    * @function
    *  
    * @returns {void}
@@ -87,6 +88,7 @@ export default class AudioPlayer {
   /**
    * audio playing callback
    * 
+   * @private
    * @function
    *  
    * @returns {void}
@@ -101,6 +103,7 @@ export default class AudioPlayer {
   /**
    * audio play back started
    * 
+   * @private
    * @function
    *  
    * @returns {void}
@@ -116,6 +119,7 @@ export default class AudioPlayer {
   /**
    * audio paused callback
    * 
+   * @private
    * @function
    *  
    * @returns {void}
@@ -132,6 +136,7 @@ export default class AudioPlayer {
   /**
    * player.currentTime updated
    * 
+   * @private
    * @function
    * 
    * @returns {void} 
@@ -155,6 +160,9 @@ export default class AudioPlayer {
   /**
    * scrolls UI to current playing station if in list
    * 
+   * @private
+   * @function
+   * 
    * @returns {void}
    */
   _scrollToStation() {
@@ -168,6 +176,9 @@ export default class AudioPlayer {
   /**
    * attempts to check if volume can be changed. 
    * used to hide volume slider on mobile devices.
+   * 
+   * @private
+   * @function
    * 
    * @param {HTMLElement} volumeElement
    * 
@@ -185,6 +196,7 @@ export default class AudioPlayer {
   /**
    * player volume slider
    * 
+   * @private
    * @function
    * 
    * @returns {void}
@@ -199,6 +211,9 @@ export default class AudioPlayer {
   /**
    * set the volume on change
    * 
+   * @private
+   * @function
+   * 
    * @param {Event} ev 
    */
   _setVolume(ev) {
@@ -210,7 +225,9 @@ export default class AudioPlayer {
   /**
    * Toggles the play/pause state of the audio player.
    * 
+   * @private
    * @function
+   * 
    * @returns {void}
    */
   _togglePlay() {
@@ -219,6 +236,8 @@ export default class AudioPlayer {
 
   /**
    * get currently playing info from server
+   * @private
+   * @function
    * 
    * @param {String} url
    * 
@@ -240,6 +259,9 @@ export default class AudioPlayer {
 
   /**
    * play
+   * 
+   * @public
+   * @function
    * 
    * @param {Object} station
    * @param {String} station.id - The id of the station. 
@@ -274,6 +296,7 @@ export default class AudioPlayer {
   /**
    * clears interface of playing stream
    * 
+   * @private
    * @function
    * 
    * @returns {void}
@@ -288,6 +311,7 @@ export default class AudioPlayer {
   /**
    * handles offline state
    * 
+   * @private
    * @function
    * 
    * @returns {void}
@@ -302,6 +326,7 @@ export default class AudioPlayer {
   /**
    * handles online state
    * 
+   * @private
    * @function
    * 
    * @returns {void}
@@ -317,6 +342,8 @@ export default class AudioPlayer {
   /**
    * keypress callback function
    * 
+   * @private
+   * @function
    * @param {Event} ev 
    */
   _onKeyPress(ev) {
@@ -334,6 +361,8 @@ export default class AudioPlayer {
 
   /**
    * remove event listeners
+   * @public
+   * @function
    */
   destroy() {
     window.removeEventListener('offline', this._handleOffline);
@@ -351,6 +380,8 @@ export default class AudioPlayer {
 
   /**
    * loads player into document
+   * @public
+   * @function
    */
   async init() {
     document.querySelector('body').append(this.player);
