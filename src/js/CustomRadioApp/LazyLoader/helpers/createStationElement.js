@@ -51,11 +51,10 @@ const saveToLocalStorage = debounce((data) => {
  * Send event to matomo
  * 
  * @param {String} event 
- * 
- * @param {String} url 
+ * @param {String} str 
  */
-function _paqToggle(event, url) {
-  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', event, url]);
+function _paqToggle(event, str) {
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', event, str]);
 }
 
 /**
