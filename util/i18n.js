@@ -30,12 +30,7 @@ let currentLang = 'en';
  * @returns {String}
  */
 function setLanguage(lang) {
-  if (locales[lang]) {
-    currentLang = lang;
-  } else {
-    log.warning(`Language "${lang}" not found. Falling back to 'en'.`);
-    currentLang = 'en';
-  }
+  currentLang = locales[lang] ? lang : 'en';
   return currentLang;
 }
 
