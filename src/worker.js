@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.11.7';
+const CACHE_VERSION = '1.11.8';
 const urlsToCache = [];
 
 /**
