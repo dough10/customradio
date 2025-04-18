@@ -48,6 +48,17 @@ const saveToLocalStorage = debounce((data) => {
 }, 300);
 
 /**
+ * Send event to matomo
+ * 
+ * @param {String} event 
+ * 
+ * @param {String} url 
+ */
+function _paqToggle(event, url) {
+  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', event, url]);
+}
+
+/**
  * toggles selected attribute
  * 
  * @param {Event} ev
@@ -73,11 +84,7 @@ function toggleSelect(ev) {
   saveToLocalStorage(forStorage);
 
   // track event
-  if (el.hasAttribute('selected')) {
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Add to file', el.dataset.url]);
-  } else {
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Remove from file', el.dataset.url]);
-  }
+  el.hasAttribute('selected') ? _paqToggle('Add to file', el.dataset.url) : _paqToggle('Remove from file', el.dataset.url);
 }
 
 /**
@@ -107,11 +114,8 @@ async function playStream(ev, player) {
 
   try {
     player.playStream(stream);
-    if (homepage === 'Unknown') {
-      new Toast(t('playing', name), 3);
-    } else {
-      new Toast(t('playing', name), 3, homepage, t('homepage'));
-    }
+    const playing = t('playing', name);
+    (homepage === 'Unknown') ? new Toast(playing, 3) : new Toast(playing, 3, homepage, t('homepage'));
   } catch (error) {
     const str = t('playingError', error.message);
     new Toast(str, 3);

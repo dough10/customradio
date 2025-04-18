@@ -209,6 +209,14 @@ export default class AudioPlayer {
   }
 
   /**
+   * hides volume slider when user is on mobile device
+   */
+  _hideVolumeSlider() {
+    const volumeElement = document.querySelector(this._selectors.volume);
+    volumeElement.style.display = 'none';
+  }
+
+  /**
    * set the volume on change
    * 
    * @private
@@ -388,12 +396,7 @@ export default class AudioPlayer {
     
     const notMobile = await this._canChangeVol();
     
-    if (notMobile) {
-      this._setVolumeSlider();
-    } else {
-      const volumeElement = document.querySelector(this._selectors.volume);
-      volumeElement.style.display = 'none';
-    }
+    notMobile ? this._setVolumeSlider() : this._hideVolumeSlider();
     
     window.addEventListener('offline', this._handleOffline);
     
