@@ -138,8 +138,8 @@ function addPopupListeners(popup, body, backdrop) {
 function placeMenu(menu, X, Y, popupHeight) {
   const wHeight = window.innerHeight / 2;
   const wWidth = window.innerWidth / 2;
-  menu.style.top = (Y > wHeight) ? `${Y - popupHeight}px` : `${Y}px`;
-  menu.style.left = (X > wWidth) ? `${X - 250}px` : `${X + 10}px`;
+  menu.style.top = `${(Y > wHeight) ? Y - popupHeight : Y}px`;
+  menu.style.left = `${(X > wWidth) ? X - 250 : X + 10}px`;
 }
 
 /**

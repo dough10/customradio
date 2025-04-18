@@ -105,7 +105,7 @@ export default class LazyLoader {
       const count = this._ndx ? this._ndx + this._pullNumber : (this._ndx + this._pullNumber) * 2
       const stations = this._list.slice(this._ndx, count);
       this._populateContainer(stations);
-      this._ndx += this._pullNumber;    
+      this._ndx += count;    
     } catch(e) {
       console.error('Error loading items', e);
     } finally {
