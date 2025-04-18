@@ -101,7 +101,9 @@ export default class LazyLoader {
     if (this._loading || this._ndx >= this._list.length) return;
     this._loading = true;
     try{
-      const stations = this._list.slice(this._ndx, this._ndx + this._pullNumber);
+      // double pull count if _ndx = 0
+      const count = this._ndx ? this._ndx + this._pullNumber : (this._ndx + this._pullNumber) * 2
+      const stations = this._list.slice(this._ndx, count);
       this._populateContainer(stations);
       this._ndx += this._pullNumber;    
     } catch(e) {
