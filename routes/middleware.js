@@ -6,6 +6,8 @@ const compression = require('compression');
 const path = require('path');
 const crypto = require('crypto');
 
+const { setLanguage } = require('../util/i18n.js');
+
 module.exports = (app, httpRequestCounter) => {
   app.use((req, res, next) => {
     res.locals.nonce = crypto.randomBytes(16).toString('base64');
@@ -51,8 +53,12 @@ module.exports = (app, httpRequestCounter) => {
 
   /**
    * middleware for timing response times
+   * also sets response language
    */
   app.use((req, res, next) => {
+    const lang = req.headers['accept-language']?.split(',')[0].split('-')[0];
+    req.loadedLang = setLanguage(lang);
+
     req.startTime = Date.now();
     next();
   });
