@@ -52,13 +52,19 @@ module.exports = (app, httpRequestCounter) => {
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
   /**
-   * middleware for timing response times
    * also sets response language
    */
   app.use((req, res, next) => {
     const lang = req.headers['accept-language']?.split(',')[0].split('-')[0];
     req.loadedLang = setLanguage(lang);
+    next();
+  });
 
+
+  /**
+   * middleware for timing response times
+   */
+  app.use((req, res, next) => {
     req.startTime = Date.now();
     next();
   });
