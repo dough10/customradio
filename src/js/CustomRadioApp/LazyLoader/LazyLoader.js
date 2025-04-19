@@ -40,7 +40,7 @@ export default class LazyLoader {
     this._parent = this._container.parentElement;
     this._createStationElement = createElFunc;
 
-    // console.log(`array length: ${list.length}, total pulls: ${(list.length / this._pullNumber) - 2}`);
+    console.log(`array length: ${list.length}, total pulls: ${(list.length / this._pullNumber) - 2}`);
 
     // bind this to the class instance
     this._resizeHandler = this._onResize.bind(this);
