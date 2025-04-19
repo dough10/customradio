@@ -45,7 +45,7 @@ describe('Toast', () => {
     );
   });
 
-  it('should handle a valid link click by dismiaaing toast and opening link', async () => {
+  it('should handle a valid link click by dismissing toast and opening link', async () => {
     const message = 'Test message';
     const link = 'https://example.com';
     const linkText = 'Click here';
