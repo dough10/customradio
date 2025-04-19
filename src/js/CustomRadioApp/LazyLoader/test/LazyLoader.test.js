@@ -51,7 +51,7 @@ describe('LazyLoader', () => {
   it('should load initial elements on instantiation', () => {
     new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
 
-    const pullCount = Math.round(window.innerHeight / 58);
+    const pullCount = Math.round(window.innerHeight / 58) * 2;
     expect(container.children.length).to.equal(pullCount);
     expect(mockCreateStationElement.callCount).to.equal(pullCount);
   });
@@ -90,7 +90,9 @@ describe('LazyLoader', () => {
     lazyLoader.reset(newList);
 
     expect(container.children.length).to.be.lessThanOrEqual(10);
-    expect(mockCreateStationElement.callCount).to.be.lessThanOrEqual(20); // initial + reset
+
+    // initial pull = normal pull * 2
+    expect(mockCreateStationElement.callCount).to.be.lessThanOrEqual(30); // initial + reset
   });
 
   it('should clean up listeners on destroy', () => {
