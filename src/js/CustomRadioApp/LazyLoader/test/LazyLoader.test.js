@@ -1,12 +1,13 @@
-import { expect } from '@open-wc/testing';
+import { expect, fixture } from '@open-wc/testing';
 import Sinon from 'sinon';
 import LazyLoader from '../LazyLoader.js';
+import * as helpers from '../helpers/createStationElement.js';
 
 describe('LazyLoader', () => {
   let container, parent, list, player, scrollFunc, mockCreateStationElement;
 
   beforeEach(() => {
-    // Set up the DOM structure for testing
+    // Setup DOM
     parent = document.createElement('div');
     parent.style.height = '500px';
     parent.style.overflow = 'auto';
@@ -16,8 +17,8 @@ describe('LazyLoader', () => {
     parent.appendChild(container);
     document.body.appendChild(parent);
 
-    // Mock data
-    list = Array.from({ length: 50 }, (_, i) => ({
+    // Mock station data
+    list = Array.from({ length: 100 }, (_, i) => ({
       name: `Station ${i + 1}`,
       url: `http://example.com/stream${i + 1}`,
       bitrate: 128,
@@ -30,8 +31,16 @@ describe('LazyLoader', () => {
     // Mock player
     player = { playStream: Sinon.spy() };
 
-    // Mock scroll callback
+    // Spy on scroll callback
     scrollFunc = Sinon.spy();
+
+    // Stub createStationElement globally
+    mockCreateStationElement = Sinon.stub().callsFake((station) => {
+      const el = document.createElement('div');
+      el.style.height = '58px';
+      el.textContent = station.name;
+      return el;
+    });
   });
 
   afterEach(() => {
@@ -40,89 +49,73 @@ describe('LazyLoader', () => {
   });
 
   it('should load initial elements on instantiation', () => {
-    new LazyLoader(list, container, player, scrollFunc);
+    new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
 
     const pullCount = Math.round(window.innerHeight / 58);
     expect(container.children.length).to.equal(pullCount);
+    expect(mockCreateStationElement.callCount).to.equal(pullCount);
   });
 
-  // it('should load more elements when scrolling near the bottom', () => {
-  //   const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+  it('should load more elements when scrolling near the bottom', () => {
+    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
 
-  //   // Simulate initial content by appending enough children to the container
-  //   const initialPullCount = Math.round(window.innerHeight / 58);
-  //   for (let i = 0; i < initialPullCount; i++) {
-  //     const child = document.createElement('div');
-  //     child.style.height = '58px'; // Match the height used in getPullCount
-  //     container.appendChild(child);
-  //   }
+    const initialCount = container.children.length;
 
-  //   // Ensure the parent has a scrollable height
-  //   expect(parent.scrollHeight).to.be.greaterThan(parent.clientHeight);
+    // Scroll near the bottom
+    parent.scrollTop = parent.scrollHeight;
+    parent.dispatchEvent(new Event('scroll'));
 
-  //   // Simulate scrolling near the bottom
-  //   parent.scrollTop = parent.scrollHeight - parent.clientHeight - 1; // Scroll to near the bottom
-  //   parent.dispatchEvent(new Event('scroll'));
+    // Verify more elements were loaded
+    expect(container.children.length, 'should be double the initial pull').to.be.greaterThan(initialCount);
+    expect(mockCreateStationElement.callCount, 'should be called twice as many times').to.be.greaterThan(initialCount);
+  });
 
-  //   // Verify that additional elements are loaded
-  //   const pullCount = Math.round(window.innerHeight / 58);
-  //   expect(container.children.length, '1').to.equal(pullCount * 3); // Initial + additional pull
-  //   expect(mockCreateStationElement.callCount, '2').to.equal(pullCount * 2);
+  it('should not load elements if already loading or all are loaded', () => {
+    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    lazyLoader._loading = true; // simulate loading in progress
 
-  //   // Ensure `_load` is not called again unnecessarily
-  //   parent.dispatchEvent(new Event('scroll'));
-  //   expect(container.children.length, '3').to.equal(pullCount * 3); // No additional elements should be loaded
-  //   expect(mockCreateStationElement.callCount, '4').to.equal(pullCount * 2);
-  // });
+    const currentCount = container.children.length;
+    parent.scrollTop = parent.scrollHeight;
+    parent.dispatchEvent(new Event('scroll'));
 
-  // it('should adjust pull count on window resize', () => {
-  //   const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    // Nothing should be added
+    expect(container.children.length).to.equal(currentCount);
+  });
 
-  //   // Simulate window resize
-  //   Sinon.stub(window, 'innerHeight').value(1000);
-  //   window.dispatchEvent(new Event('resize'));
+  it('should reset with new data and reload', () => {
+    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
 
-  //   const newPullCount = Math.round(1000 / 58);
-  //   expect(container.children.length).to.equal(newPullCount);
-  //   expect(mockCreateStationElement.callCount).to.equal(newPullCount);
-  // });
+    container.replaceChildren();
+    const newList = list.slice(0, 10);
+    lazyLoader.reset(newList);
 
-  // it('should not load more elements if all elements are already loaded', () => {
-  //   const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    expect(container.children.length).to.be.lessThanOrEqual(10);
+    expect(mockCreateStationElement.callCount).to.be.lessThanOrEqual(20); // initial + reset
+  });
 
-  //   // Simulate scrolling to load all elements
-  //   while (container.children.length < list.length) {
-  //     parent.scrollTop = parent.scrollHeight * 0.9;
-  //     parent.dispatchEvent(new Event('scroll'));
-  //   }
+  it('should clean up listeners on destroy', () => {
+    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
 
-  //   expect(container.children.length).to.equal(list.length);
-  //   expect(mockCreateStationElement.callCount).to.equal(list.length);
+    const resizeSpy = Sinon.spy(window, 'removeEventListener');
+    const scrollSpy = Sinon.spy(lazyLoader._parent, 'removeEventListener');
 
-  //   // Try scrolling again
-  //   parent.scrollTop = parent.scrollHeight * 0.9;
-  //   parent.dispatchEvent(new Event('scroll'));
+    lazyLoader.destroy();
 
-  //   // Ensure no additional elements are loaded
-  //   expect(container.children.length).to.equal(list.length);
-  //   expect(mockCreateStationElement.callCount).to.equal(list.length);
-  // });
+    expect(resizeSpy.calledWith('resize', lazyLoader._resizeHandler)).to.be.true;
+    expect(scrollSpy.calledWith('scroll', lazyLoader._scrollHandler)).to.be.true;
+  });
 
-  // it('should call the scroll callback with the correct scroll position', () => {
-  //   new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+  it('should respond to window resize by loading more if needed', async () => {
+    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    const previousCount = container.children.length;
 
-  //   // Simulate scrolling
-  //   parent.scrollTop = 100;
-  //   parent.dispatchEvent(new Event('scroll'));
+    // Simulate resize where window is now much taller
+    Sinon.stub(window, 'innerHeight').value(window.innerHeight + 500);
+    window.dispatchEvent(new Event('resize'));
 
-  //   expect(scrollFunc.calledOnce).to.be.true;
-  //   expect(scrollFunc.calledWith(0)).to.be.true; // Initial scroll position
+    // Allow time for debounce
+    await new Promise(resolve => setTimeout(resolve, 120));
 
-  //   // Simulate another scroll
-  //   parent.scrollTop = 200;
-  //   parent.dispatchEvent(new Event('scroll'));
-
-  //   expect(scrollFunc.calledTwice).to.be.true;
-  //   expect(scrollFunc.calledWith(100)).to.be.true; // Previous scroll position
-  // });
+    expect(container.children.length).to.be.greaterThan(previousCount);
+  });
 });
