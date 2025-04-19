@@ -3,6 +3,7 @@ import createStationElement from './helpers/createStationElement.js';
 
 const ELEMENT_HEIGHT = 58;
 const SCROLL_THRESHOLD = 0.7;
+const LI_BOTTOM_MARGIN = 180;
 
 /**
  * calculate how many station elements can fit in the current browser window height
@@ -63,7 +64,7 @@ export default class LazyLoader {
   
     const remainingScroll = this._parent.scrollHeight - this._parent.scrollTop - this._parent.clientHeight;
   
-    if (remainingScroll <= (ELEMENT_HEIGHT * 3) + 180) {
+    if (remainingScroll <= (ELEMENT_HEIGHT * 4) + LI_BOTTOM_MARGIN) {
       this._load();
     }
   }
