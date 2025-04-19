@@ -69,7 +69,7 @@ export default class CollapsingHeader {
   }
 
   /**
-   * @private
+   * @public
    * @function
    * remove resize event listener
    */
