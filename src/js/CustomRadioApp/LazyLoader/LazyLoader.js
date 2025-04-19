@@ -38,6 +38,8 @@ export default class LazyLoader {
     this._scrollFunc = scrollFunc;
     this._parent = this._container.parentElement;
 
+    // console.log(`array length: ${list.length}, total pulls: ${(list.length / this._pullNumber) - 2}`);
+
     // bind this to the class instance
     this._resizeHandler = this._onResize.bind(this);
     this._scrollHandler = this._onScroll.bind(this);
