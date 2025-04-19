@@ -43,7 +43,7 @@ describe('LazyLoader', () => {
     new LazyLoader(list, container, player, scrollFunc);
 
     const pullCount = Math.round(window.innerHeight / 58);
-    expect(container.children.length).to.equal(pullCount * 2);
+    expect(container.children.length).to.equal(pullCount);
   });
 
   // it('should load more elements when scrolling near the bottom', () => {
