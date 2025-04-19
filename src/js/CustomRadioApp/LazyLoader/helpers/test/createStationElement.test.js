@@ -1,6 +1,6 @@
 import { expect } from '@open-wc/testing';
 import Sinon from 'sinon';
-import createStationElement from '../helpers/createStationElement.js';
+import createStationElement from '../createStationElement.js';
 
 /* jshint -W030 */
 describe('createStationElement', () => {
