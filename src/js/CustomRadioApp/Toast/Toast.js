@@ -78,10 +78,11 @@ export default class Toast {
     document.querySelector('body').append(this.toast);
     
     //display the toast
-    sleep(25).then(() => requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (!this.toast) throw new Error(`Failed to create toast with message: ${message}`);
       this.toast.toggleAttribute('opened');
       console.log(message);
-    }));
+    });
   }
 
   /**
