@@ -1,4 +1,3 @@
-import sleep from '../utils/sleep.js';
 import isValidURL from '../utils/URL.js';
 import ToastCache from './ToastCache.js';
 
@@ -100,7 +99,6 @@ export default class Toast {
     toast.addEventListener('click', this._clicked, true);
     toast.addEventListener('mouseenter', this._mouseIn, true);
     toast.addEventListener('mouseleave', this._mouseOut, true);
-
     return toast;
   }
 
@@ -185,11 +183,19 @@ export default class Toast {
    */
   _cleanupToast() {
     clearTimeout(this._timer);
-    if (!this.toast) return;
+    this._timer = 0;
+    
+    // debug
+    if (!this.toast) throw new Error(`Toast element disapeared`);
+
+    // clean up listeners added when creating the toast element
     this.toast.removeEventListener('transitionend', this._transitionEnd, true);
     this.toast.removeEventListener('click', this._clicked, true);
     this.toast.removeEventListener('mouseenter', this._mouseIn, true);
     this.toast.removeEventListener('mouseleave', this._mouseOut, true);
+
+    // attach listener for closing transition
+    // element will be deleted after
     this.toast.addEventListener('transitionend', this._removeToast, true);
     requestAnimationFrame(() => {
       this.toast.removeAttribute('opened');
@@ -202,7 +208,6 @@ export default class Toast {
   _removeToast() {
     this.toast.removeEventListener('transitionend', this._removeToast, true);
     this.toast.remove();
-    this.toast = null;
   }
 
   /**
@@ -210,8 +215,13 @@ export default class Toast {
    * Sets up a timer to close the toast after the specified timeout.
    */
   _transitionEnd() {
-    if (!this.toast) return;
+    // debug
+    if (!this.toast) throw new Error(`Toast element disapeared in opening animation`);
+
+    // remove opening transition listener
     this.toast.removeEventListener('transitionend', this._transitionEnd, true);
+
+    // set starttime for mouse in / out behavor
     this._startTime = Date.now();
     this._timer = setTimeout(this._cleanupToast, this._timeout);
   }
