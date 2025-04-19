@@ -31,12 +31,13 @@ export default class LazyLoader {
   _loading = false;
   _scrollThreshold = SCROLL_THRESHOLD;
 
-  constructor(list, container, player, scrollFunc) {
+  constructor(list, container, player, scrollFunc, createElFunc = createStationElement) {
     this._list = list;
     this._container = container;
     this._player = player;
     this._scrollFunc = scrollFunc;
     this._parent = this._container.parentElement;
+    this._createStationElement = createElFunc;
 
     // console.log(`array length: ${list.length}, total pulls: ${(list.length / this._pullNumber) - 2}`);
 
@@ -88,7 +89,7 @@ export default class LazyLoader {
   _populateContainer(stationList) {
     const localFragment = document.createDocumentFragment();
     stationList.forEach(element => {
-      const stationElement = createStationElement(element, this._player);
+      const stationElement = this._createStationElement(element, this._player);
       if (element.selected) stationElement.toggleAttribute('selected');
       localFragment.append(stationElement);
     });
