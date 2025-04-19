@@ -110,6 +110,7 @@ export default class Toast {
   _mouseIn() {
     if (this._timer) {
       clearTimeout(this._timer);
+      this._timer = null;
       this._remainingTime = this._timeout - (Date.now() - this._startTime);
     }
   }
