@@ -57,9 +57,10 @@ export default class LazyLoader {
    */
   _onScroll() {
     this._scrollFunc?.(this._parent);
-    const screenHeight = this._parent.scrollHeight - this._parent.clientHeight;
-    const scrollRatio = this._parent.scrollTop / screenHeight;
-    if (scrollRatio >= this._scrollThreshold) {
+  
+    const remainingScroll = this._parent.scrollHeight - this._parent.scrollTop - this._parent.clientHeight;
+  
+    if (remainingScroll <= (ELEMENT_HEIGHT * 3) + 180) {
       this._load();
     }
   }
