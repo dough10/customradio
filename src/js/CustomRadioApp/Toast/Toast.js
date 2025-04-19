@@ -3,6 +3,36 @@ import isValidURL from '../utils/URL.js';
 import ToastCache from './ToastCache.js';
 
 /**
+ * text link used in toast
+ * 
+ * @param {String} link 
+ * 
+ * @param {String} textContent 
+ */
+function webLink(link, textContent) {
+  if (isValidURL(link)) {
+    window.open(link, "_blank");
+  } else {
+    console.error(`Invalid URL in Toast. Message: "${textContent}", Link: "${link}"`);
+  }
+}
+
+/**
+ * function call for toast link
+ * 
+ * @param {Function} link 
+ * 
+ * @param {String} textContent 
+ */
+function linkIsFunction(link, textContent) {
+  try {
+    link();
+  } catch (error) {
+    console.error(`Error executing link function in Toast. Message: "${textContent}", Error: ${error.message}`);
+  }
+}
+
+/**
  * Toast class for displaying temporary messages to the user.
  * The toast can contain a message and an optional clickable link.
  * If a toast is already displayed, new toasts are cached and displayed in order.
@@ -136,17 +166,11 @@ export default class Toast {
     }
 
     if (typeof this.link === 'string') {
-      if (isValidURL(this.link)) {
-        window.open(this.link, "_blank");
-      } else {
-        console.error(`Invalid URL in Toast. Message: "${this.toast.textContent}", Link: "${this.link}"`);
-      }
+      webLink(this.link, this.toast.textContent);
+
     } else if (typeof this.link === 'function') {
-      try {
-        this.link();
-      } catch (error) {
-        console.error(`Error executing link function in Toast. Message: "${this.toast.textContent}", Error: ${error.message}`);
-      }
+      linkIsFunction(this.link, this.toast.textContent);
+
     } else {
       console.error(`Invalid "link" parameter in Toast. Message: "${this.toast.textContent}", Link: "${this.link}", Type: ${typeof this.link}`);
     }
