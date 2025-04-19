@@ -142,9 +142,10 @@ export default class UIManager {
    * @param {Number} total 
    */
   setCounts(selected, total) {
-    toggleActiveState(document.querySelector(this._selectors.downloadButton), selected);
+    const button = document.querySelector(this._selectors.downloadButton);
+    toggleActiveState(button, selected);
     const stationCount = document.querySelector(this._selectors.stationCount);
-    stationCount.textContent = t('stations', total);
+    stationCount.textContent = t('stations', selected + total);
   }
 
   /**
