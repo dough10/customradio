@@ -329,6 +329,11 @@ export default class AudioPlayer {
     document.querySelector(this._selectors.name).textContent = name;
     document.querySelector(this._selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
 
+    const miniPlayer = document.querySelector(this._selectors.player);
+    if (!miniPlayer.hasAttribute('playing')) {
+      miniPlayer.toggleAttribute('playing');
+    }
+
     this.player.dataset.id = id;
     this.player.src = url;
     this.player.load();
