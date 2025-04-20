@@ -337,12 +337,9 @@ export default class AudioPlayer {
     this.player.dataset.id = id;
     this.player.src = url;
     this.player.load();
-    this.player.play().catch(error => {
-      console.error('Error playing stream:', error);
-      new Toast(t('playingError', error.message), 3);
-    });
+    this.player.play();
 
-    this._updateMediaSession({ name, url , bitrate});
+    this._updateMediaSession({ name, bitrate });
   }
 
   /**
