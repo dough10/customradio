@@ -371,6 +371,7 @@ export default class AudioPlayer {
     const playerElement = document.querySelector(this._selectors.player);
     if (playerElement.hasAttribute('playing')) {
       new Toast(t('online'), 1.5);
+      this.player.load();
       this.player.play();
     }
   }
