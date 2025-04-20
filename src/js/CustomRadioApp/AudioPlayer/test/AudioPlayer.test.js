@@ -99,11 +99,11 @@ describe('AudioPlayer', () => {
     
     audioPlayer.playStream(station);
     
-    expect(audioPlayer.player.dataset.id).to.equal('station1');
-    expect(audioPlayer.player.src).to.equal('http://example.com/stream1');
-    expect(document.querySelector('#name').textContent).to.equal('Test Station');
-    expect(document.querySelector('#bitrate').textContent).to.equal('128kbps');
-    expect(playStub.calledOnce).to.be.true;
+    expect(audioPlayer.player.dataset.id, 'should have an ID').to.equal('station1');
+    expect(audioPlayer.player.src, 'should set audio.src').to.equal('http://example.com/stream1');
+    expect(document.querySelector('#name').textContent, 'should set name').to.equal('Test Station');
+    expect(document.querySelector('#bitrate').textContent, 'should set bitrate').to.equal('128kbps');
+    expect(playStub.calledOnce, 'should call play').to.be.true;
   });
 
   it('should update the playing state on time update', () => {
