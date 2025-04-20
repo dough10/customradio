@@ -6,6 +6,7 @@ import UIManager from './UIManager/UIManager.js';
 import StationManager from './StationManager/StationManager.js';
 import { setLanguage, t } from './utils/i18n.js';
 import normalizeMemo from './utils/normalizeMemo.js';
+import Notifications from './Notifications/Notifications.js';
 
 /**
  * customradio.dough10.me
@@ -26,10 +27,10 @@ export default class CustomRadioApp {
   constructor() {
     const lang = navigator.language.split('-')[0];
     setLanguage(lang);
-    
+    const notifications = new Notifications()
     this._uiManager = new UIManager(this._selectors);
     this._stationManager = new StationManager(window.location.origin);
-    this._player = new AudioPlayer();
+    this._player = new AudioPlayer(notifications);
   }
 
   /**

@@ -27,10 +27,11 @@ export default class AudioPlayer {
     downloadButton: '#download'
   };
 
-  constructor() {
+  constructor(notifications = null) {
     this.player = new Audio();
     this.pauseTimer = 0;
     this._OGTitle = document.title;
+    this._notifications = notifications;
 
     this._interactive = [
       document.querySelector(this._selectors.filter),
@@ -340,6 +341,9 @@ export default class AudioPlayer {
     this.player.play();
 
     this._updateMediaSession({ name, bitrate });
+
+    this._notifications.requestPermission();
+    this._notifications.nowPlaying(name);
   }
 
   /**
