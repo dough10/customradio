@@ -5,15 +5,7 @@ import { t } from '../utils/i18n.js';
 
 const PAUSE_TIMER_DURATION = 10000;
 const VOLUME_DEBOUNCE_DURATION = 1000;
-
-/**
- * saves volume to local storage
- * 
- * @param {Number} value - volume value
- */
-const saveVolume = debounce(value => {
-  localStorage.setItem('volume', value);
-}, VOLUME_DEBOUNCE_DURATION);
+const PLAY_DEBOUNCE_DURATION = 100;
 
 /**
  * AudioPlayer class
@@ -52,7 +44,13 @@ export default class AudioPlayer {
     this.player.onplay = this._onplay.bind(this);
     this.player.onpause = this._onpause.bind(this);
     this.player.ontimeupdate = this._ontimeupdate.bind(this);
-
+    this.player.onerror = _ => {
+      const error = this.player.error;
+      const message = error ? error.message : 'Unknown error';
+      new Toast(t('playingError', message), 3);
+    };
+    
+    // bind functions
     this._handleOnline = this._handleOnline.bind(this);
     this._handleOffline = this._handleOffline.bind(this)
     this._clearPlaying = this._clearPlaying.bind(this);
@@ -61,13 +59,14 @@ export default class AudioPlayer {
     this._setVolume = this._setVolume.bind(this);
     this._onKeyPress = this._onKeyPress.bind(this);
 
-    this._bouncedToggle = debounce(this._togglePlay, 100);
+    // debounced
+    this._bouncedToggle = debounce(this._togglePlay, PLAY_DEBOUNCE_DURATION);
 
-    this.player.onerror = _ => {
-      const error = this.player.error;
-      const message = error ? error.message : 'Unknown error';
-      new Toast(t('playingError', message), 3);
-    };
+    this._saveVolume = debounce(value => {
+      localStorage.setItem('volume', value);
+    }, VOLUME_DEBOUNCE_DURATION);
+
+
   }
 
   /**
@@ -234,7 +233,7 @@ export default class AudioPlayer {
   _setVolume(ev) {
     const slider = ev.target;
     this.player.volume = slider.value / 100;
-    saveVolume(slider.value);
+    this._saveVolume(slider.value);
   }
 
   /**
@@ -247,6 +246,41 @@ export default class AudioPlayer {
    */
   _togglePlay() {
     this.player.paused ? this.player.play() : this.player.pause();
+  }
+
+  /**
+   * default metadata for Media Session API
+   * 
+   * @private
+   * @function
+   * @param {Object} station - The station object containing metadata.
+   * @param {String} station.name - The name of the station.
+   * @param {String} station.bitrate - The bitrate of the station.
+   * 
+   * @return {Object} - Default metadata object for the Media Session API.
+   * @example
+   * _defaultMetadata({ name: 'My Station', bitrate: 128 });
+   * // Returns:
+   * // {
+   * //   title: 'My Station - 128kbps',
+   * //   artist: 'customradio.dough10.me',
+   * //   album: 'Live Stream',
+   * //   artwork: [
+   * //     { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+   * //     { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+   * //   ],
+   * // }
+   */
+  _defaultMetadata(station) {
+    return {
+      title: `${station.name} - ${station.bitrate === 0 ? '???' : station.bitrate}kbps`,
+      artist: location.host,
+      album: 'Live Stream',
+      artwork: [
+        { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+      ],
+    };
   }
 
   /**
@@ -263,34 +297,11 @@ export default class AudioPlayer {
     if (!('mediaSession' in navigator)) return;
 
     // Set media metadata
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: station.name,
-      artist: 'customradio.dough10.me',
-      album: 'Live Stream',
-      artwork: [
-        { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
-      ],
-    });
+    navigator.mediaSession.metadata = new MediaMetadata(this._defaultMetadata(station));
 
     // Set media session action handlers
     navigator.mediaSession.setActionHandler('play', () => this.player.play());
     navigator.mediaSession.setActionHandler('pause', () => this.player.pause());
-    navigator.mediaSession.setActionHandler('stop', () => this._clearPlaying());
-    // navigator.mediaSession.setActionHandler('seekbackward', () => {
-    //   this.player.currentTime = Math.max(this.player.currentTime - 10, 0);
-    // });
-    // navigator.mediaSession.setActionHandler('seekforward', () => {
-    //   this.player.currentTime = Math.min(this.player.currentTime + 10, this.player.duration);
-    // });
-    // navigator.mediaSession.setActionHandler('previoustrack', () => {
-    //   // Implement logic for previous track if applicable
-    //   new Toast(t('noPreviousTrack'), 2);
-    // });
-    // navigator.mediaSession.setActionHandler('nexttrack', () => {
-    //   // Implement logic for next track if applicable
-    //   new Toast(t('noNextTrack'), 2);
-    // });
   }
 
   /**
@@ -326,7 +337,7 @@ export default class AudioPlayer {
       new Toast(t('playingError', error.message), 3);
     });
 
-    this._updateMediaSession({ name, url });
+    this._updateMediaSession({ name, url , bitrate});
   }
 
   /**
@@ -387,8 +398,7 @@ export default class AudioPlayer {
     if (this._interactive.includes(document.activeElement)) return;
     const dialogs = Array.from(document.querySelectorAll('dialog'));
     if (dialogs.some(dialog => dialog.open)) return;
-    const button = ev.code;
-    switch (button) {
+    switch (ev.code) {
       case 'Space': 
         ev.preventDefault();
         if (this.player.src) this._bouncedToggle();
