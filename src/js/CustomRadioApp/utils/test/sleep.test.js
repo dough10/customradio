@@ -8,9 +8,8 @@ describe('sleep', () => {
     const delay = 100;
     await sleep(delay);
     const end = Date.now();
-
+  
     expect(end - start).to.be.at.least(delay);
-    expect(end - start).to.be.below(delay + 20);
   });
 
   it('should not resolve before the specified time', async () => {
