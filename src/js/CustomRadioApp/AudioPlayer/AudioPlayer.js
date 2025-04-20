@@ -135,6 +135,8 @@ export default class AudioPlayer {
 
   /**
    * player.currentTime updated
+   * ensures that the current playing station is marked as such
+   * and mini player is marked as playing
    * 
    * @private
    * @function
@@ -142,6 +144,11 @@ export default class AudioPlayer {
    * @returns {void} 
    */
   _ontimeupdate() {
+    const miniPlayer = document.querySelector(this._selectors.player);
+    if (!miniPlayer.hasAttribute('playing')) {
+      miniPlayer.toggleAttribute('playing');
+    }
+
     this.currentPlayingElement = document.querySelector(`#stations>li[data-url="${this.player.src}"]`);
     
     // already marked as playing
@@ -243,26 +250,47 @@ export default class AudioPlayer {
   }
 
   /**
-   * get currently playing info from server
+   * Updates the Media Session API metadata and action handlers.
+   * 
    * @private
    * @function
    * 
-   * @param {String} url
-   * 
-   * @returns {String}
+   * @param {Object} station - The station object containing metadata.
+   * @param {String} station.name - The name of the station.
+   * @param {String} station.url - The URL of the station.
    */
-  async _getTrackData(url) {
-    if (!url) return;
-    try {
-      const parsed = new URL(url);
-      console.log(parsed);
-      const res = await fetch(`${parsed.origin}/currentsong`);
-      if (res.status !== 200) return;
-      const playing = await res.text();
-      if (playing) document.querySelector(this._selectors.name).textContent = playing;
-    } catch(e) {
-      console.error(`error getting now playing: ${e}`);
-    }
+  _updateMediaSession(station) {
+    if (!('mediaSession' in navigator)) return;
+
+    // Set media metadata
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: station.name,
+      artist: 'customradio.dough10.me',
+      album: 'Live Stream',
+      artwork: [
+        { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+      ],
+    });
+
+    // Set media session action handlers
+    navigator.mediaSession.setActionHandler('play', () => this.player.play());
+    navigator.mediaSession.setActionHandler('pause', () => this.player.pause());
+    navigator.mediaSession.setActionHandler('stop', () => this._clearPlaying());
+    // navigator.mediaSession.setActionHandler('seekbackward', () => {
+    //   this.player.currentTime = Math.max(this.player.currentTime - 10, 0);
+    // });
+    // navigator.mediaSession.setActionHandler('seekforward', () => {
+    //   this.player.currentTime = Math.min(this.player.currentTime + 10, this.player.duration);
+    // });
+    // navigator.mediaSession.setActionHandler('previoustrack', () => {
+    //   // Implement logic for previous track if applicable
+    //   new Toast(t('noPreviousTrack'), 2);
+    // });
+    // navigator.mediaSession.setActionHandler('nexttrack', () => {
+    //   // Implement logic for next track if applicable
+    //   new Toast(t('noNextTrack'), 2);
+    // });
   }
 
   /**
@@ -289,16 +317,16 @@ export default class AudioPlayer {
     document.title = t('playing', name);
     document.querySelector(this._selectors.name).textContent = name;
     document.querySelector(this._selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
-    
-    const miniPlayer = document.querySelector(this._selectors.player);
-    if (!miniPlayer.hasAttribute('playing')) {
-      miniPlayer.toggleAttribute('playing');
-    }
 
     this.player.dataset.id = id;
     this.player.src = url;
     this.player.load();
-    this.player.play();
+    this.player.play().catch(error => {
+      console.error('Error playing stream:', error);
+      new Toast(t('playingError', error.message), 3);
+    });
+
+    this._updateMediaSession({ name, url });
   }
 
   /**
