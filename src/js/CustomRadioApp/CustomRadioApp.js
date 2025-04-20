@@ -27,10 +27,10 @@ export default class CustomRadioApp {
   constructor() {
     const lang = navigator.language.split('-')[0];
     setLanguage(lang);
-    const notifications = new Notifications()
+    this._notifications = new Notifications();
     this._uiManager = new UIManager(this._selectors);
     this._stationManager = new StationManager(window.location.origin);
-    this._player = new AudioPlayer(notifications);
+    this._player = new AudioPlayer(this._notifications);
   }
 
   /**
