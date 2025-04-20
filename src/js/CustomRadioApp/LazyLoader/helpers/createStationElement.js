@@ -4,6 +4,7 @@ import debounce from '../../utils/debounce.js';
 import contextMenu from './contextMenu.js';
 import toggleActiveState from '../../utils/toggleActiveState.js';
 import { t } from '../../utils/i18n.js';
+import hapticFeedback from '../../utils/hapticFeedback.js';
 
 const LONG_PRESS_DURATION = 500;
 
@@ -69,6 +70,8 @@ function toggleSelect(ev) {
   const el = ev.target.parentElement;
   el.toggleAttribute('selected');
   
+  hapticFeedback();
+
   // get all selected elements
   // update selected count
   const all = Array.from(el.parentNode.querySelectorAll('li[selected]'));
@@ -102,6 +105,8 @@ function toggleSelect(ev) {
 async function playStream(ev, player) {
   ev.target.blur();
   ev.preventDefault();
+
+  hapticFeedback();
 
   const el = ev.target.parentElement;
   const id = el.id; 

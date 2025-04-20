@@ -2,6 +2,7 @@ import Toast from '../Toast/Toast.js';
 import sleep from '../utils/sleep.js';
 import debounce from '../utils/debounce.js';
 import { t } from '../utils/i18n.js';
+import hapticFeedback from '../utils/hapticFeedback.js';
 
 const PAUSE_TIMER_DURATION = 10000;
 const VOLUME_DEBOUNCE_DURATION = 1000;
@@ -66,8 +67,6 @@ export default class AudioPlayer {
     this._saveVolume = debounce(value => {
       localStorage.setItem('volume', value);
     }, VOLUME_DEBOUNCE_DURATION);
-
-
   }
 
   /**
@@ -246,6 +245,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _togglePlay() {
+    hapticFeedback();
     this.player.paused ? this.player.play() : this.player.pause();
   }
 
