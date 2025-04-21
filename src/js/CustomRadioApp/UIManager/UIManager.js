@@ -5,7 +5,7 @@ import downloadTextfile from './helpers/downloadTextfile.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import toggleActiveState from '../utils/toggleActiveState.js';
 import { t } from '../utils/i18n.js';
-import normalizeMemo from '../utils/normalizeMemo.js';
+import hapticFeedback from '../utils/hapticFeedback.js';
 
 /**
  * creates a datalist option element
@@ -54,7 +54,7 @@ export default class UIManager {
     this._toTop.addEventListener('click', this._toTopHandler.bind(this));
 
     const dlButton = document.querySelector(this._selectors.downloadButton);
-    dlButton.addEventListener('click', downloadTextfile);
+    dlButton.addEventListener('click', this._dl);
 
     // document.addEventListener('keydown', this._keyDown.bind(this));    
   }
@@ -83,9 +83,17 @@ export default class UIManager {
     this._toTop.removeEventListener('click', this._toTopHandler.bind(this));
 
     const dlButton = document.querySelector(this._selectors.downloadButton);
-    dlButton.removeEventListener('click', downloadTextfile);
+    dlButton.removeEventListener('click', this._dl);
 
     // document.addEventListener('keydown', this._keyDown.bind(this));
+  }
+
+  /**
+   * downloads the current station list as a text file
+   */
+  _dl() {
+    hapticFeedback();
+    downloadTextfile();
   }
 
   /**

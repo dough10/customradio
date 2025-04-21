@@ -120,6 +120,7 @@ function wobbleDialog(event) {
     rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
   if (!isInDialog) {
     dialog.addEventListener('animationend', animationend);
+    if ('vibrate' in navigator) navigator.vibrate([20, 100, 20]);
     if (closeButton) closeButton.classList.add('attention');
     if (bigCloseButton) bigCloseButton.classList.add('button-attention');
     dialog.classList.add('dialog-attention');
