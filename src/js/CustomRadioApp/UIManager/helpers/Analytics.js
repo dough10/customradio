@@ -16,12 +16,73 @@ export default class Analytics {
 
     this._checkAnalytics = setInterval(this._checkContainer, 500);
 
-    window.onerror = (message, url, lineNumber, columnNumber, error) => {
-      this._report(message, url, lineNumber, columnNumber, error);
-      return true;
-    };
+    this._windowError = this._windowError.bind(this);
+
+    window.addEventListener('error', this._windowError, true);
   }
 
+  /**
+   * Handles window error events and reports them to Matomo.
+   * @private
+   * @method _windowError
+   * 
+   * @param {String} message 
+   * @param {String} url 
+   * @param {Number} lineNumber 
+   * @param {Number} columnNumber 
+   * @param {String} error 
+   * 
+   * @returns {Boolean}
+   */
+  _windowError(message, url, lineNumber, columnNumber, error) {
+    this._report(message, url, lineNumber, columnNumber, error);
+    return true;
+  }
+
+  /**
+   * Destroys the Analytics instance, removing event listeners and clearing intervals.
+   * This method should be called when the instance is no longer needed to prevent memory leaks.
+   * 
+   * @public
+   * 
+   * @method destroy
+   * 
+   * @returns {void}
+   * 
+   * @example
+   * const analytics = new Analytics();
+   * // ... use the analytics instance ...
+   * analytics.destroy(); // Call this when done to clean up
+   * @throws {Error} If there is an issue during the cleanup process, such as if the alert element cannot be removed.
+   */
+  destroy() {
+    window.removeEventListener('error', this._windowError, true);
+
+    if (this._dismissButton) {
+      this._dismissButton.removeEventListener('click', this._dismissAlert, true);
+    }
+
+    if (this._checkAnalytics) {
+      clearInterval(this._checkAnalytics);
+      this._checkAnalytics = null;
+    }
+
+    if (this._alert) {
+      this._alert.removeEventListener('transitionend', this._removeAlert, true);
+      if (document.body.contains(this._alert)) {
+        this._alert.remove();
+      }
+      this._alert = null;
+    }
+  }
+
+  /**
+   * 
+   * @private
+   * @method _checkContainer
+   * 
+   * @returns {void}
+   */
   _checkContainer() {
     const hasChildren = document.querySelectorAll('#matomo-opt-out>*').length > 0;
     
@@ -97,27 +158,5 @@ export default class Analytics {
   _report(message, url, lineNumber, columnNumber, error) {
     var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
     if (typeof _paq !== 'undefined') _paq.push(['JavaScript Error', errorMessage || '']);
-  }
-
-  destroy() {
-    // Remove event listener from the dismiss button
-    if (this._dismissButton) {
-      this._dismissButton.removeEventListener('click', this._dismissAlert, true);
-    }
-
-    // Clear the interval for analytics checking
-    if (this._checkAnalytics) {
-      clearInterval(this._checkAnalytics);
-      this._checkAnalytics = null;
-    }
-
-    // Remove the alert element if it exists
-    if (this._alert) {
-      this._alert.removeEventListener('transitionend', this._removeAlert, true);
-      if (document.body.contains(this._alert)) {
-        this._alert.remove();
-      }
-      this._alert = null;
-    }
   }
 }

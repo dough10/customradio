@@ -2,7 +2,6 @@ import debounce from '../utils/debounce.js';
 import createStationElement from './helpers/createStationElement.js';
 
 const ELEMENT_HEIGHT = 58;
-const SCROLL_THRESHOLD = 0.7;
 const LI_BOTTOM_MARGIN = 180;
 
 /**
@@ -33,7 +32,6 @@ export default class LazyLoader {
   _ndx = 0;
   _pullNumber = getPullCount();
   _loading = false;
-  _scrollThreshold = SCROLL_THRESHOLD;
 
   constructor(list, container, player, scrollFunc, createElFunc = createStationElement) {
     this._list = list;
@@ -66,11 +64,14 @@ export default class LazyLoader {
    * @function
    */
   _onScroll() {
+    // pass the scroll event to the scroll function if it exists
     this._scrollFunc?.(this._parent);
   
     const remainingScroll = this._parent.scrollHeight - this._parent.scrollTop - this._parent.clientHeight;
   
-    if (remainingScroll <= (ELEMENT_HEIGHT * 4) + LI_BOTTOM_MARGIN) {
+    // if the user scrolled to the bottom of the container, load more elements
+    const loadingThreshold = (ELEMENT_HEIGHT * 4) + LI_BOTTOM_MARGIN;
+    if (remainingScroll <= loadingThreshold) {
       this._load();
     }
   }

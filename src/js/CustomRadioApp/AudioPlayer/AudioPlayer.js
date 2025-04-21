@@ -144,7 +144,7 @@ export default class AudioPlayer {
    */
   _ontimeupdate() {
     const miniPlayer = document.querySelector(this._selectors.player);
-    if (!miniPlayer.hasAttribute('playing')) {
+    if (miniPlayer && !miniPlayer.hasAttribute('playing')) {
       miniPlayer.toggleAttribute('playing');
     }
 

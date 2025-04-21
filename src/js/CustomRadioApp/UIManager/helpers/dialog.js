@@ -15,14 +15,16 @@ import hapticFeedback from '../../utils/hapticFeedback.js';
  */
 function toggleButtonActivity() {
   const inputElement = document.querySelector('#station-url');
-  const submit = document.querySelector('#submit-stream');
+  const submitButton = document.querySelector('#submit-stream');
 
-  if (isValidURL(inputElement.value)) {
-    submit.removeAttribute('disabled');
-  } else {
-    if (!submit.hasAttribute('disabled')) {
-      submit.toggleAttribute('disabled');
-    }
+  const url = inputElement.value;
+  const isValid = isValidURL(url);
+  const isDisabled = submitButton.hasAttribute('disabled');
+
+  if (isValid && isDisabled) {
+    submitButton.removeAttribute('disabled');
+  } else if (!isValid && !isDisabled) {
+    submitButton.toggleAttribute('disabled');
   }
 }
 
@@ -36,6 +38,7 @@ function toggleButtonActivity() {
  *
  * @async
  * @function formSubmission
+ * 
  * @param {Event} ev - The form submission event.
  * 
  * @returns {Promise<void>} - A promise that resolves when the form submission handling is complete.
@@ -106,19 +109,27 @@ function closeDialog(el) {
  * 
  * @param {Event} event 
  */
-function wobbleDialog(event) {
-  const dialog = event.target;
+function wobbleDialog(ev) {
+  // elements
+  const dialog = ev.target;
   const closeButton = dialog.querySelector('.small-button.close');
   const bigCloseButton = dialog.querySelector('.button.close');
+
+  // animation ended callback
+  // removes classes after animation plays
   const animationend = _ => {
     dialog.removeEventListener('animationend', animationend);
     if (closeButton) closeButton.classList.remove('attention');
     if (bigCloseButton) bigCloseButton.classList.remove('button-attention');
     dialog.classList.remove('dialog-attention');
   };
+
+  // dialog location and click position
   var rect = dialog.getBoundingClientRect();
   var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
     rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
+
+  // if the click was outside the dialog, add wobble animation
   if (!isInDialog) {
     dialog.addEventListener('animationend', animationend);
     if ('vibrate' in navigator) navigator.vibrate([20, 100, 20]);
@@ -205,31 +216,31 @@ function openAddDialog() {
  * dialog interactions
  */
 function initDialogInteractions() {
-  greetUser();
-
   // animation telling user to click the x
   const dialogs = document.querySelectorAll('dialog');
   dialogs.forEach(dialog => dialog.addEventListener('click', wobbleDialog));
-
+  
   // close dialogs
   document.querySelectorAll('dialog>.close').forEach(el => {
     el.addEventListener('click', _ => closeDialog(el));
   });
-
+  
   //info
   document.querySelector('#info').addEventListener('click', info);
-
+  
   // add  stream dialog
   const addButton = document.querySelector('#add_button');
   addButton.addEventListener('click', openAddDialog);
-
+  
   // submit button for add stream dialog form submission
   const submitButton = document.querySelector('#add-stream');
   submitButton.addEventListener('submit', submitStation);
-
+  
   // toggle submit button activity on Valid URL input
   const inputElement = document.querySelector('#station-url');
   inputElement.oninput = toggleButtonActivity;
+  
+  greetUser();
 }
 
 /**
