@@ -88,6 +88,9 @@ export default class Toast {
   /**
    * Returns a new toast HTML element.
    * 
+   * @private
+   * @function
+   * 
    * @returns {HTMLElement} The toast element.
    */
   _createToast() {
@@ -105,6 +108,9 @@ export default class Toast {
 
   /**
    * stop timer when mouse enters toast element
+   * 
+   * @private
+   * @function
    */
   _mouseIn() {
     if (this._timer) {
@@ -116,6 +122,9 @@ export default class Toast {
 
   /**
    * resumes timer when mouse leaves the toast element
+   * 
+   * @private
+   * @function
    */
   _mouseOut() {
     if (this._remainingTime > 0) {
@@ -126,6 +135,9 @@ export default class Toast {
 
   /**
    * Creates a toast with a clickable link.
+   * 
+   * @private
+   * @function
    * 
    * @param {String} message - The message to display in the toast.
    * @param {String} link - The URL or function to execute when the toast is clicked.
@@ -159,6 +171,9 @@ export default class Toast {
 
   /**
    * Handles click events on the toast.
+   * 
+   * @private
+   * @function
    */
   _clicked() {
     hapticFeedback();
@@ -182,6 +197,9 @@ export default class Toast {
 
   /**
    * Plays the closing animation and removes the element from the document.
+   * 
+   * @private
+   * @function
    */
   _cleanupToast() {
     clearTimeout(this._timer);
@@ -206,6 +224,9 @@ export default class Toast {
 
   /**
    * remove from DOM and clean up last listener
+   * 
+   * @private
+   * @function
    */
   _removeToast() {
     this.toast.removeEventListener('transitionend', this._removeToast, true);
@@ -215,6 +236,9 @@ export default class Toast {
   /**
    * Called after the opening animation ends.
    * Sets up a timer to close the toast after the specified timeout.
+   * 
+   * @private
+   * @function
    */
   _transitionEnd() {
     // debug
