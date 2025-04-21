@@ -342,6 +342,7 @@ export default class AudioPlayer {
 
     this._updateMediaSession({ name, bitrate });
 
+    if (!this._notifications) return;
     this._notifications.requestPermission();
     this._notifications.nowPlaying(name);
   }
