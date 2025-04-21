@@ -3,6 +3,14 @@ import { t } from '../utils/i18n.js';
 export default class Notifications {
   /**
    * Requests notification permission from the user.
+   * 
+   * @public
+   * @function
+   * 
+   * @returns {Promise<void>} A promise that resolves when the permission request is complete.
+   * 
+   * @description This method checks if the Notification API is supported and if permission has not been granted.
+   * If permission is not granted, it requests permission from the user.
    */
   requestPermission() {
     if ('Notification' in window && Notification.permission !== 'granted') {
@@ -14,6 +22,9 @@ export default class Notifications {
 
   /**
    * Sends a notification using the appropriate API (Notification API or Service Worker API).
+   * 
+   * @private
+   * @function
    * 
    * @param {string} title - The title of the notification.
    * @param {string} [body=''] - The body text of the notification.
@@ -71,6 +82,9 @@ export default class Notifications {
 
   /**
    * Sends a "Now Playing" notification.
+   * 
+   * @public
+   * @fucntion
    * 
    * @param {string} name - The name of the currently playing station.
    */
