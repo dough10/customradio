@@ -15,6 +15,9 @@ class ToastCache {
   /**
    * Adds a toast message to the cache and starts the cache watcher if not already running.
    * 
+   * @public
+   * @function
+   * 
    * @param {String} message - The message to display in the toast.
    * @param {Number} timeout - The timeout duration for the toast.
    * @param {String|Function} link - The URL or function to execute when the toast is clicked.
