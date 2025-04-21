@@ -179,6 +179,7 @@ export default class UIManager {
    * scrolls to the top of the page
    */
   _toTopHandler() {
+    hapticFeedback();
     const wrapper = document.querySelector(this._selectors.wrapper);
     wrapper.scrollTo({
       top: 0,
