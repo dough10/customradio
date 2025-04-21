@@ -36,18 +36,18 @@ export default class CollapsingHeader {
    */
   _infoTranslateFactor = 1.5;
 
-  constructor() {
+  constructor({header, formGroup, infoButton, main}) {
     /** @type {HTMLElement|null} Header element */
-    this.header = document.querySelector('header');
+    this.header = document.querySelector(header);
 
     /** @type {HTMLElement|null} Input container element */
-    this.input = document.querySelector('.form-group');
+    this.input = document.querySelector(formGroup);
 
     /** @type {HTMLElement|null} Info button element */
-    this.infoButton = document.querySelector('#info');
+    this.infoButton = document.querySelector(infoButton);
 
     /** @type {HTMLElement|null} Main content wrapper */
-    this.wrapper = document.querySelector('.wrapper');
+    this.main = document.querySelector(main);
 
     this._onResize = this._onResize.bind(this);
 
@@ -65,7 +65,7 @@ export default class CollapsingHeader {
    */
   _onResize() {
     this._isMobile = window.innerWidth < 450;
-    this.scroll(this.wrapper?.scrollTop || 0);
+    this.scroll(this.main?.scrollTop || 0);
   }
 
   /**
@@ -120,13 +120,13 @@ export default class CollapsingHeader {
    * @returns {void}
    */
   scroll(scrollTop) {
-    if (!this.wrapper) return;
+    if (!this.main) return;
     const { transform, opacity } = this._calculateAnimation(scrollTop);
 
     requestAnimationFrame(() => {
       if (this.input) this.input.style.opacity = (1 - opacity).toFixed(2);
       if (this.header) this.header.style.transform = `translateY(-${transform}px)`;
-      if (this.wrapper) this.wrapper.style.transform = `translateY(-${transform}px)`;
+      if (this.main) this.main.style.transform = `translateY(-${transform}px)`;
 
       if (this.infoButton) {
         // the 1.5 seems to land the info button center of the collapsed header

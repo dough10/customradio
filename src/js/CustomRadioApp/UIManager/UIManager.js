@@ -29,7 +29,7 @@ export default class UIManager {
     this._lastTop = 0;
     this._toTop = document.querySelector(this._selectors.toTop);
     this.onScroll = this.onScroll.bind(this);
-    this.header = new CollapsingHeader();
+    this.header = new CollapsingHeader(selectors);
   }
   
   /**
@@ -128,7 +128,7 @@ export default class UIManager {
    * @param {Event} ev 
    */
   _filterFocus(ev) {
-    const wrapper = document.querySelector(this._selectors.wrapper);
+    const wrapper = document.querySelector(this._selectors.main);
     if (document.activeElement === ev.target && wrapper.scrollTop !== 0) {
       wrapper.scrollTop = 0;
     }
@@ -208,7 +208,7 @@ export default class UIManager {
    */
   _toTopHandler() {
     hapticFeedback();
-    const wrapper = document.querySelector(this._selectors.wrapper);
+    const wrapper = document.querySelector(this._selectors.main);
     wrapper.scrollTo({
       top: 0,
       behavior: 'smooth'

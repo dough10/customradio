@@ -22,7 +22,18 @@ export default class CustomRadioApp {
     stationsContainer: '#stations',
     downloadButton: '#download',
     resetButton: '.reset',
-    wrapper: '.wrapper'
+    main: 'main',
+    header: 'header',
+    infoButton: '#info',
+    formGroup: '.form-group',
+    player: '.player',
+    name: '#name',
+    bitrate: '#bitrate',
+    volume: '#vol',
+    smallButton: '.player>.small-button',
+    stations: '#stations>li',
+    icon: '.player>.small-button>svg>path',
+    add: '#add_button',
   };
   
   constructor() {
@@ -31,7 +42,7 @@ export default class CustomRadioApp {
     this._notifications = new Notifications();
     this._uiManager = new UIManager(this._selectors);
     this._stationManager = new StationManager(window.location.origin);
-    this._player = new AudioPlayer(this._notifications);
+    this._player = new AudioPlayer(this._notifications, this._selectors);
   }
 
   /**

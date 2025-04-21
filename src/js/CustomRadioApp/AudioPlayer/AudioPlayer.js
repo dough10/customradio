@@ -14,29 +14,16 @@ const PLAY_DEBOUNCE_DURATION = 100;
  * as well as managing UI elements for the audio tag
  */
 export default class AudioPlayer {
-  _selectors = {
-    player: '.player',
-    name: '#name',
-    bitrate: '#bitrate',
-    volume: '#vol',
-    smallButton: '.player>.small-button',
-    stations: '#stations>li',
-    icon: '.player>.small-button>svg>path',
-    filter: '#filter',
-    info: '#info',
-    add: '#add_button',
-    downloadButton: '#download'
-  };
-
-  constructor(notifications = null) {
+  constructor(notifications = null, selectors) {
     this.player = new Audio();
     this.pauseTimer = 0;
     this._OGTitle = document.title;
     this._notifications = notifications;
+    this._selectors = selectors;
 
     this._interactive = [
       document.querySelector(this._selectors.filter),
-      document.querySelector(this._selectors.info),
+      document.querySelector(this._selectors.infoButton),
       document.querySelector(this._selectors.add),
       document.querySelector(this._selectors.downloadButton),
     ];

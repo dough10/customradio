@@ -74,7 +74,7 @@ body {
   color: var(--text-color);
 }
 
-.wrapper {
+main {
   overflow-y: auto;
   overflow-x: hidden;
   position: fixed;

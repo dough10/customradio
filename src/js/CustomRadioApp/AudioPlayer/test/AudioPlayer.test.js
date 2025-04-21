@@ -33,7 +33,27 @@ describe('AudioPlayer', () => {
       </ul>
     `;
 
-    audioPlayer = new AudioPlayer();
+    audioPlayer = new AudioPlayer(null, {
+      filter: '#filter',
+      toTop: '.to-top',
+      genres: '#genres',
+      stationCount: '#station-count',
+      stationsContainer: '#stations',
+      downloadButton: '#download',
+      resetButton: '.reset',
+      main: 'main',
+      header: 'header',
+      infoButton: '#info',
+      formGroup: '.form-group',
+      player: '.player',
+      name: '#name',
+      bitrate: '#bitrate',
+      volume: '#vol',
+      smallButton: '.player>.small-button',
+      stations: '#stations>li',
+      icon: '.player>.small-button>svg>path',
+      add: '#add_button',
+    });
     playerElement = document.querySelector('.player');
   });
 
