@@ -144,9 +144,7 @@ export default class AudioPlayer {
    */
   _ontimeupdate() {
     const miniPlayer = document.querySelector(this._selectors.player);
-    if (miniPlayer && !miniPlayer.hasAttribute('playing')) {
-      miniPlayer.toggleAttribute('playing');
-    }
+    !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
 
     this.currentPlayingElement = document.querySelector(`#stations>li[data-url="${this.player.src}"]`);
     
@@ -332,9 +330,7 @@ export default class AudioPlayer {
     document.querySelector(this._selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
 
     const miniPlayer = document.querySelector(this._selectors.player);
-    if (!miniPlayer.hasAttribute('playing')) {
-      miniPlayer.toggleAttribute('playing');
-    }
+    !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
 
     this.player.dataset.id = id;
     this.player.src = url;
@@ -373,9 +369,8 @@ export default class AudioPlayer {
    */
   _handleOffline() {
     const playerElement = document.querySelector(this._selectors.player);
-    if (playerElement.hasAttribute('playing')) {
-      new Toast(t('offline'), 1.5);
-    }
+    if (!playerElement.hasAttribute('playing')) return;
+    new Toast(t('offline'), 1.5);
   }
 
   /**
@@ -388,11 +383,10 @@ export default class AudioPlayer {
    */
   _handleOnline() {
     const playerElement = document.querySelector(this._selectors.player);
-    if (playerElement.hasAttribute('playing')) {
-      new Toast(t('online'), 1.5);
-      this.player.load();
-      this.player.play();
-    }
+    if (!playerElement.hasAttribute('playing')) return;
+    new Toast(t('online'), 1.5);
+    this.player.load();
+    this.player.play();
   }
 
   /**
