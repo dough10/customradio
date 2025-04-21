@@ -272,9 +272,9 @@ export default class AudioPlayer {
    * //   ],
    * // }
    */
-  _defaultMetadata(station) {
+  _defaultMetadata({ name, bitrate }) {
     return {
-      title: `${station.name} - ${station.bitrate === 0 ? '???' : station.bitrate}kbps`,
+      title: `${name} - ${bitrate === 0 ? '???' : bitrate}kbps`,
       artist: location.host,
       album: 'Live Stream',
       artwork: [
@@ -292,7 +292,7 @@ export default class AudioPlayer {
    * 
    * @param {Object} station - The station object containing metadata.
    * @param {String} station.name - The name of the station.
-   * @param {String} station.url - The URL of the station.
+   * @param {Number} station.bitrate - The bitrate of the station.
    */
   _updateMediaSession(station) {
     if (!('mediaSession' in navigator)) return;
