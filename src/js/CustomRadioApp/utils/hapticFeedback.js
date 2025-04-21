@@ -5,12 +5,10 @@
  */
 export default function hapticFeedback() {
   if (!('vibrate' in navigator)) {
-    console.warn('Vibration API is not supported on this device.');
     return;
   }
 
   if (!window.matchMedia('(display-mode: standalone)').matches) {
-    console.warn('Haptic feedback is only available in standalone mode.');
     return;
   }
 
