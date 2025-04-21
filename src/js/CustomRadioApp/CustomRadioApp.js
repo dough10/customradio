@@ -8,41 +8,20 @@ import { setLanguage, t } from './utils/i18n.js';
 import normalizeMemo from './utils/normalizeMemo.js';
 import Notifications from './Notifications/Notifications.js';
 import hapticFeedback from './utils/hapticFeedback.js';
+import selectors from './selectors.js';
 
 /**
  * customradio.dough10.me
  */
 export default class CustomRadioApp {
-  // HTMLElement selectors
-  _selectors = {
-    filter: '#filter',
-    toTop: '.to-top',
-    genres: '#genres',
-    stationCount: '#station-count',
-    stationsContainer: '#stations',
-    downloadButton: '#download',
-    resetButton: '.reset',
-    main: 'main',
-    header: 'header',
-    infoButton: '#info',
-    formGroup: '.form-group',
-    player: '.player',
-    name: '#name',
-    bitrate: '#bitrate',
-    volume: '#vol',
-    smallButton: '.player>.small-button',
-    stations: '#stations>li',
-    icon: '.player>.small-button>svg>path',
-    add: '#add_button',
-  };
-  
+  // HTMLElement selectors  
   constructor() {
     const lang = navigator.language.split('-')[0];
     setLanguage(lang);
     this._notifications = new Notifications();
-    this._uiManager = new UIManager(this._selectors);
+    this._uiManager = new UIManager(selectors);
     this._stationManager = new StationManager(window.location.origin);
-    this._player = new AudioPlayer(this._notifications, this._selectors);
+    this._player = new AudioPlayer(this._notifications, selectors);
   }
 
   /**
@@ -59,7 +38,7 @@ export default class CustomRadioApp {
     });
     
     this._filterChanged({ 
-      target: document.querySelector(this._selectors.filter), 
+      target: document.querySelector(selectors.filter), 
       loadLocal: true 
     });
   }
@@ -85,7 +64,7 @@ export default class CustomRadioApp {
    * resets the filter input
    */
   _resetFilter() {
-    const filter = document.querySelector(this._selectors.filter);
+    const filter = document.querySelector(selectors.filter);
     if (!filter) {
       console.error('Filter element not found.');
       return;
@@ -114,7 +93,7 @@ export default class CustomRadioApp {
     // Continue with fetch — empty userInput means "show all"
     const userInput = normalizeMemo(ev?.target?.value?.trim?.() || '');
 
-    const container = document.querySelector(this._selectors.stationsContainer);
+    const container = document.querySelector(selectors.stationsContainer);
     
     // loading animation
     this._uiManager.loadingStart(container);
