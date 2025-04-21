@@ -35,6 +35,9 @@ export default class UIManager {
   /**
    * attach UI listeners
    * 
+   * @public
+   * @function
+   * 
    * @param {Object} param0
    * @param {Function} param0.onFilterChange
    * @param {Function} param0.onReset 
@@ -61,6 +64,9 @@ export default class UIManager {
 
   /**
    * remove UI listeners
+   * 
+   * @public
+   * @function
    * 
    * @param {Object} param0
    * @param {Function} param0.onFilterChange
@@ -90,6 +96,9 @@ export default class UIManager {
 
   /**
    * downloads the current station list as a text file
+   * 
+   * @private
+   * @function
    */
   _dl() {
     hapticFeedback();
@@ -98,6 +107,9 @@ export default class UIManager {
 
   /**
    * listen for alt + ˙ key
+   * 
+   * @private
+   * @function
    * 
    * @param {Event} event 
    */
@@ -109,6 +121,9 @@ export default class UIManager {
 
   /**
    * scroll to top of page if user focuses input while sctolltop not = 0
+   * 
+   * @private
+   * @function
    * 
    * @param {Event} ev 
    */
@@ -124,6 +139,7 @@ export default class UIManager {
    * 
    * @public
    * @function 
+   * 
    * @param {HTMLElement} parent 
    */
   onScroll(parent) {
@@ -146,6 +162,9 @@ export default class UIManager {
   /**
    * sets the station counts in the UI
    * 
+   * @public
+   * @function
+   * 
    * @param {Number} selected 
    * @param {Number} total 
    */
@@ -159,6 +178,9 @@ export default class UIManager {
   /**
    * gets the current genres from the UI
    * 
+   * @public
+   * @function
+   * 
    * @returns {Array<String>} List of normalized genre values
    */
   currentGenres() {
@@ -169,6 +191,9 @@ export default class UIManager {
 
   /**
    * loads genres into a datalist element
+   * 
+   * @public
+   * @function
    */
   async loadGenres(genres) {
     const options = genres.map(createOption);
@@ -177,6 +202,9 @@ export default class UIManager {
 
   /**
    * scrolls to the top of the page
+   * 
+   * @private
+   * @function
    */
   _toTopHandler() {
     hapticFeedback();
@@ -190,6 +218,9 @@ export default class UIManager {
   /**
    * creates a loading animation in the given element
    * 
+   * @public
+   * @function
+   * 
    * @param {HTMLElement} container - element to place a loadin animation
    */
   loadingStart(container) {
@@ -200,6 +231,9 @@ export default class UIManager {
 
   /**
    * removes the loading animation
+   * 
+   * @public
+   * @function
    */
   loadingEnd() {
     const loadingEl = document.querySelector('.loading');
@@ -210,6 +244,9 @@ export default class UIManager {
 
   /**
    * toggle visability of selected element
+   * 
+   * @public
+   * @function
    */
   toggleSelectedVisability() {
     const selected = document.querySelectorAll('#stations>li[selected]');
