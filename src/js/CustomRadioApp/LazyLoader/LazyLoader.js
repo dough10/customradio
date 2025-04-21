@@ -8,6 +8,9 @@ const LI_BOTTOM_MARGIN = 180;
 /**
  * calculate how many station elements can fit in the current browser window height
  * 
+ * @public
+ * @function
+ * 
  * @returns {Number} number of elements that will fit in browser window height
  */
 function getPullCount() {
@@ -58,6 +61,9 @@ export default class LazyLoader {
   
   /**
    * user scrolled the parent container
+   * 
+   * @private
+   * @function
    */
   _onScroll() {
     this._scrollFunc?.(this._parent);
@@ -72,6 +78,9 @@ export default class LazyLoader {
   /**
    * window was resized by user
    * will adjust the pull count based on screen size
+   * 
+   * @private
+   * @function
    */
   _onResize() {
     const adjusted = getPullCount();
@@ -83,6 +92,9 @@ export default class LazyLoader {
 
   /**
    * Populates a container with station elements
+   * 
+   * @private
+   * @function
    * 
    * @param {HTMLElement} container - The container to populate.
    * @param {Array} stationList - The list of stations to add.
@@ -99,6 +111,9 @@ export default class LazyLoader {
 
   /**
    * push more elements
+   * 
+   * @private
+   * @function
    * 
    * @returns {void}
    */
@@ -121,6 +136,9 @@ export default class LazyLoader {
   /**
    * resets LazyLoader to initial state
    * 
+   * @public
+   * @function
+   * 
    * @param {Array} newList 
    */
   reset(newList = []) {
@@ -133,6 +151,9 @@ export default class LazyLoader {
 
   /**
    * remove listeners for da memoryz
+   * 
+   * @public
+   * @function
    */
   destroy() {
     window.removeEventListener('resize', this._resizeHandler);
