@@ -19,8 +19,9 @@ export default class Notifications {
    * @param {string} [body=''] - The body text of the notification.
    * @param {string} [icon='/android-chrome-192x192.png'] - The icon for the notification.
    * @param {number} [timeout=5000] - The duration (in ms) before the notification is automatically closed.
+   * @param {boolean} [silent=true] - Whether the notification should be silent (no sound).
    */
-  async _notify(title, body = '', icon = '/android-chrome-192x192.png', timeout = 5000) {
+  async _notify(title, body = '', icon = '/android-chrome-192x192.png', timeout = 5000, silent = true) {
     if (Notification.permission !== 'granted') return;
 
     // Use Service Worker API if available
@@ -31,7 +32,7 @@ export default class Notifications {
           body,
           icon,
           badge: icon,
-          silent: false,
+          silent,
           tag: 'custom-radio-notification',
           renotify: true
         });
@@ -53,7 +54,7 @@ export default class Notifications {
         body,
         icon,
         badge: icon,
-        silent: false,
+        silent,
         tag: 'custom-radio-notification',
         renotify: true
       });
