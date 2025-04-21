@@ -196,6 +196,7 @@ function greetUser() {
  * opens the add stream dialog
  */
 function openAddDialog() {
+  hapticFeedback();
   const add = document.querySelector('#add');
   if (add) add.showModal();
 }
