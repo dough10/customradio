@@ -1,4 +1,5 @@
 import isValidURL from '../utils/URL.js';
+import hapticFeedback from '../utils/hapticFeedback.js';
 import ToastCache from './ToastCache.js';
 
 /**
@@ -160,6 +161,7 @@ export default class Toast {
    * Handles click events on the toast.
    */
   _clicked() {
+    hapticFeedback();
     if (!this.link) {
       this._cleanupToast();
       return;
