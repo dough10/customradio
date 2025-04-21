@@ -254,6 +254,7 @@ export default class AudioPlayer {
    * 
    * @private
    * @function
+   * 
    * @param {Object} station - The station object containing metadata.
    * @param {String} station.name - The name of the station.
    * @param {String} station.bitrate - The bitrate of the station.
@@ -399,6 +400,7 @@ export default class AudioPlayer {
    * 
    * @private
    * @function
+   * 
    * @param {Event} ev 
    */
   _onKeyPress(ev) {
@@ -415,6 +417,7 @@ export default class AudioPlayer {
 
   /**
    * remove event listeners
+   * 
    * @public
    * @function
    */
@@ -434,6 +437,7 @@ export default class AudioPlayer {
 
   /**
    * loads player into document
+   * 
    * @public
    * @function
    */
