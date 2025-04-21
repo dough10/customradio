@@ -74,11 +74,11 @@ html(lang=lang)
         span #{volume}
         input(type="range" min="0" max="100" aria-label="Volume control" role='slider')
       span#bitrate 0kbps
-      .small-button.player-big
+      button.small-button.player-big(type="button" title='Play/Pause')
         svg(viewBox="0 -960 960 960" id="play-button" alt='play/pause')
           path(fill="currentColor" d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z")
 
-    button.to-top.small-button.hidden
+    button.to-top.small-button.hidden(type="button" title='Scroll to top')
       svg(viewBox="0 0 24 24" alt='up arrow')
         path(fill="currentColor" d="M15,20H9V12H4.16L12,4.16L19.84,12H15V20Z")
 
