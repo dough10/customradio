@@ -7,6 +7,7 @@ import StationManager from './StationManager/StationManager.js';
 import { setLanguage, t } from './utils/i18n.js';
 import normalizeMemo from './utils/normalizeMemo.js';
 import Notifications from './Notifications/Notifications.js';
+import hapticFeedback from './utils/hapticFeedback.js';
 
 /**
  * customradio.dough10.me
@@ -78,6 +79,8 @@ export default class CustomRadioApp {
       console.error('Filter element not found.');
       return;
     }
+    if (!filter.value) return; 
+    hapticFeedback();
     filter.value = '';
     this._filterChanged({ target: filter });
   }

@@ -2,7 +2,7 @@ import loadingAnimation from './insertLoadingAnimation.js';
 import Toast from '../../Toast/Toast.js';
 import sleep from '../../utils/sleep.js';
 import isValidURL from '../../utils/URL.js';
-
+import hapticFeedback from '../../utils/hapticFeedback.js';
 
 /**
  * Toggles the activity state of the submit button based on the validity of the URL input.
@@ -93,6 +93,7 @@ function rmArrow(str) {
  * @param {HTMLElement} el 
  */
 function closeDialog(el) {
+  hapticFeedback();
   const dialog = el.parentElement;
   dialog.close();
   if (dialog.id === 'greeting') {
@@ -135,6 +136,8 @@ function wobbleDialog(event) {
 async function info() {
   const dialog = document.querySelector('#info-dialog');
   const depDiv = document.querySelector('#dependencies');
+
+  hapticFeedback();
 
   dialog.showModal();
 
@@ -190,6 +193,14 @@ function greetUser() {
 }
 
 /**
+ * opens the add stream dialog
+ */
+function openAddDialog() {
+  const add = document.querySelector('#add');
+  if (add) add.showModal();
+}
+
+/**
  * dialog interactions
  */
 function initDialogInteractions() {
@@ -207,10 +218,9 @@ function initDialogInteractions() {
   //info
   document.querySelector('#info').addEventListener('click', info);
 
-  // add
-  const add = document.querySelector('#add');
+  // add  stream dialog
   const addButton = document.querySelector('#add_button');
-  addButton.addEventListener('click', _ => add.showModal());
+  addButton.addEventListener('click', openAddDialog);
 
   // submit button for add stream dialog form submission
   const submitButton = document.querySelector('#add-stream');
@@ -240,10 +250,7 @@ function destroyDialogInteractions() {
 
   // Remove add dialog listener
   const addButton = document.querySelector('#add_button');
-  addButton.removeEventListener('click', _ => {
-    const add = document.querySelector('#add');
-    if (add) add.showModal();
-  });
+  addButton.removeEventListener('click', openAddDialog);
 
   // Remove submit button listener
   const submitButton = document.querySelector('#add-stream');
