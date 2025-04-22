@@ -122,7 +122,7 @@ export default class CustomRadioApp {
         this._uiManager.onScroll
       );
   
-      // if a genre was searched and not in the current datalist, load the genres from API again
+      // if a genre was searched and not in the current datalist, load the genres again
       const currentGenres = this._uiManager.currentGenres();
       const isNewGenreSearch = userInput.length && !currentGenres.includes(userInput);
       if (isNewGenreSearch || ev.loadLocal) {

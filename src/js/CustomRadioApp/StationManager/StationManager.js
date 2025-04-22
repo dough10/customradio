@@ -74,7 +74,7 @@ export default class StationManager {
   /**
    * get list of most searched genres
    * 
-   * @returns {Object}
+   * @returns {String[]}
    */
   async getGenres() {
     const res = await retryFetch(`${this.apiBaseUrl}/topGenres`);

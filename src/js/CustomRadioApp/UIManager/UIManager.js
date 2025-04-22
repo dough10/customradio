@@ -29,7 +29,7 @@ export default class UIManager {
     this._lastTop = 0;
     this._toTop = document.querySelector(selectors.toTop);
     this.onScroll = this.onScroll.bind(this);
-    this.header = new CollapsingHeader(selectors);
+    this.header = new CollapsingHeader();
   }
   
   /**

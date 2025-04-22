@@ -3,6 +3,7 @@ import Toast from '../../Toast/Toast.js';
 import sleep from '../../utils/sleep.js';
 import isValidURL from '../../utils/URL.js';
 import hapticFeedback from '../../utils/hapticFeedback.js';
+import selectors from '../../selectors.js';
 
 /**
  * Toggles the activity state of the submit button based on the validity of the URL input.
@@ -14,8 +15,8 @@ import hapticFeedback from '../../utils/hapticFeedback.js';
  * @function toggleButtonActivity
  */
 function toggleButtonActivity() {
-  const inputElement = document.querySelector('#station-url');
-  const submitButton = document.querySelector('#submit-stream');
+  const inputElement = document.querySelector(selectors.stationUrl);
+  const submitButton = document.querySelector(selectors.stationSubmit);
 
   const url = inputElement.value;
   const isValid = isValidURL(url);
@@ -49,10 +50,10 @@ async function submitStation(ev) {
   ev.preventDefault();
 
   
-  const submit = document.querySelector('#submit-stream');
+  const submit = document.querySelector(selectors.stationSubmit);
   submit.setAttribute('disabled', true);
   
-  const responseElement = document.querySelector('#response');
+  const responseElement = document.querySelector(selectors.response);
   const fData = new FormData(ev.target);
 
   try {
@@ -63,9 +64,9 @@ async function submitStation(ev) {
     const result = await response.json();
     responseElement.textContent = result.message;
     new Toast(result.message);
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', document.querySelector('#station-url').value, result.message]);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', document.querySelector(selectors.stationUrl).value, result.message]);
     await sleep(2000);
-    const inputElement = document.querySelector('#station-url');
+    const inputElement = document.querySelector(selectors.stationUrl);
     inputElement.value = '';
     document.getElementById('response').innerText = '';
   } catch (e) {
@@ -112,8 +113,8 @@ function closeDialog(el) {
 function wobbleDialog(ev) {
   // elements
   const dialog = ev.target;
-  const closeButton = dialog.querySelector('.small-button.close');
-  const bigCloseButton = dialog.querySelector('.button.close');
+  const closeButton = dialog.querySelector(selectors.smallDialogCloseButton);
+  const bigCloseButton = dialog.querySelector(selectors.dialogCloseButton);
 
   // animation ended callback
   // removes classes after animation plays
@@ -145,8 +146,8 @@ function wobbleDialog(ev) {
  * @returns {void}
  */
 async function info() {
-  const dialog = document.querySelector('#info-dialog');
-  const depDiv = document.querySelector('#dependencies');
+  const dialog = document.querySelector(selectors.infoDialog);
+  const depDiv = document.querySelector(selectors.dependencies);
 
   hapticFeedback();
 
@@ -175,7 +176,7 @@ async function info() {
     console.error(message);
     new Toast(message, 3);
   } finally {
-    depDiv.querySelector('.loading').remove();
+    depDiv.querySelector(selectors.loading).remove();
   }
 }
 
@@ -187,7 +188,7 @@ async function info() {
  */
 function greetUser() {
   const hasBeenGreeted = Number(localStorage.getItem('greeted'));
-  const greetingElement = document.querySelector('#greeting');
+  const greetingElement = document.querySelector(selectors.greeting);
 
   if (hasBeenGreeted) {
     greetingElement.remove();
@@ -208,7 +209,7 @@ function greetUser() {
  */
 function openAddDialog() {
   hapticFeedback();
-  const add = document.querySelector('#add');
+  const add = document.querySelector(selectors.addDialog);
   if (add) add.showModal();
 }
 
@@ -221,23 +222,23 @@ function initDialogInteractions() {
   dialogs.forEach(dialog => dialog.addEventListener('click', wobbleDialog));
   
   // close dialogs
-  document.querySelectorAll('dialog>.close').forEach(el => {
+  document.querySelectorAll(selectors.dialogClose).forEach(el => {
     el.addEventListener('click', _ => closeDialog(el));
   });
   
   //info
-  document.querySelector('#info').addEventListener('click', info);
+  document.querySelector(selectors.infoButton).addEventListener('click', info);
   
   // add  stream dialog
-  const addButton = document.querySelector('#add_button');
+  const addButton = document.querySelector(selectors.add);
   addButton.addEventListener('click', openAddDialog);
   
   // submit button for add stream dialog form submission
-  const submitButton = document.querySelector('#add-stream');
-  submitButton.addEventListener('submit', submitStation);
+  const stationSubmitForm = document.querySelector(selectors.stationSubmitForm);
+  stationSubmitForm.addEventListener('submit', submitStation);
   
   // toggle submit button activity on Valid URL input
-  const inputElement = document.querySelector('#station-url');
+  const inputElement = document.querySelector(selectors.stationUrl);
   inputElement.oninput = toggleButtonActivity;
   
   greetUser();
@@ -252,24 +253,24 @@ function destroyDialogInteractions() {
   dialogs.forEach(dialog => dialog.removeEventListener('click', wobbleDialog));
 
   // Remove close dialog listeners
-  document.querySelectorAll('dialog>.close').forEach(el => {
+  document.querySelectorAll(selectors.dialogClose).forEach(el => {
     el.removeEventListener('click', _ => closeDialog(el));
   });
 
   // Remove info dialog listener
-  const infoButton = document.querySelector('#info');
+  const infoButton = document.querySelector(selectors.infoButton);
   infoButton.removeEventListener('click', info);
 
   // Remove add dialog listener
-  const addButton = document.querySelector('#add_button');
+  const addButton = document.querySelector(selectors.add);
   addButton.removeEventListener('click', openAddDialog);
 
   // Remove submit button listener
-  const submitButton = document.querySelector('#add-stream');
-  submitButton.removeEventListener('submit', submitStation);
+  const stationSubmitForm = document.querySelector(selectors.stationSubmitForm);
+  stationSubmitForm.removeEventListener('submit', submitStation);
 
   // Remove input element listener
-  const inputElement = document.querySelector('#station-url');
+  const inputElement = document.querySelector(selectors.stationUrl);
   inputElement.oninput = null;
 }
 

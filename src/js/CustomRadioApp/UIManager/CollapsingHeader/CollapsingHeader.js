@@ -1,3 +1,5 @@
+import selectors from "../../selectors.js";
+
 /**
  * Class representing a scroll-responsive collapsing header.
  * Shrinks the header and adjusts element visibility based on scroll position,
@@ -36,18 +38,18 @@ export default class CollapsingHeader {
    */
   _infoTranslateFactor = 1.5;
 
-  constructor({header, formGroup, infoButton, main}) {
+  constructor() {
     /** @type {HTMLElement|null} Header element */
-    this.header = document.querySelector(header);
+    this.header = document.querySelector(selectors.header);
 
     /** @type {HTMLElement|null} Input container element */
-    this.input = document.querySelector(formGroup);
+    this.input = document.querySelector(selectors.formGroup);
 
     /** @type {HTMLElement|null} Info button element */
-    this.infoButton = document.querySelector(infoButton);
+    this.infoButton = document.querySelector(selectors.infoButton);
 
     /** @type {HTMLElement|null} Main content wrapper */
-    this.main = document.querySelector(main);
+    this.main = document.querySelector(selectors.main);
 
     this._onResize = this._onResize.bind(this);
 

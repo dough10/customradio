@@ -34,6 +34,15 @@
  * @property {Function} playingURL - Function to find a station by its data-url attribute.
  * @property {String} playingStation - The station marked as playing.
  * @property {String} selectedStation - All selected stations.
+ * @property {String} stationUrl - The station URL input element.
+ * @property {String} stationSubmit - The station submit button.
+ * @property {String} stationSubmitForm - The add station dialog form.
+ * @property {String} response - The add station response container.
+ * @property {String} dependencies - The application dependencies container.
+ * @property {String} greeting - The application greeting.
+ * @property {String} smallDialogCloseButton - The small dialog close button.
+ * @property {String} dialogCloseButton - The dialog close button.
+ * @property {String} dialogClose - All dialog close buttons.
  */
 const selectors = {
   /** @type {String} header element */
@@ -53,6 +62,9 @@ const selectors = {
 
   /** @type {String} site info button */
   infoButton: '#info',
+
+  /** @type {String} site info dialog */
+  infoDialog: '#info-dialog',
 
   /** @type {String} main page content */
   main: 'main',
@@ -99,6 +111,9 @@ const selectors = {
   /** @type {String} add station floating action button */
   add: '#add_button',
 
+  /** @type {String} add station dialog */
+  addDialog: '#add',
+
   /** @type {Function} find a station by it's data-url attribute */
   playingURL: url => `#stations>li[data-url="${url}"]`,
 
@@ -107,6 +122,33 @@ const selectors = {
 
   /** @type {String} all selected stations */
   selectedStation: '#stations>li[selected]',
+
+  /** @type {String} station url input element */
+  stationUrl: '#station-url',
+
+  /** @type {String} station submit button */
+  stationSubmit: '#submit-stream',
+
+  /** @type {String} add station dialog form */
+  stationSubmitForm: '#add-stream',
+
+  /** @type {String} add station response container */
+  response: '#response',
+
+  /** @type {String} application dependencies container */
+  dependencies: '#dependencies',
+
+  /** @type {String} application greeting */
+  greeting: '#greeting',
+
+  /** @type {String} small dialog close button */
+  smallDialogCloseButton: '.small-button.close',
+
+  /** @type {String} dialog close button */
+  dialogCloseButton: '.button.close',
+
+  /** @type {String} all dialog close buttons */
+  dialogClose: 'dialog>.close'
 };
 
 export default selectors;
