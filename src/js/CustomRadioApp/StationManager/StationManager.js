@@ -91,7 +91,7 @@ export default class StationManager {
    * @param {Boolean} loadFromLocal 
    * @param {HTMLElement} container 
    * 
-   * @returns {Array}
+   * @returns {Array<String>}
    */
   getSelectedStations(loadFromLocal, container) {
     if (loadFromLocal) {
