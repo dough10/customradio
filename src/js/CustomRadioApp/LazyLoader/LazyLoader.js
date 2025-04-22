@@ -85,10 +85,9 @@ export default class LazyLoader {
    */
   _onResize() {
     const adjusted = getPullCount();
-    if (adjusted > this._pullNumber) {
-      this._pullNumber = adjusted;
-      this._debouncedLoad();
-    }
+    if (adjusted <= this._pullNumber) return;
+    this._pullNumber = adjusted;
+    this._debouncedLoad();
   }
 
   /**
