@@ -455,7 +455,7 @@ export default class AudioPlayer {
 
     document.querySelector(selectors.smallButton).removeEventListener('click', this._togglePlay);
     
-    if (!this._notMobile) document.querySelector(selectors.volumeSlider).removeEventListener('input', this._setVolume);
+    if (this._notMobile) document.querySelector(selectors.volumeSlider).removeEventListener('input', this._setVolume);
 
     if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('play', null);
