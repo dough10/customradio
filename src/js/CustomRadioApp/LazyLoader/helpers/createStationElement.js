@@ -5,6 +5,7 @@ import contextMenu from './contextMenu.js';
 import toggleActiveState from '../../utils/toggleActiveState.js';
 import { t } from '../../utils/i18n.js';
 import hapticFeedback from '../../utils/hapticFeedback.js';
+import selectors from '../../selectors.js';
 
 const LONG_PRESS_DURATION = 500;
 
@@ -74,8 +75,8 @@ function toggleSelect(ev) {
 
   // get all selected elements
   // update selected count
-  const all = Array.from(el.parentNode.querySelectorAll('li[selected]'));
-  toggleActiveState(document.querySelector('#download'), all.length);
+  const all = Array.from(el.parentNode.querySelectorAll(selectors.selectedStation));
+  toggleActiveState(document.querySelector(selectors.downloadButton), all.length);
   
   // store selected stations in localstorage
   el.dataset.bitrate = Number(el.dataset.bitrate);
