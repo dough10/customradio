@@ -6,6 +6,7 @@ import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import toggleActiveState from '../utils/toggleActiveState.js';
 import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
+import selectors from '../selectors.js';
 
 /**
  * creates a datalist option element
@@ -24,10 +25,9 @@ function createOption(str) {
  * manages UI elements
  */
 export default class UIManager {
-  constructor(selectors) {
-    this._selectors = selectors;
+  constructor() {
     this._lastTop = 0;
-    this._toTop = document.querySelector(this._selectors.toTop);
+    this._toTop = document.querySelector(selectors.toTop);
     this.onScroll = this.onScroll.bind(this);
     this.header = new CollapsingHeader(selectors);
   }
@@ -47,16 +47,16 @@ export default class UIManager {
 
     initDialogInteractions();
 
-    const filter = document.querySelector(this._selectors.filter);
+    const filter = document.querySelector(selectors.filter);
     filter.addEventListener('change', onFilterChange);
     filter.addEventListener('focus', this._filterFocus.bind(this));
 
-    const resetButton = document.querySelector(this._selectors.resetButton);
+    const resetButton = document.querySelector(selectors.resetButton);
     resetButton.addEventListener('click', onReset);
 
     this._toTop.addEventListener('click', this._toTopHandler.bind(this));
 
-    const dlButton = document.querySelector(this._selectors.downloadButton);
+    const dlButton = document.querySelector(selectors.downloadButton);
     dlButton.addEventListener('click', this._dl);
 
     // document.addEventListener('keydown', this._keyDown.bind(this));    
@@ -79,16 +79,16 @@ export default class UIManager {
 
     destroyDialogInteractions();
 
-    const filter = document.querySelector(this._selectors.filter);
+    const filter = document.querySelector(selectors.filter);
     filter.removeEventListener('change', onFilterChange);
     filter.removeEventListener('focus', this._filterFocus.bind(this));
 
-    const resetButton = document.querySelector(this._selectors.resetButton);
+    const resetButton = document.querySelector(selectors.resetButton);
     resetButton.removeEventListener('click', onReset);
 
     this._toTop.removeEventListener('click', this._toTopHandler.bind(this));
 
-    const dlButton = document.querySelector(this._selectors.downloadButton);
+    const dlButton = document.querySelector(selectors.downloadButton);
     dlButton.removeEventListener('click', this._dl);
 
     // document.addEventListener('keydown', this._keyDown.bind(this));
@@ -128,7 +128,7 @@ export default class UIManager {
    * @param {Event} ev 
    */
   _filterFocus(ev) {
-    const wrapper = document.querySelector(this._selectors.main);
+    const wrapper = document.querySelector(selectors.main);
     if (document.activeElement === ev.target && wrapper.scrollTop !== 0) {
       wrapper.scrollTop = 0;
     }
@@ -169,14 +169,14 @@ export default class UIManager {
    * @param {Number} total 
    */
   setCounts(selected, total) {
-    const button = document.querySelector(this._selectors.downloadButton);
+    const button = document.querySelector(selectors.downloadButton);
     toggleActiveState(button, selected);
-    const stationCount = document.querySelector(this._selectors.stationCount);
+    const stationCount = document.querySelector(selectors.stationCount);
     stationCount.textContent = t('stations', selected + total);
   }
 
   /**
-   * gets the current genres from the UI
+   * gets a list of the current genres from the UI
    * 
    * @public
    * @function
@@ -184,20 +184,20 @@ export default class UIManager {
    * @returns {Array<String>} List of normalized genre values
    */
   currentGenres() {
-    const parent = document.querySelector(this._selectors.genres);
+    const parent = document.querySelector(selectors.genres);
     const options = Array.from(parent.querySelectorAll('option'));
     return options.map(element => element.value);
   }
 
   /**
-   * loads genres into a datalist element
+   * replaces the genres in the dataset with the given list
    * 
    * @public
    * @function
    */
   async loadGenres(genres) {
     const options = genres.map(createOption);
-    document.querySelector(this._selectors.genres).replaceChildren(...options);
+    document.querySelector(selectors.genres).replaceChildren(...options);
   }
 
   /**
@@ -208,7 +208,7 @@ export default class UIManager {
    */
   _toTopHandler() {
     hapticFeedback();
-    const wrapper = document.querySelector(this._selectors.main);
+    const wrapper = document.querySelector(selectors.main);
     wrapper.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -217,6 +217,7 @@ export default class UIManager {
 
   /**
    * creates a loading animation in the given element
+   * also hides the station count element
    * 
    * @public
    * @function
@@ -225,31 +226,32 @@ export default class UIManager {
    */
   loadingStart(container) {
     insertLoadingAnimation(container);
-    const stationCount = document.querySelector(this._selectors.stationCount);
+    const stationCount = document.querySelector(selectors.stationCount);
     stationCount.style.display = 'none';
   }
 
   /**
    * removes the loading animation
+   * also unhides the station count element
    * 
    * @public
    * @function
    */
   loadingEnd() {
-    const loadingEl = document.querySelector('.loading');
+    const loadingEl = document.querySelector(selectors.loading);
     if (loadingEl) loadingEl.remove();
-    const stationCount = document.querySelector(this._selectors.stationCount);
+    const stationCount = document.querySelector(selectors.stationCount);
     stationCount.style.removeProperty('display');
   }
 
   /**
-   * toggle visability of selected element
+   * toggle visability of selected elements
    * 
    * @public
    * @function
    */
   toggleSelectedVisability() {
-    const selected = document.querySelectorAll('#stations>li[selected]');
+    const selected = document.querySelectorAll(selectors.selectedStation);
     const current = selected[0].style.display;
     selected.forEach(el => {
       el.style.display = current === 'none' ? 'flex' : 'none';

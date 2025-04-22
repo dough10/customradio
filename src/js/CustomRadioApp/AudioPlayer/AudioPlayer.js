@@ -3,6 +3,7 @@ import sleep from '../utils/sleep.js';
 import debounce from '../utils/debounce.js';
 import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
+import selectors from '../selectors.js';
 
 const PAUSE_TIMER_DURATION = 10000;
 const VOLUME_DEBOUNCE_DURATION = 1000;
@@ -14,46 +15,90 @@ const PLAY_DEBOUNCE_DURATION = 100;
  * as well as managing UI elements for the audio tag
  */
 export default class AudioPlayer {
-  constructor(notifications = null, selectors) {
+  constructor(notifications = null) {
     this.player = new Audio();
     this.pauseTimer = 0;
     this._OGTitle = document.title;
     this._notifications = notifications;
-    this._selectors = selectors;
 
-    this._interactive = [
-      document.querySelector(this._selectors.filter),
-      document.querySelector(this._selectors.infoButton),
-      document.querySelector(this._selectors.add),
-      document.querySelector(this._selectors.downloadButton),
+    this._bindPlayerEvents();
+    this._bindUtilityFunctions();
+    
+    this._bouncedToggle = debounce(this._togglePlay, PLAY_DEBOUNCE_DURATION);
+    this._saveVolume = debounce(value => {
+      localStorage.setItem('volume', value);
+    }, VOLUME_DEBOUNCE_DURATION);
+  }
+
+  /**
+   * returns the audio player icon element
+   */
+  get _icon() {
+    return document.querySelector(selectors.icon);
+  }
+  
+  /**
+   * checks if the element is interactive
+   * 
+   * @private
+   * @function
+   * 
+   * @param {HTMLElement} element 
+   * 
+   * @returns {Boolean}
+   */
+  _isInteractive(element) {
+    const _selectors = [
+      selectors.filter,
+      selectors.infoButton,
+      selectors.add,
+      selectors.downloadButton,
     ];
+    return _selectors.some(selector => document.querySelector(selector) === element);
+  }
 
+  /**
+   * binds player events to the audio player
+   * 
+   * @private
+   * @function
+   * 
+   * @returns {void}
+   */
+  _bindPlayerEvents() {
     this.player.onwaiting = this._onwaiting.bind(this);
     this.player.onplaying = this._onplaying.bind(this);
     this.player.onplay = this._onplay.bind(this);
     this.player.onpause = this._onpause.bind(this);
     this.player.ontimeupdate = this._ontimeupdate.bind(this);
-    this.player.onerror = _ => {
-      const error = this.player.error;
-      const message = error ? error.message : 'Unknown error';
-      new Toast(t('playingError', message), 3);
+    this.player.onerror = () => {
+      const code = this.player.error?.code;
+      const msg = {
+        1: 'MEDIA_ERR_ABORTED',
+        2: 'MEDIA_ERR_NETWORK',
+        3: 'MEDIA_ERR_DECODE',
+        4: 'MEDIA_ERR_SRC_NOT_SUPPORTED',
+      }[code] || 'Unknown error';
+      new Toast(t('playingError', msg), 3);
     };
-    
-    // bind functions
+  }
+
+  /**
+   * binds utility functions to the class instance
+   * 
+   * @private
+   * @function
+   * 
+   * @returns {void}
+   */
+  _bindUtilityFunctions() {
     this._handleOnline = this._handleOnline.bind(this);
-    this._handleOffline = this._handleOffline.bind(this)
+    this._handleOffline = this._handleOffline.bind(this);
     this._clearPlaying = this._clearPlaying.bind(this);
     this._togglePlay = this._togglePlay.bind(this);
     this._scrollToStation = this._scrollToStation.bind(this);
     this._setVolume = this._setVolume.bind(this);
     this._onKeyPress = this._onKeyPress.bind(this);
-
-    // debounced
-    this._bouncedToggle = debounce(this._togglePlay, PLAY_DEBOUNCE_DURATION);
-
-    this._saveVolume = debounce(value => {
-      localStorage.setItem('volume', value);
-    }, VOLUME_DEBOUNCE_DURATION);
   }
 
   /**
@@ -65,10 +110,9 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onwaiting() {
-    const icon = document.querySelector(this._selectors.icon);
-    if (!icon) return;
-    icon.setAttribute('d', 'M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z');
-    icon.parentElement.classList.add('spin');
+    if (!this._icon) return;
+    this._icon.setAttribute('d', 'M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z');
+    this._icon.parentElement.classList.add('spin');
   }
 
   /**
@@ -80,10 +124,9 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onplaying() {
-    const icon = document.querySelector(this._selectors.icon);
-    if (!icon) return;
-    icon.parentElement.classList.remove('spin');
-    icon.setAttribute('d', 'M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
+    if (!this._icon) return;
+    this._icon.parentElement.classList.remove('spin');
+    this._icon.setAttribute('d', 'M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
   }
 
   /**
@@ -95,7 +138,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onplay() {
-    document.title = t('playing', document.querySelector(this._selectors.name).textContent);
+    document.title = t('playing', document.querySelector(selectors.name).textContent);
     if (this.pauseTimer) {
       clearTimeout(this.pauseTimer);
       this.pauseTimer = 0;
@@ -113,10 +156,9 @@ export default class AudioPlayer {
   _onpause() {
     document.title = this._OGTitle;
     this.pauseTimer = setTimeout(this._clearPlaying, PAUSE_TIMER_DURATION);
-    const icon = document.querySelector(this._selectors.icon);
-    if (!icon) return;
-    icon.parentElement.classList.remove('spin');
-    icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
+    if (!this._icon) return;
+    this._icon.parentElement.classList.remove('spin');
+    this._icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
   }
 
   /**
@@ -130,16 +172,16 @@ export default class AudioPlayer {
    * @returns {void} 
    */
   _ontimeupdate() {
-    const miniPlayer = document.querySelector(this._selectors.player);
+    const miniPlayer = document.querySelector(selectors.player);
     !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
 
-    this.currentPlayingElement = document.querySelector(`#stations>li[data-url="${this.player.src}"]`);
+    this.currentPlayingElement = document.querySelector(selectors.playingURL(this.player.src));
     
     // already marked as playing
     if (this.currentPlayingElement && this.currentPlayingElement.hasAttribute('playing')) return;
     
     // unmark last stream
-    const last = document.querySelector('#stations>li[playing]');
+    const last = document.querySelector(selectors.playingStation);
     if (last) last.removeAttribute('playing');
     
     // playback stopped
@@ -193,8 +235,8 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _setVolumeSlider() {
-    const slider = document.querySelector('#vol>input');
-    slider.value = Number(localStorage.getItem('volume')) || 100;
+    const slider = document.querySelector(selectors.volumeSlider);
+    slider.value = localStorage.getItem('volume') ?? 100;
     this.player.volume = slider.value / 100;
     slider.addEventListener('input', this._setVolume);
   }
@@ -203,7 +245,7 @@ export default class AudioPlayer {
    * hides volume slider when user is on mobile device
    */
   _hideVolumeSlider() {
-    const volumeElement = document.querySelector(this._selectors.volume);
+    const volumeElement = document.querySelector(selectors.volume);
     volumeElement.style.display = 'none';
   }
 
@@ -300,7 +342,7 @@ export default class AudioPlayer {
    * @param {Object} station
    * @param {String} station.id - The id of the station. 
    * @param {String} station.url - The url of the station.
-   * @param {String} station.name - staion's name
+   * @param {String} station.name - station's name
    * @param {Number} station.bitrate - streams bitrate
    * 
    * @returns {void} 
@@ -313,10 +355,10 @@ export default class AudioPlayer {
     }
     
     document.title = t('playing', name);
-    document.querySelector(this._selectors.name).textContent = name;
-    document.querySelector(this._selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
+    document.querySelector(selectors.name).textContent = name;
+    document.querySelector(selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
 
-    const miniPlayer = document.querySelector(this._selectors.player);
+    const miniPlayer = document.querySelector(selectors.player);
     !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
 
     this.player.dataset.id = id;
@@ -340,8 +382,8 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _clearPlaying() {
-    document.querySelector(this._selectors.player).removeAttribute('playing');
-    const allStations = document.querySelectorAll(this._selectors.stations);
+    document.querySelector(selectors.player).removeAttribute('playing');
+    const allStations = document.querySelectorAll(selectors.stations);
     allStations.forEach(el => el.removeAttribute('playing'));
     this.currentPlayingElement = null;
   }
@@ -355,7 +397,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _handleOffline() {
-    const playerElement = document.querySelector(this._selectors.player);
+    const playerElement = document.querySelector(selectors.player);
     if (!playerElement.hasAttribute('playing')) return;
     new Toast(t('offline'), 1.5);
   }
@@ -369,7 +411,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _handleOnline() {
-    const playerElement = document.querySelector(this._selectors.player);
+    const playerElement = document.querySelector(selectors.player);
     if (!playerElement.hasAttribute('playing')) return;
     new Toast(t('online'), 1.5);
     this.player.load();
@@ -385,7 +427,7 @@ export default class AudioPlayer {
    * @param {Event} ev 
    */
   _onKeyPress(ev) {
-    if (this._interactive.includes(document.activeElement)) return;
+    if (this._isInteractive(document.activeElement)) return;
     const dialogs = Array.from(document.querySelectorAll('dialog'));
     if (dialogs.some(dialog => dialog.open)) return;
     switch (ev.code) {
@@ -409,11 +451,16 @@ export default class AudioPlayer {
 
     window.removeEventListener('keypress', this._onKeyPress);
 
-    document.querySelector(this._selectors.name).removeEventListener('click', this._scrollToStation);
+    document.querySelector(selectors.name).removeEventListener('click', this._scrollToStation);
 
-    document.querySelector(this._selectors.smallButton).removeEventListener('click', this._togglePlay);
+    document.querySelector(selectors.smallButton).removeEventListener('click', this._togglePlay);
     
-    document.querySelector('#vol>input').removeEventListener('input', this._setVolume);
+    if (!this._notMobile) document.querySelector(selectors.volumeSlider).removeEventListener('input', this._setVolume);
+
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+    }    
   }
 
   /**
@@ -425,9 +472,9 @@ export default class AudioPlayer {
   async init() {
     document.querySelector('body').append(this.player);
     
-    const notMobile = await this._canChangeVol();
+    this._notMobile = await this._canChangeVol();
     
-    notMobile ? this._setVolumeSlider() : this._hideVolumeSlider();
+    this._notMobile ? this._setVolumeSlider() : this._hideVolumeSlider();
     
     window.addEventListener('offline', this._handleOffline);
     
@@ -435,8 +482,8 @@ export default class AudioPlayer {
     
     window.addEventListener('keypress', this._onKeyPress);
     
-    document.querySelector(this._selectors.name).addEventListener('click', this._scrollToStation);
+    document.querySelector(selectors.name).addEventListener('click', this._scrollToStation);
 
-    document.querySelector(this._selectors.smallButton).addEventListener('click', this._togglePlay);
+    document.querySelector(selectors.smallButton).addEventListener('click', this._togglePlay);
   }
 }

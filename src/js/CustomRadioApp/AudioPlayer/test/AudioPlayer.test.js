@@ -2,7 +2,6 @@ import { expect } from '@open-wc/testing';
 import Sinon from 'sinon';
 import AudioPlayer from '../AudioPlayer.js';
 import Toast from '../../Toast/Toast.js';
-import selectors from '../../selectors.js';
 
 describe('AudioPlayer', () => {
   let audioPlayer;
@@ -34,7 +33,7 @@ describe('AudioPlayer', () => {
       </ul>
     `;
 
-    audioPlayer = new AudioPlayer(null, selectors);
+    audioPlayer = new AudioPlayer();
     playerElement = document.querySelector('.player');
   });
 

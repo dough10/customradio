@@ -1,23 +1,112 @@
+/**
+ * @file selectors.js
+ * @description Contains all the selectors used in the Custom Radio App.
+ * * This file is part of the Custom Radio App project.
+ * * It defines a set of selectors that are used to interact with the DOM elements of the application.
+ * 
+ * @module selectors
+ * @version 1.0.0
+ * @author Dough10
+ * @license MIT
+ * 
+ * @typedef {Object} Selectors
+ * @property {String} header - The header element.
+ * @property {String} formGroup - The container for input elements.
+ * @property {String} filter - The main page input element for filtering stations.
+ * @property {String} genres - The genres datalist element.
+ * @property {String} resetButton - The filter reset button.
+ * @property {String} infoButton - The site info button.
+ * @property {String} main - The main page content.
+ * @property {String} stationCount - The station count display.
+ * @property {String} stationsContainer - The station list container (i.e. ui>li).
+ * @property {String} toTop - The scroll to top button.
+ * @property {String} downloadButton - The download button.
+ * @property {String} loading - The loading indicator.
+ * @property {String} player - The site mini player.
+ * @property {String} name - The playing station name.
+ * @property {String} bitrate - The playing station's bitrate.
+ * @property {String} volume - The wrapper containing volume controls.
+ * @property {String} volumeSlider - The volume slider input element.
+ * @property {String} smallButton - The mini player's play/pause button.
+ * @property {String} icon - The mini player play/pause button icon.
+ * @property {String} stations - Query selector for all stations.
+ * @property {String} add - The add station floating action button.
+ * @property {Function} playingURL - Function to find a station by its data-url attribute.
+ * @property {String} playingStation - The station marked as playing.
+ * @property {String} selectedStation - All selected stations.
+ */
 const selectors = {
-  filter: '#filter',
-  toTop: '.to-top',
-  genres: '#genres',
-  stationCount: '#station-count',
-  stationsContainer: '#stations',
-  downloadButton: '#download',
-  resetButton: '.reset',
-  main: 'main',
+  /** @type {String} header element */
   header: 'header',
-  infoButton: '#info',
+
+  /** @type {String} container for input elements */
   formGroup: '.form-group',
+
+  /** @type {String} main page input element for filtering stations */
+  filter: '#filter',
+
+  /** @type {String} genres datalist element */
+  genres: '#genres',
+
+  /** @type {String} filter reset button */
+  resetButton: '.reset',
+
+  /** @type {String} site info button */
+  infoButton: '#info',
+
+  /** @type {String} main page content */
+  main: 'main',
+
+  /** @type {String} station count display */
+  stationCount: '#station-count',
+
+  /** @type {String} station list container (i.e. ui>li) */
+  stationsContainer: '#stations',
+
+  /** @type {String} scroll to top button */
+  toTop: '.to-top',
+
+  /** @type {String} download button */
+  downloadButton: '#download',
+
+  /** @type {String} loading indicator */
+  loading: '.loading',
+
+  /** @type {String} site mini player */
   player: '.player',
+
+  /** @type {String} playing station name */
   name: '#name',
+
+  /** @type {String} playing stations bitrate */
   bitrate: '#bitrate',
+
+  /** @type {String} wrapper containing volume controls */
   volume: '#vol',
+
+  /** @type {String} volume slider input element */
+  volumeSlider: '#vol>input',
+
+  /** @type {String} miniplayers play pause button */
   smallButton: '.player>.small-button',
-  stations: '#stations>li',
+
+  /** @type {String} mini player play pause button icon */
   icon: '.player>.small-button>svg>path',
+
+  /** @type {String} queryselector for all stations */
+  stations: '#stations>li',
+
+  /** @type {String} add station floating action button */
   add: '#add_button',
+
+  /** @type {Function} find a station by it's data-url attribute */
+  playingURL: url => `#stations>li[data-url="${url}"]`,
+
+  /** @type {String} find the station marked as playing */
+  playingStation: '#stations>li[playing]',
+
+  /** @type {String} all selected stations */
+  selectedStation: '#stations>li[selected]',
 };
 
 export default selectors;

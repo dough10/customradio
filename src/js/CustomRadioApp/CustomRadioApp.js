@@ -19,9 +19,9 @@ export default class CustomRadioApp {
     const lang = navigator.language.split('-')[0];
     setLanguage(lang);
     this._notifications = new Notifications();
-    this._uiManager = new UIManager(selectors);
+    this._uiManager = new UIManager();
     this._stationManager = new StationManager(window.location.origin);
-    this._player = new AudioPlayer(this._notifications, selectors);
+    this._player = new AudioPlayer(this._notifications);
   }
 
   /**
@@ -112,7 +112,7 @@ export default class CustomRadioApp {
   
       // remove children leaving only the loading element created with this._uiManager.loadingStart ^
       // finally block removes the loading element
-      container.replaceChildren(document.querySelector('.loading'));
+      container.replaceChildren(document.querySelector(selectors.loading));
 
       // push items to the UI and load more elements when scrolled to 80% or > of the pages height
       this._lzldr ? this._lzldr.reset([...selected, ...list]) : this._lzldr = new LazyLoader(
