@@ -25,20 +25,25 @@ class ToastCache {
    * @param {Function} createToast - A callback to create a new toast.
    */
   addToCache(message, timeout, link, linkText, createToast) {
+    // add toast to cache
     this._toastCache.push([message, timeout, link, linkText]);
-    if (!this._cacheWatcher) {
-      this._cacheWatcher = setInterval(() => {
-        if (!this._toastCache.length || document.querySelector('#toast')) {
-          return;
-        }
-        const [msg, t, l, lt] = this._toastCache.shift();
-        createToast(msg, t, l, lt);
-        if (!this._toastCache.length) {
-          clearInterval(this._cacheWatcher);
-          this._cacheWatcher = null;
-        }
-      }, CACHE_CHECK_INTERVAL);
-    }
+
+    // start the cache watcher if not already running
+    if (this._cacheWatcher) return;
+    this._cacheWatcher = setInterval(() => {
+      // if a toast is already displayed, do nothing
+      if (document.querySelector('#toast')) return;
+
+      // create and display the next toast in the cache
+      const [msg, t, l, lt] = this._toastCache.shift();
+      createToast(msg, t, l, lt);
+
+      // if the cache is empty after removing the toast, stop the watcher
+      if (!this._toastCache.length) {
+        clearInterval(this._cacheWatcher);
+        this._cacheWatcher = null;
+      }
+    }, CACHE_CHECK_INTERVAL);
   }
 }
 
