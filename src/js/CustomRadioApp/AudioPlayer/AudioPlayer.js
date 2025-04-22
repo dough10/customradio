@@ -41,7 +41,7 @@ export default class AudioPlayer {
   }
 
   /**
-   * returns the audio player element
+   * returns the mini player UI element
    * 
    * @private
    * @function
@@ -61,7 +61,7 @@ export default class AudioPlayer {
   }
   
   /**
-   * checks if the element is interactive
+   * checks if the element is currently focused
    * 
    * @private
    * @function
@@ -94,16 +94,24 @@ export default class AudioPlayer {
     this.player.onplay = this._onplay.bind(this);
     this.player.onpause = this._onpause.bind(this);
     this.player.ontimeupdate = this._ontimeupdate.bind(this);
-    this.player.onerror = () => {
-      const code = this.player.error?.code;
-      const msg = {
-        1: 'MEDIA_ERR_ABORTED',
-        2: 'MEDIA_ERR_NETWORK',
-        3: 'MEDIA_ERR_DECODE',
-        4: 'MEDIA_ERR_SRC_NOT_SUPPORTED',
-      }[code] || 'Unknown error';
-      new Toast(t('playingError', msg), 3);
-    };
+    this.player.onerror = this._playingError.bind(this);
+  }
+
+  /**
+   * handles audio playback errors
+   * 
+   * @private
+   * @function
+   */
+  _playingError() {
+    const code = this.player.error?.code;
+    const msg = {
+      1: 'MEDIA_ERR_ABORTED',
+      2: 'MEDIA_ERR_NETWORK',
+      3: 'MEDIA_ERR_DECODE',
+      4: 'MEDIA_ERR_SRC_NOT_SUPPORTED',
+    }[code] || 'Unknown error';
+    new Toast(t('playingError', msg), 3);
   }
 
   /**
