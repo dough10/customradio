@@ -36,6 +36,20 @@ export default class AudioPlayer {
   get _icon() {
     return document.querySelector(selectors.icon);
   }
+
+  /**
+   * returns the audio player element
+   */
+  get _playerElement() {
+    return document.querySelector(selectors.player);
+  }
+
+  /**
+   * returns the stream name element
+   */
+  get _name() {
+    return document.querySelector(selectors.name);
+  }
   
   /**
    * checks if the element is interactive
@@ -138,7 +152,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onplay() {
-    document.title = t('playing', document.querySelector(selectors.name).textContent);
+    document.title = t('playing', this._name.textContent);
     if (this.pauseTimer) {
       clearTimeout(this.pauseTimer);
       this.pauseTimer = 0;
@@ -172,7 +186,7 @@ export default class AudioPlayer {
    * @returns {void} 
    */
   _ontimeupdate() {
-    const miniPlayer = document.querySelector(selectors.player);
+    const miniPlayer = this._player;
     !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
 
     this.currentPlayingElement = document.querySelector(selectors.playingURL(this.player.src));
@@ -355,10 +369,10 @@ export default class AudioPlayer {
     }
     
     document.title = t('playing', name);
-    document.querySelector(selectors.name).textContent = name;
+    this._name.textContent = name;
     document.querySelector(selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
 
-    const miniPlayer = document.querySelector(selectors.player);
+    const miniPlayer = this._player;
     !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
 
     this.player.dataset.id = id;
@@ -382,7 +396,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _clearPlaying() {
-    document.querySelector(selectors.player).removeAttribute('playing');
+    this._player.removeAttribute('playing');
     const allStations = document.querySelectorAll(selectors.stations);
     allStations.forEach(el => el.removeAttribute('playing'));
     this.currentPlayingElement = null;
@@ -397,7 +411,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _handleOffline() {
-    const playerElement = document.querySelector(selectors.player);
+    const playerElement = this._player;
     if (!playerElement.hasAttribute('playing')) return;
     new Toast(t('offline'), 1.5);
   }
@@ -411,7 +425,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _handleOnline() {
-    const playerElement = document.querySelector(selectors.player);
+    const playerElement = this._player;
     if (!playerElement.hasAttribute('playing')) return;
     new Toast(t('online'), 1.5);
     this.player.load();
@@ -451,7 +465,7 @@ export default class AudioPlayer {
 
     window.removeEventListener('keypress', this._onKeyPress);
 
-    document.querySelector(selectors.name).removeEventListener('click', this._scrollToStation);
+    this._name.removeEventListener('click', this._scrollToStation);
 
     document.querySelector(selectors.smallButton).removeEventListener('click', this._togglePlay);
     
@@ -482,7 +496,7 @@ export default class AudioPlayer {
     
     window.addEventListener('keypress', this._onKeyPress);
     
-    document.querySelector(selectors.name).addEventListener('click', this._scrollToStation);
+    this._name.addEventListener('click', this._scrollToStation);
 
     document.querySelector(selectors.smallButton).addEventListener('click', this._togglePlay);
   }
