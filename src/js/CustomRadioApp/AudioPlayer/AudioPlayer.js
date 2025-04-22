@@ -32,6 +32,9 @@ export default class AudioPlayer {
 
   /**
    * returns the audio player icon element
+   * 
+   * @private
+   * @function
    */
   get _icon() {
     return document.querySelector(selectors.icon);
@@ -39,6 +42,9 @@ export default class AudioPlayer {
 
   /**
    * returns the audio player element
+   * 
+   * @private
+   * @function
    */
   get _playerElement() {
     return document.querySelector(selectors.player);
@@ -46,6 +52,9 @@ export default class AudioPlayer {
 
   /**
    * returns the stream name element
+   * 
+   * @private
+   * @function
    */
   get _name() {
     return document.querySelector(selectors.name);
@@ -124,9 +133,10 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onwaiting() {
-    if (!this._icon) return;
-    this._icon.setAttribute('d', 'M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z');
-    this._icon.parentElement.classList.add('spin');
+    const icon = this._icon;
+    if (!icon) return;
+    icon.setAttribute('d', 'M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z');
+    icon.parentElement.classList.add('spin');
   }
 
   /**
@@ -138,9 +148,10 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onplaying() {
-    if (!this._icon) return;
-    this._icon.parentElement.classList.remove('spin');
-    this._icon.setAttribute('d', 'M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
+    const icon = this._icon;
+    if (!icon) return;
+    icon.parentElement.classList.remove('spin');
+    icon.setAttribute('d', 'M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
   }
 
   /**
@@ -170,9 +181,10 @@ export default class AudioPlayer {
   _onpause() {
     document.title = this._OGTitle;
     this.pauseTimer = setTimeout(this._clearPlaying, PAUSE_TIMER_DURATION);
-    if (!this._icon) return;
-    this._icon.parentElement.classList.remove('spin');
-    this._icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
+    const icon = this._icon;
+    if (!icon) return;
+    icon.parentElement.classList.remove('spin');
+    icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
   }
 
   /**
@@ -186,7 +198,7 @@ export default class AudioPlayer {
    * @returns {void} 
    */
   _ontimeupdate() {
-    const miniPlayer = this._player;
+    const miniPlayer = this._playerElement;
     !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
 
     this.currentPlayingElement = document.querySelector(selectors.playingURL(this.player.src));
@@ -372,7 +384,7 @@ export default class AudioPlayer {
     this._name.textContent = name;
     document.querySelector(selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
 
-    const miniPlayer = this._player;
+    const miniPlayer = this._playerElement;
     !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
 
     this.player.dataset.id = id;
@@ -396,7 +408,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _clearPlaying() {
-    this._player.removeAttribute('playing');
+    this._playerElement.removeAttribute('playing');
     const allStations = document.querySelectorAll(selectors.stations);
     allStations.forEach(el => el.removeAttribute('playing'));
     this.currentPlayingElement = null;
@@ -411,7 +423,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _handleOffline() {
-    const playerElement = this._player;
+    const playerElement = this._playerElement;
     if (!playerElement.hasAttribute('playing')) return;
     new Toast(t('offline'), 1.5);
   }
@@ -425,7 +437,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _handleOnline() {
-    const playerElement = this._player;
+    const playerElement = this._playerElement;
     if (!playerElement.hasAttribute('playing')) return;
     new Toast(t('online'), 1.5);
     this.player.load();
