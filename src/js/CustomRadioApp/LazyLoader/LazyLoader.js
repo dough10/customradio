@@ -70,8 +70,8 @@ export default class LazyLoader {
     const remainingScroll = this._parent.scrollHeight - this._parent.scrollTop - this._parent.clientHeight;
   
     // if the user scrolled to the bottom of the container, load more elements
-    const loadingThreshold = (ELEMENT_HEIGHT * 4) + LI_BOTTOM_MARGIN;
-    if (remainingScroll <= loadingThreshold) {
+    const loadThreshold = (ELEMENT_HEIGHT * 4) + LI_BOTTOM_MARGIN;
+    if (remainingScroll <= loadThreshold) {
       this._load();
     }
   }
