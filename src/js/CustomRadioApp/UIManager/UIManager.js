@@ -8,18 +8,6 @@ import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
 
-/**
- * creates a datalist option element
- * 
- * @param {String} str 
- * 
- * @returns {HTMLElement}
- */
-function createOption(str) {
-  const option = document.createElement('option');
-  option.value = str;
-  return option;
-}
 
 /**
  * manages UI elements
@@ -47,17 +35,15 @@ export default class UIManager {
 
     initDialogInteractions();
 
-    const filter = document.querySelector(selectors.filter);
+    const filter = this._filter;
     filter.addEventListener('change', onFilterChange);
     filter.addEventListener('focus', this._filterFocus.bind(this));
 
-    const resetButton = document.querySelector(selectors.resetButton);
-    resetButton.addEventListener('click', onReset);
+    this._resetButton.addEventListener('click', onReset);
 
     this._toTop.addEventListener('click', this._toTopHandler.bind(this));
 
-    const dlButton = document.querySelector(selectors.downloadButton);
-    dlButton.addEventListener('click', this._dl);
+    this._downloadButton.addEventListener('click', this._dl);
 
     // document.addEventListener('keydown', this._keyDown.bind(this));    
   }
@@ -79,19 +65,52 @@ export default class UIManager {
 
     destroyDialogInteractions();
 
-    const filter = document.querySelector(selectors.filter);
+    const filter = this._filter;
     filter.removeEventListener('change', onFilterChange);
     filter.removeEventListener('focus', this._filterFocus.bind(this));
 
-    const resetButton = document.querySelector(selectors.resetButton);
-    resetButton.removeEventListener('click', onReset);
+    this._resetButton.removeEventListener('click', onReset);
 
     this._toTop.removeEventListener('click', this._toTopHandler.bind(this));
 
-    const dlButton = document.querySelector(selectors.downloadButton);
-    dlButton.removeEventListener('click', this._dl);
+    this._downloadButton.removeEventListener('click', this._dl);
 
     // document.addEventListener('keydown', this._keyDown.bind(this));
+  }
+
+  /**
+   * querySelector for genre filter input element
+   */
+  get _filter() {
+    return document.querySelector(selectors.filter);
+  }
+
+  /**
+   * 
+   */
+  get _downloadButton() {
+    return document.querySelector(selectors.downloadButton);
+  }
+
+  /**
+   * querySelector for 'station count' element
+   */
+  get _stationCount() {
+    return document.querySelector(selectors.stationCount);
+  }
+
+  /**
+   * querySelector for 'reset' button
+   */
+  get _resetButton() {
+    return document.querySelector(selectors.resetButton);
+  }
+
+  /**
+   * querySelector for 'main' element
+   */
+  get _main() {
+    return document.querySelector(selectors.main);
   }
 
   /**
@@ -128,7 +147,7 @@ export default class UIManager {
    * @param {Event} ev 
    */
   _filterFocus(ev) {
-    const wrapper = document.querySelector(selectors.main);
+    const wrapper = this._main;
     if (document.activeElement === ev.target && wrapper.scrollTop !== 0) {
       wrapper.scrollTop = 0;
     }
@@ -142,8 +161,7 @@ export default class UIManager {
    * 
    * @param {HTMLElement} parent 
    */
-  onScroll(parent) {
-    const scrollTop = parent.scrollTop;
+  onScroll(scrollTop) {
     this.header.scroll(scrollTop);
   
     const atTop = scrollTop === 0;
@@ -169,10 +187,8 @@ export default class UIManager {
    * @param {Number} total 
    */
   setCounts(selected, total) {
-    const button = document.querySelector(selectors.downloadButton);
-    toggleActiveState(button, selected);
-    const stationCount = document.querySelector(selectors.stationCount);
-    stationCount.textContent = t('stations', selected + total);
+    toggleActiveState(this._downloadButton, selected);
+    this._stationCount.textContent = t('stations', selected + total);
   }
 
   /**
@@ -208,7 +224,7 @@ export default class UIManager {
    */
   _toTopHandler() {
     hapticFeedback();
-    const wrapper = document.querySelector(selectors.main);
+    const wrapper = this._main;
     wrapper.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -226,8 +242,7 @@ export default class UIManager {
    */
   loadingStart(container) {
     insertLoadingAnimation(container);
-    const stationCount = document.querySelector(selectors.stationCount);
-    stationCount.style.display = 'none';
+    this._stationCount.style.display = 'none';
   }
 
   /**
@@ -240,8 +255,7 @@ export default class UIManager {
   loadingEnd() {
     const loadingEl = document.querySelector(selectors.loading);
     if (loadingEl) loadingEl.remove();
-    const stationCount = document.querySelector(selectors.stationCount);
-    stationCount.style.removeProperty('display');
+    this._stationCount.style.removeProperty('display');
   }
 
   /**
@@ -257,4 +271,18 @@ export default class UIManager {
       el.style.display = current === 'none' ? 'flex' : 'none';
     });
   }
+}
+
+
+/**
+ * creates a datalist option element
+ * 
+ * @param {String} str 
+ * 
+ * @returns {HTMLElement}
+ */
+function createOption(str) {
+  const option = document.createElement('option');
+  option.value = str;
+  return option;
 }
