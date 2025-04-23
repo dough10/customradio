@@ -3,14 +3,9 @@ import { t } from '../utils/i18n.js';
 export default class Notifications {
   /**
    * Requests notification permission from the user.
-   * 
+   *
    * @public
-   * @function
-   * 
-   * @returns {Promise<void>} A promise that resolves when the permission request is complete.
-   * 
-   * @description This method checks if the Notification API is supported and if permission has not been granted.
-   * If permission is not granted, it requests permission from the user.
+   * @returns {Promise<void>}
    */
   requestPermission() {
     if ('Notification' in window && Notification.permission !== 'granted') {
@@ -21,58 +16,48 @@ export default class Notifications {
   }
 
   /**
-   * Sends a notification using the appropriate API (Notification API or Service Worker API).
-   * 
+   * Sends a notification using the Notification API or Service Worker API.
+   *
    * @private
-   * @function
-   * 
    * @param {string} title - The title of the notification.
    * @param {string} [body=''] - The body text of the notification.
    * @param {string} [icon='/android-chrome-192x192.png'] - The icon for the notification.
-   * @param {number} [timeout=5000] - The duration (in ms) before the notification is automatically closed.
-   * @param {boolean} [silent=true] - Whether the notification should be silent (no sound).
+   * @param {number} [timeout=5000] - Duration in ms before auto-closing the notification.
+   * @param {boolean} [silent=true] - Whether the notification should be silent.
    */
   async _notify(title, body = '', icon = '/android-chrome-192x192.png', timeout = 5000, silent = true) {
     if (Notification.permission !== 'granted') return;
 
-    // Use Service Worker API if available
+    const options = {
+      body,
+      icon,
+      badge: icon,
+      silent,
+      tag: 'custom-radio-notification',
+      renotify: true,
+    };
+
+    // Prefer Service Worker API
     if ('serviceWorker' in navigator) {
       const registration = await navigator.serviceWorker.getRegistration();
       if (registration) {
-        registration.showNotification(title, {
-          body,
-          icon,
-          badge: icon,
-          silent,
-          tag: 'custom-radio-notification',
-          renotify: true
-        });
+        registration.showNotification(title, options);
 
-        // Optionally close the notification after a timeout
         if (timeout > 0) {
           setTimeout(async () => {
-            const notifications = await registration.getNotifications({ tag: 'custom-radio-notification' });
-            notifications.forEach(notification => notification.close());
+            const notifications = await registration.getNotifications({ tag: options.tag });
+            notifications.forEach(n => n.close());
           }, timeout);
         }
+
         return;
       }
     }
 
-    // Fallback to Notification API if Service Worker API is not available
+    // Fallback to basic Notification API
     if ('Notification' in window) {
-      const notification = new Notification(title, {
-        body,
-        icon,
-        badge: icon,
-        silent,
-        tag: 'custom-radio-notification',
-        renotify: true
-      });
-
-      notification.onclick = () => {
-        window.focus();
-      };
+      const notification = new Notification(title, options);
+      notification.onclick = () => window.focus();
 
       if (timeout > 0) {
         setTimeout(() => notification.close(), timeout);
@@ -82,10 +67,8 @@ export default class Notifications {
 
   /**
    * Sends a "Now Playing" notification.
-   * 
+   *
    * @public
-   * @fucntion
-   * 
    * @param {string} name - The name of the currently playing station.
    */
   nowPlaying(name) {
