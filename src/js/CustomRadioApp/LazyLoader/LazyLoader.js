@@ -65,7 +65,7 @@ export default class LazyLoader {
    */
   _onScroll() {
     // pass the scroll event to the scroll function if it exists
-    this._scrollFunc?.(this._parent);
+    this._scrollFunc?.(this._parent.scrollTop);
   
     const remainingScroll = this._parent.scrollHeight - this._parent.scrollTop - this._parent.clientHeight;
   
