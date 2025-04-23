@@ -10,4 +10,4 @@ window.addEventListener('DOMContentLoaded', _ => app.init());
 /**
  * cleanup on window unload
  */
-window.addEventListener('unload', _ => app.destroy());
+window.addEventListener('beforeunload', _ => app.destroy());
