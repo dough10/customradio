@@ -12,10 +12,10 @@ function updateInstalled(newWorker) {
   if (newWorker.state !== 'installed') return;
   if (!navigator.serviceWorker.controller) return;
   new Toast(
-    t('appUpdated'),
-    15, 
-    _ => newWorker.postMessage({ action: 'skipWaiting' }), 
-    t('pressToRefresh')
+    t('appUpdated'),                                       // message string
+    15,                                                    // duration in seconds
+    _ => newWorker.postMessage({ action: 'skipWaiting' }), // click function 
+    t('pressToRefresh')                                    // link text
   );
 }
 
@@ -42,21 +42,15 @@ function controllerChange() {
   window.location.reload(true);
 }
 
-/**
- * service worker
- */
-async function callServiceWorker() {
+
+export default async function loadServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  
   try {
     navigator.serviceWorker.addEventListener('controllerchange', controllerChange);
     const worker = await navigator.serviceWorker.register('/worker.js', { scope: '/' });
     worker.onupdatefound = () => updateFound(worker);
   } catch (error) {
     console.log('ServiceWorker registration failed: ', error);
-  }
-}
-
-export default async function loadServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    await callServiceWorker()
   }
 }
