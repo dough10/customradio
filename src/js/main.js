@@ -3,11 +3,11 @@ import CustomRadioApp from './CustomRadioApp/CustomRadioApp.js';
 const app = new CustomRadioApp();
 
 /**
- * window loaded
+ * load app
  */
-window.onload = _ => app.init();
+window.addEventListener('DOMContentLoaded', _ => app.init());
 
 /**
  * cleanup on window unload
  */
-window.onbeforeunload = _ => app.destroy();
+window.addEventListener('unload', _ => app.destroy());
