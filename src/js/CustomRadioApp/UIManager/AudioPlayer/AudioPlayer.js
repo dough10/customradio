@@ -1,5 +1,7 @@
 import Toast from '../../Toast/Toast.js';
 import EventManager from '../../utils/EventManager/EventManager.js';
+import Notifications from '../../Notifications/Notifications.js';
+
 import sleep from '../../utils/sleep.js';
 import debounce from '../../utils/debounce.js';
 import { t } from '../../utils/i18n.js';
@@ -20,7 +22,7 @@ export default class AudioPlayer {
     this.player = new Audio();
     this.pauseTimer = 0;
     this._OGTitle = document.title;
-    this._notifications = notifications;
+    this._notifications = notifications || new Notifications();
 
     this._em = new EventManager();
 
@@ -275,7 +277,7 @@ export default class AudioPlayer {
     const slider = document.querySelector(selectors.volumeSlider);
     slider.value = localStorage.getItem('volume') ?? 100;
     this.player.volume = slider.value / 100;
-    this._em.add(slider, 'input', this._setVolume, { passive: true });
+    this._em.add(slider, 'input', this._setVolume, true);
   }
 
   /**
@@ -337,7 +339,7 @@ export default class AudioPlayer {
    * //   ],
    * // }
    */
-  _defaultMetadata({ name, bitrate }) {
+  _metadata({ name, bitrate }) {
     return {
       title: `${name} - ${bitrate === 0 ? '???' : bitrate}kbps`,
       artist: location.host,
@@ -363,7 +365,7 @@ export default class AudioPlayer {
     if (!('mediaSession' in navigator)) return;
 
     // Set media metadata
-    navigator.mediaSession.metadata = new MediaMetadata(this._defaultMetadata(station));
+    navigator.mediaSession.metadata = new MediaMetadata(this._metadata(station));
 
     // Set media session action handlers
     navigator.mediaSession.setActionHandler('play', () => this.player.play());
