@@ -1,9 +1,13 @@
+import EventManager from '../../utils/EventManager/EventManager.js';
+
 import loadingAnimation from './insertLoadingAnimation.js';
 import Toast from '../../Toast/Toast.js';
 import sleep from '../../utils/sleep.js';
 import isValidURL from '../../utils/URL.js';
 import hapticFeedback from '../../utils/hapticFeedback.js';
 import selectors from '../../selectors.js';
+
+const em = new EventManager();
 
 /**
  * Toggles the activity state of the submit button based on the validity of the URL input.
@@ -116,10 +120,14 @@ function wobbleDialog(ev) {
   const closeButton = dialog.querySelector(selectors.smallDialogCloseButton);
   const bigCloseButton = dialog.querySelector(selectors.dialogCloseButton);
 
+  let animationListener = null;
+
   // animation ended callback
   // removes classes after animation plays
   const animationend = _ => {
     dialog.removeEventListener('animationend', animationend);
+    if (animationListener) em.remove(animationListener);
+    animationListener = null;
     if (closeButton) closeButton.classList.remove('attention');
     if (bigCloseButton) bigCloseButton.classList.remove('button-attention');
     dialog.classList.remove('dialog-attention');
@@ -132,7 +140,7 @@ function wobbleDialog(ev) {
 
   // if the click was outside the dialog, add wobble animation
   if (!isInDialog) {
-    dialog.addEventListener('animationend', animationend);
+    animationListener = em.add(dialog, 'animationend', animationend);
     if ('vibrate' in navigator) navigator.vibrate([20, 100, 20]);
     if (closeButton) closeButton.classList.add('attention');
     if (bigCloseButton) bigCloseButton.classList.add('button-attention');
@@ -198,9 +206,13 @@ function greetUser() {
   if (!greetingElement) return;
 
   greetingElement.showModal();
+
   // remove after closing
-  greetingElement.addEventListener('transitionend', () => {
-    if (!greetingElement.hasAttribute('open')) greetingElement.remove();
+  const gClose = em.add(greetingElement, 'transitionend', () => {
+    if (!greetingElement.hasAttribute('open')) {
+      em.remove(gClose);
+      greetingElement.remove();
+    }
   });
 }
 
@@ -219,27 +231,28 @@ function openAddDialog() {
 function initDialogInteractions() {
   // animation telling user to click the x
   const dialogs = document.querySelectorAll('dialog');
-  dialogs.forEach(dialog => dialog.addEventListener('click', wobbleDialog));
+  dialogs.forEach(dialog => em.add(dialog, 'click', wobbleDialog));
+  
   
   // close dialogs
   document.querySelectorAll(selectors.dialogClose).forEach(el => {
-    el.addEventListener('click', _ => closeDialog(el));
+    em.add(el, 'click', _ => closeDialog(el));
   });
   
   //info
-  document.querySelector(selectors.infoButton).addEventListener('click', info);
+  em.add(document.querySelector(selectors.infoButton), 'click', info);
   
   // add  stream dialog
   const addButton = document.querySelector(selectors.add);
-  addButton.addEventListener('click', openAddDialog);
+  em.add(addButton, 'click', openAddDialog);
   
   // submit button for add stream dialog form submission
   const stationSubmitForm = document.querySelector(selectors.stationSubmitForm);
-  stationSubmitForm.addEventListener('submit', submitStation);
+  em.add(stationSubmitForm, 'submit', submitStation);
   
   // toggle submit button activity on Valid URL input
   const inputElement = document.querySelector(selectors.stationUrl);
-  inputElement.oninput = toggleButtonActivity;
+  em.add(inputElement, 'input', toggleButtonActivity);
   
   greetUser();
 }
@@ -248,30 +261,7 @@ function initDialogInteractions() {
  * Cleans up and removes all event listeners added by `initDialogInteractions`.
  */
 function destroyDialogInteractions() {
-  // Remove wobble animation listeners
-  const dialogs = document.querySelectorAll('dialog');
-  dialogs.forEach(dialog => dialog.removeEventListener('click', wobbleDialog));
-
-  // Remove close dialog listeners
-  document.querySelectorAll(selectors.dialogClose).forEach(el => {
-    el.removeEventListener('click', _ => closeDialog(el));
-  });
-
-  // Remove info dialog listener
-  const infoButton = document.querySelector(selectors.infoButton);
-  infoButton.removeEventListener('click', info);
-
-  // Remove add dialog listener
-  const addButton = document.querySelector(selectors.add);
-  addButton.removeEventListener('click', openAddDialog);
-
-  // Remove submit button listener
-  const stationSubmitForm = document.querySelector(selectors.stationSubmitForm);
-  stationSubmitForm.removeEventListener('submit', submitStation);
-
-  // Remove input element listener
-  const inputElement = document.querySelector(selectors.stationUrl);
-  inputElement.oninput = null;
+  em.removeAll();
 }
 
 export {initDialogInteractions, destroyDialogInteractions};
