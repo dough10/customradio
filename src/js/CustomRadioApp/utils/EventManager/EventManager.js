@@ -28,6 +28,8 @@ export default class EventManager {
   add(target, type, handler, options, namespace = null) {
     if (!target || typeof type !== 'string' || typeof handler !== 'function') {
       console.warn('Invalid arguments provided to EventManager.add');
+      console.log('Expected: target (HTMLElement), type (String), handler (Function), options (Object), namespace (String|null)');
+      console.log('Received:', { target, type, handler, options, namespace });
       return -1; // Return -1 to indicate failure
     }
 
