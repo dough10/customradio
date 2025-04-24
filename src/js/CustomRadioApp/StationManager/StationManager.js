@@ -40,7 +40,7 @@ async function retryFetch(url, options = {}, retries = 3) {
  */
 export default class StationManager {
   constructor(apiBaseUrl) {
-    this.apiBaseUrl = apiBaseUrl;
+    this.apiBaseUrl = apiBaseUrl || window.location.origin;
   }
 
   /**

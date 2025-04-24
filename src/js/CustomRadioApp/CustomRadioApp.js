@@ -13,7 +13,6 @@ import selectors from './selectors.js';
  * customradio.dough10.me
  */
 export default class CustomRadioApp {
-  // HTMLElement selectors  
   constructor() {
     const lang = navigator.language.split('-')[0];
     setLanguage(lang);
@@ -24,7 +23,7 @@ export default class CustomRadioApp {
   */
   init() {
     this._uiManager = new UIManager();
-    this._stationManager = new StationManager(window.location.origin);
+    this._stationManager = new StationManager();
 
     loadServiceWorker();
 
