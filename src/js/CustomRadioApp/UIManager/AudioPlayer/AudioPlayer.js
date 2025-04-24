@@ -39,7 +39,7 @@ export default class AudioPlayer {
    * returns the audio player icon element
    * 
    * @private
-   * @function
+   * @returns {HTMLElement}
    */
   get _icon() {
     return document.querySelector(selectors.icon);
@@ -49,7 +49,7 @@ export default class AudioPlayer {
    * returns the mini player UI element
    * 
    * @private
-   * @function
+   * @returns {HTMLElement}
    */
   get _playerElement() {
     return document.querySelector(selectors.player);
@@ -59,10 +59,30 @@ export default class AudioPlayer {
    * returns the stream name element
    * 
    * @private
-   * @function
+   * @returns {HTMLElement}
    */
   get _name() {
     return document.querySelector(selectors.name);
+  }
+
+  /**
+   * returns the small play button element
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _smallButton() {
+    return document.querySelector(selectors.smallButton);
+  }
+
+  /**
+   * returns the current playing element in the UI
+   * 
+   * @private
+   * @returns {HTMLElement|null}
+   */
+  get currentPlayingElement() {
+    return document.querySelector(selectors.playingURL(this.player.src));
   }
   
   /**
@@ -213,8 +233,6 @@ export default class AudioPlayer {
   _ontimeupdate() {
     const miniPlayer = this._playerElement;
     !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
-
-    this.currentPlayingElement = document.querySelector(selectors.playingURL(this.player.src));
     
     // already marked as playing
     if (this.currentPlayingElement && this.currentPlayingElement.hasAttribute('playing')) return;
@@ -509,6 +527,6 @@ export default class AudioPlayer {
     this._em.add(window, 'online', this._handleOnline);
     this._em.add(window, 'keypress', this._onKeyPress);
     this._em.add(this._name, 'click', this._scrollToStation);
-    this._em.add(document.querySelector(selectors.smallButton), 'click', this._togglePlay);
+    this._em.add(this._smallButton, 'click', this._togglePlay);
   }
 }
