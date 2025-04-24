@@ -20,7 +20,7 @@ export default class EventManager {
    * @param {HTMLElement} target 
    * @param {String} type 
    * @param {Function} handler 
-   * @param {Object} options 
+   * @param {*} options 
    * @param {String|null} namespace - Optional namespace for the listener
    * 
    * @returns {Number} index of the added listener in the listeners array
