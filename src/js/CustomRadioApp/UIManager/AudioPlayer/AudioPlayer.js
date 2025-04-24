@@ -81,7 +81,7 @@ export default class AudioPlayer {
    * @private
    * @returns {HTMLElement|null}
    */
-  get currentPlayingElement() {
+  get _currentPlayingElement() {
     return document.querySelector(selectors.playingURL(this.player.src));
   }
   
@@ -234,17 +234,19 @@ export default class AudioPlayer {
     const miniPlayer = this._playerElement;
     !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
     
+    const currentPlayingElement = this._currentPlayingElement;
+
     // already marked as playing
-    if (this.currentPlayingElement && this.currentPlayingElement.hasAttribute('playing')) return;
+    if (currentPlayingElement && currentPlayingElement.hasAttribute('playing')) return;
     
     // unmark last stream
     const last = document.querySelector(selectors.playingStation);
     if (last) last.removeAttribute('playing');
     
     // playback stopped
-    if (!this.currentPlayingElement) return;
+    if (!currentPlayingElement) return;
 
-    this.currentPlayingElement.toggleAttribute('playing');
+    currentPlayingElement.toggleAttribute('playing');
   }
 
   /**
