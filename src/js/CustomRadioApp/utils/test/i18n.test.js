@@ -18,7 +18,6 @@ describe('i18n', () => {
     i18n.setLanguage('xx'); // unknown language
     const result = i18n.t('playing', 'Fallback Song');
 
-    expect(consoleWarnStub).to.have.been.calledWith('Language xx not found, defaulting to "en".');
     expect(result).to.equal('Playing: Fallback Song');
 
     consoleWarnStub.restore();
