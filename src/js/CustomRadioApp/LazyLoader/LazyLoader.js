@@ -48,9 +48,10 @@ export default class LazyLoader {
     this._scrollHandler = this._onScroll.bind(this);
     this._debouncedLoad = debounce(this._load.bind(this), 100);
 
-    if (!this._parent) {
-      throw new Error('LazyLoader: container must have a parent element.');
+    if (!this._container || !this._container.parentElement) {
+      throw new Error('LazyLoader: container must exist and have a parent element.');
     }
+    
 
     this._parent.addEventListener('scroll', this._scrollHandler, { passive: true });
     window.addEventListener('resize', this._resizeHandler);
@@ -123,8 +124,15 @@ export default class LazyLoader {
     try{
       // double pull count for first pull
       const pullCount = this._ndx ? this._pullNumber : this._pullNumber * 2;
-      const stations = this._list.slice(this._ndx, this._ndx + pullCount);
+
+      // if the pull count is greater than the remaining items, adjust it
+      const safeStop = Math.min(this._ndx + pullCount, this._list.length);
+
+      // slice the list to get the next set of items
+      const stations = this._list.slice(this._ndx, safeStop);
       this._populateContainer(stations);
+
+      // update the index for the next pull
       this._ndx += pullCount;    
     } catch(e) {
       console.error('Error loading items', e);
