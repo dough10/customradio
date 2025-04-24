@@ -1,3 +1,4 @@
+import EventManager from "../../utils/EventManager/EventManager.js";
 import selectors from "../../selectors.js";
 
 /**
@@ -38,6 +39,13 @@ export default class CollapsingHeader {
    */
   _infoTranslateFactor = 1.5;
 
+  /**
+   * @private
+   * @type {EventManager}
+   * Event manager for handling events
+   */
+  _em = new EventManager();
+
   constructor() {
     /** @type {HTMLElement|null} Header element */
     this.header = document.querySelector(selectors.header);
@@ -54,7 +62,8 @@ export default class CollapsingHeader {
     this._onResize = this._onResize.bind(this);
 
     /** recalculate header on window resize */
-    window.addEventListener('resize', this._onResize);
+    this._em.add(window, 'resize', this._onResize);
+
 
     /** @type {Boolean} mobile device */
     this._isMobile = window.innerWidth < 450;
@@ -76,7 +85,7 @@ export default class CollapsingHeader {
    * remove resize event listener
    */
   destroy() {
-    window.removeEventListener('resize', this._onResize);
+    this._em.removeAll();
   }
 
   /**
