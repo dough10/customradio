@@ -84,6 +84,8 @@ export default class CustomRadioApp {
     // Continue with fetch — empty userInput means "show all"
     const userInput = normalizeMemo(ev?.target?.value?.trim?.() || '');
 
+    console.log(`Filter changed: ${userInput}`);
+
     const container = document.querySelector(selectors.stationsContainer);
     
     // loading animation
