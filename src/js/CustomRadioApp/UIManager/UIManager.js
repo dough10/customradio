@@ -16,7 +16,8 @@ import selectors from '../selectors.js';
  */
 export default class UIManager {
 
-  constructor() {
+  constructor(s) {
+    this._selectors = s || selectors;
     this.onScroll = this.onScroll.bind(this);
     this._player = new AudioPlayer();
     this._em = new EventManager();
@@ -68,7 +69,7 @@ export default class UIManager {
    * @returns {HTMLElement}
    */
   get _toTop() {
-    return document.querySelector(selectors.toTop);
+    return document.querySelector(this._selectors.toTop);
   }
 
   /**
@@ -78,7 +79,7 @@ export default class UIManager {
    * @returns {HTMLElement}
    */
   get _filter() {
-    return document.querySelector(selectors.filter);
+    return document.querySelector(this._selectors.filter);
   }
 
   /**
@@ -88,7 +89,7 @@ export default class UIManager {
    * @returns {HTMLElement}
    */
   get _downloadButton() {
-    return document.querySelector(selectors.downloadButton);
+    return document.querySelector(this._selectors.downloadButton);
   }
 
   /**
@@ -98,7 +99,7 @@ export default class UIManager {
    * @returns {HTMLElement}
    */
   get _stationCount() {
-    return document.querySelector(selectors.stationCount);
+    return document.querySelector(this._selectors.stationCount);
   }
 
   /**
@@ -108,7 +109,7 @@ export default class UIManager {
    * @returns {HTMLElement}
    */
   get _resetButton() {
-    return document.querySelector(selectors.resetButton);
+    return document.querySelector(this._selectors.resetButton);
   }
 
   /**
@@ -118,7 +119,7 @@ export default class UIManager {
    * @returns {HTMLElement}
    */
   get _main() {
-    return document.querySelector(selectors.main);
+    return document.querySelector(this._selectors.main);
   }
 
   /**
@@ -225,7 +226,11 @@ export default class UIManager {
    * @returns {Array<String>} List of normalized genre values
    */
   currentGenres() {
-    const parent = document.querySelector(selectors.genres);
+    const parent = document.querySelector(this._selectors.genres);
+    if (!parent) {
+      console.error('Genres parent element is missing.');
+      return [];
+    }
     const options = Array.from(parent.querySelectorAll('option'));
     return options.map(element => element.value);
   }
@@ -238,7 +243,7 @@ export default class UIManager {
    */
   async loadGenres(genres) {
     const options = genres.map(createOption);
-    document.querySelector(selectors.genres).replaceChildren(...options);
+    document.querySelector(this._selectors.genres).replaceChildren(...options);
   }
 
   /**
@@ -250,6 +255,10 @@ export default class UIManager {
   _toTopHandler() {
     hapticFeedback();
     const wrapper = this._main;
+    if (!wrapper) {
+      console.error('Main wrapper element is missing.');
+      return;
+    }
     wrapper.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -278,7 +287,7 @@ export default class UIManager {
    * @function
    */
   loadingEnd() {
-    const loadingEl = document.querySelector(selectors.loading);
+    const loadingEl = document.querySelector(this._selectors.loading);
     if (loadingEl) loadingEl.remove();
     this._stationCount.style.removeProperty('display');
   }
@@ -290,10 +299,14 @@ export default class UIManager {
    * @function
    */
   toggleSelectedVisability() {
-    const selected = document.querySelectorAll(selectors.selectedStation);
-    const current = selected[0].style.display;
+    const selected = document.querySelectorAll(this._selectors.selectedStation);
+    if (!selected.length) return;
+  
+    const isHidden = selected[0].style.display === 'none';
+    const displayValue = isHidden ? 'flex' : 'none';
+  
     selected.forEach(el => {
-      el.style.display = current === 'none' ? 'flex' : 'none';
+      el.style.display = displayValue;
     });
   }
 }
