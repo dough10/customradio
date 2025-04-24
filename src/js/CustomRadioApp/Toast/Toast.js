@@ -1,6 +1,16 @@
+import EventManager from '../utils/EventManager/EventManager.js';
 import isValidURL from '../utils/URL.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import ToastCache from './ToastCache.js';
+import sleep from '../utils/sleep.js';
+
+const em = new EventManager();
+
+const NAMESPACES = {
+  OPEN_ANIMATION: 'open-animation',
+  CLOSE_ANIMATION: 'close-animation',
+  USER_INTERACTIONS: 'user-interactions',
+};
 
 /**
  * text link used in toast
@@ -78,11 +88,12 @@ export default class Toast {
     document.querySelector('body').append(this.toast);
     
     //display the toast
-    requestAnimationFrame(() => {
+    sleep(25).then(() => requestAnimationFrame(() => {
       if (!this.toast) throw new Error(`Failed to create toast with message: ${message}`);
       this.toast.toggleAttribute('opened');
       console.log(message);
-    });
+    }));
+
   }
 
   /**
@@ -99,10 +110,11 @@ export default class Toast {
     toast.classList.add('toast');
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'assertive');
-    toast.addEventListener('transitionend', this._transitionEnd, true);
-    toast.addEventListener('click', this._clicked, true);
-    toast.addEventListener('mouseenter', this._mouseIn, true);
-    toast.addEventListener('mouseleave', this._mouseOut, true);
+
+    em.add(toast, 'transitionend', this._transitionEnd, true, NAMESPACES.OPEN_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener`) : null;
+    em.add(toast, 'click', this._clicked, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add click listener`) : null;
+    em.add(toast, 'mouseenter', this._mouseIn, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseenter listener`) : null;
+    em.add(toast, 'mouseleave', this._mouseOut, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseleave listener`) : null;
     return toast;
   }
 
@@ -113,11 +125,10 @@ export default class Toast {
    * @function
    */
   _mouseIn() {
-    if (this._timer) {
-      clearTimeout(this._timer);
-      this._timer = null;
-      this._remainingTime = this._timeout - (Date.now() - this._startTime);
-    }
+    if (!this._timer) return;
+    clearTimeout(this._timer);
+    this._timer = null;
+    this._remainingTime = this._timeout - (Date.now() - this._startTime);
   }
 
   /**
@@ -127,10 +138,8 @@ export default class Toast {
    * @function
    */
   _mouseOut() {
-    if (this._remainingTime > 0) {
-      this._startTime = Date.now();
-      this._timer = setTimeout(this._cleanupToast, this._remainingTime);
-    }
+    this._startTime = Date.now();
+    this._timer = setTimeout(this._cleanupToast, this._remainingTime);
   }
 
   /**
@@ -209,14 +218,12 @@ export default class Toast {
     if (!this.toast) throw new Error(`Toast element disapeared`);
 
     // clean up listeners added when creating the toast element
-    this.toast.removeEventListener('transitionend', this._transitionEnd, true);
-    this.toast.removeEventListener('click', this._clicked, true);
-    this.toast.removeEventListener('mouseenter', this._mouseIn, true);
-    this.toast.removeEventListener('mouseleave', this._mouseOut, true);
+    em.removeByNamespace(NAMESPACES.USER_INTERACTIONS);
+    em.removeByNamespace(NAMESPACES.OPEN_ANIMATION);
 
     // attach listener for closing transition
     // element will be deleted after
-    this.toast.addEventListener('transitionend', this._removeToast, true);
+    em.add(this.toast, 'transitionend', this._removeToast, true, NAMESPACES.CLOSE_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener for closing animation`) : null;
     requestAnimationFrame(() => {
       this.toast.removeAttribute('opened');
     });
@@ -229,7 +236,7 @@ export default class Toast {
    * @function
    */
   _removeToast() {
-    this.toast.removeEventListener('transitionend', this._removeToast, true);
+    em.removeAll();
     this.toast.remove();
   }
 
@@ -245,10 +252,12 @@ export default class Toast {
     if (!this.toast) throw new Error(`Toast element disapeared in opening animation`);
 
     // remove opening transition listener
-    this.toast.removeEventListener('transitionend', this._transitionEnd, true);
+    em.removeByNamespace(NAMESPACES.OPEN_ANIMATION);
 
     // set starttime for mouse in / out behavor
     this._startTime = Date.now();
     this._timer = setTimeout(this._cleanupToast, this._timeout);
   }
 }
+
+window.Toast = Toast;
