@@ -1,13 +1,16 @@
 import Analytics from './helpers/Analytics.js';
+import AudioPlayer from './AudioPlayer/AudioPlayer.js';
+import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
+import Notifications from '../Notifications/Notifications.js';
+import EventManager from '../utils/EventManager/EventManager.js';
+
 import {initDialogInteractions, destroyDialogInteractions} from './helpers/dialog.js';
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
-import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import toggleActiveState from '../utils/toggleActiveState.js';
 import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
-
 
 /**
  * manages UI elements
@@ -17,7 +20,10 @@ export default class UIManager {
     this._lastTop = 0;
     this._toTop = document.querySelector(selectors.toTop);
     this.onScroll = this.onScroll.bind(this);
-    this.header = new CollapsingHeader();
+    this._header = new CollapsingHeader();
+    this._notifications = new Notifications();
+    this._player = new AudioPlayer(this._notifications);
+    this._em = new EventManager();
   }
   
   /**
@@ -35,17 +41,14 @@ export default class UIManager {
 
     initDialogInteractions();
 
+    this._player.init();
+
     const filter = this._filter;
-    filter.addEventListener('change', onFilterChange);
-    filter.addEventListener('focus', this._filterFocus.bind(this));
-
-    this._resetButton.addEventListener('click', onReset);
-
-    this._toTop.addEventListener('click', this._toTopHandler.bind(this));
-
-    this._downloadButton.addEventListener('click', this._dl);
-
-    // document.addEventListener('keydown', this._keyDown.bind(this));    
+    this._em.add(filter, 'change', onFilterChange, { passive: true });
+    this._em.add(filter, 'focus', this._filterFocus.bind(this), { passive: true });
+    this._em.add(this._resetButton, 'click', onReset, { passive: true });
+    this._em.add(this._toTop, 'click', this._toTopHandler.bind(this), { passive: true });
+    this._em.add(this._downloadButton, 'click', this._dl, { passive: true });
   }
 
   /**
@@ -58,35 +61,35 @@ export default class UIManager {
    * @param {Function} param0.onFilterChange
    * @param {Function} param0.onReset 
    */
-  detachListeners({ onFilterChange, onReset }) {
+  detachListeners() {
     this._analytics.destroy();
 
-    this.header.destroy();
+    this._player.destroy();
+
+    this._header.destroy();
 
     destroyDialogInteractions();
 
-    const filter = this._filter;
-    filter.removeEventListener('change', onFilterChange);
-    filter.removeEventListener('focus', this._filterFocus.bind(this));
+    this._em.removeAll();
 
-    this._resetButton.removeEventListener('click', onReset);
-
-    this._toTop.removeEventListener('click', this._toTopHandler.bind(this));
-
-    this._downloadButton.removeEventListener('click', this._dl);
-
-    // document.addEventListener('keydown', this._keyDown.bind(this));
+    console.log('UIManager: listeners removed');
   }
 
   /**
    * querySelector for genre filter input element
+   * 
+   * @private
+   * @returns {HTMLElement}
    */
   get _filter() {
     return document.querySelector(selectors.filter);
   }
 
   /**
+   * qs for download button
    * 
+   * @private
+   * @returns {HTMLElement}
    */
   get _downloadButton() {
     return document.querySelector(selectors.downloadButton);
@@ -94,6 +97,9 @@ export default class UIManager {
 
   /**
    * querySelector for 'station count' element
+   * 
+   * @private
+   * @returns {HTMLElement}
    */
   get _stationCount() {
     return document.querySelector(selectors.stationCount);
@@ -101,6 +107,9 @@ export default class UIManager {
 
   /**
    * querySelector for 'reset' button
+   * 
+   * @private
+   * @returns {HTMLElement}
    */
   get _resetButton() {
     return document.querySelector(selectors.resetButton);
@@ -108,9 +117,36 @@ export default class UIManager {
 
   /**
    * querySelector for 'main' element
+   * 
+   * @private
+   * @returns {HTMLElement}
    */
   get _main() {
     return document.querySelector(selectors.main);
+  }
+
+  /**
+   * exposes audio player instance
+   * 
+   * @public
+   * @readonly
+   * @type {AudioPlayer}
+   * @return {AudioPlayer}
+   */
+  get audioPlayer() {
+    return this._player;
+  }
+
+  /**
+   * exposes CollapsingHeader instance
+   * 
+   * @public
+   * @readonly
+   * @type {CollapsingHeader}
+   * @return {CollapsingHeader}
+   */
+  get header() {
+    return this._header;
   }
 
   /**
@@ -154,6 +190,7 @@ export default class UIManager {
   }
 
   /**
+   * calls header.scroll() to update the header
    * toggles the display of the "to top" button on scroll
    * 
    * @public
@@ -162,12 +199,12 @@ export default class UIManager {
    * @param {HTMLElement} parent 
    */
   onScroll(scrollTop) {
-    this.header.scroll(scrollTop);
+    this._header.scroll(scrollTop);
   
     const atTop = scrollTop === 0;
-    const scrollingUp = scrollTop < this._lastTop;
+    // const scrollingUp = scrollTop < this._lastTop;
   
-    if (atTop || scrollingUp) {
+    if (atTop) {
       this._toTop.classList.add('hidden');
     } else {
       this._toTop.classList.remove('hidden');
