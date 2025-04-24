@@ -71,11 +71,12 @@ export default class Analytics {
       this._checkAnalytics = null;
     }
 
-    if (this._alert) {
-      if (document.body.contains(this._alert)) {
-        this._alert.remove();
+    const alert = this._alert;
+
+    if (alert) {
+      if (document.body.contains(alert)) {
+        alert.remove();
       }
-      this._alert = null;
     }
   }
 
@@ -88,6 +89,7 @@ export default class Analytics {
    */
   _checkContainer() {
     const hasChildren = document.querySelectorAll('#matomo-opt-out>*').length > 0;
+    const alert = this._alert;
     
     // element has yet to populate
     if (!hasChildren) return;
@@ -99,9 +101,9 @@ export default class Analytics {
     }
 
     // element is populate and ready open
-    if (!this._alert.hasAttribute('open')) {
+    if (!alert.hasAttribute('open')) {
       clearInterval(this._checkAnalytics);
-      this._alert.toggleAttribute('open');
+      alert.toggleAttribute('open');
     }
   }
   
@@ -109,10 +111,10 @@ export default class Analytics {
    * remove the alert element from the DOM
    */
   _removeAlert() {
+    const alert = this._alert;
     this._em.remove(this._alertTransition);
-    if (document.body.contains(this._alert)) {
-      this._alert.remove(); 
-      this._alert = null;
+    if (document.body.contains(alert)) {
+      alert.remove(); 
     }
   }
 
@@ -122,25 +124,27 @@ export default class Analytics {
    * @param {Event} ev 
    */
   _dismissAlert(ev) { 
+    const alert = this._alert;
+
     // Mark the alert as dismissed in localStorage
     if (ev) localStorage.setItem('dismissed', '1');
   
-    this_em.removeByNamespace('dismissAlert');
+    this._em.removeByNamespace('dismissAlert');
   
     // Clear the interval for analytics checking
     clearInterval(this._checkAnalytics);
     this._checkAnalytics = null;
   
     // Add a transitionend listener to clean up the alert element after animation
-    this._alertTransition = this._em.add(this._alert, 'transitionend', this._removeAlert, true);
+    this._alertTransition = this._em.add(alert, 'transitionend', this._removeAlert, true);
   
     // Trigger the closing animation by removing the `open` attribute
-    if (!this._alert.hasAttribute('open')) {
+    if (!alert.hasAttribute('open')) {
       this._removeAlert();
       return;
     }
 
-    this._alert.removeAttribute('open');
+    alert.removeAttribute('open');
   }
 
 /**
