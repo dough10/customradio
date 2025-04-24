@@ -1,13 +1,18 @@
 import CustomRadioApp from './CustomRadioApp/CustomRadioApp.js';
+import EventManager from './CustomRadioApp/utils/EventManager/EventManager.js';
 
+const em = new EventManager();
 const app = new CustomRadioApp();
 
 /**
  * load app
  */
-window.addEventListener('DOMContentLoaded', _ => app.init());
+em.add(window, 'load', _ => app.init());
 
 /**
  * cleanup on window unload
  */
-window.addEventListener('beforeunload', _ => app.destroy());
+em.add(window, 'beforeunload', _ => {
+  app.destroy();
+  em.removeAll();
+});
