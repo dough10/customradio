@@ -1,7 +1,6 @@
 import Analytics from './helpers/Analytics.js';
 import AudioPlayer from './AudioPlayer/AudioPlayer.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
-import Notifications from '../Notifications/Notifications.js';
 import EventManager from '../utils/EventManager/EventManager.js';
 
 import {initDialogInteractions, destroyDialogInteractions} from './helpers/dialog.js';
@@ -16,14 +15,13 @@ import selectors from '../selectors.js';
  * manages UI elements
  */
 export default class UIManager {
+
   constructor() {
-    this._lastTop = 0;
-    this._toTop = document.querySelector(selectors.toTop);
     this.onScroll = this.onScroll.bind(this);
-    this._header = new CollapsingHeader();
-    this._notifications = new Notifications();
-    this._player = new AudioPlayer(this._notifications);
+    this._player = new AudioPlayer();
     this._em = new EventManager();
+    this._analytics = new Analytics();
+    this._header = new CollapsingHeader();
   }
   
   /**
@@ -36,13 +34,10 @@ export default class UIManager {
    * @param {Function} param0.onFilterChange
    * @param {Function} param0.onReset 
   */
- attachListeners({ onFilterChange, onReset }) {
-    this._analytics = new Analytics();
-
+  attachListeners({ onFilterChange, onReset }) {
     initDialogInteractions();
 
     this._player.init();
-
     const filter = this._filter;
     this._em.add(filter, 'change', onFilterChange, { passive: true });
     this._em.add(filter, 'focus', this._filterFocus.bind(this), { passive: true });
@@ -56,23 +51,24 @@ export default class UIManager {
    * 
    * @public
    * @function
-   * 
-   * @param {Object} param0
-   * @param {Function} param0.onFilterChange
-   * @param {Function} param0.onReset 
    */
   detachListeners() {
-    this._analytics.destroy();
-
-    this._player.destroy();
-
-    this._header.destroy();
-
     destroyDialogInteractions();
-
+    this._analytics.destroy();
+    this._player.destroy();
+    this._header.destroy();
     this._em.removeAll();
-
     console.log('UIManager: listeners removed');
+  }
+
+  /**
+   * querySelector for the 'to top' button
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _toTop() {
+    return document.querySelector(selectors.toTop);
   }
 
   /**
@@ -200,16 +196,8 @@ export default class UIManager {
    */
   onScroll(scrollTop) {
     this._header.scroll(scrollTop);
-  
-    const atTop = scrollTop === 0;
-    // const scrollingUp = scrollTop < this._lastTop;
-  
-    if (atTop) {
-      this._toTop.classList.add('hidden');
-    } else {
-      this._toTop.classList.remove('hidden');
-    }
-  
+    const closeToTop = scrollTop < window.innerHeight * 0.5;
+    closeToTop ? this._toTop.classList.add('hidden') : this._toTop.classList.remove('hidden');
     this._lastTop = scrollTop;
   }
   
