@@ -196,7 +196,7 @@ export default class UIManager {
    */
   onScroll(scrollTop) {
     this._header.scroll(scrollTop);
-    const closeToTop = scrollTop < window.innerHeight * 0.5;
+    const closeToTop = scrollTop < (window.innerHeight * 0.2);
     closeToTop ? this._toTop.classList.add('hidden') : this._toTop.classList.remove('hidden');
     this._lastTop = scrollTop;
   }
