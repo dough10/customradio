@@ -1,8 +1,12 @@
+import EventManager from "../../utils/EventManager/EventManager";
+
 export default class Analytics {
   _alert = document.querySelector('#alert');
   _dismissButton = document.querySelector('.alert>.yellow-text');
 
   _isDismissed = Number(localStorage.getItem('dismissed'));
+
+  _em = new EventManager();
 
   /**
    * functions controling #alert element and matomo
@@ -12,13 +16,12 @@ export default class Analytics {
     this._removeAlert = this._removeAlert.bind(this);
     this._checkContainer = this._checkContainer.bind(this);
 
-    this._dismissButton.addEventListener('click', this._dismissAlert, true);
-
     this._checkAnalytics = setInterval(this._checkContainer, 500);
-
+    
     this._windowError = this._windowError.bind(this);
-
-    window.addEventListener('error', this._windowError, true);
+    
+    this._em.add(this._dismissButton, 'click', this._dismissAlert, true);
+    this._em.add(window, 'error', this._windowError, true);
   }
 
   /**
@@ -56,11 +59,7 @@ export default class Analytics {
    * @throws {Error} If there is an issue during the cleanup process, such as if the alert element cannot be removed.
    */
   destroy() {
-    window.removeEventListener('error', this._windowError, true);
-
-    if (this._dismissButton) {
-      this._dismissButton.removeEventListener('click', this._dismissAlert, true);
-    }
+    this._em.removeAll();
 
     if (this._checkAnalytics) {
       clearInterval(this._checkAnalytics);
@@ -68,7 +67,7 @@ export default class Analytics {
     }
 
     if (this._alert) {
-      this._alert.removeEventListener('transitionend', this._removeAlert, true);
+      // this._alert.removeEventListener('transitionend', this._removeAlert, true);
       if (document.body.contains(this._alert)) {
         this._alert.remove();
       }
@@ -106,7 +105,7 @@ export default class Analytics {
    * remove the alert element from the DOM
    */
   _removeAlert() {
-    this._alert.removeEventListener('transitionend', this._removeAlert, true);
+    this._em.remove(this._alertTransition);
     if (document.body.contains(this._alert)) {
       this._alert.remove(); 
       this._alert = null;
@@ -129,7 +128,7 @@ export default class Analytics {
     this._checkAnalytics = null;
   
     // Add a transitionend listener to clean up the alert element after animation
-    this._alert.addEventListener('transitionend', this._removeAlert, true);
+    this._alertTransition = this._em.add(this._alert, 'transitionend', this._removeAlert, true);
   
     // Trigger the closing animation by removing the `open` attribute
     if (!this._alert.hasAttribute('open')) {
