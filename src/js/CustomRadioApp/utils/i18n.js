@@ -20,7 +20,6 @@ export function setLanguage(lang) {
   if (languages[lang]) {
     currentLang = lang;
   } else {
-    console.warn(`Language ${lang} not found, defaulting to "en".`);
     currentLang = 'en';
   }
 }
