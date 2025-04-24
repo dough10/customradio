@@ -17,14 +17,15 @@ export default class CustomRadioApp {
   constructor() {
     const lang = navigator.language.split('-')[0];
     setLanguage(lang);
-    this._uiManager = new UIManager();
-    this._stationManager = new StationManager(window.location.origin);
   }
-
+  
   /**
    * initializes the app
-   */
+  */
   init() {
+    this._uiManager = new UIManager();
+    this._stationManager = new StationManager(window.location.origin);
+
     loadServiceWorker();
 
     this._uiManager.attachListeners({
