@@ -1,9 +1,10 @@
-import Toast from '../Toast/Toast.js';
-import sleep from '../utils/sleep.js';
-import debounce from '../utils/debounce.js';
-import { t } from '../utils/i18n.js';
-import hapticFeedback from '../utils/hapticFeedback.js';
-import selectors from '../selectors.js';
+import Toast from '../../Toast/Toast.js';
+import EventManager from '../../utils/EventManager/EventManager.js';
+import sleep from '../../utils/sleep.js';
+import debounce from '../../utils/debounce.js';
+import { t } from '../../utils/i18n.js';
+import hapticFeedback from '../../utils/hapticFeedback.js';
+import selectors from '../../selectors.js';
 
 const PAUSE_TIMER_DURATION = 10000;
 const VOLUME_DEBOUNCE_DURATION = 1000;
@@ -20,6 +21,8 @@ export default class AudioPlayer {
     this.pauseTimer = 0;
     this._OGTitle = document.title;
     this._notifications = notifications;
+
+    this._em = new EventManager();
 
     this._bindPlayerEvents();
     this._bindUtilityFunctions();
@@ -272,7 +275,7 @@ export default class AudioPlayer {
     const slider = document.querySelector(selectors.volumeSlider);
     slider.value = localStorage.getItem('volume') ?? 100;
     this.player.volume = slider.value / 100;
-    slider.addEventListener('input', this._setVolume);
+    this._em.add(slider, 'input', this._setVolume, { passive: true });
   }
 
   /**
@@ -479,18 +482,8 @@ export default class AudioPlayer {
    * @function
    */
   destroy() {
-    window.removeEventListener('offline', this._handleOffline);
-  
-    window.removeEventListener('online', this._handleOnline);
-
-    window.removeEventListener('keypress', this._onKeyPress);
-
-    this._name.removeEventListener('click', this._scrollToStation);
-
-    document.querySelector(selectors.smallButton).removeEventListener('click', this._togglePlay);
+    this._em.removeAll();
     
-    if (this._notMobile) document.querySelector(selectors.volumeSlider).removeEventListener('input', this._setVolume);
-
     if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('play', null);
       navigator.mediaSession.setActionHandler('pause', null);
@@ -509,15 +502,11 @@ export default class AudioPlayer {
     this._notMobile = await this._canChangeVol();
     
     this._notMobile ? this._setVolumeSlider() : this._hideVolumeSlider();
-    
-    window.addEventListener('offline', this._handleOffline);
-    
-    window.addEventListener('online', this._handleOnline);
-    
-    window.addEventListener('keypress', this._onKeyPress);
-    
-    this._name.addEventListener('click', this._scrollToStation);
 
-    document.querySelector(selectors.smallButton).addEventListener('click', this._togglePlay);
+    this._em.add(window, 'offline', this._handleOffline);
+    this._em.add(window, 'online', this._handleOnline);
+    this._em.add(window, 'keypress', this._onKeyPress);
+    this._em.add(this._name, 'click', this._scrollToStation);
+    this._em.add(document.querySelector(selectors.smallButton), 'click', this._togglePlay);
   }
 }
