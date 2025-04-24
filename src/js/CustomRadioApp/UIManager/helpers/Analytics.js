@@ -1,9 +1,6 @@
 import EventManager from "../../utils/EventManager/EventManager";
 
 export default class Analytics {
-  _alert = document.querySelector('#alert');
-  _dismissButton = document.querySelector('.alert>.yellow-text');
-
   _isDismissed = Number(localStorage.getItem('dismissed'));
 
   _em = new EventManager();
@@ -20,8 +17,16 @@ export default class Analytics {
     
     this._windowError = this._windowError.bind(this);
     
-    this._em.add(this._dismissButton, 'click', this._dismissAlert, true);
+    this._em.add(this._dismissButton, 'click', this._dismissAlert, true, 'dismissAlert');
     this._em.add(window, 'error', this._windowError, true);
+  }
+
+  get _alert() {
+    return document.querySelector('#alert');
+  }
+
+  get _dismissButton() {
+    return document.querySelector('.alert>.yellow-text');
   }
 
   /**
@@ -67,7 +72,6 @@ export default class Analytics {
     }
 
     if (this._alert) {
-      // this._alert.removeEventListener('transitionend', this._removeAlert, true);
       if (document.body.contains(this._alert)) {
         this._alert.remove();
       }
@@ -121,7 +125,7 @@ export default class Analytics {
     // Mark the alert as dismissed in localStorage
     if (ev) localStorage.setItem('dismissed', '1');
   
-    this._dismissButton.removeEventListener('click', this._dismissAlert, true);
+    this_em.removeByNamespace('dismissAlert');
   
     // Clear the interval for analytics checking
     clearInterval(this._checkAnalytics);
