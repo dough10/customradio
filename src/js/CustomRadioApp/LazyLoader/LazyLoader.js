@@ -1,3 +1,5 @@
+import EventManager from '../utils/EventManager/EventManager.js';
+
 import debounce from '../utils/debounce.js';
 import createStationElement from './helpers/createStationElement.js';
 
@@ -52,9 +54,11 @@ export default class LazyLoader {
       throw new Error('LazyLoader: container must exist and have a parent element.');
     }
     
+    this._em = new EventManager();
 
-    this._parent.addEventListener('scroll', this._scrollHandler, { passive: true });
-    window.addEventListener('resize', this._resizeHandler);
+    this._em.add(this._parent, 'scroll', this._scrollHandler, { passive: true });
+    this._em.add(window, 'resize', this._resizeHandler);
+
     this._load();
   }
   
@@ -164,7 +168,20 @@ export default class LazyLoader {
    * @function
    */
   destroy() {
-    window.removeEventListener('resize', this._resizeHandler);
-    this._parent.removeEventListener('scroll', this._scrollHandler);
+    this._em.removeAll();
+    this._parent = null;
+    this._container = null;
+    this._list = null;
+    this._player = null;
+    this._scrollFunc = null;
+    this._createStationElement = null;
+    this._resizeHandler = null;
+    this._scrollHandler = null;
+    this._debouncedLoad = null;
+    this._em = null;
+    this._loading = false;
+    this._ndx = 0;
+    this._pullNumber = 0;
+    console.log('LazyLoader destroyed');
   }
 }
