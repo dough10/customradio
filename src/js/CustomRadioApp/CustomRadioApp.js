@@ -1,12 +1,11 @@
-import loadServiceWorker from './utils/loadServiceWorker.js';
-import AudioPlayer from './AudioPlayer/AudioPlayer.js';
-import Toast from './Toast/Toast.js';
-import LazyLoader from './LazyLoader/LazyLoader.js';
 import UIManager from './UIManager/UIManager.js';
 import StationManager from './StationManager/StationManager.js';
+import Toast from './Toast/Toast.js';
+import LazyLoader from './LazyLoader/LazyLoader.js';
+
+import loadServiceWorker from './utils/loadServiceWorker.js';
 import { setLanguage, t } from './utils/i18n.js';
 import normalizeMemo from './utils/normalizeMemo.js';
-import Notifications from './Notifications/Notifications.js';
 import hapticFeedback from './utils/hapticFeedback.js';
 import selectors from './selectors.js';
 
@@ -18,10 +17,8 @@ export default class CustomRadioApp {
   constructor() {
     const lang = navigator.language.split('-')[0];
     setLanguage(lang);
-    this._notifications = new Notifications();
     this._uiManager = new UIManager();
     this._stationManager = new StationManager(window.location.origin);
-    this._player = new AudioPlayer(this._notifications);
   }
 
   /**
@@ -30,13 +27,12 @@ export default class CustomRadioApp {
   init() {
     loadServiceWorker();
 
-    this._player.init();
-
     this._uiManager.attachListeners({
       onFilterChange: this._filterChanged.bind(this),
       onReset: this._resetFilter.bind(this)
     });
     
+    // initial load of stations
     this._filterChanged({ 
       target: document.querySelector(selectors.filter), 
       loadLocal: true 
@@ -47,12 +43,7 @@ export default class CustomRadioApp {
    * destroys the app
    */
   destroy() {
-    this._player.destroy();
-    
-    this._uiManager.detachListeners({
-      onFilterChange: this._filterChanged.bind(this),
-      onReset: this._resetFilter.bind(this)
-    });
+    this._uiManager.detachListeners();
     
     if (this._lzldr) {
       this._lzldr.destroy();
@@ -116,10 +107,10 @@ export default class CustomRadioApp {
 
       // push items to the UI and load more elements when scrolled to 80% or > of the pages height
       this._lzldr ? this._lzldr.reset([...selected, ...list]) : this._lzldr = new LazyLoader(
-        [...selected, ...list], 
-        container, 
-        this._player, 
-        this._uiManager.onScroll
+        [...selected, ...list],      // list of audio streams
+        container,                   // page "main" element
+        this._uiManager.audioPlayer, // audio player instance
+        this._uiManager.onScroll     // scroll handler
       );
   
       // if a genre was searched and not in the current datalist, load the genres again
