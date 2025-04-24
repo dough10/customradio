@@ -105,7 +105,7 @@ export default class CustomRadioApp {
       // finally block removes the loading element
       container.replaceChildren(document.querySelector(selectors.loading));
 
-      // push items to the UI and load more elements when scrolled to 80% or > of the pages height
+      // push items to the UI and load more elements when scrolling close to bottom of page
       this._lzldr ? this._lzldr.reset([...selected, ...list]) : this._lzldr = new LazyLoader(
         [...selected, ...list],      // list of audio streams
         container,                   // page "main" element
