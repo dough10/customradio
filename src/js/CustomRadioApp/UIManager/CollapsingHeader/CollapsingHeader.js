@@ -59,11 +59,8 @@ export default class CollapsingHeader {
     /** @type {HTMLElement|null} Main content wrapper */
     this.main = document.querySelector(selectors.main);
 
-    this._onResize = this._onResize.bind(this);
-
     /** recalculate header on window resize */
-    this._em.add(window, 'resize', this._onResize);
-
+    this._em.add(window, 'resize', this._onResize.bind(this));
 
     /** @type {Boolean} mobile device */
     this._isMobile = window.innerWidth < 450;
