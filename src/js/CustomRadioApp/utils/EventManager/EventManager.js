@@ -21,12 +21,31 @@ export default class EventManager {
    * @param {String} type 
    * @param {Function} handler 
    * @param {Object} options 
+   * @param {String|null} namespace - Optional namespace for the listener
    * 
    * @returns {Number} index of the added listener in the listeners array
    */
-  add(target, type, handler, options) {
-    if (target) target.addEventListener(type, handler, options);
-    this.listeners.push({ target, type, handler, options });
+  add(target, type, handler, options, namespace = null) {
+    if (!target || typeof type !== 'string' || typeof handler !== 'function') {
+      console.warn('Invalid arguments provided to EventManager.add');
+      return -1; // Return -1 to indicate failure
+    }
+
+    const isDuplicate = this.listeners.some(
+      listener =>
+        listener.target === target &&
+        listener.type === type &&
+        listener.handler === handler &&
+        JSON.stringify(listener.options) === JSON.stringify(options)
+    );
+  
+    if (isDuplicate) {
+      console.warn('Duplicate listener detected');
+      return -1;
+    }
+
+    target.addEventListener(type, handler, options);
+    this.listeners.push({ target, type, handler, options, namespace });
     return this.listeners.length - 1;
   }
 
@@ -41,10 +60,26 @@ export default class EventManager {
     if (listener && listener.target) {
       const { target, type, handler, options } = listener;
       target.removeEventListener(type, handler, options);
-      this.listeners.splice(index, 1); // Remove the listener from the array
-      return true;
+      this.listeners.splice(index, 1);
+      return listener;
     }
-    return false; // Return false if the listener could not be removed
+    return null;
+  }
+
+  /**
+   * Removes all event listeners associated with a specific namespace.
+   * 
+   * @param {String} namespace - The namespace of the listeners to remove.
+   */
+  removeByNamespace(namespace) {
+    this.listeners = this.listeners.filter(listener => {
+      if (listener.namespace === namespace) {
+        const { target, type, handler, options } = listener;
+        if (target) target.removeEventListener(type, handler, options);
+        return false;
+      }
+      return true;
+    });
   }
 
   /**
