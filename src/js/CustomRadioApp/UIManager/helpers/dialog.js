@@ -233,7 +233,6 @@ function initDialogInteractions() {
   const dialogs = document.querySelectorAll('dialog');
   dialogs.forEach(dialog => em.add(dialog, 'click', wobbleDialog));
   
-  
   // close dialogs
   document.querySelectorAll(selectors.dialogClose).forEach(el => {
     em.add(el, 'click', _ => closeDialog(el));
