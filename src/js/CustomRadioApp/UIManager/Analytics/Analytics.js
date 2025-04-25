@@ -21,10 +21,22 @@ export default class Analytics {
     this._em.add(window, 'error', this._windowError, true);
   }
 
+  /**
+   * Returns the alert element from the DOM.
+   * @private
+   * @method _alert
+   * @return {HTMLElement} The alert element.
+   */
   get _alert() {
     return document.querySelector('#alert');
   }
 
+  /**
+   * Returns the dismiss button element within the alert.
+   * @private
+   * @method _dismissButton
+   * @return {HTMLElement} The dismiss button element.
+   */
   get _dismissButton() {
     return document.querySelector('.alert>.yellow-text');
   }
@@ -72,7 +84,6 @@ export default class Analytics {
     }
 
     const alert = this._alert;
-
     if (alert) {
       if (document.body.contains(alert)) {
         alert.remove();
