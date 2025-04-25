@@ -1,4 +1,4 @@
-import Analytics from './helpers/Analytics.js';
+import Analytics from './Analytics/Analytics.js';
 import AudioPlayer from './AudioPlayer/AudioPlayer.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import EventManager from '../utils/EventManager/EventManager.js';
