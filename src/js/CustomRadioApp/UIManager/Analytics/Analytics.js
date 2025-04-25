@@ -124,6 +124,7 @@ export default class Analytics {
   _removeAlert() {
     const alert = this._alert;
     this._em.remove(this._alertTransition);
+    this._alertTransition = null;
     if (document.body.contains(alert)) {
       alert.remove(); 
     }
