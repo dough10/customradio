@@ -258,8 +258,9 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _scrollToStation() {
-    if (!this.currentPlayingElement) return;
-    this.currentPlayingElement.scrollIntoView({
+    const currentPlayingElement = this._currentPlayingElement;
+    if (!currentPlayingElement) return;
+    currentPlayingElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
     })
