@@ -232,8 +232,8 @@ export default class AudioPlayer {
    */
   _ontimeupdate() {
     const miniPlayer = this._playerElement;
-    !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
-    
+    !miniPlayer?.hasAttribute('playing') ? miniPlayer?.toggleAttribute('playing') : null;
+ 
     const currentPlayingElement = this._currentPlayingElement;
 
     // already marked as playing
