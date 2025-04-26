@@ -116,27 +116,27 @@ describe('LazyLoader', () => {
     expect(lzldr._loading).to.be.false;
 
     // should toggle loading state to input boolean value
-    lzldr._toggleLoading(true);
+    lzldr._setLoading(true);
     expect(lzldr._loading).to.be.true;
     expect(container.querySelector('.loading')).to.exist;
 
     // should not toggle loading state if already loading
-    lzldr._toggleLoading(true);
+    lzldr._setLoading(true);
     expect(lzldr._loading).to.be.true;
     expect(container.querySelector('.loading')).to.exist;
 
     // should toggle loading state to input boolean value
-    lzldr._toggleLoading(false);
+    lzldr._setLoading(false);
     expect(lzldr._loading).to.be.false;
     expect(container.querySelector('.loading')).to.not.exist;
 
     // should ignore input that is not a boolean that is not boolean
-    lzldr._toggleLoading(0);
+    lzldr._setLoading(0);
     expect(lzldr._loading).to.be.true;
     expect(container.querySelector('.loading')).to.exist;
  
     // should ignore input that is not a boolean and toggle state to false because last test was true
-    lzldr._toggleLoading('false');
+    lzldr._setLoading('false');
     expect(lzldr._loading).to.be.false;
     expect(container.querySelector('.loading')).to.not.exist;
   });
