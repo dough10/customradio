@@ -1,4 +1,5 @@
 import EventManager from '../utils/EventManager/EventManager.js';
+import insertLoadingAnimation from '../UIManager/helpers/insertLoadingAnimation.js';
 
 import debounce from '../utils/debounce.js';
 import createStationElement from './helpers/createStationElement.js';
@@ -35,13 +36,14 @@ export default class LazyLoader {
   _pullNumber = getPullCount();
   _loading = false;
 
-  constructor(list, container, player, scrollFunc, createElFunc = createStationElement) {
+  constructor(list, container, player, scrollFunc, createElFunc, loadingAnimation) {
     this._list = list;
     this._container = container;
     this._player = player;
     this._scrollFunc = scrollFunc;
     this._parent = this._container.parentElement;
-    this._createStationElement = createElFunc;
+    this._createStationElement = createElFunc || createStationElement;
+    this._insertLoadingAnimation = loadingAnimation || insertLoadingAnimation;
 
     console.log(`array length: ${list.length}, total pulls: ${(list.length / this._pullNumber)}`);
 
@@ -115,6 +117,23 @@ export default class LazyLoader {
   }
 
   /**
+   * toggle loading state
+   * 
+   * @param {Boolean} [state] - If true, loading state is set to true, otherwise toggled.
+   * 
+   * @returns {void}
+   */
+  _setLoading(state) {
+    if (typeof state !== 'boolean') {
+      state = !this._loading;
+    }
+    if (state === this._loading) return; // no change, do nothing
+    this._loading = Boolean(state);
+    if (this._ndx == 0) return;
+    this._loading ? this._insertLoadingAnimation(this._container) : this._container.querySelector('.loading')?.remove();
+  }
+
+  /**
    * push more elements
    * 
    * @private
@@ -124,7 +143,7 @@ export default class LazyLoader {
    */
   _load() {
     if (this._loading || this._ndx >= this._list.length) return;
-    this._loading = true;
+    this._setLoading(true);
     try{
       // double pull count for first pull
       const pullCount = this._ndx ? this._pullNumber : this._pullNumber * 2;
@@ -141,7 +160,7 @@ export default class LazyLoader {
     } catch(e) {
       console.error('Error loading items', e);
     } finally {
-      this._loading = false;
+      this._setLoading(false);
     }
   }
 
