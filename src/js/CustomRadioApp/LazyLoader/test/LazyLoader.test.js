@@ -49,15 +49,17 @@ describe('LazyLoader', () => {
   });
 
   it('should load initial elements on instantiation', () => {
-    new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    const lzldr = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
 
     const pullCount = Math.round(window.innerHeight / 58) * 2;
     expect(container.children.length).to.equal(pullCount);
     expect(mockCreateStationElement.callCount).to.equal(pullCount);
+    expect(lzldr._ndx).to.equal(pullCount);
+    expect(lzldr._loading).to.be.false;
   });
 
   it('should load more elements when scrolling near the bottom', () => {
-    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    const lzldr = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
 
     const initialCount = container.children.length;
 
@@ -71,8 +73,8 @@ describe('LazyLoader', () => {
   });
 
   it('should not load elements if already loading or all are loaded', () => {
-    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
-    lazyLoader._loading = true; // simulate loading in progress
+    const lzldr = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    lzldr._loading = true; // simulate loading in progress
 
     const currentCount = container.children.length;
     parent.scrollTop = parent.scrollHeight;
@@ -83,11 +85,11 @@ describe('LazyLoader', () => {
   });
 
   it('should reset with new data and reload', () => {
-    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    const lzldr = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
 
     container.replaceChildren();
     const newList = list.slice(0, 10);
-    lazyLoader.reset(newList);
+    lzldr.reset(newList);
 
     expect(container.children.length).to.be.lessThanOrEqual(10);
 
@@ -96,19 +98,51 @@ describe('LazyLoader', () => {
   });
 
   it('should clean up listeners on destroy', () => {
-    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    const lzldr = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
 
     const resizeSpy = Sinon.spy(window, 'removeEventListener');
-    const scrollSpy = Sinon.spy(lazyLoader._parent, 'removeEventListener');
+    const scrollSpy = Sinon.spy(lzldr._parent, 'removeEventListener');
 
-    lazyLoader.destroy();
+    lzldr.destroy();
 
-    // expect(resizeSpy.calledWith('resize', lazyLoader._resizeHandler)).to.be.true;
-    // expect(scrollSpy.calledWith('scroll', lazyLoader._scrollHandler)).to.be.true;
+    expect(resizeSpy).to.have.been.called;
+    expect(scrollSpy).to.have.been.called;
+  });
+
+  it('should toggle loading state correctly', () => {
+    const lzldr = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+
+    // should start with loading state false
+    expect(lzldr._loading).to.be.false;
+
+    // should toggle loading state to input boolean value
+    lzldr._toggleLoading(true);
+    expect(lzldr._loading).to.be.true;
+    expect(container.querySelector('.loading')).to.exist;
+
+    // should not toggle loading state if already loading
+    lzldr._toggleLoading(true);
+    expect(lzldr._loading).to.be.true;
+    expect(container.querySelector('.loading')).to.exist;
+
+    // should toggle loading state to input boolean value
+    lzldr._toggleLoading(false);
+    expect(lzldr._loading).to.be.false;
+    expect(container.querySelector('.loading')).to.not.exist;
+
+    // should ignore input that is not a boolean that is not boolean
+    lzldr._toggleLoading(0);
+    expect(lzldr._loading).to.be.true;
+    expect(container.querySelector('.loading')).to.exist;
+ 
+    // should ignore input that is not a boolean and toggle state to false because last test was true
+    lzldr._toggleLoading('false');
+    expect(lzldr._loading).to.be.false;
+    expect(container.querySelector('.loading')).to.not.exist;
   });
 
   it('should respond to window resize by loading more if needed', async () => {
-    const lazyLoader = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
+    const lzldr = new LazyLoader(list, container, player, scrollFunc, mockCreateStationElement);
     const previousCount = container.children.length;
 
     // Simulate resize where window is now much taller
