@@ -214,7 +214,7 @@ export default class UIManager {
    */
   setCounts(selected, total) {
     toggleActiveState(this._downloadButton, selected);
-    this._stationCount.textContent = t('stations', selected + total);
+    this._stationCount.textContent = t('stations', total, selected);
   }
 
   /**

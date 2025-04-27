@@ -1,5 +1,5 @@
 export const en = {
-  stations: count => `${count} stations`,
+  stations: (count, selected) => `${count} stations + ${selected} selected`,
   genreError: 'Invalid input. Please enter valid genre.',
   stationsError: error => `Error fetching stations: ${error}`,
 
