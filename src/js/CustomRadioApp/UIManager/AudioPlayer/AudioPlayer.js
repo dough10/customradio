@@ -474,6 +474,7 @@ export default class AudioPlayer {
     const playerElement = this._playerElement;
     if (!playerElement.hasAttribute('playing')) return;
     new Toast(t('online'), 1.5);
+    this.player.src = this.player.src;
     this.player.load();
     this.player.play();
   }
