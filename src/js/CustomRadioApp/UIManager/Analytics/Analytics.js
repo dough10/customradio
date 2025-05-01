@@ -176,6 +176,6 @@ export default class Analytics {
  */
   _report(message, url, lineNumber, columnNumber, error) {
     var errorMessage = `Error: ${message} at ${url}:${lineNumber}:${columnNumber}`;
-    if (typeof _paq !== 'undefined') _paq.push(['JavaScript Error', errorMessage || '']);
+    if (typeof _paq !== 'undefined') _paq.push(['Error', errorMessage || '']);
   }
 }
