@@ -160,7 +160,6 @@ async function streamTest(url) {
  */
 module.exports = async (url) => {
   if (!url || typeof url !== 'string' || !isValidURL(url)) {
-    log.error(`Invalid URL: ${url}`);
     return {
       ok: false,
       error: `url must be a string with a valid URL format: ${url}`
