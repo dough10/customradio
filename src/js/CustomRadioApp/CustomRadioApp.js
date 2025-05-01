@@ -220,8 +220,8 @@ export default class CustomRadioApp {
       // update the genres datalist if the user input is a genre or if loadLocal is true
       this._updateGenresDatalist(userInput, ev.loadLocal);
   
-      // sled filter analytics
-      this._analyticsTrackEvent('Filter', 'Change', userInput);
+      // filter analytics
+      if (userInput) this._analyticsTrackEvent('Filter', 'Change', userInput);
     } catch (error) {
       // failure
       this._filterFailed(error);
