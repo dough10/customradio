@@ -13,6 +13,5 @@ import '../src/css/stations.css';
 import '../src/css/context-menu.css';
 import '../src/css/header.css';
 import '../src/css/base.css';
-import '../src/css/mediaqueries.css';
 import '../src/css/keyframes.css';
 import '../src/js/main.js';
