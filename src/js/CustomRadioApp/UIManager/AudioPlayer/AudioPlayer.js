@@ -1,6 +1,7 @@
 import Toast from '../../Toast/Toast.js';
 import EventManager from '../../utils/EventManager/EventManager.js';
 import Notifications from '../../Notifications/Notifications.js';
+import PlayReporter from './PlayReporter/PlayReporter.js';
 
 import sleep from '../../utils/sleep.js';
 import debounce from '../../utils/debounce.js';
@@ -18,16 +19,21 @@ const PLAY_DEBOUNCE_DURATION = 100;
  * as well as managing UI elements for the audio tag
  */
 export default class AudioPlayer {
-  constructor(notifications = null) {
-    this.player = new Audio();
-    this.pauseTimer = 0;
-    this._OGTitle = document.title;
-    this._notifications = notifications || new Notifications();
+  /** @type {Number} used to UI pause timeout (ui is hidden) */
+  pauseTimer = 0;
+  
+  /** @type {String} page original title */
+  _OGTitle = document.title;
 
+  constructor(notifications = null) {
+    this._bindUtilityFunctions();
+
+    this.player = new Audio();
+    this._bindPlayerEvents();
+    
+    this._notifications = notifications || new Notifications();
     this._em = new EventManager();
 
-    this._bindPlayerEvents();
-    this._bindUtilityFunctions();
     
     this._bouncedToggle = debounce(this._togglePlay, PLAY_DEBOUNCE_DURATION);
     this._saveVolume = debounce(value => {
@@ -218,6 +224,8 @@ export default class AudioPlayer {
     if (!icon) return;
     icon.parentElement.classList.remove('spin');
     icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
+
+    if (this._reporter) this._reporter.playStopped();
   }
 
   /**
@@ -428,6 +436,8 @@ export default class AudioPlayer {
 
     this._updateMediaSession({ name, bitrate });
 
+    this._reporter = new PlayReporter(id);
+
     if (!this._notifications) return;
     this._notifications.requestPermission();
     this._notifications.nowPlaying(name);
@@ -507,6 +517,8 @@ export default class AudioPlayer {
    */
   destroy() {
     this._em.removeAll();
+
+    this._reporter?.destroy();
     
     if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('play', null);
