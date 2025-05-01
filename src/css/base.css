@@ -161,3 +161,10 @@ ul {
 .margin-bottom-24 {
   margin-bottom: 24px;
 }
+
+@media screen and (max-width: 450px) {
+  #info {
+    opacity: 0;
+    display: none;
+  }
+}

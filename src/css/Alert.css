@@ -34,3 +34,9 @@
   color: yellow;
   min-width: 135px;
 }
+
+@media screen and (max-width: 600px) {
+  .alert {
+    display: inline-block;
+  }
+}

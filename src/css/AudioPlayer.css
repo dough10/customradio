@@ -80,3 +80,27 @@
 .spin {
   animation: spin 1.5s linear infinite;
 }
+
+@media screen and (max-width: 767px) {
+  #name {
+    max-width: var(--max-width-small);
+  }
+
+  #vol {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  #name {
+    max-width: var(--max-width-xsmall);
+  }
+
+  #bitrate {
+    display: none;
+  }
+
+  .toast-wrapper>div:first-child {
+    max-width: 200px;
+  }
+}
