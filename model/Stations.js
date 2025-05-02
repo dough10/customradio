@@ -37,7 +37,8 @@ function connectionEstablished(err) {
         homepage TEXT,
         error TEXT,
         duplicate BOOLEAN,
-        plays INTEGER DEFAULT 0
+        plays INTEGER DEFAULT 0,
+        inList INTEGER DEFAULT 0
       )`,
       errorMsg: 'Failed to create the stations table'
     },
@@ -139,14 +140,14 @@ class Stations {
     const nameConditions = genrePatterns.map(() => 'LOWER(name) LIKE ?').join(' OR ');
     const genreConditions = genrePatterns.map(() => "LOWER(REPLACE(REPLACE(genre, '&', 'and'), '-', '')) LIKE ?").join(' OR ');
   
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, plays, inList, (inList + plays) as popularity
     FROM stations
     WHERE content_type IN (${contentTypePlaceholders})
       AND online = 1
       AND duplicate = 0
       AND bitrate IS NOT NULL
       AND (${nameConditions} OR ${genreConditions})
-    ORDER BY name ASC;`;
+    ORDER BY popularity DESC, name ASC;`;
     const params = [...usedTypes, ...genrePatterns, ...genrePatterns];
 
     return this._ensureInitialized(() => this._runQuery(query, params));
@@ -154,19 +155,21 @@ class Stations {
 
   /**
    * Get all online stations with the correct content type.
+   * Sorted by combined inList and plays values, then alphabetically by name
    * 
    * @returns {Promise<Array>} A promise that resolves to an array of station objects.
    * 
    * @throws {Error} If the query fails.
    */
   getOnlineStations() {
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage
-    FROM stations
-    WHERE content_type IN (${mapPlaceholders(usedTypes)})
-      AND online = 1
-      AND duplicate = 0
-      AND bitrate IS NOT NULL
-    ORDER BY name ASC;`;
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, plays, inList,
+      (inList + plays) as popularity
+      FROM stations
+      WHERE content_type IN (${mapPlaceholders(usedTypes)})
+        AND online = 1
+        AND duplicate = 0
+        AND bitrate IS NOT NULL
+      ORDER BY popularity DESC, name ASC;`;
 
     return this._ensureInitialized(() => this._runQuery(query, usedTypes));
   }
@@ -253,8 +256,9 @@ class Stations {
       homepage, 
       error, 
       duplicate,
-      plays
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      plays,
+      inList
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const values = [
       obj.name,
       obj.url,
@@ -266,7 +270,8 @@ class Stations {
       obj.homepage,
       obj.error,
       obj.duplicate,
-      obj.plays || 0
+      obj.plays || 0,
+      obj.inList || 0
     ];
 
     return new Promise((resolve, reject) => {
@@ -315,7 +320,8 @@ class Stations {
       homepage = ?, 
       error = ?, 
       duplicate = ?,
-      plays = ?
+      plays = ?,
+      inList = ?
       WHERE id = ?`;
     const values = [
       obj.name,
@@ -329,6 +335,7 @@ class Stations {
       obj.error,
       obj.duplicate,
       obj.plays || 0,
+      obj.inList || 0,
       obj.id
     ];
 
@@ -390,6 +397,43 @@ class Stations {
       ORDER BY plays DESC
       LIMIT ?`;
     return this._ensureInitialized(() => this._runQuery(query, [limit]));
+  }
+
+  /**
+   * Add station to user's list
+   * @param {number} id - The ID of the station
+   * @returns {Promise<void>} A promise that resolves when the station is added to list
+   * @throws {Error} If the query fails
+   */
+  addToList(id) {
+    const query = `UPDATE stations SET inList = 1 WHERE id = ?`;
+    return this._ensureInitialized(() => this._runQuery(query, [id]));
+  }
+
+  /**
+   * Remove station from user's list
+   * @param {number} id - The ID of the station
+   * @returns {Promise<void>} A promise that resolves when the station is removed from list
+   * @throws {Error} If the query fails
+   */
+  removeFromList(id) {
+    const query = `UPDATE stations SET inList = 0 WHERE id = ?`;
+    return this._ensureInitialized(() => this._runQuery(query, [id]));
+  }
+
+  /**
+   * Get all stations in user's list
+   * @returns {Promise<Array>} A promise that resolves to an array of station objects
+   * @throws {Error} If the query fails
+   */
+  getListedStations() {
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, plays
+      FROM stations
+      WHERE inList = 1
+      AND online = 1
+      AND duplicate = 0
+      ORDER BY name ASC`;
+    return this._ensureInitialized(() => this._runQuery(query));
   }
 
   /**
@@ -534,6 +578,9 @@ function validateStation(obj) {
   if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
   if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
   if (typeof obj.duplicate !== 'boolean') throw new Error('Invalid type for property "duplicate". Expected boolean.');
+  if (obj.inList !== undefined && typeof obj.inList !== 'number') {
+    throw new Error('Invalid type for property "inList". Expected number.');
+  }
 }
 
 /**
