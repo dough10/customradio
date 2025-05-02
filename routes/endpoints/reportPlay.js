@@ -10,7 +10,7 @@ const ipHashes = new Set();
 
 const blacklist = process.env.BLACKLIST?.split(',') || [];
 
-const RATE_LIMIT_MINUTES = 5;
+const RATE_LIMIT_MINUTES = 0.5;
 const RATE_LIMIT_MS = RATE_LIMIT_MINUTES * 60 * 1000;
 
 /**
@@ -25,6 +25,9 @@ const RATE_LIMIT_MS = RATE_LIMIT_MINUTES * 60 * 1000;
  * @throws {Error} If play count increment fails
  */
 module.exports = async (req, res) => {
+  const id = req.params.id;
+  const ip = req.ip;
+
   const requestHash = createRequestHash(
     req.ip, 
     req.headers['user-agent'] || 'unknown'
@@ -36,21 +39,6 @@ module.exports = async (req, res) => {
     });
     return;
   }
-
-  const forwardedFor = req.headers['x-forwarded-for'];
-  const realIp = req.headers['x-real-ip'];
-  
-  if (forwardedFor && forwardedFor !== req.ip || 
-      realIp && realIp !== req.ip) {
-    log.warn(`Possible IP spoofing attempt: ${req.ip}`);
-    res.status(403).json({ 
-      error: 'spoof' 
-    });
-    return;
-  }
-
-  const id = req.params.id;
-  const ip = req.ip;
 
   if (!id || isNaN(id)) {
     res.status(400).json({ error: 'Invalid station ID' });
@@ -67,11 +55,10 @@ module.exports = async (req, res) => {
 
   const sql = new Stations('data/customradio.db');
   try {
-    await sql.incrementPlays(id);
-    log.info(`${req.ip} -> /reportPlay/${id} ${Date.now() - req.startTime}ms`);
-    res.json({ message: 'play recorded' });
+    await sql.incrementPlayMinutes(id);
+    res.json({ minutes: await sql.getPlayMinutes(id) });
   } catch(e) {
-    const eMessage = `Error incrimenting play count: ${e.message}`;
+    const eMessage = `Error incrimenting play minutes: ${e.message}`;
     res.status(500).json({error: eMessage});
     log.error(eMessage);
   } finally {
