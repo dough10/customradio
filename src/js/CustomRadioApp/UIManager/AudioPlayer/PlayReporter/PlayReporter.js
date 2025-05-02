@@ -1,5 +1,9 @@
-/** Number of minutes that counts as a valid play */
-export const COUNTS_AS_PLAY_MINUTES = 5;
+export const REPORTING_INTERVAL = 1;
+
+const CONFIG = {
+  RETRY_ATTEMPTS: 3,
+  REPORT_ENDPOINT: '/reportPlay'
+};
 
 /**
  * Converts minutes to milliseconds
@@ -18,17 +22,35 @@ export function minsToMs(mins) {
 }
 
 /**
+ * retry function a given number of times
+ * 
+ * @param {Function} fn 
+ * @param {Number} retries
+ *  
+ * @returns {Function}
+ */
+async function retry(fn, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (i === retries - 1) console.error(e);
+    }
+  }
+}
+
+/**
  * Reports play events after a specified duration
  */
 export default class PlayReporter {
   /** @type {number} Timer ID for the play report timeout */
-  _timerID = 0;
+  _intervalID = 0;
   
   /** @type {string} Station ID being reported */
   _stationId;
   
   /** @type {Number} time until station is reported as played in ms */
-  _timeout = minsToMs(COUNTS_AS_PLAY_MINUTES);
+  _interval = minsToMs(REPORTING_INTERVAL);
   
   /**
    * Creates a new PlayReporter instance
@@ -37,9 +59,7 @@ export default class PlayReporter {
    */
   constructor(id) {
     this._stationId = id;
-    this._timerID = setTimeout(() => {
-      this._reportPlay();
-    }, this._timeout);
+    this._intervalID = setInterval(() => this._reportPlay(), this._interval);
   }
 
   /**
@@ -48,10 +68,32 @@ export default class PlayReporter {
    * @private
    */
   async _reportPlay() {
-    const res = await fetch(`/reportPlay/${this._stationId}`);
-    if (!res.ok) {
-      console.error(`Failed to report play: ${this._stationId}`);
-    }
+    requestIdleCallback(async (deadline) => {
+      try {
+        if (deadline.timeRemaining() > 0) {
+          const encodedId = encodeURIComponent(this._stationId);
+          const res = await retry(() => 
+            fetch(`/reportPlay/${encodedId}`)
+          );
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+        } else {
+          this._scheduleReport();
+        }
+      } catch (error) {
+        console.error('Play report failed:', error);
+      }
+    }, { timeout: 2000 });
+  }
+
+  /**
+   * Schedules the play report
+   * 
+   * @private
+   */
+  _scheduleReport() {
+    requestIdleCallback(this._reportPlay.bind(this));
   }
 
   /**
@@ -60,9 +102,9 @@ export default class PlayReporter {
    * @public
    */
   playStopped() {
-    if (this._timerID) {
-      clearTimeout(this._timerID);
-      this._timerID = 0;
+    if (this._intervalID) {
+      clearInterval(this._intervalID);
+      this._intervalID = 0;
     }
   }
 
