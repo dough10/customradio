@@ -36,7 +36,8 @@ function connectionEstablished(err) {
         icon TEXT,
         homepage TEXT,
         error TEXT,
-        duplicate BOOLEAN
+        duplicate BOOLEAN,
+        plays INTEGER DEFAULT 0
       )`,
       errorMsg: 'Failed to create the stations table'
     },
@@ -251,8 +252,9 @@ class Stations {
       icon, 
       homepage, 
       error, 
-      duplicate
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      duplicate,
+      plays
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const values = [
       obj.name,
       obj.url,
@@ -263,7 +265,8 @@ class Stations {
       obj.icon,
       obj.homepage,
       obj.error,
-      obj.duplicate
+      obj.duplicate,
+      obj.plays || 0
     ];
 
     return new Promise((resolve, reject) => {
@@ -292,6 +295,7 @@ class Stations {
    * @param {string} obj.homepage - The homepage URL of the station.
    * @param {string} obj.error - Any error message related to the station.
    * @param {boolean} obj.duplicate - Whether the station is a duplicate.
+   * @param {number} [obj.plays=0] - The play count of the station.
    * 
    * @returns {Promise<string>} A promise that resolves to a success message.
    * 
@@ -310,7 +314,8 @@ class Stations {
       icon = ?, 
       homepage = ?, 
       error = ?, 
-      duplicate = ?
+      duplicate = ?,
+      plays = ?
       WHERE id = ?`;
     const values = [
       obj.name,
@@ -323,6 +328,7 @@ class Stations {
       obj.homepage,
       obj.error,
       obj.duplicate,
+      obj.plays || 0,
       obj.id
     ];
 
@@ -335,6 +341,55 @@ class Stations {
         }
       });
     }));
+  }
+
+  /**
+   * Increment the play count for a station
+   * 
+   * @param {number} id - The ID of the station
+   * 
+   * @returns {Promise<void>} A promise that resolves when the play count is incremented
+   * 
+   * @throws {Error} If the query fails
+   */
+  incrementPlays(id) {
+    const query = `UPDATE stations SET plays = plays + 1 WHERE id = ?`;
+    return this._ensureInitialized(() => this._runQuery(query, [id]));
+  }
+
+  /**
+   * Get the play count for a station
+   * 
+   * @param {number} id - The ID of the station
+   * 
+   * @returns {Promise<number>} A promise that resolves to the play count
+   * 
+   * @throws {Error} If the query fails
+   */
+  async getPlays(id) {
+    const query = `SELECT plays FROM stations WHERE id = ?`;
+    const rows = await this._ensureInitialized(() => this._runQuery(query, [id]));
+    return rows[0]?.plays || 0;
+  }
+
+  /**
+   * Get the most played stations
+   * 
+   * @param {number} limit - Maximum number of stations to return
+   * 
+   * @returns {Promise<Array>} A promise that resolves to an array of station objects
+   * 
+   * @throws {Error} If the query fails
+   */
+  getMostPlayed(limit = 10) {
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, plays
+      FROM stations
+      WHERE online = 1 
+      AND duplicate = 0 
+      AND plays > 0
+      ORDER BY plays DESC
+      LIMIT ?`;
+    return this._ensureInitialized(() => this._runQuery(query, [limit]));
   }
 
   /**
