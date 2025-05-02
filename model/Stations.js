@@ -2,11 +2,14 @@ const sqlite3 = require('sqlite3').verbose();
 const usedTypes = require("../util/usedTypes.js");
 
 /**
- * Returns a string of placeholders for SQL queries.
+ * Returns a string of comma-separated question marks for SQL placeholders
  * 
- * @param {Array} arr 
+ * @param {Array} arr - Array to generate placeholders for
  * 
- * @returns {String}
+ * @returns {String} Comma-separated question marks (e.g., "?,?,?")
+ * 
+ * @example
+ * mapPlaceholders([1,2,3]) // returns "?,?,?"
  */
 function mapPlaceholders(arr) {
   return arr.map(() => '?').join(',');
@@ -37,7 +40,7 @@ function connectionEstablished(err) {
         homepage TEXT,
         error TEXT,
         duplicate BOOLEAN,
-        plays INTEGER DEFAULT 0,
+        playMinutes INTEGER DEFAULT 0,
         inList INTEGER DEFAULT 0
       )`,
       errorMsg: 'Failed to create the stations table'
@@ -84,15 +87,16 @@ function connectionEstablished(err) {
 }
 
 /**
- * Class representing a collection of radio stations.
+ * Class representing a SQLite database for radio stations
+ * Handles CRUD operations, station filtering, and play tracking
  */
 class Stations {
   /**
-   * Create a Stations instance.
+   * Create a Stations instance
    * 
-   * @param {string} filePath - The file path to the SQLite database.
-   * 
-   * @throws {Error} If the file path is not provided or the database cannot be created.
+   * @param {string} filePath - Path to SQLite database file
+   * @throws {Error} If filePath is not provided
+   * @throws {Error} If database connection fails
    */
   constructor(filePath) {
     if (!filePath) throw new Error('Database file path is required');
@@ -104,6 +108,7 @@ class Stations {
    * Ensure the database is initialized before running a query.
    * 
    * @param {Function} fn - The function to run after initialization.
+   * 
    * @returns {Promise} A promise that resolves when the function completes.
    */
   async _ensureInitialized(fn) {
@@ -124,13 +129,57 @@ class Stations {
   }
 
   /**
-   * Retrieve stations by genre.
+   * Get all online stations with the correct content type
+   * Sorted by popularity (inList * 100 + playMinutes) and name
    * 
-   * @param {string} genre - The genre to filter stations by.
+   * @returns {Promise<Array<{
+   *   id: number,
+   *   name: string,
+   *   url: string,
+   *   bitrate: number,
+   *   genre: string,
+   *   icon: string,
+   *   homepage: string,
+   *   playMinutes: number,
+   *   inList: number,
+   *   popularity: number
+   * }>>} Array of station objects
    * 
-   * @returns {Promise<Array>} A promise that resolves to an array of station objects.
+   * @throws {Error} If query fails
+   */
+  getOnlineStations() {
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList,
+      (inList * 100 + playMinutes) as popularity
+      FROM stations
+      WHERE content_type IN (${mapPlaceholders(usedTypes)})
+        AND online = 1
+        AND duplicate = 0
+        AND bitrate IS NOT NULL
+      ORDER BY popularity DESC, name ASC;`;
+
+    return this._ensureInitialized(() => this._runQuery(query, usedTypes));
+  }
+
+  /**
+   * Get stations matching specified genres
+   * Filters by name and genre, sorts by popularity
    * 
-   * @throws {Error} If the query fails.
+   * @param {string[]} genres - Array of genre terms to search for
+   * 
+   * @returns {Promise<Array<{
+   *   id: number,
+   *   name: string,
+   *   url: string,
+   *   bitrate: number,
+   *   genre: string,
+   *   icon: string,
+   *   homepage: string,
+   *   playMinutes: number,
+   *   inList: number,
+   *   popularity: number
+   * }>>} Array of matching station objects
+   * 
+   * @throws {Error} If query fails
    */
   getStationsByGenre(genres) {
     const contentTypePlaceholders = mapPlaceholders(usedTypes);
@@ -140,7 +189,7 @@ class Stations {
     const nameConditions = genrePatterns.map(() => 'LOWER(name) LIKE ?').join(' OR ');
     const genreConditions = genrePatterns.map(() => "LOWER(REPLACE(REPLACE(genre, '&', 'and'), '-', '')) LIKE ?").join(' OR ');
   
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, plays, inList, (inList + plays) as popularity
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList, (inList * 100 + playMinutes) as popularity
     FROM stations
     WHERE content_type IN (${contentTypePlaceholders})
       AND online = 1
@@ -154,86 +203,25 @@ class Stations {
   }
 
   /**
-   * Get all online stations with the correct content type.
-   * Sorted by combined inList and plays values, then alphabetically by name
+   * Add new station to database
    * 
-   * @returns {Promise<Array>} A promise that resolves to an array of station objects.
+   * @param {Object} obj - Station object
+   * @param {string} obj.name - Station name
+   * @param {string} obj.url - Station stream URL
+   * @param {string} obj.genre - Station genre(s)
+   * @param {boolean} obj.online - Online status
+   * @param {string} obj['content-type'] - Audio content type
+   * @param {number} obj.bitrate - Stream bitrate
+   * @param {string} obj.icon - Station icon URL
+   * @param {string} obj.homepage - Station website URL
+   * @param {string} obj.error - Error message if any
+   * @param {boolean} obj.duplicate - Duplicate status
+   * @param {number} [obj.playMinutes=0] - Total minutes played
+   * @param {number} [obj.inList=0] - Whether station is in user's list (0 or 1)
    * 
-   * @throws {Error} If the query fails.
-   */
-  getOnlineStations() {
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, plays, inList,
-      (inList + plays) as popularity
-      FROM stations
-      WHERE content_type IN (${mapPlaceholders(usedTypes)})
-        AND online = 1
-        AND duplicate = 0
-        AND bitrate IS NOT NULL
-      ORDER BY popularity DESC, name ASC;`;
-
-    return this._ensureInitialized(() => this._runQuery(query, usedTypes));
-  }
-
-  /**
-   * Check if a station exists.
+   * @returns {Promise<number|string>} New station ID or "Station exists" message
    * 
-   * @param {String} url 
-   * 
-   * @returns {Promise<Boolean>} A promise that resolves to true if the station exists, false otherwise.
-   */
-  async exists(url) {
-    const query = `SELECT COUNT(*) AS count FROM stations WHERE url = ?`;
-    const rows = await this._ensureInitialized(() => this._runQuery(query, [url]));
-    return rows[0].count > 0;
-  }
-
-  /**
-   * Mark a station as a duplicate.
-   * 
-   * @param {number} id - The ID of the station to mark as a duplicate.
-   * 
-   * @returns {Promise<void>} A promise that resolves when the station is marked as a duplicate.
-   * 
-   * @throws {Error} If the query fails.
-   */
-  markDuplicate(id) {
-    const query = `UPDATE stations SET duplicate = 1 WHERE id = ?`;
-    return this._ensureInitialized(() => this._runQuery(query, [id]));
-  }
-
-  /**
-   * Log an error message for a specific station.
-   * 
-   * @param {number} id - The ID of the station to log the error for.
-   * @param {string} error - The error message to log.
-   * 
-   * @returns {Promise<void>} A promise that resolves when the error is logged.
-   * 
-   * @throws {Error} If the query fails.
-   */
-  logStreamError(id, error) {
-    const query = `UPDATE stations SET error = ? WHERE id = ?`;
-    return this._ensureInitialized(() => this._runQuery(query, [error, id]));
-  }
-
-  /**
-   * Add a new station to the database.
-   * 
-   * @param {Object} obj - The station object.
-   * @param {string} obj.name - The name of the station.
-   * @param {string} obj.url - The URL of the station.
-   * @param {string} obj.genre - The genre of the station.
-   * @param {boolean} obj.online - The online status of the station.
-   * @param {string} obj['content-type'] - The content type of the station.
-   * @param {number} obj.bitrate - The bitrate of the station.
-   * @param {string} obj.icon - The icon URL of the station.
-   * @param {string} obj.homepage - The homepage URL of the station.
-   * @param {string} obj.error - Any error message related to the station.
-   * @param {boolean} obj.duplicate - Whether the station is a duplicate.
-   * 
-   * @returns {Promise<number|string>} A promise that resolves to the ID of the new station or a message if the station already exists.
-   * 
-   * @throws {Error} If the station object or URL is not provided.
+   * @throws {Error} If validation fails or query errors
    */
   async addStation(obj) {
     validateStation(obj);
@@ -256,7 +244,7 @@ class Stations {
       homepage, 
       error, 
       duplicate,
-      plays,
+      playMinutes,
       inList
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const values = [
@@ -270,7 +258,7 @@ class Stations {
       obj.homepage,
       obj.error,
       obj.duplicate,
-      obj.plays || 0,
+      obj.playMinutes || 0,
       obj.inList || 0
     ];
 
@@ -286,25 +274,26 @@ class Stations {
   }
 
   /**
-   * Update the properties of a station.
+   * Update existing station
    * 
-   * @param {Object} obj - The station object.
-   * @param {number} obj.id - The ID of the station.
-   * @param {string} obj.name - The name of the station.
-   * @param {string} obj.url - The URL of the station.
-   * @param {string} obj.genre - The genre of the station.
-   * @param {boolean} obj.online - The online status of the station.
-   * @param {string} obj['content-type'] - The content type of the station.
-   * @param {number} obj.bitrate - The bitrate of the station.
-   * @param {string} obj.icon - The icon URL of the station.
-   * @param {string} obj.homepage - The homepage URL of the station.
-   * @param {string} obj.error - Any error message related to the station.
-   * @param {boolean} obj.duplicate - Whether the station is a duplicate.
-   * @param {number} [obj.plays=0] - The play count of the station.
+   * @param {Object} obj - Station object with updated values
+   * @param {number} obj.id - Station ID to update
+   * @param {string} obj.name - Station name
+   * @param {string} obj.url - Station stream URL
+   * @param {string} obj.genre - Station genre(s)
+   * @param {boolean} obj.online - Online status
+   * @param {string} obj['content-type'] - Audio content type
+   * @param {number} obj.bitrate - Stream bitrate
+   * @param {string} obj.icon - Station icon URL
+   * @param {string} obj.homepage - Station website URL
+   * @param {string} obj.error - Error message if any
+   * @param {boolean} obj.duplicate - Duplicate status
+   * @param {number} [obj.playMinutes=0] - Total minutes played
+   * @param {number} [obj.inList=0] - Whether station is in user's list (0 or 1)
    * 
-   * @returns {Promise<string>} A promise that resolves to a success message.
+   * @returns {Promise<string>} Success message
    * 
-   * @throws {Error} If the station object, ID, or any required property is not provided.
+   * @throws {Error} If validation fails or query errors
    */
   updateStation(obj) {
     validateStation(obj);
@@ -320,7 +309,7 @@ class Stations {
       homepage = ?, 
       error = ?, 
       duplicate = ?,
-      plays = ?,
+      playMinutes = ?,
       inList = ?
       WHERE id = ?`;
     const values = [
@@ -334,7 +323,7 @@ class Stations {
       obj.homepage,
       obj.error,
       obj.duplicate,
-      obj.plays || 0,
+      obj.playMinutes || 0,
       obj.inList || 0,
       obj.id
     ];
@@ -351,21 +340,24 @@ class Stations {
   }
 
   /**
-   * Increment the play count for a station
+   * Increment station's play minutes count
    * 
-   * @param {number} id - The ID of the station
+   * @param {number} id - Station ID
    * 
-   * @returns {Promise<void>} A promise that resolves when the play count is incremented
+   * @returns {Promise<void>}
    * 
-   * @throws {Error} If the query fails
+   * @throws {Error} If query fails
+   * 
+   * @example
+   * await stations.incrementPlayMinutes(123);
    */
-  incrementPlays(id) {
-    const query = `UPDATE stations SET plays = plays + 1 WHERE id = ?`;
+  incrementPlayMinutes(id) {
+    const query = `UPDATE stations SET playMinutes = playMinutes + 1 WHERE id = ?`;
     return this._ensureInitialized(() => this._runQuery(query, [id]));
   }
 
   /**
-   * Get the play count for a station
+   * Get the play minutes for a station
    * 
    * @param {number} id - The ID of the station
    * 
@@ -373,10 +365,10 @@ class Stations {
    * 
    * @throws {Error} If the query fails
    */
-  async getPlays(id) {
-    const query = `SELECT plays FROM stations WHERE id = ?`;
+  async getPlayMinutes(id) {
+    const query = `SELECT playMinutes FROM stations WHERE id = ?`;
     const rows = await this._ensureInitialized(() => this._runQuery(query, [id]));
-    return rows[0]?.plays || 0;
+    return rows[0]?.playMinutes || 0;
   }
 
   /**
@@ -389,20 +381,23 @@ class Stations {
    * @throws {Error} If the query fails
    */
   getMostPlayed(limit = 10) {
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, plays
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes
       FROM stations
       WHERE online = 1 
       AND duplicate = 0 
-      AND plays > 0
-      ORDER BY plays DESC
+      AND playMinutes > 0
+      ORDER BY playMinutes DESC
       LIMIT ?`;
     return this._ensureInitialized(() => this._runQuery(query, [limit]));
   }
 
   /**
    * Add station to user's list
+   * 
    * @param {number} id - The ID of the station
+   * 
    * @returns {Promise<void>} A promise that resolves when the station is added to list
+   * 
    * @throws {Error} If the query fails
    */
   addToList(id) {
@@ -412,8 +407,11 @@ class Stations {
 
   /**
    * Remove station from user's list
+   * 
    * @param {number} id - The ID of the station
+   * 
    * @returns {Promise<void>} A promise that resolves when the station is removed from list
+   * 
    * @throws {Error} If the query fails
    */
   removeFromList(id) {
@@ -423,11 +421,13 @@ class Stations {
 
   /**
    * Get all stations in user's list
+   * 
    * @returns {Promise<Array>} A promise that resolves to an array of station objects
+   * 
    * @throws {Error} If the query fails
    */
   getListedStations() {
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, plays
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes
       FROM stations
       WHERE inList = 1
       AND online = 1
@@ -460,9 +460,15 @@ class Stations {
   }
 
   /**
-   * Gets the number of online and total stations.
+   * Get database statistics
+   * Counts online and total stations with valid content types
    * 
-   * @returns {Promise<{online: number, total: number}>}
+   * @returns {Promise<{
+   *   online: number, 
+   *   total: number
+   * }>} Object containing counts
+   * 
+   * @throws {Error} If queries fail
    */
   async dbStats() {
     try {  
@@ -478,9 +484,12 @@ class Stations {
   
 
   /**
-   * Returns the top 10 searched genres in alphabetical order.
+   * Get most popular genres from recent searches
+   * Returns top 10 genres searched in last 15 days
    * 
-   * @returns {Promise<Array>} A promise that resolves to an array of the top 10 genres.
+   * @returns {Promise<string[]>} Array of genre names
+   * 
+   * @throws {Error} If query fails
    */
   async topGenres() {
     const query = `SELECT genres, COUNT(*) as count
