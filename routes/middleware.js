@@ -17,30 +17,6 @@ module.exports = (app, httpRequestCounter) => {
     next();
   });
 
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://analytics.dough10.me", "'sha256-HnpdFfQPCyb9+3fdMfjROV7BpCSr2PERzs+rVxA3als='", (req, res) => `'nonce-${res.locals.nonce}'`],
-        styleSrc: ["'self'", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
-        imgSrc: ["'self'", "data:"],
-        connectSrc: ["'self'", "*"],
-        fontSrc: ["'self'"],
-        frameSrc: ["'self'"],
-        mediaSrc: ["*"],
-        styleSrcElem: ["'self'", "'unsafe-inline'"],
-        styleSrcAttr: ["'self'", "'unsafe-inline'"],
-        scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-        reportUri: "/csp-report"
-      },
-    },
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true
-    }
-  }));
-
   app.use(compression());
   app.use(express.urlencoded({
     extended: true
@@ -53,7 +29,7 @@ module.exports = (app, httpRequestCounter) => {
     res.locals.nonce = crypto.randomBytes(16).toString('base64');
     next();
   });
-  
+
   /**
    * serves static files
    */
@@ -152,4 +128,29 @@ module.exports = (app, httpRequestCounter) => {
     }
     next();
   });
+
+
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://analytics.dough10.me", "'sha256-HnpdFfQPCyb9+3fdMfjROV7BpCSr2PERzs+rVxA3als='", (req, res) => `'nonce-${res.locals.nonce}'`],
+        styleSrc: ["'self'", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
+        imgSrc: ["'self'", "data:"],
+        connectSrc: ["*"],
+        fontSrc: ["'self'"],
+        frameSrc: ["'self'"],
+        mediaSrc: ["*"],
+        styleSrcElem: ["'self'", "'unsafe-inline'"],
+        styleSrcAttr: ["'self'", "'unsafe-inline'"],
+        scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+        reportUri: "/csp-report"
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true
+    }
+  }));
 };
