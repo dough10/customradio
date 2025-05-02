@@ -176,7 +176,7 @@ export default class LazyLoader {
     this._list = newList;
     this._ndx = 0;
     this._pullNumber = getPullCount();
-    console.log(`array length: ${newList.length}, total pulls: ${(newList.length / this._pullNumber)}`);
+    // console.log(`array length: ${newList.length}, total pulls: ${(newList.length / this._pullNumber)}`);
     this._load();
   }  
 
