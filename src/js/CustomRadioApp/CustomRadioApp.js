@@ -185,7 +185,7 @@ export default class CustomRadioApp {
     // empty userInput means "show all"
     const userInput = normalizeMemo(ev?.target?.value?.trim?.() || '');
 
-    console.log(`Filter changed: ${userInput}`);
+    if (userInput.length) console.log(`Filter changed: ${userInput}`);
 
     return userInput;
   }
@@ -221,7 +221,7 @@ export default class CustomRadioApp {
       this._updateGenresDatalist(userInput, ev.loadLocal);
   
       // filter analytics
-      if (userInput) this._analyticsTrackEvent('Filter', 'Change', userInput);
+      if (userInput.length) this._analyticsTrackEvent('Filter', 'Change', userInput);
     } catch (error) {
       // failure
       this._filterFailed(error);
