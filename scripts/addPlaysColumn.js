@@ -6,12 +6,12 @@ const db = new sqlite3.Database(dbPath);
 
 // Run migrations in series to ensure order
 db.serialize(() => {
-  // Add plays column
-  db.run(`ALTER TABLE stations ADD COLUMN plays INTEGER DEFAULT 0`, (err) => {
+  // Add playMinutes column
+  db.run(`ALTER TABLE stations ADD COLUMN playMinutes INTEGER DEFAULT 0`, (err) => {
     if (err) {
-      console.error('Error adding plays column:', err.message);
+      console.error('Error adding playMinutes column:', err.message);
     } else {
-      console.log('Successfully added plays column to stations table');
+      console.log('Successfully added playMinutes column to stations table');
     }
   });
 
