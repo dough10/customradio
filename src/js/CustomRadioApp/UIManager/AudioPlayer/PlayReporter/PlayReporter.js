@@ -47,9 +47,11 @@ export default class PlayReporter {
    * 
    * @private
    */
-  _reportPlay() {
-    console.log(`Station ${this._stationId} played for ${COUNTS_AS_PLAY_MINUTES} minutes`);
-    // Add actual reporting logic here
+  async _reportPlay() {
+    const res = await fetch(`/reportPlay/${this._stationId}`);
+    if (!res.ok) {
+      console.error(`Failed to report play: ${this._stationId}`);
+    }
   }
 
   /**
