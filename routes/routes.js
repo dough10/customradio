@@ -12,6 +12,7 @@ const cspReport = require('./endpoints/csp-report.js');
 const markDuplicate = require('./endpoints/markDuplicate.js');
 const sitemap = require('./endpoints/sitemap.js');
 const robots = require('./endpoints/robots.js');
+const reportPlay = require('./endpoints/reportPlay.js');
 const securitytxt = require('./endpoints/securitytxt.js');
 const ads = require('./endpoints/ads.js');
 const topGenres = require('./endpoints/topGenres.js');
@@ -392,6 +393,19 @@ module.exports = (app, register) => {
       .isInt({ min: 100, max: 599 })
       .withMessage('status-code must be an integer between 100 and 599'),
   ], cspReport);
+
+  /**
+   * Reports a play for a station and increments its play count
+   * Rate limited to one request per IP address every 5 minutes
+   * 
+   * @param {ReportPlayRequest} req Express request object
+   * @param {Response} res Express response object
+   * 
+   * @returns {Promise<void>}
+   * 
+   * @throws {Error} If play count increment fails
+   */
+  app.get('/reportPlay/:id', reportPlay);
 
   /**
    * Catch-all route for handling 404 errors.
