@@ -436,6 +436,7 @@ export default class AudioPlayer {
 
     this._updateMediaSession({ name, bitrate });
 
+    if (this._reporter) this._reporter.destroy();
     this._reporter = new PlayReporter(id);
 
     if (!this._notifications) return;
