@@ -8,6 +8,8 @@ const Stations = require('../../model/Stations.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
+const blacklist = process.env.BLACKLIST?.split(',') || [];
+
 /**
  * Generates a query string for the given value.
  * 
@@ -78,7 +80,7 @@ module.exports = async (req, res) => {
     
     const genreString = genres.join(',');
 
-    if (genreString) {
+    if (genreString && !blacklist.includes(req.ip)) {
       log.debug(`Saving genres: ${genreString}`);
       await sql.logGenres(genreString);
     }
