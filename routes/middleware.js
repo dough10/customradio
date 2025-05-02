@@ -9,8 +9,11 @@ const crypto = require('crypto');
 const { setLanguage } = require('../util/i18n.js');
 
 module.exports = (app, httpRequestCounter) => {
+  /**
+   * middleware for timing response times
+   */
   app.use((req, res, next) => {
-    res.locals.nonce = crypto.randomBytes(16).toString('base64');
+    req.startTime = Date.now();
     next();
   });
 
@@ -46,6 +49,11 @@ module.exports = (app, httpRequestCounter) => {
   app.set('trust proxy', true);
   app.disable('x-powered-by');
 
+  app.use((req, res, next) => {
+    res.locals.nonce = crypto.randomBytes(16).toString('base64');
+    next();
+  });
+  
   /**
    * serves static files
    */
@@ -57,15 +65,6 @@ module.exports = (app, httpRequestCounter) => {
   app.use((req, res, next) => {
     const lang = req.headers['accept-language']?.split(',')[0].split('-')[0];
     req.loadedLang = setLanguage(lang);
-    next();
-  });
-
-
-  /**
-   * middleware for timing response times
-   */
-  app.use((req, res, next) => {
-    req.startTime = Date.now();
     next();
   });
 
@@ -131,5 +130,26 @@ module.exports = (app, httpRequestCounter) => {
     } else {
       next();
     }
+  });
+
+  /**
+   * Middleware to extract and validate client information
+   */
+  app.use((req, res, next) => {
+    const clientInfo = {
+      ip: req.ip,
+      userAgent: req.headers['user-agent'] || 'unknown',
+      forwardedFor: req.headers['x-forwarded-for'],
+      realIp: req.headers['x-real-ip']
+    };
+
+    // Check for consistent IP across headers
+    if (clientInfo.forwardedFor && 
+        !clientInfo.forwardedFor.includes(clientInfo.ip)) {
+      return res.status(403).json({ 
+        error: 'Invalid request origin' 
+      });
+    }
+    next();
   });
 };
