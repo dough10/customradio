@@ -59,6 +59,14 @@ function _paqToggle(event, str) {
   if (typeof _paq !== 'undefined') _paq.push(['trackEvent', event, str]);
 }
 
+/**
+ * reports station in user list state
+ * 
+ * @param {String} id 
+ * @param {Number} state 
+ * 
+ * @returns {void}
+ */
 async function reportInList(id, state) {
   const res = await fetch(`/reportInList/${id}/${state}`);
   if (!res.ok) {
@@ -96,7 +104,7 @@ function toggleSelect(ev) {
 
   // track event
   const selected = el.hasAttribute('selected');
-  reportInList(el.id, selected);
+  reportInList(el.id, Number(selected));
   if (selected) {
     _paqToggle('Add to file', el.dataset.url);
   } else {
