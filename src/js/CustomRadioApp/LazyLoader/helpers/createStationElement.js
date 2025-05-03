@@ -6,6 +6,8 @@ import toggleActiveState from '../../utils/toggleActiveState.js';
 import { t } from '../../utils/i18n.js';
 import hapticFeedback from '../../utils/hapticFeedback.js';
 import selectors from '../../selectors.js';
+import _OPTIONS from '../../utils/post_options.js';
+
 
 const LONG_PRESS_DURATION = 500;
 
@@ -26,13 +28,7 @@ async function postStreamIssue(id, error) {
       id,
       error
     }).toString();
-    const response = await fetch('/stream-issue', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formBody,
-    });
+    const response = await fetch('/stream-issue', _OPTIONS(formBody));
     const result = await response.json();
     console.log(result.message);
   } catch (err) {
@@ -68,7 +64,7 @@ function _paqToggle(event, str) {
  * @returns {void}
  */
 async function reportInList(id, state) {
-  const res = await fetch(`/reportInList/${id}/${state}`);
+  const res = await fetch(`/reportInList/${id}/${state}`, _OPTIONS());
   if (!res.ok) {
     console.error(`report Failed for id: ${id}`);
     return;
