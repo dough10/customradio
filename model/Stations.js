@@ -421,6 +421,7 @@ class Stations {
 
   /**
    * Remove station from user's list
+   * Prevents inList from going below 0
    * 
    * @param {number} id - The ID of the station
    * 
@@ -429,7 +430,12 @@ class Stations {
    * @throws {Error} If the query fails
    */
   removeFromList(id) {
-    const query = `UPDATE stations SET inList = inList - 1 WHERE id = ?`;
+    const query = `UPDATE stations 
+      SET inList = CASE 
+        WHEN inList > 0 THEN inList - 1 
+        ELSE 0 
+      END 
+      WHERE id = ?`;
     return this._ensureInitialized(() => this._runQuery(query, [id]));
   }
 
