@@ -1,8 +1,13 @@
+import _OPTIONS from '../../../utils/post_options.js';
+
 export const REPORTING_INTERVAL = 1;
 
 const CONFIG = {
   RETRY_ATTEMPTS: 3,
-  REPORT_ENDPOINT: id => `/reportPlay/${encodeURIComponent(id)}`
+  REPORT_ENDPOINT: id => `/reportPlay/${encodeURIComponent(id)}`,
+  IDLE_TIMEOUT: 2000,
+  REQUEST_OPTIONS: _OPTIONS(),
+  INTERVAL: minsToMs(REPORTING_INTERVAL)
 };
 
 /**
@@ -50,7 +55,10 @@ export default class PlayReporter {
   _stationId;
   
   /** @type {Number} time until station is reported as played in ms */
-  _interval = minsToMs(REPORTING_INTERVAL);
+  _interval = CONFIG.INTERVAL;
+
+  /** @typedef {'idle'|'reporting'|'stopped'} ReporterState */
+  _state = 'idle';
   
   /**
    * Creates a new PlayReporter instance
@@ -68,27 +76,22 @@ export default class PlayReporter {
    * @private
    */
   async _reportPlay() {
+    if (this._state === 'stopped') return;
+    this._state = 'reporting';
     requestIdleCallback(async (deadline) => {
       try {
         if (deadline.timeRemaining() > 0) {
           const url = CONFIG.REPORT_ENDPOINT(this._stationId);
-          await retry(() => fetch(url));
+          await retry(() => fetch(url, CONFIG.REQUEST_OPTIONS));
         } else {
-          this._scheduleReport();
+          requestIdleCallback(this._reportPlay.bind(this));
         }
       } catch (error) {
         console.warn('Play report failed:', error);
+      } finally {
+        this._state = 'idle';
       }
-    }, { timeout: 2000 });
-  }
-
-  /**
-   * Schedules the play report
-   * 
-   * @private
-   */
-  _scheduleReport() {
-    requestIdleCallback(this._reportPlay.bind(this));
+    }, { timeout: CONFIG.IDLE_TIMEOUT });
   }
 
   /**
@@ -101,6 +104,7 @@ export default class PlayReporter {
       clearInterval(this._intervalID);
       this._intervalID = 0;
     }
+    this._state = 'stopped';
   }
 
   /**
@@ -110,5 +114,7 @@ export default class PlayReporter {
    */
   destroy() {
     this.playStopped();
+    this._stationId = null;
+    this._interval = null;
   }
 }
