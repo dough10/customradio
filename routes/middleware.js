@@ -8,9 +8,21 @@ const crypto = require('crypto');
 
 const { setLanguage } = require('../util/i18n.js');
 
+/**
+ * Configure and apply middleware to Express application
+ * 
+ * @param {express.Application} app - Express application instance
+ * @param {Object} httpRequestCounter - Counter for HTTP requests
+ * @returns {void}
+ */
 module.exports = (app, httpRequestCounter) => {
   /**
-   * middleware for timing response times
+   * Middleware to track request timing
+   * Adds startTime to request object for response time calculation
+   * 
+   * @param {express.Request} req - Express request object
+   * @param {express.Response} res - Express response object
+   * @param {express.NextFunction} next - Express next middleware function
    */
   app.use((req, res, next) => {
     req.startTime = Date.now();
@@ -25,6 +37,14 @@ module.exports = (app, httpRequestCounter) => {
   app.set('trust proxy', true);
   app.disable('x-powered-by');
 
+  /**
+   * Middleware to generate nonce for CSP
+   * Creates a random nonce and adds it to res.locals for use in CSP headers
+   * 
+   * @param {express.Request} req - Express request object
+   * @param {express.Response} res - Express response object
+   * @param {express.NextFunction} next - Express next middleware function
+   */
   app.use((req, res, next) => {
     res.locals.nonce = crypto.randomBytes(16).toString('base64');
     next();
@@ -36,7 +56,7 @@ module.exports = (app, httpRequestCounter) => {
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
   /**
-   * also sets response language
+   * Set response language
    */
   app.use((req, res, next) => {
     const lang = req.headers['accept-language']?.split(',')[0].split('-')[0];
@@ -45,7 +65,7 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
-   * middleware setting security header
+   * Middleware setting security header
    */
   app.use((req, res, next) => {
     res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -53,7 +73,7 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
-   * counts connection requests
+   * Count connection requests
    */
   app.use((req, res, next) => {
     res.on('finish', () => {
@@ -67,7 +87,7 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
-   * cors
+   * CORS
    */
   app.use(cors({
     origin: ['https://customradio.dough10.me'],
@@ -109,7 +129,14 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
-   * Middleware to extract and validate client information
+   * Client information validation middleware
+   * Extracts and validates client IP addresses across headers
+   * Prevents IP spoofing attempts
+   * 
+   * @param {express.Request} req - Express request object
+   * @param {express.Response} res - Express response object
+   * @param {express.NextFunction} next - Express next middleware function
+   * @returns {void|Response} Returns 403 if IP validation fails
    */
   app.use((req, res, next) => {
     const clientInfo = {
@@ -129,7 +156,11 @@ module.exports = (app, httpRequestCounter) => {
     next();
   });
 
-
+  /**
+   * Helmet security middleware configuration
+   * Sets various HTTP headers for security
+   * Configures Content Security Policy
+   */
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
