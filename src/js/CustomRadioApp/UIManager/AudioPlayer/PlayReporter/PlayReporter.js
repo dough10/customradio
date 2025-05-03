@@ -2,7 +2,7 @@ export const REPORTING_INTERVAL = 1;
 
 const CONFIG = {
   RETRY_ATTEMPTS: 3,
-  REPORT_ENDPOINT: '/reportPlay'
+  REPORT_ENDPOINT: id => `/reportPlay/${encodeURIComponent(id)}`
 };
 
 /**
@@ -29,7 +29,7 @@ export function minsToMs(mins) {
  *  
  * @returns {Function}
  */
-async function retry(fn, retries = 3) {
+async function retry(fn, retries = CONFIG.RETRY_ATTEMPTS) {
   for (let i = 0; i < retries; i++) {
     try {
       return await fn();
@@ -71,8 +71,8 @@ export default class PlayReporter {
     requestIdleCallback(async (deadline) => {
       try {
         if (deadline.timeRemaining() > 0) {
-          const encodedId = encodeURIComponent(this._stationId);
-          await retry(() => fetch(`/reportPlay/${encodedId}`));
+          const url = CONFIG.REPORT_ENDPOINT(this._stationId);
+          await retry(() => fetch(url));
         } else {
           this._scheduleReport();
         }
