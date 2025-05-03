@@ -7,7 +7,7 @@ const log = new Logger(logLevel);
 
 module.exports = async (req, res) => {
   const id = req.params.id;
-  const state = req.params.state;
+  const state = Number(req.params.state);
   const sql = new Stations('data/customradio.db');
   try {
     if (state) {
