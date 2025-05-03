@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -49,7 +50,69 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
-   * serves static files
+   * Session middleware configuration
+   * Sets up secure session handling with CSRF protection
+   */
+  app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: 'strict'
+    }
+  }));
+
+  /**
+   * CSRF token generation middleware
+   * Generates and stores CSRF token in session if not present
+   * Makes token available to templates via res.locals
+   * 
+   * @param {express.Request} req - Express request object
+   * @param {express.Response} res - Express response object
+   * @param {express.NextFunction} next - Express next middleware function
+   */
+  app.use((req, res, next) => {
+    if (!req.session.csrfToken) {
+      const csrfToken = crypto.randomBytes(32).toString('hex');
+      req.session.csrfToken = csrfToken;
+      res.locals.csrfToken = csrfToken;
+    } else {
+      res.locals.csrfToken = req.session.csrfToken;
+    }
+    next();
+  });
+
+  /**
+   * CSRF token verification middleware
+   * Verifies CSRF token in headers matches session token
+   * Skips verification for GET requests
+   * 
+   * @param {express.Request} req - Express request object
+   * @param {express.Response} res - Express response object
+   * @param {express.NextFunction} next - Express next middleware function
+   * @returns {void|Response} Returns 403 if CSRF validation fails
+   */
+  app.use((req, res, next) => {
+    if (req.method === 'GET') {
+      return next();
+    }
+
+    const token = req.headers['x-csrf-token'];
+    const sessionToken = req.session?.csrfToken;
+
+    if (!token || !sessionToken || token !== sessionToken) {
+      return res.status(403).json({
+        error: 'Invalid CSRF token'
+      });
+    }
+
+    next();
+  });
+
+  /**
+   * Serves static files
    */
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
@@ -144,7 +207,6 @@ module.exports = (app, httpRequestCounter) => {
       realIp: req.headers['x-real-ip']
     };
 
-    // Check for consistent IP across headers
     if (clientInfo.forwardedFor && 
         !clientInfo.forwardedFor.includes(clientInfo.ip)) {
       return res.status(403).json({ 
