@@ -6,6 +6,9 @@ import sleep from '../../utils/sleep.js';
 import isValidURL from '../../utils/URL.js';
 import hapticFeedback from '../../utils/hapticFeedback.js';
 import selectors from '../../selectors.js';
+import _OPTIONS from '../../utils/post_options.js';
+import updateCsrf from '../../utils/updateCsrf.js';
+import retry from '../../utils/retry.js';
 
 const em = new EventManager();
 
@@ -58,18 +61,14 @@ async function submitStation(ev) {
   submit.setAttribute('disabled', true);
   
   const responseElement = document.querySelector(selectors.response);
-  const fData = new FormData(ev.target);
 
   try {
-    const response = await fetch('/add', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
-      },
-      body: fData,
-    });
+    const response = await retry( _ => fetch('/add', _OPTIONS(ev.target)));
+    if (response.status === 403) {
+      const success = await updateCsrf();
+      if (success) submitStation(ev);
+      return;
+    }
     const result = await response.json();
     const message = result.message;
     responseElement.textContent = message;
@@ -172,7 +171,7 @@ async function info() {
   loadingAnimation(depDiv);
 
   try {
-    const response = await fetch('/info');
+    const response = await retry( _ => fetch('/info'));
     const pack = await response.json();
 
     dialog.querySelector('h1').textContent = `v${pack.version}`;
