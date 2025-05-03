@@ -30,9 +30,7 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   app.use(compression());
-  app.use(express.urlencoded({
-    extended: true
-  }));
+  app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.set('trust proxy', true);
   app.disable('x-powered-by');
