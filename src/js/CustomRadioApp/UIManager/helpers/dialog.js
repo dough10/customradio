@@ -66,9 +66,10 @@ async function submitStation(ev) {
       body: fData,
     });
     const result = await response.json();
-    responseElement.textContent = result.message;
-    new Toast(result.message);
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', document.querySelector(selectors.stationUrl).value, result.message]);
+    const message = result.message;
+    responseElement.textContent = message;
+    if (message.length) new Toast(result.message);
+    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', document.querySelector(selectors.stationUrl).value, message]);
     await sleep(2000);
     const inputElement = document.querySelector(selectors.stationUrl);
     inputElement.value = '';
