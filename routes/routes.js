@@ -83,6 +83,7 @@ module.exports = (app, register) => {
     res.send(
       pug.renderFile('./templates/index.pug', {
         lang: req.loadedLang,
+        csrf: req.session.csrfToken,
         title: t('title'),
         intro: t('intro'),
         hibyLink: t('hibyLink'),
@@ -409,7 +410,7 @@ module.exports = (app, register) => {
   app.post('/reportPlay/:id', reportPlay);
 
   /**
-   * report station in users txt list
+   * report if station is in a users txt list
    */
   app.post('/reportInList/:id/:state', reportInList);
 
