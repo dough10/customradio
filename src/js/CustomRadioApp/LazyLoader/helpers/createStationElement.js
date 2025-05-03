@@ -59,6 +59,14 @@ function _paqToggle(event, str) {
   if (typeof _paq !== 'undefined') _paq.push(['trackEvent', event, str]);
 }
 
+async function reportInList(id, state) {
+  const res = await fetch(`/reportInList/${id}/${state}`);
+  if (!res.ok) {
+    console.error(`report Failed for id: ${id}`);
+    return;
+  }
+}
+
 /**
  * toggles selected attribute
  * 
@@ -70,16 +78,16 @@ function toggleSelect(ev) {
   // toggle selected attribute
   const el = ev.target.parentElement;
   el.toggleAttribute('selected');
+  el.dataset.bitrate = Number(el.dataset.bitrate);
   
   hapticFeedback();
 
   // get all selected elements
-  // update selected count
   const all = Array.from(el.parentNode.querySelectorAll(selectors.selectedStation));
+  // update download button
   toggleActiveState(document.querySelector(selectors.downloadButton), all.length);
   
   // store selected stations in localstorage
-  el.dataset.bitrate = Number(el.dataset.bitrate);
   const forStorage = all
   .map(el => {return {id: el.id, ...el.dataset}})
   .sort((a, b) => a.name.localeCompare(b.name));
@@ -87,7 +95,13 @@ function toggleSelect(ev) {
   saveToLocalStorage(forStorage);
 
   // track event
-  el.hasAttribute('selected') ? _paqToggle('Add to file', el.dataset.url) : _paqToggle('Remove from file', el.dataset.url);
+  const selected = el.hasAttribute('selected');
+  reportInList(el.id, selected);
+  if (selected) {
+    _paqToggle('Add to file', el.dataset.url);
+  } else {
+    _paqToggle('Remove from file', el.dataset.url);
+  }
 }
 
 /**
