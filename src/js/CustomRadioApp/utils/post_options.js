@@ -9,8 +9,7 @@ export default (body = null) => {
   };
 
   if (body) {
-    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-    options.body = body;
+    options.body = new FormData(body);
   }
 
   return options;
