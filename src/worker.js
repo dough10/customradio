@@ -59,6 +59,28 @@ async function handleTopGenresRequest(event) {
   }
 }
 
+/**
+ * Handles HTML requests and injects fresh CSRF tokens
+ * 
+ * @param {FetchEvent} event - The fetch event
+ * @returns {Promise<Response>} Response with fresh CSRF token
+ */
+async function handleHtmlRequest(event) {
+  const cache = await caches.open(CACHE_VERSION);
+  const cachedResponse = await cache.match(event.request);
+  try {
+    const networkResponse = await fetch(event.request);
+    const clonedResponse = networkResponse.clone();
+    await cache.put(event.request, clonedResponse);
+    return networkResponse;
+  } catch(e) {
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    throw error;
+  }
+}
+
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
@@ -70,7 +92,9 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.url.includes('/stations')) {
+  if (event.request.headers.get('Accept')?.includes('text/html')) {
+    event.respondWith(handleHtmlRequest(event));
+  } else if (event.request.url.includes('/stations')) {
     event.respondWith(handleStationsRequest(event));
   } else if (event.request.url.includes('/topGenres')) {
     event.respondWith(handleTopGenresRequest(event));
