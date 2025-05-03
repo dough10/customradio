@@ -7,7 +7,8 @@ export const REPORTING_INTERVAL = 1;
 const CONFIG = {
   REPORT_ENDPOINT: id => `/reportPlay/${encodeURIComponent(id)}`,
   IDLE_TIMEOUT: 2000,
-  INTERVAL: minsToMs(REPORTING_INTERVAL)
+  INTERVAL: minsToMs(REPORTING_INTERVAL),
+  REPORT_ATTEMPTS: 2
 };
 
 /**
@@ -41,6 +42,8 @@ export default class PlayReporter {
 
   /** @typedef {'idle'|'reporting'|'stopped'} ReporterState */
   _state = 'idle';
+
+  _reportAttempts = 0;
   
   /**
    * Creates a new PlayReporter instance
@@ -65,7 +68,8 @@ export default class PlayReporter {
         if (deadline.timeRemaining() > 0) {
           const url = CONFIG.REPORT_ENDPOINT(this._stationId);
           const res = await retry(() => fetch(url, _OPTIONS()));
-          if (res.status === 403) {
+          if (res?.status === 403 && this._reportAttempts < CONFIG.REPORT_ATTEMPTS) {
+            this._reportAttempts++;
             const success = await updateCsrf();
             if (success) requestIdleCallback(this._reportPlay.bind(this));
           }
@@ -73,6 +77,7 @@ export default class PlayReporter {
           requestIdleCallback(this._reportPlay.bind(this));
         }
       } catch (error) {
+        this._reportAttempts = 0;
         console.warn('Play report failed:', error);
       } finally {
         this._state = 'idle';
