@@ -7,6 +7,8 @@ import { t } from '../../utils/i18n.js';
 import hapticFeedback from '../../utils/hapticFeedback.js';
 import selectors from '../../selectors.js';
 import _OPTIONS from '../../utils/post_options.js';
+import updateCsrf from '../../utils/updateCsrf.js';
+import retry from '../../utils/retry.js';
 
 
 const LONG_PRESS_DURATION = 500;
@@ -24,11 +26,10 @@ const LONG_PRESS_DURATION = 500;
  */
 async function postStreamIssue(id, error) {
   try {
-    const formBody = new URLSearchParams({
+    const response = await fetch('/stream-issue', _OPTIONS({
       id,
       error
-    }).toString();
-    const response = await fetch('/stream-issue', _OPTIONS(formBody));
+    }));
     const result = await response.json();
     console.log(result.message);
   } catch (err) {
@@ -64,11 +65,21 @@ function _paqToggle(event, str) {
  * @returns {void}
  */
 async function reportInList(id, state) {
-  const res = await fetch(`/reportInList/${id}/${state}`, _OPTIONS());
-  if (!res.ok) {
-    console.error(`report Failed for id: ${id}`);
-    return;
-  }
+  requestIdleCallback(async deadline => {
+    try {
+      if (deadline.timeRemaining() > 0) {
+        const res = await retry(_ => fetch(`/reportInList/${id}/${state}`, _OPTIONS()));
+        if (res.status === 403) {
+          const success = await updateCsrf();
+          if (success) reportInList(id, state);
+        }
+      } else {
+        requestIdleCallback(_ => reportInList(id, state));
+      }
+    } catch(e) {
+      console.error(e);
+    }
+  });
 }
 
 /**
