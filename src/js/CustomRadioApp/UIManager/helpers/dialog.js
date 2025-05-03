@@ -63,6 +63,11 @@ async function submitStation(ev) {
   try {
     const response = await fetch('/add', {
       method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+      },
       body: fData,
     });
     const result = await response.json();
