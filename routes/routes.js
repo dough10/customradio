@@ -13,6 +13,7 @@ const markDuplicate = require('./endpoints/markDuplicate.js');
 const sitemap = require('./endpoints/sitemap.js');
 const robots = require('./endpoints/robots.js');
 const reportPlay = require('./endpoints/reportPlay.js');
+const reportInList = require('./endpoints/reportInList.js');
 const securitytxt = require('./endpoints/securitytxt.js');
 const ads = require('./endpoints/ads.js');
 const topGenres = require('./endpoints/topGenres.js');
@@ -406,6 +407,11 @@ module.exports = (app, register) => {
    * @throws {Error} If play count increment fails
    */
   app.get('/reportPlay/:id', reportPlay);
+
+  /**
+   * report station in users txt list
+   */
+  app.get('/reportInList/:id/:state', reportInList);
 
   /**
    * Catch-all route for handling 404 errors.
