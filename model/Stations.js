@@ -1,6 +1,12 @@
 const sqlite3 = require('sqlite3').verbose();
 const usedTypes = require("../util/usedTypes.js");
 
+const DB_CONFIG = {
+  RECENT_DAYS: 15,
+  TOP_GENRES_LIMIT: 10,
+  POPULARITY_MULTIPLIER: 30
+};
+
 /**
  * Returns a string of comma-separated question marks for SQL placeholders
  * 
@@ -68,6 +74,14 @@ function connectionEstablished(err) {
     {
       query: `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`,
       errorMsg: 'Failed to create index on genres table (time)'
+    },
+    {
+      query: `CREATE INDEX IF NOT EXISTS idx_stations_playMinutes ON stations(playMinutes)`,
+      errorMsg: 'Failed to create index on stations table (playMinutes)'
+    },
+    {
+      query: `CREATE INDEX IF NOT EXISTS idx_stations_compound ON stations(online, duplicate, content_type)`,
+      errorMsg: 'Failed to create compound index on stations table'
     }
   ];
 
@@ -130,7 +144,7 @@ class Stations {
 
   /**
    * Get all online stations with the correct content type
-   * Sorted by popularity (inList * 100 + playMinutes) and name
+   * Sorted by popularity (inList * DB_CONFIG.POPULARITY_MULTIPLIER + playMinutes) and name
    * 
    * @returns {Promise<Array<{
    *   id: number,
@@ -149,7 +163,7 @@ class Stations {
    */
   getOnlineStations() {
     const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList,
-      (inList * 100 + playMinutes) as popularity
+      (inList * ${DB_CONFIG.POPULARITY_MULTIPLIER} + playMinutes) as popularity
       FROM stations
       WHERE content_type IN (${mapPlaceholders(usedTypes)})
         AND online = 1
@@ -189,7 +203,7 @@ class Stations {
     const nameConditions = genrePatterns.map(() => 'LOWER(name) LIKE ?').join(' OR ');
     const genreConditions = genrePatterns.map(() => "LOWER(REPLACE(REPLACE(genre, '&', 'and'), '-', '')) LIKE ?").join(' OR ');
   
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList, (inList * 100 + playMinutes) as popularity
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList, (inList * ${DB_CONFIG.POPULARITY_MULTIPLIER} + playMinutes) as popularity
     FROM stations
     WHERE content_type IN (${contentTypePlaceholders})
       AND online = 1
@@ -494,10 +508,10 @@ class Stations {
   async topGenres() {
     const query = `SELECT genres, COUNT(*) as count
       FROM genres
-      WHERE time > datetime('now', '-15 days')
+      WHERE time > datetime('now', '-${DB_CONFIG.RECENT_DAYS} days')
       GROUP BY genres
       ORDER BY count DESC
-      LIMIT 10;`;
+      LIMIT ${DB_CONFIG.TOP_GENRES_LIMIT};`;
     const response = await this._ensureInitialized(() => this._runQuery(query));
     return response.map(obj => obj.genres).sort((a, b) => a.localeCompare(b));
   }
@@ -542,6 +556,24 @@ class Stations {
         }
       });
     }));
+  }
+
+  /**
+   * Destroy the database instance and clean up resources.
+   * 
+   * @returns {Promise<void>} A promise that resolves when the instance is destroyed.
+   * 
+   * @throws {Error} If an error occurs during cleanup.
+   */
+  async destroy() {
+    try {
+      await this.close();
+      this.db = null;
+      this.initializationPromise = null;
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+      throw error;
+    }
   }
 
   /**
