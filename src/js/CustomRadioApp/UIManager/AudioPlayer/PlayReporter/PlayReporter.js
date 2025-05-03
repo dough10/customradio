@@ -72,17 +72,12 @@ export default class PlayReporter {
       try {
         if (deadline.timeRemaining() > 0) {
           const encodedId = encodeURIComponent(this._stationId);
-          const res = await retry(() => 
-            fetch(`/reportPlay/${encodedId}`)
-          );
-          if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-          }
+          await retry(() => fetch(`/reportPlay/${encodedId}`));
         } else {
           this._scheduleReport();
         }
       } catch (error) {
-        console.error('Play report failed:', error);
+        console.warn('Play report failed:', error);
       }
     }, { timeout: 2000 });
   }
