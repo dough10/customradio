@@ -216,6 +216,20 @@ class Stations {
     return this._ensureInitialized(() => this._runQuery(query, params));
   }
 
+
+  /**
+   * Check if a station exists.
+   * 
+   * @param {String} url 
+   * 
+   * @returns {Promise<Boolean>} A promise that resolves to true if the station exists, false otherwise.
+   */
+  async exists(url) {
+    const query = `SELECT COUNT(*) AS count FROM stations WHERE url = ?`;
+    const rows = await this._ensureInitialized(() => this._runQuery(query, [url]));
+    return rows[0].count > 0;
+  }  
+
   /**
    * Add new station to database
    * 
