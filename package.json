@@ -11,7 +11,8 @@
     "test": "web-test-runner \"src/js/CustomRadioApp/**/*.test.js\" --node-resolve && mocha",
     "version++": "node build_assets/incriment-version.js && node make-docs.js",
     "build-docker": "sh build_assets/build-container.sh \"registry.dough10.me/customradio\"",
-    "docs": "node make-docs.js"
+    "docs": "node make-docs.js",
+    "generate-secret": "openssl rand -base64 16 | tr -d '/+' | cut -c1-16"
   },
   "author": "dough10",
   "license": "ISC",
