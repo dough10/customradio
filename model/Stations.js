@@ -401,7 +401,7 @@ class Stations {
    * @throws {Error} If the query fails
    */
   addToList(id) {
-    const query = `UPDATE stations SET inList = 1 WHERE id = ?`;
+    const query = `UPDATE stations SET inList = inList + 1 WHERE id = ?`;
     return this._ensureInitialized(() => this._runQuery(query, [id]));
   }
 
@@ -415,7 +415,7 @@ class Stations {
    * @throws {Error} If the query fails
    */
   removeFromList(id) {
-    const query = `UPDATE stations SET inList = 0 WHERE id = ?`;
+    const query = `UPDATE stations SET inList = inList - 1 WHERE id = ?`;
     return this._ensureInitialized(() => this._runQuery(query, [id]));
   }
 
