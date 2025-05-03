@@ -1,4 +1,4 @@
-export default async (body = null) => {
+export default (body = null) => {
   const options = {
     method: 'POST',
     credentials: 'same-origin',
