@@ -1,12 +1,12 @@
 import _OPTIONS from '../../../utils/post_options.js';
+import updateCsrf from '../../../utils/updateCsrf.js';
+import retry from '../../../utils/retry.js';
 
 export const REPORTING_INTERVAL = 1;
 
 const CONFIG = {
-  RETRY_ATTEMPTS: 3,
   REPORT_ENDPOINT: id => `/reportPlay/${encodeURIComponent(id)}`,
   IDLE_TIMEOUT: 2000,
-  REQUEST_OPTIONS: _OPTIONS(),
   INTERVAL: minsToMs(REPORTING_INTERVAL)
 };
 
@@ -24,24 +24,6 @@ export function minsToMs(mins) {
     throw new Error('Minutes cannot be negative');
   }
   return mins * 60 * 1000;
-}
-
-/**
- * retry function a given number of times
- * 
- * @param {Function} fn 
- * @param {Number} retries
- *  
- * @returns {Function}
- */
-async function retry(fn, retries = CONFIG.RETRY_ATTEMPTS) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      return await fn();
-    } catch (e) {
-      if (i === retries - 1) console.error(e);
-    }
-  }
 }
 
 /**
@@ -82,7 +64,11 @@ export default class PlayReporter {
       try {
         if (deadline.timeRemaining() > 0) {
           const url = CONFIG.REPORT_ENDPOINT(this._stationId);
-          await retry(() => fetch(url, CONFIG.REQUEST_OPTIONS));
+          const res = await retry(() => fetch(url, _OPTIONS()));
+          if (res.status === 403) {
+            const success = await updateCsrf();
+            if (success) requestIdleCallback(this._reportPlay.bind(this));
+          }
         } else {
           requestIdleCallback(this._reportPlay.bind(this));
         }
