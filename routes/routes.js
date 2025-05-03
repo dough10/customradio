@@ -406,12 +406,12 @@ module.exports = (app, register) => {
    * 
    * @throws {Error} If play count increment fails
    */
-  app.get('/reportPlay/:id', reportPlay);
+  app.post('/reportPlay/:id', reportPlay);
 
   /**
    * report station in users txt list
    */
-  app.get('/reportInList/:id/:state', reportInList);
+  app.post('/reportInList/:id/:state', reportInList);
 
   /**
    * Catch-all route for handling 404 errors.
