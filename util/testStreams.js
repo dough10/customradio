@@ -117,22 +117,20 @@ async function updateStationData(sql, old, updated) {
 /**
  * Compares station and stream objects to check if data has changed.
  * 
- * @param {Object} station - The station object from the database.
- * @param {Object} stream - The stream object from the live stream check.
+ * @param {Object} old - The station object from the database.
+ * @param {Object} updated - The stream object from the live stream check.
  * 
  * @returns {Boolean} - Returns true if the data is unchanged, false otherwise.
  */
-function stationDataIsUnchanged(station, stream) {
+function stationDataIsUnchanged(old, updated) {
   return (
-    station.name === (stream.name || station.name || stream.description) &&
-    station.url === (stream.url || station.url) &&
-    station.genre === (stream.icyGenre || station.genre || 'Unknown') &&
-    station.online === (stream.isLive || false) &&
-    station['content-type'] === (stream.content || station['content-type'] || 'Unknown') &&
-    station.bitrate === (stream.bitrate || 0) &&
-    station.homepage === (stream.icyurl || station.homepage || 'Unknown') &&
-    station.error === (stream.error || '') &&
-    station.duplicate === Boolean(station.duplicate)
+    old.name === (updated.name || old.name) &&
+    old.url === (updated.url || old.url) &&
+    old.genre === (updated.icyGenre || old.genre || 'Unknown') &&
+    old.online === (updated.isLive || false) &&
+    old['content-type'] === (updated.content || old['content-type'] || 'Unknown') &&
+    old.bitrate === (updated.bitrate || 0) &&
+    old.homepage === (updated.icyurl || old.homepage || 'Unknown')
   );
 }
 
