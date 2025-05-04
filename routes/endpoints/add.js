@@ -64,18 +64,13 @@ module.exports = async (req, res) => {
       return res.status(400).json({ message: t('conTestFailed', status.error)});
     }
 
-    if (!status.name) {
-      log.warning(`Failed to retrieve station name, ${Date.now() - req.startTime}ms`);
-      return res.status(400).json({ messag: t('noName') });
-    }
-
     const data = {
-      name: status.name,
+      name: status.name || 'Unknown',
       url,
       online: status.isLive,
       genre: status.genre || 'Unknown',
-      'content-type': status.content || '',
-      bitrate: status.bitrate || 'Unknown',
+      'content-type': status.content || 'Unknown',
+      bitrate: status.bitrate || 0,
       icon: status.icon || 'Unknown',
       homepage: status.icyurl || 'Unknown',
       error: '',
