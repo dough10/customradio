@@ -89,25 +89,26 @@ async function testHomepageConnection(url) {
  * Update station data in the database.
  * 
  * @param {Object} sql - The Stations instance.
- * @param {Object} station - The station object.
- * @param {Object} stream - The stream object.
+ * @param {Object} old - The original station object.
+ * @param {Object} updated - The updated stream object.
  * @returns {Promise<void>}
  */
-async function updateStationData(sql, station, stream) {
+async function updateStationData(sql, old, updated) {
+  const homepage = await retry(() => testHomepageConnection(updated.icyurl));
   const updatedData = {
-    name: stream.name || station.name || stream.description,
-    url: stream.url || station.url,
-    genre: stream.icyGenre || station.genre || 'Unknown',
-    online: stream.isLive || false,
-    'content-type': stream.content || station['content-type'] || 'Unknown',
-    bitrate: stream.bitrate || 0,
+    id: old.id,
+    name: (updated.name && typeof updated.name === 'string') ? updated.name : old.name,
+    url: updated.url || old.url,
+    genre: (updated.icyGenre && updated.icyGenre === 'string') ? updated.icyGenre : old.genre || 'Unknown',
+    online: (typeof updated.isLive === 'boolean') ? updated.isLive : false,
+    'content-type': updated.content || old['content-type'] || 'Unknown',
+    bitrate: updated.bitrate || 0,
     icon: 'Unknown',
-    homepage: await retry(() => testHomepageConnection(stream.icyurl)) || 'Unknown',
-    error: stream.error || '',
-    duplicate: Boolean(station.duplicate) || false,
-    playMinutes: station.playMinutes,
-    inList: station.inList,
-    id: station.id
+    homepage: homepage || old.homepage || 'Unknown',
+    error: updated.error || '',
+    duplicate: Boolean(old.duplicate) || false,
+    playMinutes: old.playMinutes,
+    inList: old.inList,
   };
 
   await sql.updateStation(updatedData);
@@ -195,7 +196,7 @@ async function testStreams() {
     const ms = now - startTime;
 
     log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entries: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
-    // await cleanUpGenres();
+
   } catch (e) {
     log.error(`Failed stream test or database update: ${e.message}`);
   } finally { 
@@ -203,4 +204,4 @@ async function testStreams() {
   }
 }
 
-module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
+module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs, updateStationData};
