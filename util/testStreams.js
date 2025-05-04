@@ -104,7 +104,10 @@ async function updateStationData(sql, station, stream) {
     icon: 'Unknown',
     homepage: await retry(() => testHomepageConnection(stream.icyurl)) || 'Unknown',
     error: stream.error || '',
-    duplicate: Boolean(station.duplicate) || false
+    duplicate: Boolean(station.duplicate) || false,
+    playMinutes: station.playMinutes,
+    inList: station.inList,
+    id: station.id
   };
 
   await sql.updateStation(updatedData);
@@ -118,7 +121,7 @@ async function updateStationData(sql, station, stream) {
  * 
  * @returns {Boolean} - Returns true if the data is unchanged, false otherwise.
  */
-function isStationDataUnchanged(station, stream) {
+function stationDataIsUnchanged(station, stream) {
   return (
     station.name === (stream.name || station.name || stream.description) &&
     station.url === (stream.url || station.url) &&
@@ -178,9 +181,7 @@ async function testStreams() {
           if (!station) return;
           try {
             const stream = await retry(() => isLiveStream(station.url));
-            if (isStationDataUnchanged(station, stream)) {
-              return;
-            }
+            if (stationDataIsUnchanged(station, stream)) return;
             await updateStationData(sql, station, stream);
             total++;
           } catch (e) {
