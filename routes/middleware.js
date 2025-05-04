@@ -1,5 +1,7 @@
 const express = require('express');
 const session = require('express-session');
+const { createClient } = require('redis');
+const { RedisStore } = require('connect-redis');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -8,6 +10,38 @@ const path = require('path');
 const crypto = require('crypto');
 
 const { setLanguage } = require('../util/i18n.js');
+const Logger = require('../util/logger.js');
+
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
+
+/**
+ * Redis client setup and session configuration
+ */
+function initSessionStorage() {
+  if (process.env.NODE_ENV !== 'production') {
+    return;
+  }
+  const redisClient = createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    password: process.env.REDIS_PASSWORD,
+    legacyMode: false
+  });
+
+  redisClient.connect().catch(error => {
+    log.error('Redis connection error:', error);
+    process.exit(1);
+  });
+
+  redisClient.on('error', err => log.error('Redis Client Error:', err));
+  redisClient.on('connect', () => log.debug('Redis Connected'));
+
+  const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: 'customradio:'
+  });
+  return redisStore;
+}
 
 /**
  * Configure and apply middleware to Express application
@@ -49,16 +83,12 @@ module.exports = (app, httpRequestCounter) => {
     next();
   });
 
-  /**
-   * Session middleware configuration
-   * Sets up secure session handling with CSRF protection
-   */
   app.use(session({
+    store: initSessionStorage(),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       sameSite: 'strict',
       maxAge: 24 * 60 * 60 * 1000
