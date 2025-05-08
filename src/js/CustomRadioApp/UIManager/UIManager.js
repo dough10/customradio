@@ -42,7 +42,10 @@ export default class UIManager {
     const filter = this._filter;
     this._em.add(filter, 'change', onFilterChange, { passive: true });
     this._em.add(filter, 'focus', this._filterFocus.bind(this), { passive: true });
-    this._em.add(this._resetButton, 'click', onReset, { passive: true });
+    this._em.add(this._resetButton, 'click', ev => {
+      this._filterFocus(ev);
+      onReset();
+    }, { passive: true });
     this._em.add(this._toTop, 'click', this._toTopHandler.bind(this), { passive: true });
     this._em.add(this._downloadButton, 'click', this._dl, { passive: true });
   }
