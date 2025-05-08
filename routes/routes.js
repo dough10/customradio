@@ -376,9 +376,6 @@ module.exports = (app, register) => {
       if (value === '' || value === null) return true;
       return validator.isURL(value, envOptions);
     }).withMessage('referrer must be a valid URL'),
-    body('csp-report.blocked-uri')
-      .isURL(envOptions)
-      .withMessage('blocked-uri must be a valid URL'),
     body('csp-report.violated-directive')
       .escape()
       .isString()
@@ -387,10 +384,6 @@ module.exports = (app, register) => {
       .escape()
       .isString()
       .withMessage('original-policy must be a string'),
-    body('csp-report.source-file')
-      .optional()
-      .isURL(envOptions)
-      .withMessage('source-file must be a valid URL'),
     body('csp-report.status-code')
       .isInt({ min: 100, max: 599 })
       .withMessage('status-code must be an integer between 100 and 599'),
