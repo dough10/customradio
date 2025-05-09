@@ -3,6 +3,7 @@ const session = require('express-session');
 const { createClient } = require('redis');
 const { RedisStore } = require('connect-redis');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const path = require('path');
@@ -177,6 +178,14 @@ module.exports = (app, httpRequestCounter) => {
     });
     next();
   });
+
+  /**
+   * CORS
+   */
+  app.use(cors({
+    origin: ['https://customradio.dough10.me'],
+    methods: ['GET', 'POST'],
+  }));
 
   /**
    * Middleware to handle Content Security Policy (CSP) violation reports.
