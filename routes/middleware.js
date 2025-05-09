@@ -3,6 +3,7 @@ const session = require('express-session');
 const { createClient } = require('redis');
 const { RedisStore } = require('connect-redis');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const path = require('path');
@@ -14,12 +15,23 @@ const Logger = require('../util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
+const urlWhitelist = [
+  'https://customradio.dough10.me',
+  'https://testradio.dough10.me'
+];
+
+const corsOptions = {
+  origin: urlWhitelist,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+};
+
 /**
  * Redis client setup and session configuration
  */
 function initSessionStorage() {
   if (process.env.NODE_ENV !== 'production') {
-    return;
+    return null;
   }
   const redisClient = createClient({
     url: process.env.REDIS_URL || 'redis://localhost:6379',
@@ -62,12 +74,26 @@ module.exports = (app, httpRequestCounter) => {
     req.startTime = Date.now();
     next();
   });
-
+  
+  app.set('trust proxy', true);
+  app.disable('x-powered-by');
   app.use(compression());
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
-  app.set('trust proxy', true);
-  app.disable('x-powered-by');
+  
+  /**
+   * CORS
+  */
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
+  
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && !urlWhitelist.includes(origin)) {
+      return res.status(403).json({ error: 'Origin not allowed' });
+    }
+    next();
+  });  
 
   /**
    * Middleware to generate nonce for CSP
