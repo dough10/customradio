@@ -89,6 +89,7 @@ module.exports = (app, httpRequestCounter) => {
     resave: false,
     saveUninitialized: true,
     cookie: {
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       sameSite: 'strict',
       maxAge: 24 * 60 * 60 * 1000
