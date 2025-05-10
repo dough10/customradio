@@ -7,8 +7,10 @@ export const REPORTING_INTERVAL = 1;
 const CONFIG = {
   REPORT_ENDPOINT: id => `/reportPlay/${encodeURIComponent(id)}`,
   IDLE_TIMEOUT: 2000,
-  INTERVAL: minsToMs(REPORTING_INTERVAL)
+  REPORT_INTERVAL_MS: minsToMs(REPORTING_INTERVAL)
 };
+
+const STATES = Object.freeze({ IDLE: 'idle', REPORTING: 'reporting', STOPPED: 'stopped', PAUSED: 'paused' });
 
 /**
  * Converts minutes to milliseconds
@@ -34,13 +36,13 @@ export default class PlayReporter {
   _intervalID = 0;
   
   /** @type {string} Station ID being reported */
-  _stationId;
+  _stationId = '0';
   
   /** @type {Number} time until station is reported as played in ms */
-  _interval = CONFIG.INTERVAL;
+  _interval = CONFIG.REPORT_INTERVAL_MS;
 
-  /** @typedef {'idle'|'reporting'|'stopped'} ReporterState */
-  _state = 'idle';
+  /** @typedef {'idle'|'reporting'|'stopped'|'paused'} ReporterState */
+  _state = STATES.IDLE;
 
   /**
    * Creates a new PlayReporter instance
@@ -53,31 +55,64 @@ export default class PlayReporter {
   }
 
   /**
-   * Reports the play event
+   * Initiates the play report process using requestIdleCallback
    * 
    * @private
    */
-  async _reportPlay() {
-    if (this._state === 'stopped') return;
-    this._state = 'reporting';
-    requestIdleCallback(async (deadline) => {
-      try {
-        if (deadline.timeRemaining() > 0) {
-          const url = CONFIG.REPORT_ENDPOINT(this._stationId);
-          const res = await retry(() => fetch(url, _OPTIONS()));
-          if (res?.status === 403) {
-            const success = await updateCsrf();
-            // if (success) requestIdleCallback(this._reportPlay.bind(this));
-          }
-        } else {
-          requestIdleCallback(this._reportPlay.bind(this));
-        }
-      } catch (error) {
-        console.warn('Play report failed:', error);
-      } finally {
-        this._state = 'idle';
+  _reportPlay() {
+    if (this._state === STATES.STOPPED) return;
+    this._state = STATES.REPORTING;
+
+    requestIdleCallback((deadline) => {
+      if (deadline.timeRemaining() > 0) {
+        this._sendReport();
+      } else {
+        requestIdleCallback(this._reportPlay.bind(this));
       }
     }, { timeout: CONFIG.IDLE_TIMEOUT });
+  }
+
+  /**
+   * Handles the actual fetch and retry logic
+   * 
+   * @private
+   */
+  async _sendReport() {
+    if (this._state === STATES.STOPPED) return;
+    try {
+      const url = CONFIG.REPORT_ENDPOINT(this._stationId);
+      const res = await retry(() => fetch(url, _OPTIONS()));
+
+      if (res?.status !== 403) return;
+      await updateCsrf();
+    } catch (error) {
+      console.warn('Play report failed:', error);
+    } finally {
+      if (this._state === STATES.STOPPED) return;
+      this._state = STATES.IDLE;
+    }
+  }
+
+  /**
+   * pauses reporting without stopping
+   */
+  pause() {
+    if (this._intervalID) {
+      clearInterval(this._intervalID);
+      this._intervalID = 0;
+    }
+    this._state = STATES.PAUSED;
+  }
+
+  /**
+   * resumes reporting after pause
+   * 
+   * @returns {void}
+   */
+  resume() {
+    if (this._intervalID) return;
+    this._intervalID = setInterval(() => this._reportPlay(), this._interval);
+    this._state = STATES.IDLE;
   }
 
   /**
@@ -90,7 +125,7 @@ export default class PlayReporter {
       clearInterval(this._intervalID);
       this._intervalID = 0;
     }
-    this._state = 'stopped';
+    this._state = STATES.STOPPED;
   }
 
   /**
