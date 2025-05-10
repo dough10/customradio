@@ -4,13 +4,18 @@ import retry from '../../../utils/retry.js';
 
 export const REPORTING_INTERVAL = 1;
 
-const CONFIG = {
+const CONFIG = Object.freeze({
   REPORT_ENDPOINT: id => `/reportPlay/${encodeURIComponent(id)}`,
   IDLE_TIMEOUT: 2000,
   REPORT_INTERVAL_MS: minsToMs(REPORTING_INTERVAL)
-};
+});
 
-const STATES = Object.freeze({ IDLE: 'idle', REPORTING: 'reporting', STOPPED: 'stopped', PAUSED: 'paused' });
+const STATES = Object.freeze({ 
+  IDLE: 'idle',
+  REPORTING: 'reporting',
+  STOPPED: 'stopped',
+  PAUSED: 'paused'
+});
 
 /**
  * Converts minutes to milliseconds
@@ -51,6 +56,7 @@ export default class PlayReporter {
    */
   constructor(id) {
     this._stationId = id;
+    this._reportPlay();
     this._intervalID = setInterval(() => this._reportPlay(), this._interval);
   }
 
