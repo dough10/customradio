@@ -101,6 +101,7 @@ export default class PlayReporter {
       clearInterval(this._intervalID);
       this._intervalID = 0;
     }
+    if (this._state === STATES.STOPPED) return;
     this._state = STATES.PAUSED;
   }
 
@@ -110,6 +111,7 @@ export default class PlayReporter {
    * @returns {void}
    */
   resume() {
+    if (this._state === STATES.STOPPED) return;
     if (this._intervalID) return;
     this._intervalID = setInterval(() => this._reportPlay(), this._interval);
     this._state = STATES.IDLE;
