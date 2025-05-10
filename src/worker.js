@@ -92,6 +92,11 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
+  const url = event.request.url;
+  if (url.includes('/info') || url.includes('/reportPlay/') || url.includes('/reportInList/')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
   if (event.request.headers.get('Accept')?.includes('text/html')) {
     event.respondWith(handleHtmlRequest(event));
   } else if (event.request.url.includes('/stations')) {
