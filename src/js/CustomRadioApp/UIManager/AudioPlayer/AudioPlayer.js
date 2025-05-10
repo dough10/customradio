@@ -176,6 +176,7 @@ export default class AudioPlayer {
     if (!icon) return;
     icon.setAttribute('d', 'M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z');
     icon.parentElement.classList.add('spin');
+    this._reporter?.pause();
   }
 
   /**
@@ -191,6 +192,7 @@ export default class AudioPlayer {
     if (!icon) return;
     icon.parentElement.classList.remove('spin');
     icon.setAttribute('d', 'M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
+    this._reporter?.resume();
   }
 
   /**
@@ -207,6 +209,7 @@ export default class AudioPlayer {
       clearTimeout(this.pauseTimer);
       this.pauseTimer = 0;
     }
+    this._reporter?.resume();
   }
 
   /**
@@ -224,8 +227,7 @@ export default class AudioPlayer {
     if (!icon) return;
     icon.parentElement.classList.remove('spin');
     icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
-
-    if (this._reporter) this._reporter.playStopped();
+    this._reporter?.pause();
   }
 
   /**
@@ -457,6 +459,7 @@ export default class AudioPlayer {
     const allStations = document.querySelectorAll(selectors.stations);
     allStations.forEach(el => el.removeAttribute('playing'));
     this.currentPlayingElement = null;
+    if (this._reporter) this._reporter.playStopped();
   }
 
   /**
