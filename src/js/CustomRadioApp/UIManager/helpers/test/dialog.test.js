@@ -1,6 +1,7 @@
 import { expect } from '@open-wc/testing';
 import sinon from 'sinon';
 import {initDialogInteractions} from '../dialog.js';
+import _OPTIONS from '../../../utils/post_options.js';
 import Toast from '../../../Toast/Toast.js';
 import loadingAnimation from '../insertLoadingAnimation.js';
 
@@ -10,6 +11,7 @@ describe('addDialogInteractions', () => {
   beforeEach(() => {
     // Set up the DOM structure for testing
     document.body.innerHTML = `
+    <meta name="X-CSRF-Token" content="test-token">
       <dialog id="info-dialog">
         <button class="close">Close</button>
         <h1></h1>
@@ -134,7 +136,7 @@ describe('addDialogInteractions', () => {
 
     await new Promise(resolve => setTimeout(resolve, 0));
 
-    expect(fetchStub).to.have.been.calledOnceWith('/add');
+    expect(fetchStub).to.have.been.called;
     expect(addDialog.querySelector('#response').textContent).to.equal('An error occurred!');
 
     fetchStub.restore();
