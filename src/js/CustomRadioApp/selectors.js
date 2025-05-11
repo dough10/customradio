@@ -4,11 +4,6 @@
  * * This file is part of the Custom Radio App project.
  * * It defines a set of selectors that are used to interact with the DOM elements of the application.
  * 
- * @module selectors
- * @version 1.0.0
- * @author Dough10
- * @license MIT
- * 
  * @typedef {Object} Selectors
  * @property {String} header - The header element.
  * @property {String} formGroup - The container for input elements.
