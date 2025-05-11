@@ -55,6 +55,7 @@
     "mocha": "^10.7.3",
     "mongodb": "^6.15.0",
     "sinon": "^19.0.4",
+    "sinon-chai": "^4.0.0",
     "terser-webpack-plugin": "^5.3.10",
     "version-incrementer": "^0.1.1",
     "webpack": "^5.93.0",
