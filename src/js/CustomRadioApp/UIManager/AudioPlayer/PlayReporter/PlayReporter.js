@@ -56,7 +56,6 @@ export default class PlayReporter {
    */
   constructor(id) {
     this._stationId = id;
-    this._reportPlay();
     this._intervalID = setInterval(() => this._reportPlay(), this._interval);
   }
 
