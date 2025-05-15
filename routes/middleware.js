@@ -17,7 +17,8 @@ const log = new Logger(logLevel);
 
 const urlWhitelist = [
   'https://customradio.dough10.me',
-  'https://testradio.dough10.me'
+  'https://testradio.dough10.me',
+  'https://radiotxt.site'
 ];
 
 const corsOptions = {
