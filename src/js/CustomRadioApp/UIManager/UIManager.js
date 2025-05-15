@@ -185,7 +185,7 @@ export default class UIManager {
   _filterFocus(ev) {
     const wrapper = this._main;
     if (document.activeElement === ev.target && wrapper.scrollTop !== 0) {
-      wrapper.scrollTop = 0;
+      this._toTopHandler();
     }
   }
 
@@ -256,12 +256,12 @@ export default class UIManager {
    * @function
    */
   _toTopHandler() {
-    hapticFeedback();
     const wrapper = this._main;
     if (!wrapper) {
       console.error('Main wrapper element is missing.');
       return;
     }
+    hapticFeedback();
     wrapper.scrollTo({
       top: 0,
       behavior: 'smooth'
