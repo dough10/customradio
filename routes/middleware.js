@@ -170,11 +170,6 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
-   * Serves static files
-   */
-  app.use(express.static(path.join(__dirname, '..', 'public')));
-
-  /**
    * Set response language
    */
   app.use((req, res, next) => {
@@ -294,4 +289,9 @@ module.exports = (app, httpRequestCounter) => {
       preload: true
     }
   }));
+
+  /**
+   * Serves static files
+   */
+  app.use(express.static(path.join(__dirname, '..', 'public')));
 };
