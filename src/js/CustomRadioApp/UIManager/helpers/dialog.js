@@ -122,30 +122,27 @@ function closeDialog(el) {
 function wobbleDialog(ev) {
   // elements
   const dialog = ev.target;
+  const namespace = 'wobble-animation';
   const closeButton = dialog.querySelector(selectors.smallDialogCloseButton);
   const bigCloseButton = dialog.querySelector(selectors.dialogCloseButton);
-
-  let animationListener = null;
 
   // animation ended callback
   // removes classes after animation plays
   const animationend = _ => {
-    dialog.removeEventListener('animationend', animationend);
-    if (animationListener) em.remove(animationListener);
-    animationListener = null;
+    em.removeByNamespace(namespace);
     if (closeButton) closeButton.classList.remove('attention');
     if (bigCloseButton) bigCloseButton.classList.remove('button-attention');
     dialog.classList.remove('dialog-attention');
   };
 
   // dialog location and click position
-  var rect = dialog.getBoundingClientRect();
-  var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
+  const rect = dialog.getBoundingClientRect();
+  const isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
     rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
 
   // if the click was outside the dialog, add wobble animation
   if (!isInDialog) {
-    animationListener = em.add(dialog, 'animationend', animationend);
+    em.add(dialog, 'animationend', animationend, true, namespace);
     if ('vibrate' in navigator) navigator.vibrate([20, 100, 20]);
     if (closeButton) closeButton.classList.add('attention');
     if (bigCloseButton) bigCloseButton.classList.add('button-attention');
@@ -189,7 +186,7 @@ async function info() {
     console.error(message);
     new Toast(message, 3);
   } finally {
-    depDiv.querySelector(selectors.loading).remove();
+    depDiv.querySelector(selectors.loading)?.remove();
   }
 }
 
