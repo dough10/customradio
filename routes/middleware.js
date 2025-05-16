@@ -15,14 +15,8 @@ const Logger = require('../util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-const urlWhitelist = [
-  'https://customradio.dough10.me',
-  'https://testradio.dough10.me',
-  'https://radiotxt.site'
-];
-
 const corsOptions = {
-  origin: urlWhitelist,
+  origin: 'https://radiotxt.site',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 };
@@ -82,6 +76,42 @@ module.exports = (app, httpRequestCounter) => {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   
+  /**
+   * Helmet security middleware configuration
+   * Sets various HTTP headers for security
+   * Configures Content Security Policy
+   */
+  app.use(helmet({
+    dnsPrefetchControl: { allow: true },
+    frameguard: { action: 'sameorigin' },
+    xssFilter: true,
+    expectCt: {
+      enforce: true,
+      maxAge: 30 * 24 * 60 * 60
+    },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://analytics.dough10.me", "'sha256-HnpdFfQPCyb9+3fdMfjROV7BpCSr2PERzs+rVxA3als='", (req, res) => `'nonce-${res.locals.nonce}'`],
+        styleSrc: ["'self'", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
+        imgSrc: ["'self'", "data:"],
+        connectSrc: ["*"],
+        fontSrc: ["'self'"],
+        frameSrc: ["'self'"],
+        mediaSrc: ["*"],
+        styleSrcElem: ["'self'", "'unsafe-inline'"],
+        styleSrcAttr: ["'self'", "'unsafe-inline'"],
+        scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+        reportUri: "/csp-report"
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true
+    }
+  }));
+
   /**
    * CORS
   */
@@ -179,14 +209,6 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
-   * Middleware setting security header
-   */
-  app.use((req, res, next) => {
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    next();
-  });
-
-  /**
    * Count connection requests
    */
   app.use((req, res, next) => {
@@ -260,35 +282,6 @@ module.exports = (app, httpRequestCounter) => {
     }
     next();
   });
-
-  /**
-   * Helmet security middleware configuration
-   * Sets various HTTP headers for security
-   * Configures Content Security Policy
-   */
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://analytics.dough10.me", "'sha256-HnpdFfQPCyb9+3fdMfjROV7BpCSr2PERzs+rVxA3als='", (req, res) => `'nonce-${res.locals.nonce}'`],
-        styleSrc: ["'self'", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
-        imgSrc: ["'self'", "data:"],
-        connectSrc: ["*"],
-        fontSrc: ["'self'"],
-        frameSrc: ["'self'"],
-        mediaSrc: ["*"],
-        styleSrcElem: ["'self'", "'unsafe-inline'"],
-        styleSrcAttr: ["'self'", "'unsafe-inline'"],
-        scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-        reportUri: "/csp-report"
-      },
-    },
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true
-    }
-  }));
 
   /**
    * Serves static files
