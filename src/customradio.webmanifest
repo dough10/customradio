@@ -1,6 +1,6 @@
 {
   "name": "radio.txt creator",
-  "short_name": "customradio",
+  "short_name": "radiotxt.site",
   "description": "A online radio browser that creates a text file for Hiby digital audio players.",
   "orientation": "portrait-primary",
   "start_url": "/",
