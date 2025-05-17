@@ -36,16 +36,16 @@ html(lang=lang)
     //-   link(rel='stylesheet' href='styles.min.css')
     link(rel="preload" href="styles.min.css" as="style")
     link(rel='stylesheet' href='styles.min.css')
-    script(type="text/javascript", defer) var _paq = window._paq = window._paq || []; _paq.push(["trackPageView"]); _paq.push(["enableLinkTracking"]); (function() { var a = "https://analytics.dough10.me/"; _paq.push(["setTrackerUrl", a + "matomo.php"]); _paq.push(["setSiteId", "2"]); var e = document, t = e.createElement("script"), p = e.getElementsByTagName("script")[0]; t.async = true; t.src = a + "matomo.js"; p.parentNode.insertBefore(t, p);})();
+    script(nonce=nonce, type="text/javascript", defer) var _paq = window._paq = window._paq || []; _paq.push(["trackPageView"]); _paq.push(["enableLinkTracking"]); (function() { var a = "https://analytics.dough10.me/"; _paq.push(["setTrackerUrl", a + "matomo.php"]); _paq.push(["setSiteId", "2"]); var e = document, t = e.createElement("script"), p = e.getElementsByTagName("script")[0]; t.async = true; t.src = a + "matomo.js"; p.parentNode.insertBefore(t, p);})();
     title #{title}
-    script(type="application/ld+json")
+    script(nonce=nonce, type="application/ld+json")
       | {"@context":"https://schema.org","@type":"WebSite","name":"radio.txt creator","url":"https://customradio.dough10.me","description":"An online radio station browser with the ability to export .txt files for use in Hiby digital audio players."}
   
   body
     #alert.alert
       #reset-text
         #matomo-opt-out
-        script(defer type="text/javascript" src="https://analytics.dough10.me/index.php?module=CoreAdminHome&action=optOutJS&divId=matomo-opt-out&language=auto&showIntro=1")
+        script(nonce=nonce, defer type="text/javascript" src="https://analytics.dough10.me/index.php?module=CoreAdminHome&action=optOutJS&divId=matomo-opt-out&language=auto&showIntro=1")
       .yellow-text(title=clickDismiss) #{clickDismiss}
 
     header
@@ -159,4 +159,4 @@ html(lang=lang)
         | #{securityContact}: 
         a(href=".well-known/security.txt" target="_blank") security.txt
 
-    script(src="bundle.min.js" async) 
+    script(nonce=nonce, src="bundle.min.js" async) 
