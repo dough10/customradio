@@ -310,7 +310,6 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   app.disable("x-powered-by");
-  app.disable("X-XSS-Protection");
 
   /**
    * Serves static files
