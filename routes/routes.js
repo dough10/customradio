@@ -84,6 +84,7 @@ module.exports = (app, register) => {
       pug.renderFile('./templates/index.pug', {
         lang: req.loadedLang,
         csrf: req.session.csrfToken,
+        nonce: res.locals.nonce,
         title: t('title'),
         intro: t('intro'),
         hibyLink: t('hibyLink'),
