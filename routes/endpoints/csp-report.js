@@ -53,8 +53,6 @@ const log = new Logger(logLevel);
 module.exports = async (req, res) => {
   const cspReport = req.body['csp-report'];
   cspReport.time = new Date().toLocaleString();
-  
-  log.debug(cspReport);
 
   const errors = validationResult(req);
 
