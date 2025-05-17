@@ -41,7 +41,7 @@ function initSessionStorage() {
     process.exit(1);
   });
 
-  redisClient.on("error", (err) => log.error(`Redis Client ${err}`));
+  redisClient.on("error", err => log.error(`Redis Client ${err}`));
   redisClient.on("connect", () => log.debug("Redis Connected"));
 
   const redisStore = new RedisStore({
@@ -73,6 +73,7 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   app.set("trust proxy", true);
+  app.disable("x-powered-by");
   app.use(compression());
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
@@ -97,8 +98,12 @@ module.exports = (app, httpRequestCounter) => {
    */
   app.use(
     helmet({
-      dnsPrefetchControl: { allow: true },
-      frameguard: { action: "sameorigin" },
+      dnsPrefetchControl: { 
+        allow: true 
+      },
+      frameguard: { 
+        action: "sameorigin" 
+      },
       xssFilter: true,
       expectCt: {
         enforce: true,
@@ -106,7 +111,9 @@ module.exports = (app, httpRequestCounter) => {
       },
       contentSecurityPolicy: {
         directives: {
-          defaultSrc: ["'self'"],
+          defaultSrc: [
+            "'self'"
+          ],
           scriptSrc: [
             "'self'",
             "https://analytics.dough10.me",
@@ -116,11 +123,22 @@ module.exports = (app, httpRequestCounter) => {
             "'self'",
             "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='",
           ],
-          imgSrc: ["'self'", "data:"],
-          connectSrc: ["*"],
-          fontSrc: ["'self'"],
-          frameSrc: ["'self'"],
-          mediaSrc: ["*"],
+          imgSrc: [
+            "'self'", 
+            "data:"
+          ],
+          connectSrc: [
+            "*"
+          ],
+          fontSrc: [
+            "'self'"
+          ],
+          frameSrc: [
+            "'self'"
+          ],
+          mediaSrc: [
+            "*"
+          ],
           styleSrcElem: [
             "'self'",
             "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='",
@@ -131,7 +149,10 @@ module.exports = (app, httpRequestCounter) => {
             "'sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='",
             "'unsafe-hashes'",
           ],
-          scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+          scriptSrcAttr: [
+            "'self'", 
+            "'unsafe-inline'"
+          ],
           reportUri: "/csp-report",
         },
       },
@@ -207,7 +228,7 @@ module.exports = (app, httpRequestCounter) => {
       return next();
     }
 
-    if (req.method === "POST" && req.path === "/csp-report") {
+    if (req.path === "/csp-report") {
       return next();
     }
 
@@ -308,8 +329,6 @@ module.exports = (app, httpRequestCounter) => {
     }
     next();
   });
-
-  app.disable("x-powered-by");
 
   /**
    * Serves static files
