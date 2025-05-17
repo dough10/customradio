@@ -15,8 +15,10 @@ const Logger = require('../util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
+const siteURL = 'https://radiotxt.site';
+
 const corsOptions = {
-  origin: 'https://radiotxt.site',
+  origin: siteURL,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 };
@@ -39,7 +41,7 @@ function initSessionStorage() {
     process.exit(1);
   });
 
-  redisClient.on('error', err => log.error('Redis Client Error:', err));
+  redisClient.on('error', (err) => log.error('Redis Client Error:', err));
   redisClient.on('connect', () => log.debug('Redis Connected'));
 
   const redisStore = new RedisStore({
@@ -120,7 +122,7 @@ module.exports = (app, httpRequestCounter) => {
   
   app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (origin && !urlWhitelist.includes(origin)) {
+    if (origin && origin !== siteURL) {
       return res.status(403).json({ error: 'Origin not allowed' });
     }
     next();
