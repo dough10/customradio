@@ -391,7 +391,7 @@ module.exports = (app, register) => {
   ], cspReport);
 
   /**
-   * Reports a play for a station and increments its play count
+   * Reports a playMinute for a station and increments its playMinute count
    * Rate limited to one request per IP address every 5 minutes
    * 
    * @param {ReportPlayRequest} req Express request object
