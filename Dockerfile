@@ -19,6 +19,7 @@ WORKDIR /usr/src/app
 
 COPY --chown=node:node --from=build /usr/src/app/package*.json ./
 COPY --chown=node:node --from=build /usr/src/app/index.js ./
+COPY --chown=node:node --from=build /usr/src/app/test.js ./
 COPY --chown=node:node --from=build /usr/src/app/public ./public
 COPY --chown=node:node --from=build /usr/src/app/util ./util
 COPY --chown=node:node --from=build /usr/src/app/routes ./routes
