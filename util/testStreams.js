@@ -11,7 +11,7 @@ const Logger = require('./logger.js');
 const Stations = require('../model/Stations.js');
 const retry = require('./retry.js');
 
-const limit = pLimit(5);
+const limit = pLimit(3);
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
