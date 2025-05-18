@@ -34,7 +34,12 @@ const log = new Logger(logLevel);
  *   console.log('Online. o( ❛ᴗ❛ )o');
  * });
  */
-app.listen(3000, _ => { 
+app.listen(3000, _ => {
+  setInterval(() => {
+    const mem = process.memoryUsage();
+    log.debug(`Heap Used: ${(mem.heapUsed / 1024 / 1024).toFixed(2)} MB`);
+  }, 10000);
+
   middleware(app, httpRequestCounter);
   routes(app, register);
   
