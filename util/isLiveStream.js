@@ -112,7 +112,7 @@ async function streamTest(url) {
       error: ''
     };
   } catch (error) {
-    const errorMessage = `Test error: ${url} - ${error.message}`;
+    const errorMessage = `Test failed: ${url} - ${error.message}`;
     log.debug(errorMessage);
     return {
       ok: false,
@@ -180,6 +180,10 @@ module.exports = async (url) => {
     }
   }
 
-  log.debug(`Testing: ${url}`);
-  return await retry(() => streamTest(url));
+  try {
+    log.debug(`Testing: ${url}`);
+    return await retry(() => streamTest(url));
+  } catch(e) {
+    log.error(`Failed testing http: ${e.message}`);
+  }
 };
