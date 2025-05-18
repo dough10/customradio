@@ -171,6 +171,10 @@ module.exports = (app, httpRequestCounter) => {
   app.options("*", cors(corsOptions));
 
   app.use((req, res, next) => {
+    if (process.env.NODE_ENV !== "production") {
+      return next();
+    }
+
     const origin = req.headers.origin;
     if (origin && origin !== siteURL) {
       return res.status(403).json({ error: "Origin not allowed" });
