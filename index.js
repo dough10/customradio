@@ -14,6 +14,7 @@ const Logger = require('./util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
+const mins = 5;
 
 /**
  * Starts the Express server and sets up necessary initializations.
@@ -38,7 +39,7 @@ app.listen(3000, _ => {
   setInterval(() => {
     const mem = process.memoryUsage();
     log.debug(`Heap Used: ${(mem.heapUsed / 1024 / 1024).toFixed(2)} MB`);
-  }, 10000);
+  }, mins * 60 * 1000);
 
   middleware(app, httpRequestCounter);
   routes(app, register);
