@@ -17,7 +17,7 @@ const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
 /**
- * Returns an 's' if the number is not equal to 1, otherwise returns an empty string.
+ * Returns `'y'` when the count is exactly **1** (e.g. “entry”) and `'ies'` for all other counts (e.g. “entries”).
  * 
  * This function is useful for creating plural forms of words based on the number provided.
  * For example, it helps in formatting messages that include counts, such as "1 item" vs. "2 items".
@@ -26,18 +26,18 @@ const log = new Logger(logLevel);
  * 
  * @param {number} num - The number to determine if pluralization is needed.
  * 
- * @returns {string} An 's' if `num` is not 1, otherwise an empty string.
+ * Returns `'y'` when the count is exactly **1** (e.g. “entry”) and `'ies'` for all other counts (e.g. “entries”).
  * 
  * @example
  * 
  * plural(1);
- * // Returns: ''
- * 
+ * // Returns: 'y'
+@@
  * plural(5);
- * // Returns: 's'
+ * // Returns: 'ies'
  */
 function plural(num) {
-  return Number.isInteger(num) && num === 1 ? '' : 's';
+  return Number.isInteger(num) && num === 1 ? 'y' : 'ies';
 }
 
 /**
@@ -74,7 +74,7 @@ async function testHomepageConnection(url) {
       headers: {
         'User-Agent': `customradio.dough10.me/${pack.version}`
       },
-      timeout: 3000
+      timeout: 1500
     });
     if (response.status >= 200 && response.status < 300 && response.headers['content-type'].includes('text/html')) {
       return homepage;
@@ -157,6 +157,20 @@ function toMB(heap) {
  return `${(heap / 1024 / 1024).toFixed(2)} MB`;
 }
 
+/**
+ * calculate precentage
+ * 
+ * @param {Number} small smaller number
+ * @param {Number} big bigger number
+ * @param {Number} places decimal places
+ *  
+ * @returns {String}
+ */
+function percentage(small, big, places = 2) {
+  if (typeof big !== 'number' || big === 0) return '0.00';
+  return ((small / big) * 100).toFixed(places);
+ }
+
 
 /**
  * Tests streams for online state and headers to update the database with stream information.
@@ -185,64 +199,69 @@ async function testStreams() {
   log.info('Updating database');
   const sql = new Stations('data/customradio.db');
 
+  const startTime = Date.now();
   try {
     const totalStationCount = await sql.getTotalCount();
-    let counter = 0;
-
     const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
-
-    let total = 0;
-
-    let peakHeap = 0; 
     
-    const startTime = Date.now();
+    let counter = 0;
+    let updatedCount = 0;
     
     for (let ndx = 0; ndx < parts; ndx++) {
-      const used = process.memoryUsage();
-      peakHeap = Math.max(peakHeap, used.heapUsed);
-      log.info(`Memory usage: ${toMB(used.heapUsed)}, Peak: ${toMB(peakHeap)}`);
       const offset = ndx * UPDATE_PULL_COUNT;
-      try {
-        const stationPull = await sql.getPaginatedStations(UPDATE_PULL_COUNT, offset);
-        const length = stationPull.length;
-        await Promise.all(
-          stationPull.map(station => limit(async () => {
-            counter++;
-            const partCount = counter - (ndx * UPDATE_PULL_COUNT);
-            log.debug(`Update progress: part ${ndx}/${parts}, station ${partCount}/${length} Part: ${((partCount/length) * 100).toFixed(1)}% Total: ${((counter / totalStationCount) * 100).toFixed(3)}%`);
-            if (!station) return;
-            try {
-              const stream = await retry(() => isLiveStream(station.url));
-              if (stationDataIsUnchanged(station, stream)) {
-                log.debug(`Station ID ${station.id}: No change..`);
-                return;
-              }
-              await updateStationData(sql, station, stream);
-              log.debug(`Station ID ${station.id}: Updated..`);
-              total++;
-            } catch (e) {
-              log.debug(`Error testing stream for station ID ${station.id} (${station.name}): ${e.message}`);
-            }
-          }))
-        );
-      } catch(e) {
-        log.error(`Failed updating database part ${ndx}: ${e.message}`);
-      }
+      const stationPull = await sql.getPaginatedStations(UPDATE_PULL_COUNT, offset);
+      const length = stationPull.length;
+
+      // test batch
+      await Promise.all(stationPull.map(station => limit(async () => {
+        // progress tracking
+        counter++; 
+        const partCount = counter - (ndx * UPDATE_PULL_COUNT);
+        const partPrecent = length ? percentage(partCount, length, 1) : '0.0';
+        const totalPrecent = percentage(counter, totalStationCount, 3);
+        log.debug(`Update progress: part ${ndx}/${parts}, station ${partCount}/${length}`);
+        log.debug(`Part: ${partPrecent}% Total: ${totalPrecent}%`);
+        
+        // run test
+        try {
+          log.debug(`Testing id: ${station.id}, url: ${station.url}`);
+          const stream = await retry(() => isLiveStream(station.url));
+
+          if (stationDataIsUnchanged(station, stream)) {
+            log.debug(`Station ID ${station.id}: No change..`);
+            return;
+          }
+
+          await updateStationData(sql, station, stream);
+          log.debug(`Station ID ${station.id}: Updated..`);
+          // count changes
+          updatedCount++;
+        } catch (e) {
+          log.debug(`Error testing stream for station ID ${station.id} (${station.name}): ${e.message}`);
+        }
+      })));
+
+      // track memory usage
+      const used = process.memoryUsage();
+      log.info(`Memory usage: ${toMB(used.heapUsed)}`);
+
+      // Forced garbage collection after batch processing to reduce memory pressure
       if (global.gc) {
         global.gc();
-       log.debug('Forced garbage collection after batch processing to reduce memory pressure');
+        log.debug('Garbage collected');
       }
     }
+    const duration = msToHhMmSs(Date.now() - startTime);
     const stats = await sql.dbStats();
-    const now = new Date().getTime();
-    const ms = now - startTime;
 
-    log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entries: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
+    log.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
+    log.info(`Stats - Total: ${stats.total}, Online: ${stats.online}, Offline: ${stats.total - stats.online}`);
   } catch(e) {
-    log.error(`Database update has failed: ${e.message}`)
+    log.error(`Database update failed: ${e.message}`);
   } finally {
     await sql.close();
   }
+
 }
 
 module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs, updateStationData};
