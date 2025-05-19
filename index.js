@@ -36,11 +36,6 @@ const mins = 5;
  * });
  */
 app.listen(3000, _ => {
-  setInterval(() => {
-    const mem = process.memoryUsage();
-    log.debug(`Heap Used: ${(mem.heapUsed / 1024 / 1024).toFixed(2)} MB`);
-  }, mins * 60 * 1000);
-
   middleware(app, httpRequestCounter);
   routes(app, register);
   
