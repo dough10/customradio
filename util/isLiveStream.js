@@ -68,7 +68,7 @@ async function streamTest(url) {
       headers: {
         'User-Agent': `customradio.dough10.me/${pack.version}`
       },
-      timeout: 3000
+      timeout: 1500
     });
     const isLive = response.status >= 200 && response.status < 300;
     let name = response.headers['icy-name'];
