@@ -141,6 +141,21 @@ class Stations {
     const getQuery = 'SELECT * FROM stations';
     return this._ensureInitialized(() => this._runQuery(getQuery));
   }
+  
+  /**
+   * get paginated results
+   * 
+   * @param {Number} limit 
+   * @param {Number} offset
+   * 
+   * @returns {Promise<Array>} A promise that resolves to an array of station objects.
+   * 
+   * @throws {Error} If the query fails.
+   */
+  getPaginatedStations(limit, offset) {
+    const query = 'SELECT * FROM stations ORDER BY iD LIMIT ? OFFSET ?';
+    return this._ensureInitialized(() => this._runQuery(query, [limit, offset]));
+  }
 
   /**
    * Get all online stations with the correct content type
@@ -477,7 +492,7 @@ class Stations {
    * 
    * @returns {Number|Error} count or error
    */
-  _getCount(condition) {
+  _getUsableCount(condition) {
     const typesPlaceholder = mapPlaceholders(usedTypes);
     return new Promise((resolve, reject) => {
       this.db.get(`SELECT COUNT(*) AS count 
@@ -494,6 +509,24 @@ class Stations {
   }
 
   /**
+   * returns a count of all station entries
+   * 
+   * @returns {Number|Error} count or error
+   */
+  getTotalCount() {
+    return new Promise((resolve, reject) => {
+      const query = 'SELECT COUNT(*) AS count FROM stations';
+      this.db.get(query, (err, row) => {
+        if (err) {
+          reject(new Error(`Failed counting stations: ${err.message}`));
+        } else {
+          resolve(row.count);
+        }
+      });
+    });  
+  }
+
+  /**
    * Get database statistics
    * Counts online and total stations with valid content types
    * 
@@ -506,8 +539,8 @@ class Stations {
    */
   async dbStats() {
     try {  
-      const online = await this._ensureInitialized(() => this._getCount('online = 1'));
-      const total = await this._ensureInitialized(() => this._getCount('1'));
+      const online = await this._ensureInitialized(() => this._getUsableCount('online = 1'));
+      const total = await this._ensureInitialized(() => this._getUsableCount('1'));
   
       return { online, total };
   
