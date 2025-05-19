@@ -172,7 +172,6 @@ module.exports = async (url) => {
   if (url.startsWith('http://')) {
     const httpsUrl = url.replace('http://', 'https://');
     try {
-      log.debug(`Testing HTTPS: ${httpsUrl}`);
       return await retry(() => streamTest(httpsUrl));
     } catch (error) {
       log.error(`HTTPS test failed for ${httpsUrl}: ${error.message}`);
@@ -181,7 +180,6 @@ module.exports = async (url) => {
   }
 
   try {
-    log.debug(`Testing: ${url}`);
     return await retry(() => streamTest(url));
   } catch(e) {
     log.error(`Failed testing http: ${e.message}`);
