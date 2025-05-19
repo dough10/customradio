@@ -1,4 +1,4 @@
-const UPDATE_PULL_COUNT = 500;
+const UPDATE_PULL_COUNT = 100;
 
 const axios = require('axios');
 const pack = require('../package.json');
@@ -37,7 +37,7 @@ const log = new Logger(logLevel);
  * // Returns: 's'
  */
 function plural(num) {
-  return num === 1 ? '' : 's';
+  return Number.isInteger(num) && num === 1 ? '' : 's';
 }
 
 /**
@@ -94,7 +94,12 @@ async function testHomepageConnection(url) {
  * @returns {Promise<void>}
  */
 async function updateStationData(sql, old, updated) {
-  const homepage = await retry(() => testHomepageConnection(updated.icyurl));
+  const homepage = await retry(() => testHomepageConnection(updated.icyurl))
+    .catch(e => {
+      log.debug(`Failed to resolve homepage for station ID ${old.id}: ${e.message}`);
+      return null;
+    });
+
   const updatedData = {
     id: old.id,
     name: (updated.name && typeof updated.name === 'string') ? updated.name : old.name,
@@ -123,15 +128,35 @@ async function updateStationData(sql, old, updated) {
  * @returns {Boolean} - Returns true if the data is unchanged, false otherwise.
  */
 function stationDataIsUnchanged(old, updated) {
+  const name = updated.name || old.name;
+  const url = updated.url || old.url;
+  const genre = updated.icyGenre || old.genre || 'Unknown';
+  const online = typeof updated.isLive === 'boolean' ? updated.isLive : false;
+  const contentType = updated.content || old['content-type'] || 'Unknown';
+  const bitrate = updated.bitrate || 0;
+
   return (
-    old.name === (updated.name || old.name) &&
-    old.url === (updated.url || old.url) &&
-    old.genre === (updated.icyGenre || old.genre || 'Unknown') &&
-    old.online === (typeof updated.isLive === 'boolean' ? updated.isLive : false) &&
-    old['content-type'] === (updated.content || old['content-type'] || 'Unknown') &&
-    old.bitrate === (updated.bitrate || 0)
+    old.name === name &&
+    old.url === url &&
+    old.genre === genre &&
+    old.online === online &&
+    old['content-type'] === contentType &&
+    old.bitrate === bitrate
   );
 }
+
+/**
+ * filesize in MB
+ * 
+ * @param {Number} heap 
+ * 
+ * @returns {String}
+ */
+function toMB(heap) {
+ if (typeof heap !== 'number' || isNaN(heap)) return '0.00 MB';
+ return `${(heap / 1024 / 1024).toFixed(2)} MB`;
+}
+
 
 /**
  * Tests streams for online state and headers to update the database with stream information.
@@ -167,10 +192,15 @@ async function testStreams() {
     const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
 
     let total = 0;
+
+    let peakHeap = 0; 
     
     const startTime = Date.now();
     
     for (let ndx = 0; ndx < parts; ndx++) {
+      const used = process.memoryUsage();
+      peakHeap = Math.max(peakHeap, used.heapUsed);
+      log.info(`Memory usage: ${toMB(used.heapUsed)}, Peak: ${toMB(peakHeap)}`);
       const offset = ndx * UPDATE_PULL_COUNT;
       try {
         const stationPull = await sql.getPaginatedStations(UPDATE_PULL_COUNT, offset);
@@ -179,7 +209,7 @@ async function testStreams() {
           stationPull.map(station => limit(async () => {
             counter++;
             const partCount = counter - (ndx * UPDATE_PULL_COUNT);
-            log.debug(`Update progress: part ${ndx}/${parts}, station ${partCount}/${length} ${((partCount/length) * 100).toFixed(1)}% Total: ${((counter / totalStationCount) * 100).toFixed(3)}%`);
+            log.debug(`Update progress: part ${ndx}/${parts}, station ${partCount}/${length} Part: ${((partCount/length) * 100).toFixed(1)}% Total: ${((counter / totalStationCount) * 100).toFixed(3)}%`);
             if (!station) return;
             try {
               const stream = await retry(() => isLiveStream(station.url));
@@ -191,12 +221,16 @@ async function testStreams() {
               log.debug(`Station ID ${station.id}: Updated..`);
               total++;
             } catch (e) {
-              log.debug(`Error testing stream for station ID ${station.id}: ${e.message}`);
+              log.debug(`Error testing stream for station ID ${station.id} (${station.name}): ${e.message}`);
             }
           }))
         );
       } catch(e) {
         log.error(`Failed updating database part ${ndx}: ${e.message}`);
+      }
+      if (global.gc) {
+        global.gc();
+       log.debug('Forced garbage collection after batch processing to reduce memory pressure');
       }
     }
     const stats = await sql.dbStats();
