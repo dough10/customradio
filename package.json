@@ -4,7 +4,7 @@
   "description": "build custion radio.txt for use on hiby audio players",
   "main": "index.js",
   "scripts": {
-    "start": "node index",
+    "start": "node --expose-gc index",
     "prebuild": "bash build_assets/pre.sh",
     "build": "npx webpack",
     "postbuild": "bash build_assets/post.sh",
