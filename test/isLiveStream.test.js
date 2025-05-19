@@ -39,7 +39,7 @@ describe('isLiveStream', () => {
       headers: {
         'User-Agent': `customradio.dough10.me/${pack.version}`
       },
-      timeout: 3000
+      timeout: 1500
     });
 
     expect(live.ok).to.be.true;
