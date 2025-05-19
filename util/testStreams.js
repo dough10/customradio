@@ -1,4 +1,4 @@
-module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs};
+const UPDATE_PULL_COUNT = 500;
 
 const axios = require('axios');
 const pack = require('../package.json');
@@ -11,7 +11,7 @@ const Logger = require('./logger.js');
 const Stations = require('../model/Stations.js');
 const retry = require('./retry.js');
 
-const limit = pLimit(3);
+const limit = pLimit(5);
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -99,7 +99,7 @@ async function updateStationData(sql, old, updated) {
     id: old.id,
     name: (updated.name && typeof updated.name === 'string') ? updated.name : old.name,
     url: updated.url || old.url,
-    genre: (updated.icyGenre && updated.icyGenre === 'string') ? updated.icyGenre : old.genre || 'Unknown',
+    genre: (updated.icyGenre && typeof updated.icyGenre === 'string') ? updated.icyGenre : old.genre || 'Unknown',
     online: (typeof updated.isLive === 'boolean') ? updated.isLive : false,
     'content-type': updated.content || old['content-type'] || 'Unknown',
     bitrate: updated.bitrate || 0,
@@ -127,10 +127,9 @@ function stationDataIsUnchanged(old, updated) {
     old.name === (updated.name || old.name) &&
     old.url === (updated.url || old.url) &&
     old.genre === (updated.icyGenre || old.genre || 'Unknown') &&
-    old.online === (updated.isLive || false) &&
+    old.online === (typeof updated.isLive === 'boolean' ? updated.isLive : false) &&
     old['content-type'] === (updated.content || old['content-type'] || 'Unknown') &&
-    old.bitrate === (updated.bitrate || 0) &&
-    old.homepage === (updated.icyurl || old.homepage || 'Unknown')
+    old.bitrate === (updated.bitrate || 0)
   );
 }
 
@@ -162,43 +161,53 @@ async function testStreams() {
   const sql = new Stations('data/customradio.db');
 
   try {
-    const startTime = new Date().getTime();
-  
-    const stations = await sql.getAllStations();
-    
-    let total = 0;
-
+    const totalStationCount = await sql.getTotalCount();
     let counter = 0;
 
-    const length = stations.length;
+    const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
 
-    await Promise.all(
-      stations.map(station =>
-        limit(async () => {
-          counter++;
-          log.debug(`Update progress: ${((counter / length) * 100).toFixed(3)}%`);
-          if (!station) return;
-          try {
-            const stream = await retry(() => isLiveStream(station.url));
-            if (stationDataIsUnchanged(station, stream)) return;
-            await updateStationData(sql, station, stream);
-            total++;
-          } catch (e) {
-            log.debug(`Error testing stream for station ID ${station.id}: ${e.message}`);
-          }
-        })
-      )
-    );
+    let total = 0;
+    
+    const startTime = Date.now();
+    
+    for (let ndx = 0; ndx < parts; ndx++) {
+      const offset = ndx * UPDATE_PULL_COUNT;
+      try {
+        const stationPull = await sql.getPaginatedStations(UPDATE_PULL_COUNT, offset);
+        const length = stationPull.length;
+        await Promise.all(
+          stationPull.map(station => limit(async () => {
+            counter++;
+            const partCount = counter - (ndx * UPDATE_PULL_COUNT);
+            log.debug(`Update progress: part ${ndx}/${parts}, station ${partCount}/${length} ${((partCount/length) * 100).toFixed(1)} Total: ${((counter / totalStationCount) * 100).toFixed(3)}%`);
+            if (!station) return;
+            try {
+              const stream = await retry(() => isLiveStream(station.url));
+              if (stationDataIsUnchanged(station, stream)) {
+                log.debug(`Station ID ${station.id}: No change..`);
+                return;
+              }
+              await updateStationData(sql, station, stream);
+              log.debug(`Station ID ${station.id}: Updated..`);
+              total++;
+            } catch (e) {
+              log.debug(`Error testing stream for station ID ${station.id}: ${e.message}`);
+            }
+          }))
+        );
+      } catch(e) {
+        log.error(`Failed updating database part ${ndx}: ${e.message}`);
+      }
+    }
     const stats = await sql.dbStats();
     const now = new Date().getTime();
     const ms = now - startTime;
 
     log.info(`Database update complete: ${total} entry${plural(total)} updated over ${msToHhMmSs(ms)}. usable entries: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
-
-  } catch (e) {
-    log.error(`Failed stream test or database update: ${e.message}`);
-  } finally { 
-    await sql.close(); 
+  } catch(e) {
+    log.error(`Database update has failed: ${e.message}`)
+  } finally {
+    await sql.close();
   }
 }
 
