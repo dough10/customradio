@@ -12,13 +12,13 @@ describe('testStreams.js module', () => {
   afterEach(() => sinon.restore());
 
   describe('plural()', () => {
-    it('should return empty string for 1', () => {
-      expect(testModule.plural(1)).to.equal('');
+    it('should return "y" string for 1', () => {
+      expect(testModule.plural(1)).to.equal('y');
     });
 
-    it('should return "s" for other numbers', () => {
-      expect(testModule.plural(0)).to.equal('s');
-      expect(testModule.plural(2)).to.equal('s');
+    it('should return "ies" for other numbers', () => {
+      expect(testModule.plural(0)).to.equal('ies');
+      expect(testModule.plural(2)).to.equal('ies');
     });
   });
 
