@@ -31,4 +31,4 @@ COPY --chown=node:node --from=build /usr/src/app/model ./model
 COPY --chown=node:node --from=build /usr/src/app/locales ./locales
 EXPOSE 3000/tcp
 
-CMD ["dumb-init", "node", "index.js"]
+CMD ["dumb-init", "node", "--expose-gc", "index.js"]
