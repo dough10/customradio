@@ -179,7 +179,7 @@ async function testStreams() {
           stationPull.map(station => limit(async () => {
             counter++;
             const partCount = counter - (ndx * UPDATE_PULL_COUNT);
-            log.debug(`Update progress: part ${ndx}/${parts}, station ${partCount}/${length} ${((partCount/length) * 100).toFixed(1)} Total: ${((counter / totalStationCount) * 100).toFixed(3)}%`);
+            log.debug(`Update progress: part ${ndx}/${parts}, station ${partCount}/${length} ${((partCount/length) * 100).toFixed(1)}% Total: ${((counter / totalStationCount) * 100).toFixed(3)}%`);
             if (!station) return;
             try {
               const stream = await retry(() => isLiveStream(station.url));
