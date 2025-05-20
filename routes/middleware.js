@@ -220,8 +220,9 @@ module.exports = (app, httpRequestCounter) => {
       return next();
     }
 
-    const csrfExemptPaths = ["/csp-report", "/metrics", "/healthz"];
-    if (csrfExemptPaths.includes(req.path)) return next();
+    if (req.path === "/csp-report") {
+      return next();
+    }
 
     const token = req.headers["x-csrf-token"];
     const sessionToken = req.session?.csrfToken;
