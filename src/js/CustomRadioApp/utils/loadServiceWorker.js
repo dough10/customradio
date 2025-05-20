@@ -44,6 +44,11 @@ function controllerChange() {
 
 
 export default async function loadServiceWorker() {
+  if (navigator.storage && navigator.storage.persist) {
+    const persistent = await navigator.storage.persist();
+    console.log('Persistent storage granted:', persistent);
+  }
+
   if (!('serviceWorker' in navigator)) return;
   
   try {
