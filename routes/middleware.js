@@ -15,12 +15,9 @@ const Logger = require("../util/logger.js");
 const logLevel = process.env.LOG_LEVEL || "info";
 const log = new Logger(logLevel);
 
-const siteURL = "https://radiotxt.site";
-
 const corsOptions = {
-  origin: siteURL,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true,
+  origin: '*',
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 };
 
 /**
@@ -111,6 +108,9 @@ module.exports = (app, httpRequestCounter) => {
       },
       contentSecurityPolicy: {
         directives: {
+          manifestSrc: [
+            "'self'"
+          ],
           defaultSrc: [
             "'self'"
           ],
@@ -170,18 +170,6 @@ module.exports = (app, httpRequestCounter) => {
   app.use(cors(corsOptions));
   app.options("*", cors(corsOptions));
 
-  app.use((req, res, next) => {
-    if (process.env.NODE_ENV !== "production") {
-      return next();
-    }
-
-    const origin = req.headers.origin;
-    if (origin && origin !== siteURL) {
-      return res.status(403).json({ error: "Origin not allowed" });
-    }
-    next();
-  });
-
   app.use(
     session({
       store: initSessionStorage(),
@@ -232,9 +220,8 @@ module.exports = (app, httpRequestCounter) => {
       return next();
     }
 
-    if (req.path === "/csp-report") {
-      return next();
-    }
+    const csrfExemptPaths = ["/csp-report", "/metrics", "/healthz"];
+    if (csrfExemptPaths.includes(req.path)) return next();
 
     const token = req.headers["x-csrf-token"];
     const sessionToken = req.session?.csrfToken;
