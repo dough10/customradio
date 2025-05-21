@@ -2,12 +2,31 @@ import UIManager from './UIManager/UIManager.js';
 import StationManager from './StationManager/StationManager.js';
 import Toast from './Toast/Toast.js';
 import LazyLoader from './LazyLoader/LazyLoader.js';
+import Alert from './Alerts/Alerts.js';
 
 import loadServiceWorker from './utils/loadServiceWorker.js';
 import { setLanguage, t } from './utils/i18n.js';
 import normalizeMemo from './utils/normalizeMemo.js';
 import hapticFeedback from './utils/hapticFeedback.js';
 import selectors from './selectors.js';
+
+function news() {
+  const newURL = 'https://radiotxt.site';
+  const currentURL = 'https://customradio.dough10.me';
+
+  if (window.location.origin === newURL) return;
+  if (localStorage.getItem('newUrlTransitionAlertShown')) return;
+
+  if (document.querySelector('#alert')) {
+    return setTimeout(news, 5000);
+  }
+
+  setTimeout(_ => {
+    localStorage.setItem('newUrlTransitionAlertShown', 'true');
+    new Alert(t('moving', newURL, currentURL));
+  }, 10000);
+}
+
 
 /**
  * customradio.dough10.me
@@ -29,6 +48,8 @@ export default class CustomRadioApp {
   */
   init() {
     this._loadServiceWorker();
+
+    news();
 
     this._uiManager.attachListeners({
       onFilterChange: this._filterChanged.bind(this),
