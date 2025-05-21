@@ -24,7 +24,7 @@ function news() {
   setTimeout(_ => {
     localStorage.setItem('newUrlTransitionAlertShown', 1);
     new Alert(t('moving', newURL, currentURL));
-  }, 10000);
+  }, 5000);
 }
 
 
