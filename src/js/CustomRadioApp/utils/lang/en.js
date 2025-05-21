@@ -20,5 +20,14 @@ export const en = {
   removeTitle: 'Remove from file',
 
   appUpdated: 'App updated',
-  pressToRefresh: 'Press to refresh'
+  pressToRefresh: 'Press to refresh',
+
+  dismiss: 'Click to dismiss',
+  moving: (newURL, currentURL) => `
+    <h2>Heads Up! Our Website is Getting a New Home!</h2>
+    <p>We're transitioning to a new web address:</p>
+    <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
+    <p>For a limited time, both ${currentURL} and our new URL will be fully accessible. We encourage you to start using the new address and update any saved links.</p>
+    <p>Thanks for your patience during this transition!</p>
+  `
 };

@@ -20,5 +20,14 @@ export const zh = {
   removeTitle: '从文件中移除',
 
   appUpdated: '应用已更新',
-  pressToRefresh: '点击刷新'
+  pressToRefresh: '点击刷新',
+
+  dismiss: '点击关闭',
+  moving: (newURL, currentURL) => `
+    <h2>注意！我们的网站将有一个新家！</h2>
+    <p>我们正在迁移到新的网址：</p>
+    <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
+    <p>在有限的时间内，${currentURL} 和我们的新网址都将完全可用。我们鼓励您开始使用新地址并更新所有保存的链接。</p>
+    <p>感谢您在此过渡期间的耐心！</p>
+  `
 };
