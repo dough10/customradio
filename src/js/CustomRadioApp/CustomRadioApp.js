@@ -13,18 +13,19 @@ import selectors from './selectors.js';
 function news() {
   const newURL = 'https://radiotxt.site';
   const currentURL = 'https://customradio.dough10.me';
+  const time = 2500;
 
   if (window.location.origin === newURL) return;
   if (localStorage.getItem('newUrlTransitionAlertShown')) return;
 
   if (document.querySelector('#alert')) {
-    return setTimeout(news, 5000);
+    return setTimeout(news, time);
   }
 
   setTimeout(_ => {
     localStorage.setItem('newUrlTransitionAlertShown', 1);
     new Alert(t('moving', newURL, currentURL));
-  }, 5000);
+  }, time);
 }
 
 
