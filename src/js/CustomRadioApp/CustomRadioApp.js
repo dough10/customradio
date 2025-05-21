@@ -22,7 +22,7 @@ function news() {
   }
 
   setTimeout(_ => {
-    localStorage.setItem('newUrlTransitionAlertShown', 'true');
+    localStorage.setItem('newUrlTransitionAlertShown', 1);
     new Alert(t('moving', newURL, currentURL));
   }, 10000);
 }
