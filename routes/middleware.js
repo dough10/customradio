@@ -147,6 +147,7 @@ module.exports = (app, httpRequestCounter) => {
           styleSrcAttr: [
             "'self'",
             "'sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='",
+            "'sha256-vikEcQTvq6CdeDjkjiw9V6JBRIAzZI2b0ZVRQumWr/U='",
             "'unsafe-hashes'",
           ],
           scriptSrcAttr: [
