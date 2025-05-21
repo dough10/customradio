@@ -19,6 +19,7 @@ const ads = require('./endpoints/ads.js');
 const topGenres = require('./endpoints/topGenres.js');
 const fourohfour = require('./endpoints/fourohfour.js');
 const info = require('./endpoints/info.js');
+const changelog = require('./endpoints/changeLog.js');
 const { t } = require('../util/i18n.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
@@ -74,6 +75,11 @@ module.exports = (app, register) => {
    * info!
    */
   app.get('/info', info);
+
+  /**
+   * change log
+   */
+  app.get('/changelog.txt', changelog);
 
   /**
    * Index
