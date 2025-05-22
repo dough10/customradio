@@ -98,9 +98,9 @@ module.exports = (app, httpRequestCounter) => {
       dnsPrefetchControl: { 
         allow: true 
       },
-      frameguard: { 
-        action: "sameorigin" 
-      },
+      xFrameOptions: false,
+      crossOriginResourcePolicy: false,
+      originAgentCluster: false,
       xssFilter: true,
       expectCt: {
         enforce: true,
