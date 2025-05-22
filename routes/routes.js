@@ -374,9 +374,6 @@ module.exports = (app, register) => {
     body('csp-report')
       .isObject()
       .withMessage('csp-report must be an object'),
-    body('csp-report.document-uri')
-      .isURL(envOptions)
-      .withMessage('document-uri must be a valid URL'),
     body('csp-report.referrer')
       .optional()
       .custom(value => {
