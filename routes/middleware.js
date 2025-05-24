@@ -312,6 +312,10 @@ module.exports = (app, httpRequestCounter) => {
       realIp: req.headers["x-real-ip"],
     };
 
+    if (clientInfo.ip === '2a06:98c0:3600::103') {
+      return res.status(404).send();
+    }
+
     if (
       clientInfo.forwardedFor &&
       !clientInfo.forwardedFor.includes(clientInfo.ip)
