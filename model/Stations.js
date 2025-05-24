@@ -383,6 +383,20 @@ class Stations {
   }
 
   /**
+   * Mark a station as a duplicate in the database.
+   * 
+   * @param {number} id - The ID of the station to mark as a duplicate.
+   * 
+   * @returns {Promise<void>} A promise that resolves when the station is marked as a duplicate.
+   * 
+   * @throws {Error} If the query fails.
+   */
+  markDuplicate(id) {
+    const query = `UPDATE stations SET duplicate = 1 WHERE id = ?`;
+    return this._runQuery(query, [id]);
+  }
+
+  /**
    * Increment station's play minutes count
    * 
    * @param {number} id - Station ID
