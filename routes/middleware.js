@@ -25,7 +25,7 @@ const corsOptions = {
  */
 function initSessionStorage() {
   if (process.env.NODE_ENV !== "production") {
-    return null;
+    return undefined;
   }
   const redisClient = createClient({
     url: process.env.REDIS_URL || "redis://localhost:6379",
@@ -217,25 +217,31 @@ module.exports = (app, httpRequestCounter) => {
    * @returns {void|Response} Returns 403 if CSRF validation fails
    */
   app.use((req, res, next) => {
-    if (req.method === "GET") {
-      return next();
-    }
-
-    if (req.path === "/csp-report") {
+    if (["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path === "/csp-report") {
       return next();
     }
 
     const token = req.headers["x-csrf-token"];
     const sessionToken = req.session?.csrfToken;
 
-    if (!token || !sessionToken || token !== sessionToken) {
-      return res.status(403).json({
-        error: "Invalid CSRF token",
-      });
+    if (!req.session) {
+      log.warning(`Missing session for ${req.method} ${req.originalUrl}`);
+      return res.status(440).json({ error: "Session expired or not established" });
+    }
+
+    if (!sessionToken) {
+      log.warning(`CSRF token missing from session for ${req.method} ${req.originalUrl}`);
+      return res.status(419).json({ error: "CSRF token missing in session" });
+    }
+
+    if (!token || token !== sessionToken) {
+      log.warning(`Invalid CSRF token on ${req.method} ${req.originalUrl}`);
+      return res.status(403).json({ error: "Invalid CSRF token" });
     }
 
     next();
   });
+
 
   /**
    * Set response language
@@ -312,18 +318,24 @@ module.exports = (app, httpRequestCounter) => {
       realIp: req.headers["x-real-ip"],
     };
 
-    if (clientInfo.ip === '2a06:98c0:3600::103') {
-      return res.status(404).send();
+    const forwardedIps = clientInfo.forwardedFor
+      ? clientInfo.forwardedFor.split(",").map(ip => ip.trim())
+      : [];
+
+    if (clientInfo.realIp && clientInfo.ip !== clientInfo.realIp) {
+      log.warning(`IP mismatch: req.ip=${clientInfo.ip}, x-real-ip=${clientInfo.realIp}`);
+      return res.status(403).json({
+        error: 'ip mismatch'
+      });
     }
 
-    if (
-      clientInfo.forwardedFor &&
-      !clientInfo.forwardedFor.includes(clientInfo.ip)
-    ) {
+    if (forwardedIps.length && !forwardedIps.includes(clientInfo.ip)) {
+      log.warning(`IP not in x-forwarded-for: req.ip=${clientInfo.ip}, x-forwarded-for=${clientInfo.forwardedFor}`);
       return res.status(403).json({
         error: "Invalid request origin",
       });
     }
+
     next();
   });
 
