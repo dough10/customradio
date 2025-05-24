@@ -89,7 +89,7 @@ export default class PlayReporter {
       const res = await retry(() => fetch(url, _OPTIONS()));
       const {message} = await res.json();
       if (message === 'ip in blacklist') this.playStopped();
-      if (res?.status !== 403) return;
+      if (![403, 419, 440].includes(res?.status)) return;
       await updateCsrf();
     } catch (error) {
       console.warn('Play report failed:', error);
