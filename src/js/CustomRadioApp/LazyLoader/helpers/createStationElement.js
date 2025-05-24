@@ -13,6 +13,11 @@ import retry from '../../utils/retry.js';
 
 const LONG_PRESS_DURATION = 500;
 
+async function csrf(res) {
+  if (![403, 419, 440].includes(res?.status)) return false;
+  return await updateCsrf();
+}
+
 /**
  * pushes an error to database
  * 
@@ -32,6 +37,8 @@ async function postStreamIssue(id, error) {
     }));
     const result = await response.json();
     console.log(result.message);
+    if (!await csrf(result)) return;
+    postStreamIssue(id, error);
   } catch (err) {
     console.error(`Error reporting stream issue for ID ${id}:`, err);
   }
@@ -69,10 +76,8 @@ async function reportInList(id, state) {
     try {
       if (deadline.timeRemaining() > 0) {
         const res = await retry(_ => fetch(`/reportInList/${id}/${state}`, _OPTIONS()));
-        if (res.status === 403) {
-          const success = await updateCsrf();
-          if (success) reportInList(id, state);
-        }
+        if (!await csrf(res)) return;
+        reportInList(id, state);
       } else {
         requestIdleCallback(_ => reportInList(id, state));
       }
