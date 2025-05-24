@@ -8,8 +8,11 @@ export default (body = null) => {
     }
   };
 
-  if (body) {
+  if (body instanceof HTMLFormElement) {
     options.body = new FormData(body);
+  } else if (body && typeof body === 'object') {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(body);
   }
 
   return options;
