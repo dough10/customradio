@@ -64,7 +64,7 @@ async function submitStation(ev) {
 
   try {
     const response = await retry( _ => fetch('/add', _OPTIONS(ev.target)));
-    if (response.status === 403) {
+    if ([403, 419, 440].includes(response?.status)) {
       const success = await updateCsrf();
       if (success) submitStation(ev);
       return;
