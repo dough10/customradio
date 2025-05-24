@@ -2,6 +2,8 @@ import svgIcon from './createSVGIcon.js';
 import sleep from '../../utils/sleep.js';
 import Toast from '../../Toast/Toast.js';
 import { t } from '../../utils/i18n.js';
+import _OPTIONS from '../../utils/post_options.js';
+import updateCsrf from '../../utils/updateCsrf.js';
 
 const ELEMENT_HEIGHT = 40;
 
@@ -149,18 +151,15 @@ function placeMenu(menu, X, Y, popupHeight) {
  */
 async function markDuplicate(id) {
   try {
-    const formBody = new URLSearchParams({
-      id
-    }).toString();
-    const response = await fetch('/mark-duplicate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formBody,
-    });
+    const response = await fetch('/mark-duplicate', _OPTIONS({id}));
     const result = await response.json();
     new Toast(result.message, 1.5);
+    // invalid csrf
+    if (![440,419,403].includes(result.status)) return;
+    // attempt to update
+    if (!await updateCsrf()) return;
+    // if updated send request again
+    markDuplicate(id);
   } catch (err) {
     console.error('error reporting stream duplicate:', err);
   }
