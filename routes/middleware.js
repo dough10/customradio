@@ -322,13 +322,6 @@ module.exports = (app, httpRequestCounter) => {
       ? clientInfo.forwardedFor.split(",").map(ip => ip.trim())
       : [];
 
-    if (clientInfo.realIp && clientInfo.ip !== clientInfo.realIp) {
-      log.warning(`IP mismatch: req.ip=${clientInfo.ip}, x-real-ip=${clientInfo.realIp}`);
-      return res.status(403).json({
-        error: 'ip mismatch'
-      });
-    }
-
     if (forwardedIps.length && !forwardedIps.includes(clientInfo.ip)) {
       log.warning(`IP not in x-forwarded-for: req.ip=${clientInfo.ip}, x-forwarded-for=${clientInfo.forwardedFor}`);
       return res.status(403).json({
