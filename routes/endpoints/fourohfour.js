@@ -36,22 +36,26 @@ module.exports = async (req, res) => {
   
   log.info(`${req.ip} requested ${url.format(reqadd)} 404! ${message}`);
 
-  const requestedPath = decodeURIComponent(reqadd.pathname);
-
-  /**
-   * Array of sensitive paths that will trigger a redirect to a Rickroll if detected.
-   * @type {string[]}
-   */
-  const sensitivePaths = ['.env', 'wp-admin', '.git', '.ssh', '.json', '.yml', '.sql'];
-
-  // Check if the requested path contains any sensitive path and redirect accordingly
-  for (const path of sensitivePaths) {
-    if (requestedPath.includes(path)) {
-      // Rickroll
-      return res.redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+  try {
+    const requestedPath = decodeURIComponent(reqadd.pathname);
+    
+    /**
+     * Array of sensitive paths that will trigger a redirect to a Rickroll if detected.
+     * @type {string[]}
+     */
+    const sensitivePaths = ['.env', 'wp-admin', '.git', '.ssh', '.json', '.yml', '.sql'];
+  
+    // Check if the requested path contains any sensitive path and redirect accordingly
+    for (const path of sensitivePaths) {
+      if (requestedPath.includes(path)) {
+        // Rickroll
+        return res.redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+      }
     }
+  
+    // Respond with a 404 error and a custom message
+    res.status(404).json({message});
+  } catch(e) {
+    res.status(404).json({message});
   }
-
-  // Respond with a 404 error and a custom message
-  res.status(404).json({message});
 };
