@@ -117,6 +117,7 @@ module.exports = (app, httpRequestCounter) => {
           scriptSrc: [
             "'self'",
             "https://analytics.dough10.me",
+            "https://static.cloudflareinsights.com",
             (req, res) => `'nonce-${res.locals.nonce}'`,
           ],
           styleSrc: [
