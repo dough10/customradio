@@ -53,6 +53,7 @@ export default async function contextMenu(ev) {
   if (!el.dataset.name) return;
   if (ev.type === "contextmenu") ev.preventDefault();
 
+  const body = document.querySelector('body');
   const buttons = getButtons(el).map(contextMenuItem);
   
   // positioning
@@ -140,14 +141,13 @@ function addPopupListeners(popup, body, backdrop) {
   const dismiss = _ => {
     em.removeByNamespace('context-dismiss');
     const ndx = em.add(popup, 'transitionend', _ => {
+      em.remove(ndx);
       backdrop.remove();
       popup.remove();
-      em.remove(ndx);
     }, true);
     popup.removeAttribute('open');
     backdrop.removeAttribute('visable');
   };
-  em.add(popup, 'mouseleave', _ => dismiss(), true, 'context-dismiss');
   em.add(body, 'click', _ => dismiss(), true, 'context-dismiss');
   em.add(body, 'contextmenu', _ => dismiss(), true, 'context-dismiss');
 }
