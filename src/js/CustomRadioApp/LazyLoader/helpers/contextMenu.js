@@ -5,8 +5,19 @@ import { t } from '../../utils/i18n.js';
 import _OPTIONS from '../../utils/post_options.js';
 import updateCsrf from '../../utils/updateCsrf.js';
 
+import EventManager from '../../utils/EventManager/EventManager.js';
+
 const ELEMENT_HEIGHT = 40;
 
+const em = new EventManager();
+
+/**
+ * generate button array
+ * 
+ * @param {HTMLElement} el element clicked
+ * 
+ * @returns {Array} list of button objects
+ */
 function getButtons(el) {
   const buttons = [
     {
@@ -41,22 +52,28 @@ export default async function contextMenu(ev) {
   const el = ev.target;
   if (!el.dataset.name) return;
   if (ev.type === "contextmenu") ev.preventDefault();
-  const buttonData = getButtons(el);
-  const body = document.querySelector('body');
-  const buttons = buttonData.map(contextMenuItem);
-  const popupHeight = ELEMENT_HEIGHT * buttonData.length;
+
+  const buttons = getButtons(el).map(contextMenuItem);
+  
+  // positioning
+  const popupHeight = ELEMENT_HEIGHT * buttons.length;
   const X = ev.pageX || ev.touches[0].pageX;
   const Y = ev.pageY || ev.touches[0].pageY;
   const popup = document.createElement('ul');
   const backdrop = document.createElement('div');
-
+  
   backdrop.classList.add('backdrop');
   popup.classList.add('context-menu');
   popup.append(...buttons);
   placeMenu(popup, X, Y, popupHeight);
   body.append(popup, backdrop);
-  await sleep(10);
-  popup.addEventListener('transitionend', _ => addPopupListeners(popup, body, backdrop));
+
+  await sleep(20);
+
+  const ndx = em.add(popup, 'transitionend', _ => {
+    addPopupListeners(popup, body, backdrop);
+    em.remove(ndx);
+  }, true);
   backdrop.toggleAttribute('visable');
   popup.toggleAttribute('open');
 }
@@ -80,7 +97,7 @@ function contextMenuItem({icon, text, title, func}) {
   const li = document.createElement('li');
   li.title = title;
   li.append(svgIcon(icon), txt);
-  li.addEventListener('click', _ => func());
+  em.add(li, 'click', _ => func(), true, 'clicks');
   return li;
 }
 
@@ -121,18 +138,18 @@ function openStationHomepage(homepage) {
  */
 function addPopupListeners(popup, body, backdrop) {
   const dismiss = _ => {
-    body.removeEventListener('click', _ => dismiss());
-    body.removeEventListener('contextmenu', _ => dismiss());
-    popup.addEventListener('transitionend', _ => {
+    em.removeByNamespace('context-dismiss');
+    const ndx = em.add(popup, 'transitionend', _ => {
       backdrop.remove();
       popup.remove();
-    });
+      em.remove(ndx);
+    }, true);
     popup.removeAttribute('open');
     backdrop.removeAttribute('visable');
   };
-  popup.addEventListener('mouseleave', _ => dismiss());
-  body.addEventListener('click', _ => dismiss());
-  body.addEventListener('contextmenu', _ => dismiss());
+  em.add(popup, 'mouseleave', _ => dismiss(), true, 'context-dismiss');
+  em.add(body, 'click', _ => dismiss(), true, 'context-dismiss');
+  em.add(body, 'contextmenu', _ => dismiss(), true, 'context-dismiss');
 }
 
 /**
