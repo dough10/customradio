@@ -5,6 +5,7 @@ const log = new Logger(logLevel);
 
 const changelog = {
   "1.12.2": [
+    'new list style',
     'conditional context buttons (no homepage button if no homepage url in database)'
   ],
   "1.12.1": [
