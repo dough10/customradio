@@ -1,5 +1,5 @@
 {
-  "1.12.2": [
+  "Current": [
     "New list styling",
     "Conditional context menu buttons (no homepage button if homepage url not in database)"
   ],
