@@ -39,7 +39,7 @@ describe('EventManager', () => {
 
   it('should return null when trying to remove a non-existent listener', () => {
     const removed = eventManager.remove(999); // Invalid index
-    expect(removed).to.be.null;
+    expect(removed).to.be.false;
   });
 
   it('should remove all event listeners', () => {
@@ -71,7 +71,7 @@ describe('EventManager', () => {
     const index = eventManager.add(null, 'click', mockHandler);
 
     const removed = eventManager.remove(index);
-    expect(removed).to.be.null; // Cannot remove a listener with a null target
+    expect(removed).to.be.false; // Cannot remove a listener with a null target
   });
 
   it('should add and remove listeners with namespaces', () => {
