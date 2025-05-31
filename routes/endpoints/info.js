@@ -12,7 +12,7 @@ module.exports = (req, res) => {
     
     const packageJson = JSON.parse(packageData);
     log.info(`${req.ip} -> /info ${Date.now() - req.startTime}ms`);
-    res.json({dependencies: packageJson.dependencies, version: packageJson.version});
+    res.json({dependencies: packageJson.dependencies, version: packageJson.version, changelog: require('../../changelog.json')});
   } catch (err) {
     const error = `An error occurred while reading the package.json file: ${err.message}`;
     log.critical(error);
