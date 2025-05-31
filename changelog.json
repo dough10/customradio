@@ -1,7 +1,7 @@
 {
   "Current": [
     "Change log added to info dialog",
-    "New list styling",
+    "Updated list styling",
     "Conditional context menu buttons (no homepage button if homepage url not in database)"
   ],
   "1.12.1": [
