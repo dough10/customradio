@@ -63,9 +63,9 @@ export default class EventManager {
       const { target, type, handler, options } = listener;
       target.removeEventListener(type, handler, options);
       this.listeners.splice(index, 1);
-      return listener;
+      return true;
     }
-    return null;
+    return false;
   }
 
   /**
