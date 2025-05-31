@@ -79,16 +79,16 @@ dialog>.small-button.close {
   padding: 8px;
 }
 
-.scrollable>ul {
+.scrollable>*>ul {
   margin: 0 0 24px 0;
   padding: 0;
 }
 
-.scrollable>ul>li {
+.scrollable>*>ul>li {
   padding: 0 16px;
 }
 
-.scrollable>ul>li>ul {
+.scrollable>*>ul>li>ul {
   margin: 0;
   padding: 0;
 }

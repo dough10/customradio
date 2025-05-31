@@ -127,28 +127,34 @@ html(lang=lang)
       .scrollable
         .margin-bottom-24 #{thanks} <br />
           a(href='https://paypal.me/jdough10' target="_blank" rel="noopener noreferrer") paypal.me/jdough10
-        b Frontend:
-        ul 
-          li
-            a(href="https://fonts.google.com/" target="_blank") Google Fonts
-          li
-            a(href="https://fonts.google.com/icons" target="_blank") Material Icons
-          li
-            | Vanilla JS
-          li
-            | HTML5 Audio
+        h3.margin-bottom-24 Change Log
+        #changelog
+        | Complete Changelog: 
+        a(href="changelog.txt" target="_blank" rel="noopener noreferrer") changelog.txt
+        h3.margin-top-24.margin-bottom-24 Stack
+        div
+          b Frontend:
+          ul 
+            li
+              a(href="https://fonts.google.com/" target="_blank") Google Fonts
+            li
+              a(href="https://fonts.google.com/icons" target="_blank") Material Icons
+            li
+              | Vanilla JS
+            li
+              | HTML5 Audio
 
-        b  Backend:
-        ul#dependencies
-          li 
-            a(href="https://nodejs.org" target="_blank") NodeJS: 22
-          li
-            a(href="https://www.sqlite.org/" target="_blank") SQLite: 3.4
+          b  Backend:
+          ul#dependencies
+            li 
+              a(href="https://nodejs.org" target="_blank") NodeJS: 22
+            li
+              a(href="https://www.sqlite.org/" target="_blank") SQLite: 3.4
 
-        b Data:
-        ul 
-          li 
-            a(href="https://dir.xiph.org/" target="_blank") Icecast directory
+          b Data:
+          ul 
+            li 
+              a(href="https://dir.xiph.org/" target="_blank") Icecast directory
 
       .flex-row
         svg.margin-right-8(height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" alt='github')

@@ -150,6 +150,35 @@ function wobbleDialog(ev) {
   }
 }
 
+function createList(entrys) {
+  const fragment = document.createDocumentFragment();
+  Object.entries(entrys).forEach(([key, value]) => {
+    const li = document.createElement('li');
+    li.textContent = `${key}: ${rmArrow(value)}`;
+    fragment.appendChild(li);
+  });
+  return fragment; 
+}
+
+function createChangelog(changes) {
+  const fragment = document.createDocumentFragment();
+  let count = 0;
+  for (const version in changes) {
+    if (count >= 2) break;
+    const header = document.createElement('b');
+    header.textContent = `${version}:`;
+    const list = document.createElement('ul');
+    fragment.append(header, list);
+    changes[version].forEach(change => {
+      const li = document.createElement('li');
+      li.textContent = change;
+      list.append(li);
+    });
+    count++;
+  }
+  return fragment;
+}
+
 /**
  * populate info dialog with details about application
  * 
@@ -172,15 +201,12 @@ async function info() {
     const pack = await response.json();
 
     dialog.querySelector('h1').textContent = `v${pack.version}`;
+    
+    const changelog = createChangelog(pack.changelog);
+    document.querySelector('#changelog').append(changelog);
 
-    const fragment = document.createDocumentFragment();
-    Object.entries(pack.dependencies).forEach(([key, value]) => {
-      const li = document.createElement('li');
-      li.textContent = `${key}: ${rmArrow(value)}`;
-      fragment.appendChild(li);
-    });
-
-    depDiv.append(fragment);
+    const dependencies = createList(pack.dependencies);
+    depDiv.append(dependencies);
   } catch (error) {
     const message = `Error fetching dependencies: ${error.message}`;
     console.error(message);
