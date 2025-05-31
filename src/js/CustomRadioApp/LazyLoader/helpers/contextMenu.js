@@ -7,17 +7,8 @@ import updateCsrf from '../../utils/updateCsrf.js';
 
 const ELEMENT_HEIGHT = 40;
 
-/**
- * Opens a context menu at the click location.
- * 
- * @param {MouseEvent|TouchEvent} ev - The event that triggered the context menu.
- * @returns {Promise<void>}
- */
-export default async function contextMenu(ev) {
-  const el = ev.target;
-  if (!el.dataset.name) return;
-  if (ev.type === "contextmenu") ev.preventDefault();
-  const buttonData = [
+function getButtons(el) {
+  const buttons = [
     {
       icon: {
         viewbox: '0 -960 960 960',
@@ -33,9 +24,24 @@ export default async function contextMenu(ev) {
       },
       text : t('homepage'),
       title: t('homepageTitle', el.dataset.homepage),
-      func: _ => openStationHomepage(el.dataset.homepage)
+      func: _ => openStationHomepage(el.dataset.homepage),
+      condition: el => el.dataset.homepage !== 'Unknown'
     }
   ];
+  return buttons.filter(btn => !btn.condition || btn.condition(el));
+}
+
+/**
+ * Opens a context menu at the click location.
+ * 
+ * @param {MouseEvent|TouchEvent} ev - The event that triggered the context menu.
+ * @returns {Promise<void>}
+ */
+export default async function contextMenu(ev) {
+  const el = ev.target;
+  if (!el.dataset.name) return;
+  if (ev.type === "contextmenu") ev.preventDefault();
+  const buttonData = getButtons(el);
   const body = document.querySelector('body');
   const buttons = buttonData.map(contextMenuItem);
   const popupHeight = ELEMENT_HEIGHT * buttonData.length;
