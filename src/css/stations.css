@@ -47,7 +47,7 @@
 }
 
 #stations>li[playing][selected]>div {
-  background: var(--background-color);
+  background: var(--main-color);
   color: var(--text-color);
 }
 
