@@ -18,6 +18,7 @@ ENV TZ="America/Chicago"
 WORKDIR /usr/src/app
 
 COPY --chown=node:node --from=build /usr/src/app/package*.json ./
+COPY --chown=node:node --from=build /usr/src/app/changelog.json ./
 COPY --chown=node:node --from=build /usr/src/app/index.js ./
 COPY --chown=node:node --from=build /usr/src/app/test.js ./
 COPY --chown=node:node --from=build /usr/src/app/public ./public
