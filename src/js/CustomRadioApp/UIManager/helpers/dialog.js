@@ -151,6 +151,13 @@ function wobbleDialog(ev) {
   }
 }
 
+/**
+ * creates html elements for application dependencies 
+ * 
+ * @param {Array} entrys
+ *  
+ * @returns {HTMLElement}
+ */
 function createList(entrys) {
   const fragment = document.createDocumentFragment();
   Object.entries(entrys).forEach(([key, value]) => {
@@ -161,15 +168,26 @@ function createList(entrys) {
   return fragment; 
 }
 
+/**
+ * creates html elements for most recent 2 versions of changelog
+ * 
+ * @param {Object} changes - changelog object from backend
+ * 
+ * @returns {HTMLElement} document fragment containing HTMLElements
+ */
 function createChangelog(changes) {
   const fragment = document.createDocumentFragment();
   let count = 0;
   for (const version in changes) {
     if (count >= 2) break;
+
     const header = document.createElement('b');
     header.textContent = `${version}:`;
+
     const list = document.createElement('ul');
+    
     fragment.append(header, list);
+    
     changes[version].forEach(change => {
       const li = document.createElement('li');
       li.textContent = change;
@@ -187,7 +205,8 @@ function createChangelog(changes) {
  */
 async function info() {
   const dialog = document.querySelector(selectors.infoDialog);
-  const depDiv = document.querySelector(selectors.dependencies);
+  const depDiv = dialog.querySelector(selectors.dependencies);
+  const changelog = dialog.querySelector(selectors.changelog);
 
   hapticFeedback();
 
@@ -203,8 +222,8 @@ async function info() {
 
     dialog.querySelector('h1').textContent = `v${pack.version}`;
     
-    const changelog = createChangelog(pack.changelog);
-    document.querySelector('#changelog').append(changelog);
+    const changes = createChangelog(pack.changelog);
+    changelog.append(changes);
 
     const dependencies = createList(pack.dependencies);
     depDiv.append(dependencies);
