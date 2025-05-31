@@ -139,7 +139,7 @@ self.addEventListener('message', event => {
 });
 
 self.addEventListener('push', function(event) {
-  const data = event.data.json(); // your server sends JSON
+  const data = event.data.json();
 
   event.waitUntil(
     self.registration.showNotification(data.title, {
@@ -147,7 +147,7 @@ self.addEventListener('push', function(event) {
       icon: 'android-chrome-192.png',
       badge: 'badge.png',
       data: {
-        url: data.url // you can open this when clicked
+        url: data.url
       }
     })
   );
@@ -157,7 +157,6 @@ self.addEventListener('notificationclick', function(event) {
   event.notification.close();
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(windowClients => {
-      // Check if app is already open
       for (let client of windowClients) {
         if (client.url === event.notification.data.url && 'focus' in client) {
           return client.focus();
