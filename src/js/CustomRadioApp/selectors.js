@@ -143,7 +143,10 @@ const selectors = {
   dialogCloseButton: '.button.close',
 
   /** @type {String} all dialog close buttons */
-  dialogClose: 'dialog>.close'
+  dialogClose: 'dialog>.close',
+
+  /** @type {String} changelog */
+  changelog: '#changelog'
 };
 
 export default selectors;
