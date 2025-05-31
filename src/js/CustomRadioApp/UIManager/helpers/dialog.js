@@ -69,6 +69,7 @@ async function submitStation(ev) {
       if (success) submitStation(ev);
       return;
     }
+    if (!response) throw Error('network error adding Station');
     const result = await response.json();
     const message = result.message;
     responseElement.textContent = message;
