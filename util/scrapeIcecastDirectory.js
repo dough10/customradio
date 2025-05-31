@@ -63,11 +63,18 @@ module.exports = async () => {
           
           try{
             const url = rmRef(entry.listen_url[0]);
+
+            // early check for url in database
+            // isLiveStream may change url protocol (http -> https)
+            // addStation method checks again. this line keeps from doing extra work
             if (await sql.exists(url)) return;
             
             const stream = await isLiveStream(url);
           
+            // do not add if stream offline
             if (!stream.ok) return;
+            
+            // check if stream is allowed content type
             if (!usedTypes.includes(stream.content)) return;
           
             const result = await sql.addStation({
@@ -82,10 +89,10 @@ module.exports = async () => {
               error: '',
               duplicate: false
             });
-            if (result !== 'Station exists') {
-              log.debug(`Added station: ${result}`);
-              total += 1;
-            }
+
+            if (result === 'Station exists') return;
+            log.debug(`Added station: ${result}`);
+            total += 1;
           } catch(e) {
             log.error(`Error processing entry: ${err.message}`);
           }
