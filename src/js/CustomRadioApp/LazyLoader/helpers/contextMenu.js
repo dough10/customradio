@@ -110,15 +110,7 @@ function contextMenuItem({icon, text, title, func}) {
  * @returns {void}
  */
 function openStationHomepage(homepage) {
-  if (homepage === 'Unknown') {
-    new Toast(t('noHome'), 3);
-    return;
-  }
-  
   try {
-    if (!(homepage.startsWith('https://') || homepage.startsWith('http://'))) {
-      homepage = 'http://' + homepage;
-    }
     const url = new URL(homepage);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') {
       throw new Error('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
@@ -138,18 +130,19 @@ function openStationHomepage(homepage) {
  * @param {HTMLElement} body 
  */
 function addPopupListeners(popup, body, backdrop) {
-  const dismiss = _ => {
+  const dismiss = ev => {
+    ev.preventDefault();
     em.removeByNamespace('context-dismiss');
-    const ndx = em.add(popup, 'transitionend', _ => {
-      em.remove(ndx);
+    em.add(popup, 'transitionend', _ => {
+      em.removeAll();
       backdrop.remove();
       popup.remove();
     }, true);
     popup.removeAttribute('open');
     backdrop.removeAttribute('visable');
   };
-  em.add(body, 'click', _ => dismiss(), true, 'context-dismiss');
-  em.add(body, 'contextmenu', _ => dismiss(), true, 'context-dismiss');
+  em.add(body, 'click', dismiss, true, 'context-dismiss');
+  em.add(body, 'contextmenu', dismiss, true, 'context-dismiss');
 }
 
 /**
