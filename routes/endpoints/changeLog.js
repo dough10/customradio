@@ -3,22 +3,9 @@ const Logger = require('../../util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-const changelog = {
-  "1.12.2": [
-    'new list style',
-    'conditional context buttons (no homepage button if no homepage url in database)'
-  ],
-  "1.12.1": [
-    'Added an Alert system to notify users of changes',
-    'Anonymous station play and in list reporting, shifts popular stations to top of search results',
-    'Japaneese translations',
-    'Korean Translations',
-    'Swedish translations',
-    'added this changelog'
-  ] 
-};
+const changelog = require('../../changelog.json');
 
-function format(req) {
+function format() {
   let formattedText = '';
   for (const version in changelog) {
     formattedText += `${version}:\n\n`;
@@ -32,6 +19,6 @@ function format(req) {
 module.exports = (req, res) => {
   log.info(`${req.ip} -> /changelog.txt ${Date.now() - req.startTime}ms`);
   res.type('text/plain');
-  const changelogText = format(req);
+  const changelogText = format();
   res.send(changelogText);
 };
