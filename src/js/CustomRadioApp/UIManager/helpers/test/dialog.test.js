@@ -15,6 +15,7 @@ describe('addDialogInteractions', () => {
       <dialog id="info-dialog">
         <button class="close">Close</button>
         <h1></h1>
+        <div id="changelog"></div>
         <ul id="dependencies"></ul>
       </dialog>
       <dialog id="add">
@@ -51,6 +52,11 @@ describe('addDialogInteractions', () => {
       json: sinon.stub().resolves({
         version: '1.0.0',
         dependencies: { axios: '^1.2.3', sinon: '^7.5.0' },
+        changelog: {
+          "1.0.0": [
+            'change made'
+          ]
+        }
       }),
     });
 
@@ -64,7 +70,12 @@ describe('addDialogInteractions', () => {
     const versionHeader = dialog.querySelector('h1');
     expect(versionHeader.textContent).to.equal('v1.0.0');
 
-    const dependencies = document.querySelectorAll('#dependencies>li');
+    const changes = dialog.querySelectorAll('#changelog>*');
+    expect(changes).to.have.lengthOf(2);
+    expect(changes[0].textContent).to.equal('1.0.0:');
+    expect(changes[1].textContent).to.equal('change made');
+
+    const dependencies = dialog.querySelectorAll('#dependencies>li');
     expect(dependencies).to.have.lengthOf(2);
     expect(dependencies[0].textContent).to.equal('axios: 1.2.3');
     expect(dependencies[1].textContent).to.equal('sinon: 7.5.0');
