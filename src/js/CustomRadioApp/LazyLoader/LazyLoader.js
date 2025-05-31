@@ -16,7 +16,12 @@ const LI_BOTTOM_MARGIN = 180;
  * @returns {Number} number of elements that will fit in browser window height
  */
 function getPullCount() {
-  return Math.round(window.innerHeight / ELEMENT_HEIGHT);
+  if (window.innerWidth < 400) {
+    return Math.ceil(window.innerHeight / ELEMENT_HEIGHT);
+  }
+  const colWidth = Math.ceil(window.innerWidth / 370);
+  const colHeight = Math.ceil(window.innerHeight / ELEMENT_HEIGHT)
+  return Math.ceil(colHeight * colWidth);
 }
 
 /**

@@ -23,6 +23,7 @@
   --background-color: #b9b9b9;
   --selected-color: rgba(100, 100, 100, 0.4);
   --seperator-line: 1px solid rgba(51, 51, 51, 0.2);
+  --station-background: rgb(200, 200, 200);
   --contrast-color: #121212;
   --animate-150: 150ms;
   --animate-200: 200ms;
@@ -43,6 +44,7 @@
     --background-color: rgb(22, 22, 22);
     --selected-color: rgba(136, 136, 136, 0.6);
     --seperator-line: 1px solid rgba(225, 225, 225, 0.1);
+    --station-background: rgb(33, 33, 33);
   }
 }
 
