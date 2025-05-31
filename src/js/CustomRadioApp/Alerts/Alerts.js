@@ -8,7 +8,7 @@ export default class Alert {
   constructor(bodyHTML) {
     this.alert = this.#createAlert(bodyHTML);
     document.querySelector('body').append(this.alert);
-    sleep(10).then(_ => requestAnimationFrame(() => this.alert.setAttribute('open', true)));
+    sleep(20).then(_ => requestAnimationFrame(() => this.alert.setAttribute('open', true)));
   }
 
   destroy() {
