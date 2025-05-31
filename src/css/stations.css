@@ -13,6 +13,8 @@
 }
 
 #stations>li {
+  margin: 8px auto;
+  max-width: 500px;
   padding: 0.5em;
   display: flex;
   justify-content: center;
@@ -54,9 +56,12 @@
   color: var(--text-color);
 }
 
+#stations>li:first-child {
+  margin-top: 0;
+}
+
 #stations>li:last-child {
   margin-bottom: 11.25em;
-  border-bottom: var(--seperator-line);
 }
 
 #stations>li[selected] {
