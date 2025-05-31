@@ -4,6 +4,9 @@ const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
 const changelog = {
+  "1.12.2": [
+    'conditional context buttons (no homepage button if no homepage url in database)'
+  ],
   "1.12.1": [
     'Added an Alert system to notify users of changes',
     'Anonymous station play and in list reporting, shifts popular stations to top of search results',
