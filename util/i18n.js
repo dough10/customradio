@@ -30,6 +30,7 @@ let currentLang = 'en';
  * @returns {String}
  */
 function setLanguage(lang) {
+  if (!locales[lang]) log.warning(`language file does not exist: ${lang}`);
   currentLang = locales[lang] ? lang : 'en';
   return currentLang;
 }
