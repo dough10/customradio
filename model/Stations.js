@@ -503,17 +503,16 @@ class Stations {
    * counts stations the meet the input condition
    * 
    * @param {String} condition
-   * @param {string[]} [types=usedTypes] optional array of content types
    * 
    * @returns {Number|Error} count or error
    */
-  _getUsableCount(condition, types = usedTypes) {
-    const typesPlaceholder = mapPlaceholders(types);
+  _getUsableCount(condition) {
+    const typesPlaceholder = mapPlaceholders(usedTypes);
     return new Promise((resolve, reject) => {
       this.db.get(`SELECT COUNT(*) AS count 
         FROM stations 
         WHERE ${condition} AND content_type IN (${typesPlaceholder})`, 
-        types, (err, row) => {
+        usedTypes, (err, row) => {
         if (err) {
           reject(new Error(`Failed counting stations: ${err.message}`));
         } else {
