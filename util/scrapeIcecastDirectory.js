@@ -16,10 +16,38 @@ const limit = pLimit(5);
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
+
+let progressCounter = 0;
+let changed = 0;
+
+
 /**
- * Scrapes the Icecast directory for new stations
+ * get data from icecast directory
  * 
- * @returns {Promise<void>}
+ * @returns {Array|Boolean}
+ */
+async function requestData() {
+  const res = await axios.get('http://dir.xiph.org/yp.xml', {
+    headers: {
+      'User-Agent': `customradio.dough10.me/${pack.version}`
+    },
+    timeout: 20000
+  });
+  if (!res.data) return false;
+  const parser = new xml2js.Parser();
+  const result = await parser.parseStringPromise(res.data);
+  return result.directory.entry;
+}
+
+/**
+ * 
+ * @param {Object} entry 
+ * @param {Number} progressCounter 
+ * @param {Number} changed 
+ * @param {Number} length 
+ * @param {Object} sql 
+ * 
+ * @returns {void}
  * 
  * data structure
  * {
@@ -32,80 +60,78 @@ const log = new Logger(logLevel);
  *   current_song: [ "Coolio - Gangsta's Paradise" ],
  *   genre: [ '2000-х Музыка' ]
  * }
+ */  
+async function processStream(entry, length, sql) {
+  progressCounter++;
+  log.debug(`Scrape progress: ${((progressCounter / length) * 100).toFixed(3)}%`);
+  
+  try{
+    const url = rmRef(entry.listen_url[0]);
+
+    // early check for url in database
+    // isLiveStream may change url protocol (http -> https)
+    // addStation method checks again. this line keeps from doing extra work
+    if (await sql.exists(url)) return;
+    
+    const stream = await isLiveStream(url);
+  
+    // do not add if stream offline
+    if (!stream.ok) return;
+    
+    // check if stream is allowed content type
+    if (!usedTypes.includes(stream.content)) return;
+  
+    const result = await sql.addStation({
+      name: stream.name || entry.server_name[0] || stream.description,
+      url: stream.url,
+      genre: stream.icyGenre || entry.genre[0] || 'Unknown',
+      online: stream.isLive,
+      'content-type': stream.content || '',
+      bitrate: stream.bitrate || 0,
+      icon: 'Unknown',
+      homepage: await retry(() => testHomepageConnection(stream.icyurl)) || 'Unknown',
+      error: '',
+      duplicate: false
+    });
+
+    if (result === 'Station exists') return;
+    log.debug(`Added station: ${result}`);
+    changed++;
+  } catch(e) {
+    log.error(`Error processing entry: ${e.message}`);
+  }
+}
+
+/**
+ * Scrapes the Icecast directory for new stations
+ * 
+ * @returns {Promise<void>}
  */
 module.exports = async () => {
   const sql = new Stations('data/customradio.db');
 
+  const startTime = new Date().getTime();
+  progressCounter = 0;
+  changed = 0;
   try {
-    const res = await axios.get('http://dir.xiph.org/yp.xml', {
-      headers: {
-        'User-Agent': `customradio.dough10.me/${pack.version}`
-      },
-      timeout: 20000
-    });
-    if (!res.data) return;
-    
-    const parser = new xml2js.Parser();
-    const result = await parser.parseStringPromise(res.data);
-    const data = result.directory.entry;
-    
-    let total = 0;
-    const startTime = new Date().getTime();
+    const data = await requestData();
+    if (!data) throw Error('Fetch failed');
     const length = data.length;
     
     log.info(`Scraping Icecast Directory for new stations. ${length} stations pulled`);
-    let counter = 0;
     await Promise.all(
-      data.map(entry =>
-        limit(async () => {
-          counter++;
-          log.debug(`Scrape progress: ${((counter / length) * 100).toFixed(3)}%`);
-          
-          try{
-            const url = rmRef(entry.listen_url[0]);
-
-            // early check for url in database
-            // isLiveStream may change url protocol (http -> https)
-            // addStation method checks again. this line keeps from doing extra work
-            if (await sql.exists(url)) return;
-            
-            const stream = await isLiveStream(url);
-          
-            // do not add if stream offline
-            if (!stream.ok) return;
-            
-            // check if stream is allowed content type
-            if (!usedTypes.includes(stream.content)) return;
-          
-            const result = await sql.addStation({
-              name: stream.name || entry.server_name[0] || stream.description,
-              url: stream.url,
-              genre: stream.icyGenre || entry.genre[0] || 'Unknown',
-              online: stream.isLive,
-              'content-type': stream.content || '',
-              bitrate: stream.bitrate || 0,
-              icon: 'Unknown',
-              homepage: await retry(() => testHomepageConnection(stream.icyurl)) || 'Unknown',
-              error: '',
-              duplicate: false
-            });
-
-            if (result === 'Station exists') return;
-            log.debug(`Added station: ${result}`);
-            total += 1;
-          } catch(e) {
-            log.error(`Error processing entry: ${err.message}`);
-          }
-        })
+      data.map(entry => 
+        limit(() => processStream(entry, length, sql))
       )
     );
-    const stats = await sql.dbStats();
+    const {total, online} = await sql.dbStats();
     const now = new Date().getTime();
-    const ms = now - startTime;
-    log.info(`Icecast Directory scrape complete: ${total} entry${plural(total)} added over ${msToHhMmSs(ms)}. usable entries: ${stats.total}, online: ${stats.online}, offline: ${stats.total - stats.online}`);
+    log.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(now - startTime)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
   } catch (err) {
     log.critical(`Scrape failed: ${err.message}`);
   } finally {
     await sql.close();
+    changed = 0;
+    progressCounter = 0;
   }
 };
