@@ -179,7 +179,7 @@ function createChangelog(changes) {
   const fragment = document.createDocumentFragment();
   let count = 0;
   for (const version in changes) {
-    if (count >= 2) break;
+    if (count >= 3) break;
 
     const header = document.createElement('b');
     header.textContent = `${version}:`;
