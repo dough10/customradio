@@ -12,7 +12,7 @@ module.exports = {
   entry: './build_assets/build.js',
   output: {
     filename: 'bundle.min.js',
-    path: path.resolve(__dirname, 'public'),
+    path: path.resolve(__dirname, '..', 'public'),
   },
   module: {
     rules: [
