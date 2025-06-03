@@ -17,3 +17,4 @@ data/.gitignore
 templates/.gitignore
 */*-old.js
 data/*.db
+t.js
