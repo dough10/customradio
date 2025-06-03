@@ -1,4 +1,5 @@
 import Alert from '../Alerts/Alerts.js';
+import { t } from './i18n.js';
 
 export default function news() {
   const newURL = 'https://radiotxt.site';
