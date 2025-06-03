@@ -2,31 +2,13 @@ import UIManager from './UIManager/UIManager.js';
 import StationManager from './StationManager/StationManager.js';
 import Toast from './Toast/Toast.js';
 import LazyLoader from './LazyLoader/LazyLoader.js';
-import Alert from './Alerts/Alerts.js';
 
 import loadServiceWorker from './utils/loadServiceWorker.js';
 import { setLanguage, t } from './utils/i18n.js';
 import normalizeMemo from './utils/normalizeMemo.js';
 import hapticFeedback from './utils/hapticFeedback.js';
 import selectors from './selectors.js';
-
-function news() {
-  const newURL = 'https://radiotxt.site';
-  const currentURL = 'https://customradio.dough10.me';
-  const time = 2500;
-
-  if (window.location.origin === newURL) return;
-  if (localStorage.getItem('newUrlTransitionAlertShown')) return;
-
-  if (document.querySelector('#alert')) {
-    return setTimeout(news, time);
-  }
-
-  setTimeout(_ => {
-    localStorage.setItem('newUrlTransitionAlertShown', 1);
-    new Alert(t('moving', newURL, currentURL));
-  }, time);
-}
+import news from './utils/news.js';
 
 
 /**
