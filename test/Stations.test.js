@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
-const Stations = require('../model/Stations');
+const Stations = require('../src/model/Stations');
 
 (async () => {
   const { expect } = await import('chai');

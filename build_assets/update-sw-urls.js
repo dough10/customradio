@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const src = path.join(__dirname, '..', 'src');
+const src = path.join(__dirname, '..', 'html');
 const dest = path.join(__dirname, '..', 'public');
 
-// get file lists from destination folder
-let screenshots = fs.readdirSync(path.join(dest, 'screenshots'));
+// get file lists from src folder
+let screenshots = fs.readdirSync(path.join(src, 'screenshots'));
 
 // remove some paths and correct file paths
 const files = fs.readdirSync(dest)
@@ -20,6 +20,7 @@ const files = fs.readdirSync(dest)
   '/stations',
   '/topGenres'
 ].forEach(endpoint => files.push(endpoint));
+
 screenshots = screenshots.map(image => `/screenshots/${image}`);
 
 const urlsToCache = JSON.stringify([...files, ...screenshots]);

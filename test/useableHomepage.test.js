@@ -1,6 +1,6 @@
 (async () => {
   const { expect } = await import('chai');
-  const useableHomepage = require('../util/useableHomepage');
+  const useableHomepage = require('../src/util/useableHomepage');
   
   describe('useableHomapage', function() {
     it('should return null for an empty homepage', function() {

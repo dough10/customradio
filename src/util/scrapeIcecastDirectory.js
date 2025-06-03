@@ -1,7 +1,7 @@
 require('dotenv').config();
 const xml2js = require('xml2js');
 const axios = require('axios');
-const pack = require('../package.json');
+const pack = require('../../package.json');
 const pLimit = require('p-limit');
 
 const { testHomepageConnection, plural, msToHhMmSs } = require('./testStreams.js');

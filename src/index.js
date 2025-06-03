@@ -1,4 +1,4 @@
-const pack = require('./package.json');
+const pack = require('../package.json');
 const express = require('express');
 const schedule = require('node-schedule');
 const app = express();

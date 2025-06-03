@@ -2,7 +2,7 @@ const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 const axios = require('axios');
-const isLiveStream = require('../util/isLiveStream.js');
+const isLiveStream = require('../src/util/isLiveStream.js');
 const pack = require('../package.json');
 
 chai.use(sinonChai.default || sinonChai); // 👈 safe fallback

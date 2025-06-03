@@ -1,6 +1,6 @@
 (async () => {
   const { expect } = await import('chai');
-  const rmRef = require('../util/rmRef');
+  const rmRef = require('../src/util/rmRef');
 
   describe('rmRef', function() {
     it('should remove the "ref" query parameter from the URL', function() {

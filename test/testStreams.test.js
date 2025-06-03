@@ -2,11 +2,11 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const axios = require('axios');
 
-const testModule = require('../util/testStreams.js');
-const isLiveStream = require('../util/isLiveStream.js');
-const useableHomepage = require('../util/useableHomepage.js');
-const Stations = require('../model/Stations.js');
-const retry = require('../util/retry.js');
+const testModule = require('../src/util/testStreams.js');
+const isLiveStream = require('../src/util/isLiveStream.js');
+const useableHomepage = require('../src/util/useableHomepage.js');
+const Stations = require('../src/model/Stations.js');
+const retry = require('../src/util/retry.js');
 
 describe('testStreams.js module', () => {
   afterEach(() => sinon.restore());
@@ -34,7 +34,7 @@ describe('testStreams.js module', () => {
 
     beforeEach(() => {
       axiosHeadStub = sinon.stub(axios, 'head');
-      sinon.stub(require.cache[require.resolve('../util/useableHomepage.js')], 'exports').value((value) => value);
+      sinon.stub(require.cache[require.resolve('../src/util/useableHomepage.js')], 'exports').value((value) => value);
     });
 
     it('should return homepage on valid HEAD response', async () => {

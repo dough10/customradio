@@ -14,11 +14,11 @@ const locales = {};
  * load translation files
  */
 const context = require.context('../locales', false, /\.js$/);
-
 context.keys().forEach(file => {
   const lang = path.basename(file, '.js');
   locales[lang] = context(file);
 });
+
 
 /** @type {String} current language */
 let currentLang = 'en';

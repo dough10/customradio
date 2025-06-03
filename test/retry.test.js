@@ -1,6 +1,6 @@
 // test/retry.test.js
 const { expect } = require('chai');
-const retry = require('../util/retry.js'); // assuming the file is retry.js
+const retry = require('../src/util/retry.js'); // assuming the file is retry.js
 
 describe('retry', () => {
   it('should retry the given number of times and eventually throw', async () => {

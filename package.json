@@ -1,17 +1,18 @@
 {
   "name": "customradio",
-  "version": "1.12.2",
+  "version": "1.12.3",
   "description": "build custion radio.txt for use on hiby audio players",
   "main": "index.js",
   "scripts": {
-    "start": "node --expose-gc index",
+    "start:prod": "node --expose-gc dist/index.js",
     "prebuild": "bash build_assets/pre.sh",
     "build": "npx webpack --config config/webpack.config.js",
     "postbuild": "bash build_assets/post.sh",
-    "test": "web-test-runner \"src/js/CustomRadioApp/**/*.test.js\" --node-resolve && mocha",
+    "test": "web-test-runner \"html/js/CustomRadioApp/**/*.test.js\" --node-resolve && mocha",
     "version++": "node build_assets/incriment-version.js && node make-docs.js",
     "build-docker": "sh build_assets/build-container.sh \"registry.dough10.me/customradio\"",
     "docs": "node make-docs.js",
+    "runtime": "webpack --config config/runtime.config.js",
     "generate-secret": "openssl rand -base64 16 | tr -d '/+' | cut -c1-16"
   },
   "author": "dough10",

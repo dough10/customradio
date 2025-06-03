@@ -1,7 +1,6 @@
 const path = require('path');
 const packageJson = require('../package.json'); // Import package.json
 
-// Function to create externals object from dependencies
 const nodeModules = {};
 if (packageJson.dependencies) {
   for (const key in packageJson.dependencies) {
@@ -11,11 +10,11 @@ if (packageJson.dependencies) {
 
 module.exports = {
   mode: 'production',
-  entry: './index.js',
+  entry: './src/index.js',
   target: 'node',
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname),
+    filename: 'index.js',
+    path: path.resolve(__dirname, '..', 'dist'),
   },
   module: {
     rules: [

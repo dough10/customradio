@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
-const workerFilePath = path.join(__dirname, '..', 'src', 'worker.js');
+const workerFilePath = path.join(__dirname, '..', 'html', 'worker.js');
 
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const version = packageJson.version;

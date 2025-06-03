@@ -44,19 +44,19 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: './src/customradio.webmanifest',
+          from: './html/customradio.webmanifest',
           to: '[name][ext]',
         },
         {
-          from: './src/favicon.ico',
+          from: './html/favicon.ico',
           to: '[name][ext]',
         },
         {
-          from: './src/*.png',
+          from: './html/*.png',
           to: '[name][ext]',
         },
         {
-          from: './src/screenshots',
+          from: './html/screenshots',
           to: 'screenshots',
         },
       ],

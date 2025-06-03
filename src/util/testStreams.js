@@ -1,11 +1,10 @@
 const UPDATE_PULL_COUNT = 100;
 
 const axios = require('axios');
-const pack = require('../package.json');
+const pack = require('../../package.json');
 const pLimit = require('p-limit');
 
 const isLiveStream = require('./isLiveStream.js');
-const rmRef = require('./rmRef.js');
 const useableHomepage = require('./useableHomepage.js');
 const Logger = require('./logger.js');
 const Stations = require('../model/Stations.js');

@@ -1,5 +1,5 @@
 const axios = require('axios');
-const pack = require('../package.json');
+const pack = require('../../package.json');
 
 const isValidURL = require('./isValidURL.js');
 const Logger = require('./logger.js');
