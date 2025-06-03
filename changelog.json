@@ -1,5 +1,8 @@
 {
   "Current": [
+    "Bundled node runtime code"
+  ],
+  "1.12.2": [
     "Change log added to info dialog",
     "Updated list styling",
     "Conditional context menu buttons (no homepage button if homepage url not in database)"
