@@ -1,23 +1,27 @@
-FROM node:lts-slim AS build
+FROM node:lts-slim AS base
 
+ENV TZ="America/Chicago"
 WORKDIR /usr/radiotxt
 
-RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        openssl \
+        dumb-init \
+        sqlite3 && \
+    rm -rf /var/lib/apt/lists/*
+
+FROM base AS build
 
 COPY --chown=node:node . .
-
 RUN npm install && npm run runtime && npm run build
 
-FROM node:lts-slim
-
-RUN apt-get update && apt-get install -y --no-install-recommends dumb-init sqlite3 && rm -rf /var/lib/apt/lists/*
+FROM base
 
 ENV NODE_ENV=production
-ENV TZ="America/Chicago"
 
 WORKDIR /usr/radiotxt
 
-COPY --chown=node:node --from=build /usr/radiotxt/package*.json ./
+COPY --chown=node:node --from=build /usr/radiotxt/package.json ./
 COPY --chown=node:node --from=build /usr/radiotxt/changelog.json ./
 COPY --chown=node:node --from=build /usr/radiotxt/public ./public
 COPY --chown=node:node --from=build /usr/radiotxt/node_modules ./node_modules
