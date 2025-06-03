@@ -13,10 +13,11 @@ const locales = {};
 /**
  * load translation files
  */
-const localesDir = path.join(__dirname, '..', 'locales');
-fs.readdirSync(localesDir).forEach(file => {
+const context = require.context('../locales', false, /\.js$/);
+
+context.keys().forEach(file => {
   const lang = path.basename(file, '.js');
-  locales[lang] = require(path.join(localesDir, file));
+  locales[lang] = context(file);
 });
 
 /** @type {String} current language */
