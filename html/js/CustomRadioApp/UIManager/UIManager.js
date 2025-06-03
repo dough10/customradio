@@ -1,9 +1,9 @@
 import Analytics from './Analytics/Analytics.js';
 import AudioPlayer from './AudioPlayer/AudioPlayer.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
-import EventManager from '../utils/EventManager/EventManager.js';
+import EventManager from '../EventManager/EventManager.js';
 
-import {initDialogInteractions, destroyDialogInteractions} from './helpers/dialog.js';
+import {initDialogInteractions, destroyDialogInteractions} from './dialogs/dialog.js';
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
 import toggleActiveState from '../utils/toggleActiveState.js';

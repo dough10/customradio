@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import {initDialogInteractions} from '../dialog.js';
 import _OPTIONS from '../../../utils/post_options.js';
 import Toast from '../../../Toast/Toast.js';
-import loadingAnimation from '../insertLoadingAnimation.js';
+import loadingAnimation from '../../helpers/insertLoadingAnimation.js';
 
 describe('addDialogInteractions', () => {
   let dialog, addDialog, closeButton, addButton, form, inputElement, submitButton;

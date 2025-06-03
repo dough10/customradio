@@ -1,4 +1,4 @@
-import EventManager from '../utils/EventManager/EventManager';
+import EventManager from '../EventManager/EventManager';
 import sleep from '../utils/sleep'
 import { t } from '../utils/i18n';
 

@@ -1,5 +1,5 @@
 import CustomRadioApp from './CustomRadioApp/CustomRadioApp.js';
-import EventManager from './CustomRadioApp/utils/EventManager/EventManager.js';
+import EventManager from './CustomRadioApp/EventManager/EventManager.js';
 
 const em = new EventManager();
 const app = new CustomRadioApp();

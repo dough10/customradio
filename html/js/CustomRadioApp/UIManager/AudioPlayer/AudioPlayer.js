@@ -1,5 +1,5 @@
 import Toast from '../../Toast/Toast.js';
-import EventManager from '../../utils/EventManager/EventManager.js';
+import EventManager from '../../EventManager/EventManager.js';
 import Notifications from '../../Notifications/Notifications.js';
 import PlayReporter from './PlayReporter/PlayReporter.js';
 

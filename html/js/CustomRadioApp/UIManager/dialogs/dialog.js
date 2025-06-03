@@ -1,6 +1,6 @@
-import EventManager from '../../utils/EventManager/EventManager.js';
+import EventManager from '../../EventManager/EventManager.js';
 
-import loadingAnimation from './insertLoadingAnimation.js';
+import loadingAnimation from '../helpers/insertLoadingAnimation.js';
 import Toast from '../../Toast/Toast.js';
 import sleep from '../../utils/sleep.js';
 import isValidURL from '../../utils/URL.js';

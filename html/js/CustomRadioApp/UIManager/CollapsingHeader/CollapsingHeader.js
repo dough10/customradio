@@ -1,4 +1,4 @@
-import EventManager from "../../utils/EventManager/EventManager.js";
+import EventManager from "../../EventManager/EventManager.js";
 import selectors from "../../selectors.js";
 
 /**

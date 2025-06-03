@@ -1,4 +1,4 @@
-import EventManager from "../../utils/EventManager/EventManager";
+import EventManager from "../../EventManager/EventManager";
 
 export default class Analytics {
   _isDismissed = Number(localStorage.getItem('dismissed'));

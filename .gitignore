@@ -18,3 +18,4 @@ t.js
 */*/*-old.*
 t.html
 dist
+src/logs

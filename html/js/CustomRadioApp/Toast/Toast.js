@@ -1,4 +1,4 @@
-import EventManager from '../utils/EventManager/EventManager.js';
+import EventManager from '../EventManager/EventManager.js';
 import isValidURL from '../utils/URL.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import ToastCache from './ToastCache.js';

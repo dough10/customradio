@@ -5,7 +5,7 @@ import { t } from '../../utils/i18n.js';
 import _OPTIONS from '../../utils/post_options.js';
 import updateCsrf from '../../utils/updateCsrf.js';
 
-import EventManager from '../../utils/EventManager/EventManager.js';
+import EventManager from '../../EventManager/EventManager.js';
 
 const ELEMENT_HEIGHT = 40;
 

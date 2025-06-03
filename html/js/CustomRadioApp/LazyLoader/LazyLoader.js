@@ -1,4 +1,4 @@
-import EventManager from '../utils/EventManager/EventManager.js';
+import EventManager from '../EventManager/EventManager.js';
 import insertLoadingAnimation from '../UIManager/helpers/insertLoadingAnimation.js';
 
 import debounce from '../utils/debounce.js';
