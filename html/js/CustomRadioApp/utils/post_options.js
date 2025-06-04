@@ -8,7 +8,7 @@ export default (body = null) => {
     }
   };
 
-  if (body instanceof HTMLFormElement) {
+  if (body && body instanceof HTMLFormElement) {
     options.body = new FormData(body);
   } else if (body && typeof body === 'object') {
     options.headers['Content-Type'] = 'application/json';
