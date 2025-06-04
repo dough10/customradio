@@ -14,9 +14,9 @@ export default class Alert {
   destroy() {
     if (!this.alert) return;
     this.#em.add(this.alert, 'transitionend', _ => {
-      this.alert.remove();
       this.#em.removeByNamespace('alert-click');
       this.#em.removeByNamespace('close-animation');
+      this.alert.remove();
       this.alert = null;
     }, true, 'close-animation');
     this.alert.removeAttribute('open');
