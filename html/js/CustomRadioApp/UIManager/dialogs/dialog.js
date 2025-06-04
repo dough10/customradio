@@ -62,8 +62,10 @@ async function submitStation(ev) {
   
   const responseElement = document.querySelector(selectors.response);
 
+  const url = document.querySelector('#station-url').value;
+
   try {
-    const response = await retry( _ => fetch('/add', _OPTIONS(ev.target)));
+    const response = await retry( _ => fetch('/add', _OPTIONS({url})));
     if ([403, 419, 440].includes(response?.status)) {
       const success = await updateCsrf();
       if (success) submitStation(ev);
