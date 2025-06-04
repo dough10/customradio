@@ -191,8 +191,9 @@ function createChangelog(changes) {
     fragment.append(header, list);
     
     changes[version].forEach(change => {
+      const cleanedChange = change.replace(/\s*\(.*?\)\s*/g, ' ').trim();
       const li = document.createElement('li');
-      li.textContent = change;
+      li.textContent = cleanedChange;
       list.append(li);
     });
     count++;
