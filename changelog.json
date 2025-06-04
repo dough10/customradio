@@ -8,7 +8,7 @@
     "Conditional context menu buttons (no homepage button if homepage url not in database)"
   ],
   "1.12.1": [
-    "Added an Alert system to notify users of changes",
+    "Enhanced the Alert system (update user of changes)",
     "Anonymous station play and in list reporting (shifts popular stations to top of search results)",
     "Added additional translations (KO, SV, JA)",
     "Added changelog"
