@@ -21,8 +21,6 @@ ENV NODE_ENV=production
 
 WORKDIR /usr/radiotxt
 
-COPY --chown=node:node --from=build /usr/radiotxt/package.json ./
-COPY --chown=node:node --from=build /usr/radiotxt/changelog.json ./
 COPY --chown=node:node --from=build /usr/radiotxt/public ./public
 COPY --chown=node:node --from=build /usr/radiotxt/node_modules ./node_modules
 COPY --chown=node:node --from=build /usr/radiotxt/templates ./templates
