@@ -1,5 +1,3 @@
-const multer = require('multer');
-const upload = multer();
 const { query, body } = require('express-validator');
 const pug = require('pug');
 const validator = require('validator');
@@ -165,7 +163,7 @@ module.exports = (app, register) => {
    * @throws {express.Response} 400 - If validation fails or required fields are missing.
    * @throws {express.Response} 500 - If an error occurs while adding the station to the database.
    */
-  app.post('/mark-duplicate', upload.none(), [
+  app.post('/mark-duplicate', [
     body('id')
       .trim()
       .escape()
@@ -192,7 +190,7 @@ module.exports = (app, register) => {
    * @throws {express.Response} 400 - If validation fails or required fields are missing.
    * @throws {express.Response} 500 - If an error occurs while adding the station with the issue to the database.
    */
-  app.post('/stream-issue', upload.none(), [
+  app.post('/stream-issue', [
     body('id')
       .trim()
       .escape()
@@ -320,7 +318,7 @@ module.exports = (app, register) => {
    *   "error": "Failed to add station"
    * }
    */
-  app.post('/add', upload.none(), [
+  app.post('/add', [
     body('url')
       .isURL()
       .notEmpty()
@@ -370,7 +368,7 @@ module.exports = (app, register) => {
    * @apiSuccessExample {json} Success-Response:
    * HTTP/1.1 204 No Content
    */
-  app.post('/csp-report', upload.none(), [
+  app.post('/csp-report', [
     body('csp-report')
       .isObject()
       .withMessage('csp-report must be an object'),
