@@ -1,7 +1,7 @@
 FROM node:lts-slim AS base
 
 ENV TZ="America/Chicago"
-WORKDIR /usr/radiotxt
+WORKDIR /usr/src/app
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -19,7 +19,7 @@ FROM base
 
 ENV NODE_ENV=production
 
-WORKDIR /usr/radiotxt
+WORKDIR /usr/src/app
 
 COPY --chown=node:node --from=build /usr/radiotxt/public ./public
 COPY --chown=node:node --from=build /usr/radiotxt/node_modules ./node_modules
