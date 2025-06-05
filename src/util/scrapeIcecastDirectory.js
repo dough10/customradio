@@ -42,8 +42,6 @@ async function requestData() {
 /**
  * 
  * @param {Object} entry 
- * @param {Number} progressCounter 
- * @param {Number} changed 
  * @param {Number} length 
  * @param {Object} sql 
  * 
