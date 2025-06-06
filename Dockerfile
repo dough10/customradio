@@ -21,12 +21,12 @@ ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
 
-COPY --chown=node:node --from=build /usr/radiotxt/public ./public
-COPY --chown=node:node --from=build /usr/radiotxt/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/radiotxt/templates ./templates
-COPY --chown=node:node --from=build /usr/radiotxt/logs ./logs
-COPY --chown=node:node --from=build /usr/radiotxt/data ./data
-COPY --chown=node:node --from=build /usr/radiotxt/dist ./dist
+COPY --chown=node:node --from=build /usr/src/app/public ./public
+COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/src/app/templates ./templates
+COPY --chown=node:node --from=build /usr/src/app/logs ./logs
+COPY --chown=node:node --from=build /usr/src/app/data ./data
+COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 
 EXPOSE 3000/tcp
 
