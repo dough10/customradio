@@ -66,7 +66,7 @@ async function streamTest(url) {
   try {
     const response = await axios.head(url, {
       headers: {
-        'User-Agent': `customradio.dough10.me/${pack.version}`
+        'User-Agent': `radiotxt.site/${pack.version}`
       },
       timeout: 1500
     });

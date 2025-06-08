@@ -29,7 +29,7 @@ let changed = 0;
 async function requestData() {
   const res = await axios.get('http://dir.xiph.org/yp.xml', {
     headers: {
-      'User-Agent': `customradio.dough10.me/${pack.version}`
+      'User-Agent': `radiotxt.site/${pack.version}`
     },
     timeout: 20000
   });
