@@ -97,8 +97,6 @@ async function streamTest(url) {
       name = icyurl;
     }
 
-    log.debug(`Result: ${url} - ${isLive ? 'Live' : 'Not Live'} - ${name || 'Unknown'} - ${icyGenre || 'Unknown'} - ${bitrate || 'Unknown'}`);
-
     return {
       ok: true,
       url,
