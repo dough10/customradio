@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const Logger = require('../../util/logger.js');
 const changelog = require('../../../changelog.json');
 const pack = require('../../../package.json');
