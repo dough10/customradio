@@ -37,7 +37,7 @@ describe('isLiveStream', () => {
 
     expect(axiosStub).to.have.been.calledWith(url, {
       headers: {
-        'User-Agent': `customradio.dough10.me/${pack.version}`
+        'User-Agent': `radiotxt.site/${pack.version}`
       },
       timeout: 1500
     });
