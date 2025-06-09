@@ -15,6 +15,9 @@ const limit = pLimit(5);
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
+let counter = 0;
+let updatedCount = 0;
+
 /**
  * Returns `'y'` when the count is exactly **1** (e.g. “entry”) and `'ies'` for all other counts (e.g. “entries”).
  * 
@@ -130,16 +133,14 @@ function stationDataIsUnchanged(old, updated) {
   const name = updated.name || old.name;
   const url = updated.url || old.url;
   const genre = updated.icyGenre || old.genre || 'Unknown';
-  const online = typeof updated.isLive === 'boolean' ? updated.isLive : false;
-  const contentType = updated.content || old['content-type'] || 'Unknown';
+  const online = updated.isLive;
   const bitrate = updated.bitrate || 0;
 
   return (
     old.name === name &&
     old.url === url &&
     old.genre === genre &&
-    old.online === online &&
-    old['content-type'] === contentType &&
+    Boolean(old.online) === online &&
     old.bitrate === bitrate
   );
 }
@@ -168,8 +169,48 @@ function toMB(heap) {
 function percentage(small, big, places = 2) {
   if (typeof big !== 'number' || big === 0) return '0.00';
   return ((small / big) * 100).toFixed(places);
- }
+}
 
+/**
+ * 
+ * @param {Object} station current entry for the station in question
+ * @param {Number} ndx batch index 
+ * @param {Number} offset ndx * (desired pull count)
+ * @param {Number} length  
+ * @param {Object} sql sqlite database class instance
+ * @param {Number} totalStationCount total count of stations in the database
+ * @param {Number} parts number of batches (totalStationCount / (desired batch length))
+ * 
+ * @returns {void}
+ */
+async function processStream(station, ndx, offset, length, sql, totalStationCount, parts) {
+  counter++; 
+  
+  const partCount = counter - offset;
+  const partPrecent = length ? percentage(partCount, length, 1) : '0.0';
+  const totalPrecent = percentage(counter, totalStationCount, 3);
+  
+  try {
+    const startTime = Date.now()
+    log.debug(`[${station.id}] Testing url ${station.url}`);
+    const stream = await retry(() => isLiveStream(station.url));
+  
+    log.debug(`[${station.id}] Station: ${partCount}/${length}, ${partPrecent}%`);
+    log.debug(`[${station.id}] Part: ${ndx + 1}/${parts}, Total progress: ${totalPrecent}%`);
+    
+    if (stationDataIsUnchanged(station, stream)) {
+      log.debug(`[${station.id}] No change.. ${Date.now() - startTime}ms`);
+      return;
+    }
+
+    await updateStationData(sql, station, stream);
+    log.debug(`[${station.id}] Updated.. ${Date.now() - startTime}ms`);
+    // count changes
+    updatedCount++;
+  } catch (e) {
+    log.debug(`[${station.id}] Error for (${station.name}): ${e.message}`);
+  } 
+}
 
 /**
  * Tests streams for online state and headers to update the database with stream information.
@@ -203,42 +244,21 @@ async function testStreams() {
     const totalStationCount = await sql.getTotalCount();
     const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
     
-    let counter = 0;
-    let updatedCount = 0;
+    counter = 0;
+    updatedCount = 0;
     
     for (let ndx = 0; ndx < parts; ndx++) {
       const offset = ndx * UPDATE_PULL_COUNT;
       const stationPull = await sql.getPaginatedStations(UPDATE_PULL_COUNT, offset);
       const length = stationPull.length;
 
-      // test batch
-      await Promise.all(stationPull.map(station => limit(async () => {
-        // progress tracking
-        counter++; 
-        const partCount = counter - (ndx * UPDATE_PULL_COUNT);
-        const partPrecent = length ? percentage(partCount, length, 1) : '0.0';
-        const totalPrecent = percentage(counter, totalStationCount, 3);
-        log.debug(`Update progress: part ${ndx}/${parts}, station ${partCount}/${length}`);
-        log.debug(`Part: ${partPrecent}% Total: ${totalPrecent}%`);
-        
-        // run test
-        try {
-          log.debug(`Testing id: ${station.id}, url: ${station.url}`);
-          const stream = await retry(() => isLiveStream(station.url));
-
-          if (stationDataIsUnchanged(station, stream)) {
-            log.debug(`Station ID ${station.id}: No change..`);
-            return;
-          }
-
-          await updateStationData(sql, station, stream);
-          log.debug(`Station ID ${station.id}: Updated..`);
-          // count changes
-          updatedCount++;
-        } catch (e) {
-          log.debug(`Error testing stream for station ID ${station.id} (${station.name}): ${e.message}`);
-        }
-      })));
+      await Promise.all(
+        stationPull.map(station => 
+          limit(() => 
+            processStream(station, ndx, offset, length, sql, totalStationCount, parts)
+          )
+        )
+      );
 
       // track memory usage
       const used = process.memoryUsage();
@@ -263,4 +283,4 @@ async function testStreams() {
 
 }
 
-module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs, updateStationData};
+module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs, updateStationData, stationDataIsUnchanged};
