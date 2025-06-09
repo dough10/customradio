@@ -187,7 +187,7 @@ export default class CustomRadioApp {
     ev.target.blur();
 
     // empty userInput means "show all"
-    const userInput = normalizeMemo(ev?.target?.value?.trim?.() || '');
+    const userInput = normalizeMemo(ev.target.value.trim() || '');
 
     if (userInput.length) console.log(`Filter changed: ${userInput}`);
 
