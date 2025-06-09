@@ -183,7 +183,7 @@ function createChangelog(changes) {
   for (const version in changes) {
     if (count >= 3) break;
 
-    const header = document.createElement('b');
+    const header = document.createElement('h3');
     header.textContent = `${version}:`;
 
     const list = document.createElement('ul');
