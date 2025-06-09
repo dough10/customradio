@@ -26,7 +26,6 @@
     "express": "^4.19.2",
     "express-session": "^1.18.1",
     "express-validator": "^7.1.0",
-    "he": "^1.2.0",
     "helmet": "^8.0.0",
     "node-schedule": "^2.1.1",
     "prom-client": "^15.1.3",

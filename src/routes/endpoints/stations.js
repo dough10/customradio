@@ -1,5 +1,4 @@
 const { validationResult } = require('express-validator');
-const he = require('he');
 
 const { t } = require('../../util/i18n.js');
 const Logger = require('../../util/logger.js');
@@ -9,6 +8,9 @@ const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
 const blacklist = process.env.BLACKLIST?.split(',') || [];
+
+const MAX_GENRES = 10;
+const MAX_GENRE_LENGTH = 64;
 
 /**
  * Generates a query string for the given value.
@@ -33,6 +35,32 @@ const blacklist = process.env.BLACKLIST?.split(',') || [];
 function queryString(value) {
   return (value.length === 0) ? '' : `?genres=${value}`;
 }
+
+/**
+ * sanatize user input
+ * 
+ * @param {String} input user input
+ * 
+ * @returns {Array}
+ */
+function sanitizeGenresInput(input) {
+  try {
+    const decoded = decodeURIComponent(input);
+
+    return decoded
+      .split(',')
+      .map(genre =>
+        genre
+          .normalize('NFKC')                     // Normalize Unicode
+          .replace(/[\u0000-\u001F\u007F]/g, '') // Strip control characters
+          .trim()
+      )
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 
 /**
  * Handles the request to fetch and return a list of audio stations based on query parameters.
@@ -75,7 +103,10 @@ module.exports = async (req, res) => {
   }  
   const sql = new Stations('data/customradio.db');
   try {
-    const genres = decodeURIComponent(req.query.genres).split(',').map(genre => he.decode(genre).toLowerCase());
+    const genres = sanitizeGenresInput(req.query.genres || '').filter(
+      g => g.length <= MAX_GENRE_LENGTH
+    ).slice(0, MAX_GENRES);
+
     const stations = await sql.getStationsByGenre(genres);
     
     const genreString = genres.join(',');
