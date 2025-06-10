@@ -1,6 +1,5 @@
 {
   "Current": [
-    "Bundle node runtime code",
     "Fix bug in DB update process",
     "Fix search to allow commas to seperate querys (blues, jazz, house)"
   ],
