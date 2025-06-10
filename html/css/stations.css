@@ -35,9 +35,9 @@
   align-items: center;
   font-size: 0.8em;
   padding: 0.5em;
-  background: rgba(var(--pop-rgb), 0.8);
+  background: var(--pop-color, #333333);
   border-radius: 7px;
-  color: var(--contrast-color);
+  color: var(--contrast-color, #ffffff);
   margin: 0 8px;
   max-height: 32px;
   min-height: 32px;
