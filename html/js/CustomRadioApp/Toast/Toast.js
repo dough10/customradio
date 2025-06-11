@@ -191,10 +191,12 @@ export default class Toast {
       return;
     }
 
-    if (typeof this.link === 'string') {
+    const linkType = typeof this.link;
+
+    if (linkType === 'string') {
       webLink(this.link, this.toast.textContent);
 
-    } else if (typeof this.link === 'function') {
+    } else if (linkType === 'function') {
       linkIsFunction(this.link, this.toast.textContent);
 
     } else {
