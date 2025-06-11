@@ -40,16 +40,21 @@ function sitemapxml(req, stats) {
  * @param {Object} res 
  */
 module.exports = (req, res) => {
-  fs.stat('index.js', (error, stats) => {
+  fs.stat('dist/index.js', (error, stats) => {
     if (error) {
-      log.error('Failed getting sitemap:', error.message);
+      log.error(`Failed getting sitemap: ${error.message}`);
       res.status(500).json({
         message: 'Failed getting sitemap.xml'
       });
+      return;
     }
     log.info(`${req.ip} -> ${req.originalUrl} ${Date.now() - req.startTime}ms`);
-    const xml = sitemapxml(req, stats);
-    res.set('Content-Type', 'application/xml');
-    res.send(xml);
+    try {
+      const xml = sitemapxml(req, stats);
+      res.set('Content-Type', 'application/xml');
+      res.send(xml);
+    } catch(e) {
+      res.status(500).json({error: `Failed gettings XML: ${e.message}`})
+    }
   });
 };
