@@ -4,7 +4,10 @@ import { t } from '../utils/i18n';
 
 
 export default class Alert {
+
+  /** @type {Class} EventManager instance */
   #em = new EventManager();
+
   constructor(bodyHTML) {
     this.alert = this.#createAlert(bodyHTML);
     document.querySelector('body').append(this.alert);
