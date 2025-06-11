@@ -225,17 +225,17 @@ module.exports = (app, httpRequestCounter) => {
     const sessionToken = req.session?.csrfToken;
 
     if (!req.session) {
-      log.warning(`Missing session for ${req.method} ${req.originalUrl}`);
+      log.warning(`${req.ip} Missing session for ${req.method} ${req.originalUrl}`);
       return res.status(440).json({ error: "Session expired or not established" });
     }
 
     if (!sessionToken) {
-      log.warning(`CSRF token missing from session for ${req.method} ${req.originalUrl}`);
+      log.warning(`${req.ip} CSRF token missing from session for ${req.method} ${req.originalUrl}`);
       return res.status(419).json({ error: "CSRF token missing in session" });
     }
 
     if (!token || token !== sessionToken) {
-      log.warning(`Invalid CSRF token on ${req.method} ${req.originalUrl}`);
+      log.warning(`${req.ip} Invalid CSRF token on ${req.method} ${req.originalUrl}`);
       return res.status(403).json({ error: "Invalid CSRF token" });
     }
 
