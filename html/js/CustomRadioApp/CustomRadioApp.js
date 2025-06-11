@@ -118,7 +118,7 @@ export default class CustomRadioApp {
 
     // push items to the UI and load more elements when scrolling close to bottom of page
     this._lzldr ? this._lzldr.reset(stations) : this._lzldr = new LazyLoader(
-      stations,      // list of audio streams
+      stations,                    // list of audio streams
       container,                   // page "main" element
       this._uiManager.audioPlayer, // audio player instance
       this._uiManager.onScroll     // scroll handler
