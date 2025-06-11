@@ -14,6 +14,16 @@ const log = new Logger(logLevel);
  * @returns {String}
  */
 function sitemapxml(req, stats) {
+  const baseURL = `${req.protocol}://${req.get('host')}`;
+  const paths = ['/'];
+
+  const urlEntries = paths.map(path => ({
+    loc: `${baseURL}${path}`,
+    lastmod: stats.mtime.toISOString(),
+    priority: path === '/' ? '1.0' : '0.8',
+    changefreq: 'weekly'
+  }));
+
   const sitemapObject = {
     urlset: {
       $: {
@@ -21,12 +31,7 @@ function sitemapxml(req, stats) {
         "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
         "xsi:schemaLocation": "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
       },
-      url: {
-        loc: `${req.protocol}://${req.get('host')}/`,
-        lastmod: stats.mtime.toISOString(),
-        priority: '1.0',
-        changefreq: 'weekly'
-      }
+      url: urlEntries
     }
   };
   const builder = new xml2js.Builder();
