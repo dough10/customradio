@@ -2,10 +2,16 @@ import EventManager from '../EventManager/EventManager';
 import sleep from '../utils/sleep'
 import { t } from '../utils/i18n';
 
-
+/**
+ * creates and displays an alert element
+ * used to notify user or for content that may need to be interacted with
+ */
 export default class Alert {
 
-  /** @type {Class} EventManager instance */
+  /**
+   * @private 
+   * @type {Class} EventManager instance 
+   */
   #em = new EventManager();
 
   constructor(bodyHTML) {
@@ -14,6 +20,11 @@ export default class Alert {
     sleep(20).then(_ => requestAnimationFrame(() => this.alert.setAttribute('open', true)));
   }
 
+  /**
+   * destroys the Alert instance
+   * 
+   * @returns {void}
+   */
   destroy() {
     if (!this.alert) return;
     this.#em.add(this.alert, 'transitionend', _ => {
@@ -25,6 +36,15 @@ export default class Alert {
     this.alert.removeAttribute('open');
   }
 
+  /**
+   * creates an alert element
+   * 
+   * @private
+   * 
+   * @param {String} bodyHTML a string of HTML
+   * 
+   * @returns {HTMLElement}
+   */
   #createAlert(bodyHTML) {    
     const dismiss = document.createElement('div');
     dismiss.classList.add('yellow-text');
