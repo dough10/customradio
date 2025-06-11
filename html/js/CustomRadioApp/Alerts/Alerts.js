@@ -23,6 +23,8 @@ export default class Alert {
   /**
    * destroys the Alert instance
    * 
+   * @public
+   * 
    * @returns {void}
    */
   destroy() {
