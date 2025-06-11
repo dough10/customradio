@@ -386,9 +386,6 @@ module.exports = (app, register) => {
       .escape()
       .isString()
       .withMessage('original-policy must be a string'),
-    body('csp-report.status-code')
-      .isInt({ min: 100, max: 599 })
-      .withMessage('status-code must be an integer between 100 and 599'),
   ], cspReport);
 
   /**
