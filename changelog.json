@@ -1,5 +1,7 @@
 {
   "Current": [
+  ],
+  "1.12.3": [
     "Fix bug in DB update process",
     "Fix search to allow commas to seperate querys (blues, jazz, house)"
   ],
