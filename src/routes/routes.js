@@ -170,7 +170,7 @@ module.exports = (app, register) => {
       .isString()
       .notEmpty()
       .withMessage('Invalid ID paramater')
-  ], (req, res) => markDuplicate(req, res));
+  ], markDuplicate);
 
   /**
    * An endpoint for audio stream playback error callback
@@ -203,7 +203,7 @@ module.exports = (app, register) => {
       .isString()
       .notEmpty()
       .withMessage('Error meessage must be a string')
-  ], (req, res) => streamIssue(req, res));
+  ], streamIssue);
 
   /**
    * Handles the request to retrieve the top genres from the database.
@@ -229,7 +229,7 @@ module.exports = (app, register) => {
    * 
    * app.get('/topGenres', getTopGenres);
    */
-  app.get('/topGenres', (req, res) => topGenres(req, res));
+  app.get('/topGenres', topGenres);
 
   /**
    * Handles GET requests to the '/stations' endpoint.
@@ -272,7 +272,7 @@ module.exports = (app, register) => {
       .escape()
       .isString()
       .withMessage('Genres must be a string'),
-  ], (req, res) => getStations(req, res));
+  ], getStations);
 
   /**
    * Handles POST requests to the '/add' endpoint.
@@ -323,7 +323,7 @@ module.exports = (app, register) => {
       .isURL()
       .notEmpty()
       .withMessage('Invalid URL')
-  ], (req, res) => addToDatabase(req, res));
+  ], addToDatabase);
 
   /**
    * @api {post} /csp-report Receive Content Security Policy Violation Reports
