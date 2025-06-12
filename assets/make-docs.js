@@ -72,6 +72,7 @@ function renderDoc(filename) {
  */
 function dependencies() {
   let dep = pack.dependencies;
+  if (!dep.length) return '';
   let output = '## Dependencies\n\n';
   for (let item in dep) {
     output += `- ${item}: ${dep[item]}\n`;
@@ -91,6 +92,7 @@ function dependencies() {
  */
 function devDependencies() {
   let dep = pack.devDependencies;
+  if (!dep.length) return '';
   let output = '## Dev Dependencies\n\n';
   for (let item in dep) {
     output += `- ${item}: ${dep[item]}\n`;
