@@ -275,8 +275,8 @@ module.exports = (app, httpRequestCounter) => {
    * is assigned to `req.body`. If parsing fails, a 400 error response is sent back to the client.
    * For all other request types, the middleware simply calls `next()` to pass control to the next middleware.
    *
-   * @param {import('express').Request} req - The HTTP request object.
-   * @param {import('express').Response} res - The HTTP response object.
+   * @param {express.Request} req - The HTTP request object.
+   * @param {express.Response} res - The HTTP response object.
    * @param {function} next - The next middleware function in the stack.
    *
    * @returns {void} This function does not return a value, but may send a response or call next().
