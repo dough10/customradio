@@ -13,7 +13,7 @@ RUN apt-get update && \
 FROM base AS build
 
 COPY --chown=node:node . .
-RUN npm install && npm run runtime && npm run build
+RUN npm install && npm run build
 
 FROM base
 

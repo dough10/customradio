@@ -6,14 +6,13 @@
   "scripts": {
     "start:prod": "node --expose-gc dist/index.js",
     "prebuild": "bash build_assets/pre.sh",
-    "build": "npx webpack --config config/webpack.config.js",
+    "build": "npx webpack --config config/runtime.config.js && npx webpack --config config/webpack.config.js",
     "postbuild": "bash build_assets/post.sh",
     "test": "web-test-runner \"html/js/CustomRadioApp/**/*.test.js\" --node-resolve && mocha",
-    "version++": "node build_assets/incriment-version.js && node make-docs.js",
+    "version++": "node build_assets/incriment-version.js && node assets/make-docs.js",
     "build-docker": "sh build_assets/build-container.sh \"registry.dough10.me/customradio\"",
     "docs": "node make-docs.js",
-    "runtime": "webpack --config config/runtime.config.js",
-    "generate-secret": "openssl rand -base64 16 | tr -d '/+' | cut -c1-16"
+    "run container": "bash build_assets/run.sh"
   },
   "author": "dough10",
   "license": "ISC",
