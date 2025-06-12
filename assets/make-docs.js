@@ -138,7 +138,7 @@ function processDocs() {
 function hulkSmash() {
   const head = fs.readFileSync('./assets/head.txt').toString();
   const foot = fs.readFileSync('./assets/foot.txt').toString();
-  return `# ${pack.name} V:${pack.version}\n${head}\n${processDocs()}\n${dependencies()}\n${devDependencies()}\n${foot}`;
+  return `# ${pack.name} V:${pack.version}\n${head}\n\n${dependencies()}\n${devDependencies()}\n${foot}`;
 }
 
 writeFile('README.md', hulkSmash()).then(console.log);
