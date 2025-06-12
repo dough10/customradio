@@ -110,11 +110,12 @@ function devDependencies() {
  * let processedDocs = processDocs();
  */
 function processDocs() {
-  let files = require('./files.js')();
+  const files = require('./files.js')();
+  const excludePath = require('../.path.js');
   if (!files.length) return '';
   let output = '\n## Documentation\n\n';
   for (let i = 0; i < files.length; i++) {
-    const file = files[i].replace('/Users/dough10/Documents/customradio/','').replace('.js','');
+    const file = files[i].replace(`${excludePath}/`,'').replace('.js','');
     renderDoc(file);
     let str = `- [${file}-doc.md](${file}-doc.md)\n`;
     if (i <= 0) {
@@ -137,7 +138,7 @@ function processDocs() {
 function hulkSmash() {
   const head = fs.readFileSync('./assets/head.txt').toString();
   const foot = fs.readFileSync('./assets/foot.txt').toString();
-  return `# ${pack.name} V:${pack.version}\n${head}\n\n${dependencies()}\n${devDependencies()}\n${foot}`;
+  return `# ${pack.name} V:${pack.version}\n${head}\n${processDocs()}\n${dependencies()}\n${devDependencies()}\n${foot}`;
 }
 
 writeFile('README.md', hulkSmash()).then(console.log);
