@@ -9,8 +9,6 @@
 stream_test.js
 yp.xml
 .vscode
-assets
-make-docs.js
 .DS*
 public
 t.js
@@ -19,3 +17,4 @@ t.js
 t.html
 dist
 src/logs
+**/*-doc.md
