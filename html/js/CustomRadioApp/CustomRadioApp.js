@@ -130,14 +130,13 @@ export default class CustomRadioApp {
    * @param {String} userInput 
    * @param {Boolean} loadLocal 
    */
-  _updateGenresDatalist(userInput, loadLocal) {
+  async _updateGenresDatalist(userInput, loadLocal) {
     // if a genre was searched and not in the current datalist, load the genres again
     const currentGenres = this._uiManager.currentGenres();
     const isNewGenreSearch = userInput.length && !currentGenres.includes(userInput);
     if (isNewGenreSearch || loadLocal) {
-      this._stationManager.getGenres().then(genreList => {
-        this._uiManager.loadGenres(genreList);
-      });
+      const genreList = await this._stationManager.getGenres();
+      this._uiManager.loadGenres(genreList);
     }
   }
 
@@ -222,7 +221,7 @@ export default class CustomRadioApp {
       this._updateUIStationsList(stationList, container);
   
       // update the genres datalist if the user input is a genre or if loadLocal is true
-      this._updateGenresDatalist(userInput, ev.loadLocal);
+      await this._updateGenresDatalist(userInput, ev.loadLocal);
   
       // filter analytics
       if (userInput.length) this._analyticsTrackEvent('Filter', 'Change', userInput);
