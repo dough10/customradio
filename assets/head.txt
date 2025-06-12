@@ -1,9 +1,5 @@
 
-An online radio station browser with the ability to export a radio.txt file for use in Hiby digital audio players.
-
-![Mobile](html/screenshots/375x667.png)
-
-![desktop](html/screenshots/1280x720.png)
+An online radio station browser with the ability to create a radio.txt file for use in Hiby digital audio players.
 
 > Sourcecode for <https://radiotxt.site>
 
