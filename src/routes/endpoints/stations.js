@@ -80,7 +80,7 @@ module.exports = async (req, res) => {
     
     const genreString = genres.join(',');
 
-    if (genreString && !blacklist.includes(req.ip)) {
+    if (genreString && !blacklist.includes(req.ip) && stations.length) {
       log.debug(`Saving genres: ${genreString}`);
       await sql.logGenres(genreString);
     }
