@@ -1,5 +1,6 @@
 {
   "Current": [
+    "only save genres for searches that return results"
   ],
   "1.12.3": [
     "Fix bug in DB update process",
