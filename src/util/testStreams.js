@@ -10,13 +10,17 @@ const Logger = require('./logger.js');
 const Stations = require('../model/Stations.js');
 const retry = require('./retry.js');
 
-const limit = pLimit(5);
+const limit = pLimit(3);
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
 let counter = 0;
 let updatedCount = 0;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 /**
  * Returns `'y'` when the count is exactly **1** (e.g. “entry”) and `'ies'` for all other counts (e.g. “entries”).
@@ -207,6 +211,7 @@ async function processStream(station, ndx, offset, length, sql, totalStationCoun
     log.debug(`[${station.id}] Updated.. ${Date.now() - startTime}ms`);
     // count changes
     updatedCount++;
+    await sleep(500);
   } catch (e) {
     log.debug(`[${station.id}] Error for (${station.name}): ${e.message}`);
   } 
