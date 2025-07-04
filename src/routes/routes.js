@@ -49,7 +49,7 @@ module.exports = (app, register) => {
   /**
    * ads.txt
    */
-  app.get('/ads.txt', ads);
+  app.get(['app-ads.txt', '/ads.txt'], ads);
 
   /**
    * sitemap
@@ -78,6 +78,14 @@ module.exports = (app, register) => {
    * change log
    */
   app.get('/changelog.txt', changelog);
+
+  /**
+   * sellers.json
+   */
+  app.get('/sellers.json', (req, res) => {
+    log.info(`${req.ip} -> ${req.originalUrl} ${Date.now() - req.startTime}ms`);
+    res.json([]);
+  });
 
   /**
    * Index

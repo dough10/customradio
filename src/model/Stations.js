@@ -425,7 +425,7 @@ class Stations {
   async getPlayMinutes(id) {
     const query = `SELECT playMinutes FROM stations WHERE id = ?`;
     const rows = await this._ensureInitialized(() => this._runQuery(query, [id]));
-    return rows[0]?.playMinutes || 0;
+    return rows[0].playMinutes || 0;
   }
 
   /**

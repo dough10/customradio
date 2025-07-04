@@ -1,6 +1,7 @@
 {
   "Current": [
-    "only save genres for searches that return results"
+    "only save genres for searches that return results",
+    "SK and PL translations (ChatGPT translated)"
   ],
   "1.12.3": [
     "Fix bug in DB update process",

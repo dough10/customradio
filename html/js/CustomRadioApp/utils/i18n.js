@@ -9,8 +9,10 @@ import { de } from './lang/de.js';
 import { ja } from './lang/ja.js';
 import { ko } from './lang/ko.js';
 import { sv } from './lang/sv.js';
+import { sk } from './lang/sk.js';
+import { pl } from './lang/pl.js';
 
-const languages = { en, es, fr, zh, ru, it, de, ja, ko, sv };
+const languages = { en, es, fr, zh, ru, it, de, ja, ko, sv, sk, pl };
 
 let currentLang = 'en';
 

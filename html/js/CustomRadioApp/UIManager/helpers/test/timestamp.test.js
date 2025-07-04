@@ -23,7 +23,7 @@ describe('stamp function', () => {
 
   it('should return the correct format with the fixed date', () => {
     const formattedDate = new Date().toISOString().split('T')[0];
-    const expectedOutput = `# created by http://localhost:8000 [${formattedDate}]\n# name, url\n`;
+    const expectedOutput = `# created by http://localhost:8001 [${formattedDate}]\n# name, url\n`;
 
     const result = timestamp();
     expect(result).to.equal(expectedOutput);

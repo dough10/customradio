@@ -148,6 +148,7 @@ module.exports = (app, httpRequestCounter) => {
             "'self'",
             "'sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='",
             "'sha256-vikEcQTvq6CdeDjkjiw9V6JBRIAzZI2b0ZVRQumWr/U='",
+            "'sha256-GyzWImLbzJfST9/36b/h4HjE0nibbICDeXCh1mYLK68='",
             "'unsafe-hashes'",
           ],
           scriptSrcAttr: [
