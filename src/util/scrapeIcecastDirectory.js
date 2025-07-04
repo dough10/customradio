@@ -20,6 +20,9 @@ const log = new Logger(logLevel);
 let progressCounter = 0;
 let changed = 0;
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 /**
  * get data from icecast directory
@@ -125,6 +128,7 @@ module.exports = async () => {
     const {total, online} = await sql.dbStats();
     const now = new Date().getTime();
     log.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(now - startTime)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
+    await sleep(500); 
   } catch (err) {
     log.critical(`Scrape failed: ${err.message}`);
   } finally {
