@@ -14,8 +14,6 @@ const Logger = require('./util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-const mins = 5;
-
 /**
  * Starts the Express server and sets up necessary initializations.
  * 
