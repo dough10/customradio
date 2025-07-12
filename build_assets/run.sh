@@ -10,10 +10,12 @@ docker run \
   --env=REDIS_PASSWORD="$REDIS_PASSWORD" \
   --env=SESSION_SECRET="$secret" \
   --env=LOG_LEVEL="$LOG_LEVEL" \
+  --env=AUTH_SERVER_URL="$AUTH_SERVER_URL" \
   --env "$BLACKLIST" \
   --env=NODE_ENV=production \
   --env=TZ=America/Chicago \
   --volume=/Users/dough10/Documents/customradio/data:/usr/src/app/data \
+  --volume=/Users/dough10/Documents/customradio/logs:/usr/src/app/logs \
   --workdir=/usr/src/app \
   -p 3000:3000 \
   --restart=always \
