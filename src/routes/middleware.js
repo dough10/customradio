@@ -8,6 +8,7 @@ const helmet = require("helmet");
 const compression = require("compression");
 const path = require("path");
 const crypto = require("crypto");
+const cookieParser = require('cookie-parser');
 
 const { setLanguage } = require("../util/i18n.js");
 const Logger = require("../util/logger.js");
@@ -74,6 +75,7 @@ module.exports = (app, httpRequestCounter) => {
   app.use(compression());
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
+  app.use(cookieParser()); 
 
   /**
    * Middleware to generate nonce for CSP
