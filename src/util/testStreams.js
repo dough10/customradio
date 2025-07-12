@@ -10,7 +10,7 @@ const Logger = require('./logger.js');
 const Stations = require('../model/Stations.js');
 const retry = require('./retry.js');
 
-const limit = pLimit(1);
+const limit = pLimit(5);
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -211,7 +211,6 @@ async function processStream(station, ndx, offset, length, sql, totalStationCoun
     log.debug(`[${station.id}] Updated.. ${Date.now() - startTime}ms`);
     // count changes
     updatedCount++;
-    await sleep(500);
   } catch (e) {
     log.debug(`[${station.id}] Error for (${station.name}): ${e.message}`);
   } 
@@ -241,10 +240,10 @@ async function processStream(station, ndx, offset, length, sql, totalStationCoun
  *   });
  */
 async function testStreams() {
-  log.info('Updating database');
   const sql = new Stations('data/customradio.db');
 
   const startTime = Date.now();
+  log.info(`Starting database update at ${new Date(startTime).toISOString()}`);
   try {
     const totalStationCount = await sql.getTotalCount();
     const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
