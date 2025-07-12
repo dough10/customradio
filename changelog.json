@@ -1,8 +1,14 @@
 {
   "Current": [
+    "Fix bug in build process that caused DB update to fail"
+  ],
+  "1.12.5": [
     "only save genres for searches that return results",
     "SK and PL translations (ChatGPT translated)",
     "Throttle database update"
+  ],
+  "1.12.4": [
+    "somehow skipped a version..."
   ],
   "1.12.3": [
     "Fix bug in DB update process",
