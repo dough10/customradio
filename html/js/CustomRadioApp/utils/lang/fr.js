@@ -24,10 +24,11 @@ export const fr = {
 
   dismiss: 'Cliquer pour ignorer',
   moving: (newURL, currentURL) => `
-    <h2>Attention ! Notre site web déménage !</h2>
-    <p>Nous sommes en train de passer à une nouvelle adresse web :</p>
+    <h2>On déménage — à noter !</h2>
+    <p>Dès le mois prochain, notre site sera disponible à une nouvelle adresse permanente :</p>
     <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>Pendant une durée limitée, ${currentURL} et notre nouvelle URL seront entièrement accessibles. Nous vous encourageons à commencer à utiliser la nouvelle adresse et à mettre à jour tous vos liens sauvegardés.</p>
-    <p>Merci de votre patience pendant cette transition !</p>
+    <p>Jusqu’à la fin du mois, vous pouvez encore utiliser <strong>${currentURL}</strong>. Après le 1er, vous serez redirigé automatiquement.</p>
+    <p>Pensez à mettre à jour vos favoris dès maintenant.</p>
+    <p>Merci de faire ce changement avec nous !</p>
   `
 };

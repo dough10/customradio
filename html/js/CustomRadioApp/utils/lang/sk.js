@@ -24,10 +24,11 @@ export const sk = {
 
   dismiss: 'Kliknite na zatvorenie',
   moving: (newURL, currentURL) => `
-    <h2>Pozor! Naša webstránka sa sťahuje!</h2>
-    <p>Presúvame sa na novú webovú adresu:</p>
+    <h2>Presúvame sa — dôležité oznámenie!</h2>
+    <p>Od budúceho mesiaca nás nájdete na novej trvalej adrese:</p>
     <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>Po obmedzený čas budú dostupné obe adresy: ${currentURL} aj nová. Odporúčame prejsť na novú adresu a aktualizovať si uložené odkazy.</p>
-    <p>Ďakujeme za trpezlivosť počas tohto prechodu!</p>
+    <p>Až do konca tohto mesiaca bude <strong>${currentURL}</strong> stále prístupná. Od 1. dňa nasledujúceho mesiaca vás automaticky presmerujeme.</p>
+    <p>Nezabudnite si aktualizovať záložky.</p>
+    <p>Ďakujeme, že ste s nami!</p>
   `
 };

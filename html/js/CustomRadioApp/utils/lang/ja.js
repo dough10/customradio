@@ -24,10 +24,11 @@ export const ja = {
 
   dismiss: 'クリックして閉じる',
   moving: (newURL, currentURL) => `
-    <h2>お知らせ！ウェブサイトが新しいURLに移行します！</h2>
-    <p>新しいウェブアドレスに移行しています:</p>
+    <h2>サイト移転のお知らせ</h2>
+    <p>来月より、当サイトは下記の新しいURLへ完全移行いたします：</p>
     <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>期間限定で、現在の${currentURL}と新しいURLの両方にアクセスできます。新しいアドレスの使用を開始し、保存されているリンクを更新することをお勧めします。</p>
-    <p>この移行期間中の皆様のご理解とご協力に感謝いたします！</p>
+    <p>今月末までは <strong>${currentURL}</strong> にもアクセス可能ですが、1日以降は自動的に新しいURLへリダイレクトされます。</p>
+    <p>ブックマークの更新をお忘れなく！</p>
+    <p>今後ともよろしくお願いいたします。</p>
   `
 };

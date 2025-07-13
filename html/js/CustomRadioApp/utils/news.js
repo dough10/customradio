@@ -5,7 +5,7 @@ export default function news() {
   const newURL = 'https://radiotxt.site';
   const currentURL = 'https://customradio.dough10.me';
   const time = 2500;
-  const lsKey = 'newUrlTransitionAlertShown2';
+  const lsKey = 'newUrlTransitionAlertShown3';
 
   if (window.location.origin === newURL) return;
   if (localStorage.getItem(lsKey)) return;

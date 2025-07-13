@@ -24,10 +24,11 @@ export const zh = {
 
   dismiss: '点击关闭',
   moving: (newURL, currentURL) => `
-    <h2>注意！我们的网站将有一个新家！</h2>
-    <p>我们正在迁移到新的网址：</p>
+    <h2>我们的网站即将迁移</h2>
+    <p>从下个月起，我们的网站将永久迁移至以下新地址：</p>
     <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>在有限的时间内，${currentURL} 和我们的新网址都将完全可用。我们鼓励您开始使用新地址并更新所有保存的链接。</p>
-    <p>感谢您在此过渡期间的耐心！</p>
+    <p>在本月底之前，<strong>${currentURL}</strong> 仍可正常访问。自下月1日起，访问将自动跳转到新网址。</p>
+    <p>请尽快更新您的书签。</p>
+    <p>感谢您的支持与理解！</p>
   `
 };

@@ -23,11 +23,12 @@ export const pl = {
   pressToRefresh: 'Kliknij, aby odświeżyć',
 
   dismiss: 'Kliknij, aby zamknąć',
-  moving: (newURL, currentURL) => `
-    <h2>Uwaga! Nasza strona zmienia adres!</h2>
-    <p>Przenosimy się na nowy adres internetowy:</p>
+    moving: (newURL, currentURL) => `
+    <h2>Zmiana adresu strony — ważna informacja!</h2>
+    <p>Od przyszłego miesiąca nasza strona będzie dostępna wyłącznie pod nowym, stałym adresem:</p>
     <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>Przez ograniczony czas zarówno ${currentURL}, jak i nowy adres będą dostępne. Zachęcamy do korzystania z nowego adresu i aktualizacji zapisanych zakładek.</p>
-    <p>Dziękujemy za cierpliwość podczas tej zmiany!</p>
+    <p>Do końca tego miesiąca <strong>${currentURL}</strong> nadal działa, ale od 1 dnia miesiąca nastąpi przekierowanie.</p>
+    <p>Zalecamy zaktualizowanie zakładek już teraz.</p>
+    <p>Dziękujemy, że jesteś z nami!</p>
   `
 };

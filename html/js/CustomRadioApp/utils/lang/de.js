@@ -24,10 +24,11 @@ export const de = {
 
   dismiss: 'Zum Schließen klicken',
   moving: (newURL, currentURL) => `
-    <h2>Achtung! Unsere Website bekommt ein neues Zuhause!</h2>
-    <p>Wir wechseln zu einer neuen Webadresse:</p>
+    <h2>Wir ziehen um — bitte beachten!</h2>
+    <p>Ab dem nächsten Monat ist unsere Website dauerhaft unter einer neuen Adresse erreichbar:</p>
     <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>Für eine begrenzte Zeit sind sowohl ${currentURL} als auch unsere neue URL vollständig zugänglich. Wir empfehlen Ihnen, die neue Adresse zu verwenden und alle gespeicherten Links zu aktualisieren.</p>
-    <p>Vielen Dank für Ihre Geduld während dieses Übergangs!</p>
+    <p>Bis Ende dieses Monats bleibt <strong>${currentURL}</strong> weiterhin verfügbar. Ab dem 1. erfolgt eine automatische Weiterleitung zur neuen Adresse.</p>
+    <p>Bitte aktualisieren Sie jetzt Ihre Lesezeichen und gespeicherten Links.</p>
+    <p>Wir freuen uns auf den Neustart und danken Ihnen für Ihre Unterstützung!</p>
   `
 };

@@ -24,10 +24,11 @@ export const sv = {
 
   dismiss: 'Klicka för att stänga',
   moving: (newURL, currentURL) => `
-    <h2>Observera! Vår webbplats får ett nytt hem!</h2>
-    <p>Vi övergår till en ny webbadress:</p>
+    <h2>Vi flyttar — viktigt att veta!</h2>
+    <p>Från och med nästa månad kommer vår webbplats att finnas på en ny permanent adress:</p>
     <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>Under en begränsad tid kommer både ${currentURL} och vår nya URL att vara fullt tillgängliga. Vi uppmuntrar dig att börja använda den nya adressen och uppdatera alla sparade länkar.</p>
-    <p>Tack för ditt tålamod under denna övergång!</p>
+    <p>Du kan fortsätta använda <strong>${currentURL}</strong> fram till månadens slut. Efter den 1:a omdirigeras du automatiskt.</p>
+    <p>Uppdatera gärna dina bokmärken redan nu.</p>
+    <p>Tack för att du följer med oss vidare!</p>
   `
 };

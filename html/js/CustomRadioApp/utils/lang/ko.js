@@ -24,10 +24,11 @@ export const ko = {
 
   dismiss: '클릭하여 닫기',
   moving: (newURL, currentURL) => `
-    <h2>알림! 저희 웹사이트가 새로운 주소로 이동합니다!</h2>
-    <p>저희는 새로운 웹 주소로 전환하고 있습니다:</p>
+    <h2>사이트 이전 안내</h2>
+    <p>다음 달부터 저희 웹사이트는 아래의 새 주소로 영구 이전됩니다:</p>
     <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>제한된 기간 동안 ${currentURL}과 새 URL 모두 완벽하게 접속 가능합니다. 새로운 주소를 사용하시고 저장된 링크를 업데이트하시기를 권장합니다.</p>
-    <p>이 전환 기간 동안 기다려 주셔서 감사합니다!</p>
+    <p>이번 달 말까지는 <strong>${currentURL}</strong> 도 계속 사용할 수 있습니다. 1일부터는 자동으로 새 주소로 이동됩니다.</p>
+    <p>즐겨찾기나 링크를 미리 업데이트해 주세요.</p>
+    <p>항상 감사드립니다!</p>
   `
 };

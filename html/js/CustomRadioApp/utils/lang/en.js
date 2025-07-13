@@ -24,10 +24,11 @@ export const en = {
 
   dismiss: 'Click to dismiss',
   moving: (newURL, currentURL) => `
-    <h2>Heads Up! Our Website is Getting a New Home!</h2>
-    <p>We're transitioning to a new web address:</p>
+    <h2>We're Relocating — Please Take Note!</h2>
+    <p>Starting next month, our website will officially live at a new permanent address:</p>
     <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>For a limited time, both ${currentURL} and our new URL will be fully accessible. We encourage you to start using the new address and update any saved links.</p>
-    <p>Thanks for your patience during this transition!</p>
+    <p>Until the end of this month, you can still access the site at <strong>${currentURL}</strong>, but after the 1st, all visits will redirect to the new URL automatically.</p>
+    <p>To avoid disruption, we recommend updating your bookmarks and saved links now.</p>
+    <p>We’re excited about the move and appreciate you coming along with us!</p>
   `
 };
