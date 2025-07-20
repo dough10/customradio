@@ -67,7 +67,7 @@
   align-items: center;
   font-size: 0.8em;
   padding: 0.5em;
-  background: rgba(var(--pop-rgb), 0.8);
+  background: rgb(var(--pop-rgb));
   border-radius: 7px;
   color: var(--contrast-color);
   transform: translateY(-50%);
