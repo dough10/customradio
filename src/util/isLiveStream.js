@@ -19,8 +19,8 @@ const log = new Logger(logLevel);
  * console.log.info(defaultPorts[1]); // Output: ':443/'
  */
 const defaultPorts = [
-  ':80',
-  ':443'
+  ':80/',
+  ':443/'
 ];
 
 /**
@@ -35,7 +35,7 @@ function cleanURL(url) {
     url = url.slice(0, -1);
   }
   defaultPorts.forEach(port => {
-    url = url.replace(port, '');
+    url = url.replace(port, '/');
   });
   return url;
 }
