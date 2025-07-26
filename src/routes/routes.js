@@ -19,8 +19,8 @@ const fourohfour = require('./endpoints/fourohfour.js');
 const info = require('./endpoints/info.js');
 const changelog = require('./endpoints/changeLog.js');
 const { t } = require('../util/i18n.js');
-const { testStreams } = require('../util/testStreams.js');
 const authenticate = require('../util/auth.js');
+const updatedb = require('./endpoints/updatedb.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -421,20 +421,7 @@ module.exports = async (app, register) => {
   /** 
    * Endpoint to begin updating the database.
    */
-  app.get('/updatedb', await authenticate, async (req, res) => {
-    log.info(`${req.ip} -> /updatedb ${Date.now() - req.startTime}ms`);
-    try {
-      testStreams();
-    } catch(e) {
-      log.error(`Error while updating database: ${e.message}`);
-      return res.status(500).json({
-        error: 'Failed to start update process.'
-      });
-    }
-    res.json({
-      message: 'update began.'
-    });
-  });
+  app.get('/updatedb', await authenticate, updatedb);
 
   /**
    * Catch-all route for handling 404 errors.
