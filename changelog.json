@@ -1,5 +1,8 @@
 {
   "Current": [
+    "CS and PT translations added"
+  ],
+  "1.12.6": [
     "Fix bug in build process that caused DB update to fail"
   ],
   "1.12.5": [
