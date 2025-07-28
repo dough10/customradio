@@ -11,8 +11,10 @@ import { ko } from './lang/ko.js';
 import { sv } from './lang/sv.js';
 import { sk } from './lang/sk.js';
 import { pl } from './lang/pl.js';
+import { cs } from './lang/cs.js';
+import { pt } from './lang/pt.js';
 
-const languages = { en, es, fr, zh, ru, it, de, ja, ko, sv, sk, pl };
+const languages = { en, es, fr, zh, ru, it, de, ja, ko, sv, sk, pl, cs, pt };
 
 let currentLang = 'en';
 
