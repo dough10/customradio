@@ -12,8 +12,6 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 
 - **BLACKLIST** = *IP addresses blocked from reporting playmin or inList and genre searches*
 
-
-
 ### contact me
 
 <admin@dough10.me>
