@@ -85,7 +85,7 @@ module.exports = async (req, res) => {
       await sql.logGenres(genreString);
     }
 
-    log.info(`${req.ip} -> /stations${queryString(genreString)} ${stations.length} stations returned ${Date.now() - req.startTime}ms`);
+    log.info(`Fetched ${stations.length} stations for genres: ${genreString}`);
     res.json(stations);
   } catch (error) {
     log.error(`Error fetching stations: ${error.message}`);

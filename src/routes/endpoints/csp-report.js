@@ -64,7 +64,6 @@ module.exports = async (req, res) => {
   }
 
   try {
-    log.info(`${req.ip} -> /csp-report ${Date.now() - req.startTime}ms`);
     console.log(cspReport);
     res.status(204).send();
   } catch(error) {

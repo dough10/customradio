@@ -6,7 +6,6 @@ const log = new Logger(logLevel);
 
 module.exports = (req, res) => {
   try {
-    log.info(`${req.ip} -> /info ${Date.now() - req.startTime}ms`);
     res.json({version: pack.version, changelog: changelog, dependencies: pack.dependencies});
   } catch (err) {
     const error = `An error occurred while reading the package.json file: ${err.message}`;

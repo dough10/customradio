@@ -48,7 +48,6 @@ module.exports = async (req, res) => {
 
   const sql = new Stations('data/customradio.db');
   const { url } = req.body;
-  log.info(`${req.ip} -> /add ${url} ${Date.now() - req.startTime}ms`);
 
   try {
     const exists = await sql.exists(url);

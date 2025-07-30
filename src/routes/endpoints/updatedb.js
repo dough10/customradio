@@ -5,7 +5,6 @@ const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
 module.exports = async (req, res) => {
-  log.info(`${req.ip} -> /updatedb ${Date.now() - req.startTime}ms`);
   try {
     testStreams();
   } catch(e) {

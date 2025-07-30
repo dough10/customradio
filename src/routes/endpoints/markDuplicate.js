@@ -32,7 +32,6 @@ module.exports = async (req, res) => {
 
   const sql = new Stations('data/customradio.db');
   const {id} = req.body;
-  log.info(`${req.ip} -> /mark-duplicate ${id}`);
   try {
     await sql.markDuplicate(id);
     res.json({

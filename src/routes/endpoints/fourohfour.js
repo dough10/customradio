@@ -33,9 +33,7 @@ module.exports = async (req, res) => {
   };
 
   const message = '╭∩╮(︶︿︶)╭∩╮';
-  
-  log.info(`${req.ip} requested ${url.format(reqadd)} 404! ${message}`);
-
+  log.error(`${reqadd.protocol}://${reqadd.host}${reqadd.pathname} - ${message}`);
   try {
     const requestedPath = decodeURIComponent(reqadd.pathname);
     

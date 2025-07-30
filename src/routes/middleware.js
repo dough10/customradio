@@ -335,6 +335,11 @@ module.exports = (app, httpRequestCounter) => {
     next();
   });
 
+  app.use((req, res, next) => {
+    log.info(`${req.ip} -> ${req.originalUrl}`);
+    next();
+  });
+
   /**
    * Serves static files
    */

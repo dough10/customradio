@@ -35,7 +35,6 @@ module.exports = async (req, res) => {
   }
   const sql = new Stations('data/customradio.db');
   const {id, error} = req.body;
-  log.info(`${req.ip} -> /stream-issue ${id} ${error}`);
   try {
     await sql.logStreamError(id, error);
     res.json({

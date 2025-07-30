@@ -12,7 +12,6 @@ module.exports = (req, res) => {
     '# example-network.com, account-id, RESELLER'
   ];
   
-  log.info(`${req.ip} -> ${originalUrl} ${Date.now() - req.startTime}ms`);
   res.type('text/plain');
   res.send(lines.join('\n'));
 };

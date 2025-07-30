@@ -17,7 +17,6 @@ function format() {
 }
 
 module.exports = (req, res) => {
-  log.info(`${req.ip} -> /changelog.txt ${Date.now() - req.startTime}ms`);
   res.type('text/plain');
   const changelogText = format();
   res.send(changelogText);

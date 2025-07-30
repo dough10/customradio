@@ -55,7 +55,6 @@ module.exports = (req, res) => {
     }
     try {
       const xml = sitemapxml(req, stats);
-      log.info(`${req.ip} -> ${req.originalUrl} ${Date.now() - req.startTime}ms`);
       res.set('Content-Type', 'application/xml');
       res.send(xml);
     } catch(e) {
