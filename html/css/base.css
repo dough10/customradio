@@ -179,10 +179,3 @@ ul {
 .margin-top-24 {
   margin-top: 24px;
 }
-
-@media screen and (max-width: 450px) {
-  #info {
-    opacity: 0;
-    display: none;
-  }
-}
