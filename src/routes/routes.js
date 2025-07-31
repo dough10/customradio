@@ -1,8 +1,6 @@
 const { query, body } = require('express-validator');
-const pug = require('pug');
 const validator = require('validator');
 
-const Logger = require('./../util/logger.js');
 const addToDatabase = require('./endpoints/add.js');
 const getStations = require('./endpoints/stations.js');
 const streamIssue = require('./endpoints/stream-issue.js');
@@ -18,9 +16,13 @@ const topGenres = require('./endpoints/topGenres.js');
 const fourohfour = require('./endpoints/fourohfour.js');
 const info = require('./endpoints/info.js');
 const changelog = require('./endpoints/changeLog.js');
-const { t } = require('../util/i18n.js');
 const authenticate = require('../util/auth.js');
 const updatedb = require('./endpoints/updatedb.js');
+const auth = require('./endpoints/auth.js');
+const authCallback = require('./endpoints/auth.callback.js');
+const index = require('./endpoints/index.js');
+
+const Logger = require('./../util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
@@ -61,10 +63,7 @@ module.exports = async (app, register) => {
   /**
    * assetLinks
    */
-  app.get('/.well-known/assetLinks.json', (req,res) => {
-    log.info(`${req.ip} -> ${req.originalUrl} ${Date.now() - req.startTime}ms`);
-    res.json([]);
-  });
+  app.get('/.well-known/assetLinks.json', (req,res) => res.json([]));
 
   /**
    * security.txt
@@ -84,52 +83,19 @@ module.exports = async (app, register) => {
   /**
    * sellers.json
    */
-  app.get('/sellers.json', (req, res) => {
-    log.info(`${req.ip} -> ${req.originalUrl} ${Date.now() - req.startTime}ms`);
-    res.json({
-      "sellers": []
-    });
-  });
+  app.get('/sellers.json', (req, res) => res.json({
+    "sellers": []
+  }));
 
   /**
    * Index
    */
-  app.get('/', (req, res) => {
-    log.info(`${req.ip} -> /?lang=${req.loadedLang} ${Date.now() - req.startTime}ms`);
-    res.send(
-      pug.renderFile('./templates/index.pug', {
-        lang: req.loadedLang,
-        csrf: req.session.csrfToken,
-        nonce: res.locals.nonce,
-        title: t('title'),
-        intro: t('intro'),
-        hibyLink: t('hibyLink'),
-        siteUse: t('siteUse'),
-        step1: t('step1'),
-        step2: t('step2'),
-        filterLabel: t('filterLabel'),
-        closeButtonText: t('closeButtonText'),
-        downloadButtonText: t('downloadButtonText'),
-        volume: t('volume'),
-        thanks: t('thanks'),
-        securityContact: t('securityContact'),
-        clickDismiss: t('clickDismiss'),
-        addStation: t('addStation'),
-        addCase1: t('addCase1'),
-        addCase2: t('addCase2'),
-        stationURL: t('stationURL'),
-        addButtonText: t('addButtonText'),
-        stations: t('stations')
-      })
-    );
-  });
+  app.get('/', index);
 
   /**
    * index.htnml redirect to /
    */
-  app.get('/index.html', (req, res) => {
-    res.redirect('/');
-  });
+  app.get('/index.html', (req, res) => res.redirect('/'));
 
   /**
    * GET /metrics
