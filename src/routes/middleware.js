@@ -57,18 +57,18 @@ function initSessionStorage() {
  * @returns {void}
  */
 module.exports = (app, httpRequestCounter) => {
-  /**
-   * Middleware to track request timing
-   * Adds startTime to request object for response time calculation
-   *
-   * @param {express.Request} req - Express request object
-   * @param {express.Response} res - Express response object
-   * @param {express.NextFunction} next - Express next middleware function
-   */
-  app.use((req, res, next) => {
-    req.startTime = Date.now();
-    next();
-  });
+  // /**
+  //  * Middleware to track request timing
+  //  * Adds startTime to request object for response time calculation
+  //  *
+  //  * @param {express.Request} req - Express request object
+  //  * @param {express.Response} res - Express response object
+  //  * @param {express.NextFunction} next - Express next middleware function
+  //  */
+  // app.use((req, res, next) => {
+  //   req.startTime = Date.now();
+  //   next();
+  // });
 
   app.set("trust proxy", true);
   app.disable("x-powered-by");
