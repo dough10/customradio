@@ -127,7 +127,8 @@ module.exports = (app, httpRequestCounter) => {
           ],
           imgSrc: [
             "'self'", 
-            "data:"
+            "data:",
+            "https://workoscdn.com/"
           ],
           connectSrc: [
             "*"
