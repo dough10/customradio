@@ -8,8 +8,6 @@ import { setLanguage, t } from './utils/i18n.js';
 import normalizeMemo from './utils/normalizeMemo.js';
 import hapticFeedback from './utils/hapticFeedback.js';
 import selectors from './selectors.js';
-import news from './utils/news.js';
-
 
 /**
  * customradio.dough10.me
@@ -31,8 +29,6 @@ export default class CustomRadioApp {
   */
   init() {
     this._loadServiceWorker();
-
-    news();
 
     this._uiManager.attachListeners({
       onFilterChange: this._filterChanged.bind(this),

@@ -10,6 +10,7 @@ import toggleActiveState from '../utils/toggleActiveState.js';
 import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
+import news from '../utils/news.js';
 
 /**
  * manages UI elements
@@ -24,6 +25,7 @@ export default class UIManager {
     this._analytics = new Analytics();
     this._header = new CollapsingHeader();
     this._loadUser();
+    news();
   }
   
   /**
