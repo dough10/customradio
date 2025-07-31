@@ -1,6 +1,7 @@
 {
   "Current": [
-    "CS and PT translations added"
+    "CS and PT translations added",
+    "Authentication system for List memory (uses WorkOS, no personal data stored in this database)"
   ],
   "1.12.6": [
     "Fix bug in build process that caused DB update to fail"
