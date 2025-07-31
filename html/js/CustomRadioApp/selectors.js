@@ -146,7 +146,10 @@ const selectors = {
   dialogClose: 'dialog>.close',
 
   /** @type {String} changelog */
-  changelog: '#changelog'
+  changelog: '#changelog',
+
+  /** @type {String} login */
+  login: '#login',
 };
 
 export default selectors;
