@@ -23,6 +23,7 @@ export default class UIManager {
     this._em = new EventManager();
     this._analytics = new Analytics();
     this._header = new CollapsingHeader();
+    this._loadUser();
   }
   
   /**
@@ -39,9 +40,13 @@ export default class UIManager {
     initDialogInteractions();
 
     this._player.init();
-    const filter = this._filter;
-    this._em.add(filter, 'change', onFilterChange, { passive: true });
-    this._em.add(filter, 'focus', this._filterFocus.bind(this), { passive: true });
+    this._em.add(this._login, 'click', () => {
+      if (window.user) return;
+      hapticFeedback();
+      window.location.href = '/auth';
+    }, { passive: true });
+    this._em.add(this._filter, 'change', onFilterChange, { passive: true });
+    this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
     this._em.add(this._resetButton, 'click', ev => {
       this._filterFocus(ev);
       onReset();
@@ -116,6 +121,16 @@ export default class UIManager {
   }
 
   /**
+   * querySelector for 'reset' button
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _login() {
+    return document.querySelector(this._selectors.login);
+  }
+
+  /**
    * querySelector for 'main' element
    * 
    * @private
@@ -147,6 +162,26 @@ export default class UIManager {
    */
   get header() {
     return this._header;
+  }
+
+  /**
+   * loads the user data to UI
+   */
+  _loadUser() {
+    if (!window.user) return;
+    const button = this._login;
+    if (!button) {
+      console.error('Login button element is missing.');
+      return;
+    }
+    const user = window.user;
+    const img = document.createElement('img');
+    img.src = user.picture;
+    img.alt = 'user profile picture';
+    img.width = '24';
+    button.setAttribute('disabled', true);
+    button.title = `${user.firstName} ${user.lastName}`;
+    button.replaceChildren(img);
   }
 
   /**
