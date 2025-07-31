@@ -56,6 +56,9 @@ export default class CollapsingHeader {
     /** @type {HTMLElement|null} Info button element */
     this.infoButton = document.querySelector(selectors.infoButton);
 
+    /** @type {HTMLElement|null} login button element */
+    this.loginButton = document.querySelector(selectors.login);
+
     /** @type {HTMLElement|null} Main content wrapper */
     this.main = document.querySelector(selectors.main);
 
@@ -135,20 +138,29 @@ export default class CollapsingHeader {
       if (this.input) this.input.style.opacity = (1 - opacity).toFixed(2);
       if (this.header) this.header.style.transform = `translateY(-${transform}px)`;
       if (this.main) this.main.style.transform = `translateY(-${transform}px)`;
+      
+      const buttons = [
+        this.loginButton,
+        this.infoButton
+      ].filter(button => button !== null);
+      
+      // the 1.5 seems to land the info button center of the collapsed header
+      buttons.forEach(button => {
+        button.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
+      });
 
-      if (this.infoButton) {
-        // the 1.5 seems to land the info button center of the collapsed header
-        this.infoButton.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
+      if (this._isMobile) {
+        const infoOpacity = this._mobileOpacity(transform);
 
-        if (this._isMobile) {
-          const infoOpacity = this._mobileOpacity(transform);
-
-          this.infoButton.style.opacity = infoOpacity.toFixed(2);
-          this.infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
-        } else {
-          this.infoButton.style.opacity = '1';
-          this.infoButton.style.display = 'flex';
-        }
+        buttons.forEach(button => {
+          button.style.opacity = infoOpacity.toFixed(2);
+          button.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
+        });
+      } else {
+        buttons.forEach(button => {
+          button.style.opacity = '1';
+          button.style.display = 'flex';
+        });
       }
     });
   }
