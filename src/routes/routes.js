@@ -424,6 +424,16 @@ module.exports = async (app, register) => {
   app.get('/updatedb', await authenticate, updatedb);
 
   /**
+   * Endpoint for authentication using WorkOS SSO.
+   */
+  app.get('/auth', auth);
+
+  /**
+   * Endpoint for handling the authentication callback from WorkOS.
+   */
+  app.get('/auth/callback', authCallback);
+
+  /**
    * Catch-all route for handling 404 errors.
    * 
    * @summary Logs the request details and responds with a 404 error in JSON format.
