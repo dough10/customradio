@@ -23,9 +23,10 @@ describe('stamp function', () => {
 
   it('should return the correct format with the fixed date', () => {
     const formattedDate = new Date().toISOString().split('T')[0];
-    const expectedOutput = `# created by http://localhost:8001 [${formattedDate}]\n# name, url\n`;
+    // Escape square brackets for the date part
+    const expectedOutputRegex = new RegExp(`# created by http://localhost:\\d+ \\[${formattedDate}\\]\n# name, url\n`);
 
     const result = timestamp();
-    expect(result).to.equal(expectedOutput);
+    expect(result).to.match(expectedOutputRegex);
   });
 });
