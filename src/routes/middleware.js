@@ -336,7 +336,7 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   app.use((req, res, next) => {
-    log.info(`${req.ip} -> ${req.originalUrl}`);
+    log.info(`${req.ip} -> ${req.originalUrl}?lang=${req.loadedLang}`);
     next();
   });
 
