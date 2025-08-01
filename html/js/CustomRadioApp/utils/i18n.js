@@ -13,8 +13,27 @@ import { sk } from './lang/sk.js';
 import { pl } from './lang/pl.js';
 import { cs } from './lang/cs.js';
 import { pt } from './lang/pt.js';
+import { kk } from './lang/kk.js';
+import { tr } from './lang/tr.js';
 
-const languages = { en, es, fr, zh, ru, it, de, ja, ko, sv, sk, pl, cs, pt };
+const languages = { 
+  en, 
+  es, 
+  fr, 
+  zh, 
+  ru, 
+  it,
+  de, 
+  ja, 
+  ko, 
+  sv, 
+  sk, 
+  pl, 
+  cs,
+  pt, 
+  kk, 
+  tr
+};
 
 let currentLang = 'en';
 
