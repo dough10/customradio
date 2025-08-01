@@ -13,6 +13,8 @@ const cookieParser = require('cookie-parser');
 const { setLanguage } = require("../util/i18n.js");
 const Logger = require("../util/logger.js");
 
+const urlplusquery = require("../util/urlplusquery.js");
+
 const logLevel = process.env.LOG_LEVEL || "info";
 const log = new Logger(logLevel);
 
@@ -337,7 +339,7 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   app.use((req, res, next) => {
-    log.info(`${req.ip} -> ${req.originalUrl}?lang=${req.loadedLang}`);
+    log.info(`${req.ip} -> ${urlplusquery(req.originalUrl, req.loadedLang)}`);
     next();
   });
 
