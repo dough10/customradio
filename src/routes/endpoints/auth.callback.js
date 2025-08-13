@@ -10,6 +10,8 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId,
 });
 
+const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
+
 module.exports = async (req, res) => {
   try {
     const { code } = req.query;
@@ -21,15 +23,14 @@ module.exports = async (req, res) => {
         cookiePassword: process.env.COOKIE_SECRET,
       },
     });
-    
-    // log.info(`User authenticated: ${user.id} - ${user.email}`);
+    req.user = user;
     res.cookie('wos-session', sealedSession, {
       path: '/',
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
+      maxAge: THIRTY_DAYS
     });
-    // console.log(user);
     res.redirect(`/`);
   } catch(e) {
     log.error(`Error in auth callback: ${e.message}`);

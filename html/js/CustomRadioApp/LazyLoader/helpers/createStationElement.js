@@ -1,6 +1,5 @@
 import Toast from '../../Toast/Toast.js';
 import createSmallButton from './createSmallButton.js';
-import debounce from '../../utils/debounce.js';
 import contextMenu from './contextMenu.js';
 import toggleActiveState from '../../utils/toggleActiveState.js';
 import { t } from '../../utils/i18n.js';
@@ -45,15 +44,6 @@ async function postStreamIssue(id, error) {
 }
 
 /**
- * saves selected stations to localstorage
- * 
- * @param {Array} data - Array of selected stations.
- */
-const saveToLocalStorage = debounce((data) => {
-  localStorage.setItem('selected', JSON.stringify(data));
-}, 300);
-
-/**
  * Send event to matomo
  * 
  * @param {String} event 
@@ -71,15 +61,15 @@ function _paqToggle(event, str) {
  * 
  * @returns {void}
  */
-async function reportInList(id, state) {
+async function reportInList(station, state) {
   requestIdleCallback(async deadline => {
     try {
       if (deadline.timeRemaining() > 0) {
-        const res = await retry(_ => fetch(`/reportInList/${id}/${state}`, _OPTIONS()));
+        const res = await retry(_ => fetch(`/reportInList/${state}`, _OPTIONS(station)));
         if (!await csrf(res)) return;
-        reportInList(id, state);
+        reportInList(station, state);
       } else {
-        requestIdleCallback(_ => reportInList(id, state));
+        requestIdleCallback(_ => reportInList(station, state));
       }
     } catch(e) {
       console.error(e);
@@ -104,19 +94,12 @@ function toggleSelect(ev) {
 
   // get all selected elements
   const all = Array.from(el.parentNode.querySelectorAll(selectors.selectedStation));
-  // update download button
+
+  // show / hide download button
   toggleActiveState(document.querySelector(selectors.downloadButton), all.length);
   
-  // store selected stations in localstorage
-  const forStorage = all
-  .map(el => {return {id: el.id, ...el.dataset}})
-  .sort((a, b) => a.name.localeCompare(b.name));
-  
-  saveToLocalStorage(forStorage);
-
-  // track event
   const selected = el.hasAttribute('selected');
-  reportInList(el.id, Number(selected));
+  reportInList({id: Number(el.id), ...el.dataset}, Number(selected));
   if (selected) {
     _paqToggle('Add to file', el.dataset.url);
   } else {

@@ -85,17 +85,21 @@ export default class StationManager {
   }
 
   /**
-   * loads list of stations from localstorage if "loadFromLocal" is true
+   * loads list of stations from localstorage or API if "loadSaved" is true
    * otherwise grabs the selected station from UI
    * 
-   * @param {Boolean} loadFromLocal 
+   * @param {Boolean} loadSaved 
    * @param {HTMLElement} container 
    * 
    * @returns {Array<String>}
    */
-  getSelectedStations(loadFromLocal, container) {
-    if (loadFromLocal) {
-      const storedElements = JSON.parse(localStorage.getItem('selected')) || [];
+  async getSelectedStations(loadSaved, container) {
+    if (loadSaved) {
+      const res = await fetch(`${this.apiBaseUrl}/userStations`);
+      if (!res.ok) {
+        throw new Error(`Error fetching user stations: ${res.statusText}`);
+      }
+      const storedElements = await res.json();
       return storedElements.map(obj => ({ ...obj, selected: true }));
     }
     return Array.from(container.querySelectorAll('li[selected]'))

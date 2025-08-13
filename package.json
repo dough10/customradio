@@ -12,7 +12,8 @@
     "version++": "node build_assets/incriment-version.js && node assets/make-docs.js",
     "build-docker": "sh build_assets/build-container.sh \"registry.dough10.me/customradio\"",
     "docs": "node make-docs.js",
-    "run container": "bash build_assets/run.sh"
+    "run container": "bash build_assets/run.sh",
+    "translate-js": "bash build_assets/translate-js.sh src/locales/en.js es"
   },
   "author": "dough10",
   "license": "ISC",

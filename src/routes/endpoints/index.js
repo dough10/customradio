@@ -1,4 +1,3 @@
-const { WorkOS } = require('@workos-inc/node');
 const pug = require('pug');
 
 const { t } = require('../../util/i18n.js');
@@ -7,38 +6,9 @@ const Logger = require('../../util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-const workos = new WorkOS(process.env.WORKOS_API_KEY, {
-  clientId: process.env.WORKOS_CLIENT_ID,
-});
-
 module.exports = async (req, res) => {
-
-  try {
-    let user = null;
-
-    const sealed = req.cookies['wos-session'];
-    if (sealed) {
-      const session = await workos.userManagement.loadSealedSession({
-        sessionData: sealed,
-        cookiePassword: process.env.COOKIE_SECRET,
-      });
-
-      const { authenticated, user: u } = await session.authenticate();
-      if (authenticated) {
-        user = u;
-
-        const { sealedSession } = await session.refresh();
-        if (sealedSession) {
-          res.cookie('wos-session', sealedSession, {
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'lax',
-          });
-        }
-      }
-    }
-  
+  const user = req.user;
+  try {  
     res.send(pug.renderFile('./templates/index.pug', {
       user: user ? {
         id: user.id,

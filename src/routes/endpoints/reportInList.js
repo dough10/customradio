@@ -1,6 +1,5 @@
 const Logger = require('../../util/logger.js');
 const Stations = require('../../model/Stations.js');
-const { t } = require('../../util/i18n.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);

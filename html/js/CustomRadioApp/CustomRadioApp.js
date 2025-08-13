@@ -80,7 +80,7 @@ export default class CustomRadioApp {
    */
   async _createStationList(userInput, loadLocal, container) {
     // get stations added to the download list from localstorage or already in container
-    const selected = this._stationManager.getSelectedStations(loadLocal, container);
+    const selected = await this._stationManager.getSelectedStations(loadLocal, container);
 
     // get stations from db based on user input
     const stations = await this._stationManager.fetchStations(userInput);

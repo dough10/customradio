@@ -9,11 +9,10 @@ const compression = require("compression");
 const path = require("path");
 const crypto = require("crypto");
 const cookieParser = require('cookie-parser');
+const { performance } = require('perf_hooks');
 
 const { setLanguage } = require("../util/i18n.js");
 const Logger = require("../util/logger.js");
-
-const urlplusquery = require("../util/urlplusquery.js");
 
 const logLevel = process.env.LOG_LEVEL || "info";
 const log = new Logger(logLevel);
@@ -59,18 +58,14 @@ function initSessionStorage() {
  * @returns {void}
  */
 module.exports = (app, httpRequestCounter) => {
-  // /**
-  //  * Middleware to track request timing
-  //  * Adds startTime to request object for response time calculation
-  //  *
-  //  * @param {express.Request} req - Express request object
-  //  * @param {express.Response} res - Express response object
-  //  * @param {express.NextFunction} next - Express next middleware function
-  //  */
-  // app.use((req, res, next) => {
-  //   req.startTime = Date.now();
-  //   next();
-  // });
+  app.use((req, res, next) => {
+    const start = performance.now();
+    res.on("finish", () => {
+      const hasBody = req.body && Object.keys(req.body).length > 0;
+      log.info(`${req.ip} -> [${req.method}] ${req.originalUrl}, count: ${req.count ? `${req.count}` : '-'}, lang: ${req.loadedLang}, body: ${hasBody ? `${JSON.stringify(req.body)}` : '-'}, status: ${res.statusCode}, type: ${res.getHeader('Content-Type') || '-'}, bytes: ${res.getHeader('Content-Length') || '-'}, ms: ${(performance.now() - start).toFixed(2)}`);
+    });
+    next();
+  });
 
   app.set("trust proxy", true);
   app.disable("x-powered-by");
@@ -248,7 +243,6 @@ module.exports = (app, httpRequestCounter) => {
     next();
   });
 
-
   /**
    * Set response language
    */
@@ -335,11 +329,6 @@ module.exports = (app, httpRequestCounter) => {
       });
     }
 
-    next();
-  });
-
-  app.use((req, res, next) => {
-    log.info(`${req.ip} -> ${urlplusquery(req.originalUrl, req.loadedLang)}`);
     next();
   });
 
