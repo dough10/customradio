@@ -85,22 +85,46 @@ export default class StationManager {
   }
 
   /**
+   * adds selected: true to object
+   * 
+   * @param {Object} obj 
+   * 
+   * @returns {Object}
+   */
+  #mapSelected(elements) {
+    return elements.map(obj => {
+      return {
+        ...obj, 
+        selected: true
+      };
+    });
+  }
+
+  /**
    * loads list of stations from localstorage or API if "loadSaved" is true
    * otherwise grabs the selected station from UI
    * 
    * @param {Boolean} loadSaved 
    * @param {HTMLElement} container 
    * 
-   * @returns {Array<String>}
+   * @returns {Array<Object>}
    */
   async getSelectedStations(loadSaved, container) {
     if (loadSaved) {
-      const res = await fetch(`${this.apiBaseUrl}/userStations`);
-      if (!res.ok) {
-        throw new Error(`Error fetching user stations: ${res.statusText}`);
+      try {
+        const res = await fetch(`${this.apiBaseUrl}/userStations`);
+        if (!res.ok) {
+          throw new Error(`Error fetching user stations: ${res.statusText}`);
+        }
+        return this.#mapSelected(await res.json());
+      } catch {
+        try {
+          const elements = JSON.parse(localStorage.getItem('selected')) || [];
+          return this.#mapSelected(elements);
+        } catch {
+          return [];
+        }
       }
-      const storedElements = await res.json();
-      return storedElements.map(obj => ({ ...obj, selected: true }));
     }
     return Array.from(container.querySelectorAll('li[selected]'))
       .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name))
