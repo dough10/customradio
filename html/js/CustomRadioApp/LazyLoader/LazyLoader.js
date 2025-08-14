@@ -45,8 +45,6 @@ export default class LazyLoader {
     this._createStationElement = createElFunc || createStationElement;
     this._insertLoadingAnimation = loadingAnimation || insertLoadingAnimation;
 
-    // console.log(`array length: ${list.length}, total pulls: ${(list.length / this._pullNumber)}`);
-
     // bind this to the class instance
     this._resizeHandler = this._onResize.bind(this);
     this._scrollHandler = this._onScroll.bind(this);
@@ -176,7 +174,6 @@ export default class LazyLoader {
     this._list = newList;
     this._ndx = 0;
     this._pullNumber = getPullCount();
-    // console.log(`array length: ${newList.length}, total pulls: ${(newList.length / this._pullNumber)}`);
     this._load();
   }  
 
