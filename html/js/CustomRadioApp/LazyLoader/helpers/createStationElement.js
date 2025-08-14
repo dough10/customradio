@@ -1,5 +1,6 @@
 import Toast from '../../Toast/Toast.js';
 import createSmallButton from './createSmallButton.js';
+import debounce from '../../utils/debounce.js';
 import contextMenu from './contextMenu.js';
 import toggleActiveState from '../../utils/toggleActiveState.js';
 import { t } from '../../utils/i18n.js';
@@ -42,6 +43,15 @@ async function postStreamIssue(id, error) {
     console.error(`Error reporting stream issue for ID ${id}:`, err);
   }
 }
+
+/**
+ * saves selected stations to localstorage
+ * 
+ * @param {Array} data - Array of selected stations.
+ */
+const saveToLocalStorage = debounce((data) => {
+  localStorage.setItem('selected', JSON.stringify(data));
+}, 300);
 
 /**
  * Send event to matomo
@@ -98,8 +108,21 @@ function toggleSelect(ev) {
   // show / hide download button
   toggleActiveState(document.querySelector(selectors.downloadButton), all.length);
   
+  const objStructure = (element) => {
+    return {
+      id: Number(element.id),
+      ...element.dataset
+    };
+  };
+
+  const forStorage = all
+    .map(objStructure)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  
+  saveToLocalStorage(forStorage);
+
   const selected = el.hasAttribute('selected');
-  reportInList({id: Number(el.id), ...el.dataset}, Number(selected));
+  reportInList(objStructure(el), Number(selected));
   if (selected) {
     _paqToggle('Add to file', el.dataset.url);
   } else {
