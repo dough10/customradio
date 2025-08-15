@@ -32,6 +32,24 @@ export default class StationManager {
   }
 
   /**
+   * generates a URL with the given path and query parameters
+   * 
+   * @param {String} path 
+   * @param {Object} query 
+   * 
+   * @returns {String}
+   */
+  #url(path, query) {
+    const u = new URL(path, this.apiBaseUrl);
+    if (query) {
+      Object.keys(query).forEach(key => {
+        u.searchParams.append(key, query[key]);
+      });
+    }
+    return u.toString();
+  }
+
+  /**
    * fetches station list from API
    * 
    * @param {String} genreFilter 
@@ -39,11 +57,8 @@ export default class StationManager {
    * @returns {Object}
    */
   async fetchStations(genreFilter) {
-    const url = new URL(`${this.apiBaseUrl}/stations`);
-    if (genreFilter) {
-      url.searchParams.append('genres', encodeURIComponent(genreFilter));
-    }
-    const res = await retryFetch(url.toString());
+    const url = this.#url('/stations', { genre: genreFilter });
+    const res = await retryFetch(url);
     if (res.status !== 200) {
       throw new Error(`Error fetching stations: ${res.statusText}`);
     }
@@ -69,8 +84,8 @@ export default class StationManager {
    * @returns {String[]}
    */
   async getGenres() {
-    const url = new URL(`${this.apiBaseUrl}/genres`);
-    const res = await retryFetch(url.toString());
+    const url = this.#url('/topGenres');
+    const res = await retryFetch(url);
     if (res.status !== 200) {
       throw new Error(`Error fetching genres: ${res.statusText}`);
     }
@@ -105,8 +120,8 @@ export default class StationManager {
   async getSelectedStations(loadSaved, container) {
     if (loadSaved) {
       try {
-        const url = new URL(`${this.apiBaseUrl}/userStations`);
-        const res = await fetch(url.toString());
+        const url = this.#url('/userStations');
+        const res = await fetch(url);
         if (!res.ok) {
           throw new Error(`Error fetching user stations: ${res.statusText}`);
         }
