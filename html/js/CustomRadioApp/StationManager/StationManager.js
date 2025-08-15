@@ -1,16 +1,4 @@
 /**
- * add query string based on length of input value 
- * 
- * @param {String} value
- * 
- * @returns {String}
- */
-function queryString(value) {
-  const uriEncoded = encodeURIComponent(value);
-  return (value.length === 0) ? '' : `?genres=${uriEncoded}`;
-}
-
-/**
  * retry 
  * 
  * @param {String} url 
@@ -51,7 +39,11 @@ export default class StationManager {
    * @returns {Object}
    */
   async fetchStations(genreFilter) {
-    const res = await retryFetch(`${this.apiBaseUrl}/stations${queryString(genreFilter)}`);
+    const url = new URL(`${this.apiBaseUrl}/stations`);
+    if (genreFilter) {
+      url.searchParams.append('genres', encodeURIComponent(genreFilter));
+    }
+    const res = await retryFetch(url.toString());
     if (res.status !== 200) {
       throw new Error(`Error fetching stations: ${res.statusText}`);
     }
@@ -77,7 +69,8 @@ export default class StationManager {
    * @returns {String[]}
    */
   async getGenres() {
-    const res = await retryFetch(`${this.apiBaseUrl}/topGenres`);
+    const url = new URL(`${this.apiBaseUrl}/genres`);
+    const res = await retryFetch(url.toString());
     if (res.status !== 200) {
       throw new Error(`Error fetching genres: ${res.statusText}`);
     }
@@ -112,7 +105,8 @@ export default class StationManager {
   async getSelectedStations(loadSaved, container) {
     if (loadSaved) {
       try {
-        const res = await fetch(`${this.apiBaseUrl}/userStations`);
+        const url = new URL(`${this.apiBaseUrl}/userStations`);
+        const res = await fetch(url.toString());
         if (!res.ok) {
           throw new Error(`Error fetching user stations: ${res.statusText}`);
         }
