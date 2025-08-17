@@ -15,29 +15,29 @@ module.exports = async (req, res) => {
 
   const user = req.user ? req.user.id : null;
   
-  const state = req.params.state === '1' ? 1 : 0;
+  const state = req.query.state === '1' ? 1 : 0;
 
-  const station = req.body;
+  const id = req.params.id;
 
   if (!user) {
-    res.status(401).send('Unauthorized');
+    res.status(204).send();
     return;
   }
 
-  if (!station || typeof station.id === 'undefined' || typeof station.url !== 'string') {
+  if (!id || isNaN(id)) {
     res.status(400).send('Invalid station data');
     return;
   }
 
   try {
     if (state) {
-      !blacklist.includes(req.ip) ? await stationsSql.addToList(station.id) : null;
-      await userSql.saveStation(user, station);
+      !blacklist.includes(req.ip) ? await stationsSql.addToList(id) : null;
+      await userSql.addStation(user, id);
     } else {
-      await stationsSql.removeFromList(station.id);
-      await userSql.removeStation(user, station.url);
+      await stationsSql.removeFromList(id);
+      await userSql.removeStation(user, id);
     }
-    res.json({ state });
+    res.status(204).send();
   } catch(e) {
     log.error(`Error initializing database connections: ${e.message}`);
     res.status(500).send('Internal Server Error');
