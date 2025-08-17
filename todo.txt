@@ -1,0 +1,4 @@
+- create a script that takes current inList stat for station and uses the popularity calculator to convert to play minuites and rewrite to the database
+- user menu. login button when logged out, logout button when logged in. avatar scaleing animation over menu?
+- better station adding. allow changing of station name when adding a station.
+- option to "minimize" a users list to prevent users having to scroll passed it to get to search results
