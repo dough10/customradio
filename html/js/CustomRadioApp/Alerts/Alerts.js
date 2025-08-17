@@ -14,7 +14,8 @@ export default class Alert {
    */
   #em = new EventManager();
 
-  constructor(bodyHTML) {
+  constructor(bodyHTML, lsKey) {
+    this.lsKey = lsKey;
     this.alert = this.#createAlert(bodyHTML);
     document.querySelector('body').append(this.alert);
     sleep(20).then(_ => requestAnimationFrame(() => this.alert.setAttribute('open', true)));
@@ -29,6 +30,7 @@ export default class Alert {
    */
   destroy() {
     if (!this.alert) return;
+    if (this.lsKey) localStorage.setItem(this.lsKey, 1);
     this.#em.add(this.alert, 'transitionend', _ => {
       this.#em.removeByNamespace('alert-click');
       this.#em.removeByNamespace('close-animation');
