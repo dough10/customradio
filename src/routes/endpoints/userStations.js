@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
   const sql = new UserData('data/customradio.db');
 
   if (!req.user) {
-    res.status(401).send('Unauthorized');
+    res.send([]);
     return;
   }
 
