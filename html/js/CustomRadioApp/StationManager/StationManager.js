@@ -57,7 +57,8 @@ export default class StationManager {
    * @returns {Object}
    */
   async fetchStations(genreFilter) {
-    const url = this.#url('/stations', { genre: genreFilter });
+    const query = genreFilter ? { genres: genreFilter } : null;
+    const url = this.#url('/stations', query);
     const res = await retryFetch(url);
     if (res.status !== 200) {
       throw new Error(`Error fetching stations: ${res.statusText}`);
@@ -126,13 +127,8 @@ export default class StationManager {
           throw new Error(`Error fetching user stations: ${res.statusText}`);
         }
         return this.#mapSelected(await res.json());
-      } catch {
-        try {
-          const elements = JSON.parse(localStorage.getItem('selected')) || [];
-          return this.#mapSelected(elements);
-        } catch {
-          return [];
-        }
+      } catch(e) {
+        return [];
       }
     }
     return Array.from(container.querySelectorAll('li[selected]'))
