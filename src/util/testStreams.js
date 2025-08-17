@@ -38,7 +38,7 @@ function sleep(ms) {
  * 
  * plural(1);
  * // Returns: 'y'
-@@
+ * 
  * plural(5);
  * // Returns: 'ies'
  */
@@ -108,7 +108,7 @@ async function updateStationData(sql, old, updated) {
 
   const updatedData = {
     id: old.id,
-    name: (updated.name && typeof updated.name === 'string') ? updated.name : old.name,
+    name: old.name === 'Unknown' && typeof updated.name === 'string' ? updated.name : old.name,
     url: updated.url || old.url,
     genre: (updated.icyGenre && typeof updated.icyGenre === 'string') ? updated.icyGenre : old.genre || 'Unknown',
     online: (typeof updated.isLive === 'boolean') ? updated.isLive : false,
