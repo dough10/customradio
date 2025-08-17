@@ -1,5 +1,4 @@
 const sqlite3 = require('sqlite3').verbose();
-
 const Logger = require('../util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
@@ -11,21 +10,22 @@ module.exports = class UserData {
   constructor(filePath) {
     if (!filePath) throw new Error('Database file path is required');
 
-    const createTableQuery = `CREATE TABLE IF NOT EXISTS user_data (
+    const createTableQuery = `CREATE TABLE IF NOT EXISTS user_stations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user TEXT NOT NULL UNIQUE,
-      stations TEXT NOT NULL -- JSON stored as TEXT
-    )`;
+      user TEXT NOT NULL,
+      station_id INTEGER NOT NULL,
+      added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(user, station_id)
+    );`;
 
     this.#db = new sqlite3.Database(filePath, (err) => {
       if (err) {
         log.error(`Failed to open database: ${err.message}`);
         throw err;
       }
-
       this.#db.run(createTableQuery, (err) => {
         if (err) {
-          log.error(`Error creating user_data table: ${err.message}`);
+          log.error(`Error creating user_stations table: ${err.message}`);
           throw err;
         }
       });
@@ -33,45 +33,44 @@ module.exports = class UserData {
   }
 
   /**
-   * loads user stations from the database
-   * 
-   * @public
-   * 
-   * @param {string} user 
-   * 
+   * Get all stations for a user (with full station details)
+   * @param {string} user
    * @returns {Promise<Array>}
    */
   userStations(user) {
     return new Promise((resolve, reject) => {
-      const query = 'SELECT stations FROM user_data WHERE user = ?';
-      this.#db.get(query, [user], (err, row) => {
+      const query = `
+        SELECT s.id, s.name, s.url, s.bitrate, s.genre, s.homepage, s.icon
+        FROM user_stations us
+        JOIN stations s ON us.station_id = s.id
+        WHERE us.user = ?
+        ORDER BY s.name ASC
+      `;
+      this.#db.all(query, [user], (err, rows) => {
         if (err) {
           log.error(`Error fetching user stations: ${err.message}`);
           return reject(err);
         }
-        resolve(row ? JSON.parse(row.stations) : []);
+        resolve(rows);
       });
     });
   }
 
   /**
-   * saves user stations to the database
-   * 
-   * @param {string} user 
-   * @param {Array} stations 
-   * 
+   * Add a station to a user's list
+   * @param {string} user
+   * @param {number} stationId
    * @returns {Promise<void>}
    */
-  #saveStations(user, stations) {
+  addStation(user, stationId) {
     return new Promise((resolve, reject) => {
       const query = `
-        INSERT INTO user_data (user, stations)
+        INSERT OR IGNORE INTO user_stations (user, station_id)
         VALUES (?, ?)
-        ON CONFLICT(user) DO UPDATE SET stations = excluded.stations
       `;
-      this.#db.run(query, [user, JSON.stringify(stations)], function(err) {
+      this.#db.run(query, [user, stationId], function(err) {
         if (err) {
-          log.error(`Error saving user stations: ${err.message}`);
+          log.error(`Error adding station ${stationId} for user ${user}: ${err.message}`);
           return reject(err);
         }
         resolve();
@@ -80,83 +79,48 @@ module.exports = class UserData {
   }
 
   /**
-   * Checks if a station already exists for the user.
-   * 
-   * @private
-   * 
-   * @param {string} user - The user identifier.
-   * @param {string} url - The URL of the station to check.
-   * 
-   * @returns {Promise<boolean>} - Resolves to true if the station exists, false otherwise.
+   * Remove a station from a user's list
+   * @param {string} user
+   * @param {number} stationId
+   * @returns {Promise<void>}
    */
-  #exists(user, url) {
+  removeStation(user, stationId) {
     return new Promise((resolve, reject) => {
-      const query = 'SELECT stations FROM user_data WHERE user = ?';
-      this.#db.get(query, [user], (err, row) => {
+      const query = 'DELETE FROM user_stations WHERE user = ? AND station_id = ?';
+      this.#db.run(query, [user, stationId], function(err) {
         if (err) {
-          log.error(`Error checking station existence: ${err.message}`);
+          log.error(`Error removing station ${stationId} for user ${user}: ${err.message}`);
           return reject(err);
         }
-        if (!row) return resolve(false);
-        const stations = JSON.parse(row.stations);
-        const exists = stations.some(station => station.url === url);
-        resolve(exists);
+        if (this.changes === 0) {
+          log.warning(`Station ${stationId} not found for user ${user}`);
+        }
+        resolve();
       });
     });
   }
-  
-  /**
-   * Adds a new station to the user's list of stations and saves it to the database.
-   * 
-   * @async
-   * @public
-   * 
-   * @param {string} user - The user identifier.
-   * @param {Object} station - The station object to be added.
-   * 
-   * @returns {Promise<void>}
-   */
-  async saveStation(user, station) {
-    if (await this.#exists(user, station.url)) {
-      log.warning(`Station ${station.url} already exists for user ${user}`);
-      return;
-    }
-    const stations = await this.userStations(user);
-    stations.push(station);
-    stations.sort((a, b) => {
-      if (!a.name) return 1;
-      if (!b.name) return -1;
-      return a.name.localeCompare(b.name);
-    });
-    return this.#saveStations(user, stations);
-  }
 
   /**
-   * Removes a station from the user's list of stations and updates the database.
-   * 
-   * @async
-   * @public
-   * 
-   * @param {string} user - The user identifier.
-   * @param {string} url - The URL of the station to be removed.
-   * 
-   * @returns {Promise<void>}
+   * Check if a user has a station in their list
+   * @param {string} user
+   * @param {number} stationId
+   * @returns {Promise<boolean>}
    */
-  async removeStation(user, url) {
-    const stations = await this.userStations(user);
-    const filteredStations = stations.filter(station => station.url !== url);
-    if (filteredStations.length === stations.length) {
-      log.warning(`Station ${url} not found for user ${user}`);
-      return;
-    }
-    return this.#saveStations(user, filteredStations);
+  hasStation(user, stationId) {
+    return new Promise((resolve, reject) => {
+      const query = 'SELECT 1 FROM user_stations WHERE user = ? AND station_id = ? LIMIT 1';
+      this.#db.get(query, [user, stationId], (err, row) => {
+        if (err) {
+          log.error(`Error checking station ${stationId} for user ${user}: ${err.message}`);
+          return reject(err);
+        }
+        resolve(!!row);
+      });
+    });
   }
 
   /**
    * Closes the database connection.
-   * 
-   * @public
-   * 
    * @returns {Promise<void>}
    */
   close() {
@@ -170,4 +134,4 @@ module.exports = class UserData {
       });
     });
   }
-}
+};
