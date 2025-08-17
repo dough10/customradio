@@ -19,6 +19,8 @@ module.exports = (req, res) => {
     'Disallow: /stream-issue',
     'Disallow: /topGenres',
     'Disallow: /reportPlay',
+    'Disallow: /reportInList',
+    'Disallow: /userStations',
     '',
     `Allow: /$`,
     `Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml`
