@@ -92,6 +92,15 @@ async function streamTest(url) {
     bitrate = Number(bitrate);
     if (isNaN(bitrate)) bitrate = 'Unknown';
 
+    if (name) {
+      // Use Buffer to decode the name properly if it appears to be in an incorrect encoding
+      try {
+        name = Buffer.from(name, 'latin1').toString('utf8');
+      } catch (e) {
+        log.error(`Error decoding name: ${e.message}`);
+      }
+    }
+
     // set name to homepage if no name is found
     if (!name && icyurl || name && name.length <= 1 && icyurl) {
       name = icyurl;
