@@ -23,12 +23,11 @@ export const en = {
   pressToRefresh: 'Press to refresh',
 
   dismiss: 'Click to dismiss',
-  moving: (newURL, currentURL) => `
-    <h2>We're Relocating — Please Take Note!</h2>
-    <p>Starting next month, our website will officially live at a new permanent address:</p>
-    <p style="font-weight: bold; font-size: 1.1em;"><a href="${newURL}" target="_blank" rel="noopener noreferrer">${newURL}</a></p>
-    <p>Until the end of this month, you can still access the site at <strong>${currentURL}</strong>, but after the 1st, all visits will redirect to the new URL automatically.</p>
-    <p>To avoid disruption, we recommend updating your bookmarks and saved links now.</p>
-    <p>We’re excited about the move and appreciate you coming along with us!</p>
+  news: `
+    <h2>We Updated - User list storage!</h2>
+    <p>You can now login using the WorkOS user portal and any stations you save to your list will not be cleared when your browser randomly decides.</p>
+    <p>No user identifying data is saved to this database. WorkOs used a sealed session cookie to hold user session info. all user profile info is saved to WorkOS servers.</p>
+    <p>On this server. I only save the WorkOS id and station id used for lookup of a users station list.</p>
+    <p>Thanks!</p>
   `
 };
