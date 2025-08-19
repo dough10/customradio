@@ -13,7 +13,8 @@
     "build-docker": "sh build_assets/build-container.sh \"registry.dough10.me/customradio\"",
     "docs": "node make-docs.js",
     "run container": "bash build_assets/run.sh",
-    "translate-js": "bash build_assets/translate-js.sh src/locales/en.js es"
+    "translate-front": "node scripts/translate-js.js front cs de es fr it ja kk ko pl pt ru sk sv tr zh",
+    "translate-back": "node scripts/translate-js.js back cs de es fr it ja kk ko pl pt ru sk sv tr zh"
   },
   "author": "dough10",
   "license": "ISC",
@@ -55,6 +56,7 @@
     "mini-css-extract-plugin": "^2.9.0",
     "mocha": "^10.7.3",
     "mongodb": "^6.15.0",
+    "openai": "^5.12.2",
     "sinon": "^19.0.4",
     "sinon-chai": "^4.0.0",
     "terser-webpack-plugin": "^5.3.10",
