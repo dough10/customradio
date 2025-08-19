@@ -18,3 +18,5 @@ t.html
 dist
 src/logs
 **/*-doc.md
+/translated
+/og-translations
