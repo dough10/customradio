@@ -50,22 +50,19 @@ function cleanURL(url) {
  */
 function fixEncoding(str) {
   if (typeof str !== 'string') {
-    return str ? String(str) : ''; // guarantee string
+    str = String(str);
   }
 
-  // Step 1: If pure ASCII, return as-is
   if (/^[\x00-\x7F]*$/.test(str)) {
     return str;
   }
 
   try {
-    // Step 2: Detect mojibake (UTF-8 seen as Latin-1)
     if (/[ÐÃÂ]/.test(str)) {
       const decoded = Buffer.from(str, 'latin1').toString('utf8');
       if (decoded) return decoded;
     }
 
-    // Step 3: Try CP1251 → UTF-8 conversion (common for Russian)
     const cp1251 = iconv.decode(Buffer.from(str, 'binary'), 'cp1251');
     if (cp1251 && /[\u0400-\u04FF]/.test(cp1251)) { 
       return cp1251;
