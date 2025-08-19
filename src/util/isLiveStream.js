@@ -71,7 +71,6 @@ function fixEncoding(str) {
     log.error(`Encoding fix failed: ${e.message}`);
   }
 
-  // Fallback: return original string, guaranteed
   return str;
 }
 

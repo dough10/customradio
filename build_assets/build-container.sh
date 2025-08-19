@@ -2,10 +2,6 @@
 
 set -euo pipefail
 
-# npm run test
-npm run translate-front
-npm run translate-back
-
 VERSION=$(jq -r '.version' package.json)
 
 if [ $? -ne 0 ] || [ -z "$VERSION" ]; then
