@@ -1,5 +1,6 @@
 const axios = require('axios');
 const pack = require('../../package.json');
+const iconv = require('iconv-lite');
 
 const isValidURL = require('./isValidURL.js');
 const Logger = require('./logger.js');
@@ -38,6 +39,40 @@ function cleanURL(url) {
     url = url.replace(port, '/');
   });
   return url;
+}
+
+/**
+ * Fixes common encoding issues in a string.
+ * 
+ * @param {String} str
+ *  
+ * @returns {String} 
+ */
+function fixEncoding(str) {
+  if (!str) return str;
+
+  // Step 1: If it looks fine (ASCII or valid UTF-8), leave it
+  if (/^[\x00-\x7F]*$/.test(str)) {
+    return str; // pure ASCII
+  }
+
+  try {
+    // Step 2: Detect mojibake (common characters like Ð, Ã, Â)
+    if (/[ÐÃÂ]/.test(str)) {
+      return Buffer.from(str, 'latin1').toString('utf8');
+    }
+
+    // Step 3: Try CP1251 → UTF-8 conversion (common in Russian streams)
+    const cp1251 = iconv.decode(Buffer.from(str, 'binary'), 'cp1251');
+    if (/[\u0400-\u04FF]/.test(cp1251)) { // contains Cyrillic
+      return cp1251;
+    }
+  } catch (e) {
+    log.error(`Encoding fix failed: ${e.message}`);
+  }
+
+  // Fallback: return original if nothing worked
+  return str;
 }
 
 /**
@@ -93,12 +128,7 @@ async function streamTest(url) {
     if (isNaN(bitrate)) bitrate = 'Unknown';
 
     if (name) {
-      // Use Buffer to decode the name properly if it appears to be in an incorrect encoding
-      try {
-        name = Buffer.from(name, 'latin1').toString('utf8');
-      } catch (e) {
-        log.error(`Error decoding name: ${e.message}`);
-      }
+      name = fixEncoding(name);
     }
 
     // set name to homepage if no name is found
