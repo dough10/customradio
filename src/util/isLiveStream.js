@@ -49,31 +49,35 @@ function cleanURL(url) {
  * @returns {String} 
  */
 function fixEncoding(str) {
-  if (!str) return str;
+  if (typeof str !== 'string') {
+    return str ? String(str) : ''; // guarantee string
+  }
 
-  // Step 1: If it looks fine (ASCII or valid UTF-8), leave it
+  // Step 1: If pure ASCII, return as-is
   if (/^[\x00-\x7F]*$/.test(str)) {
-    return str; // pure ASCII
+    return str;
   }
 
   try {
-    // Step 2: Detect mojibake (common characters like Ð, Ã, Â)
+    // Step 2: Detect mojibake (UTF-8 seen as Latin-1)
     if (/[ÐÃÂ]/.test(str)) {
-      return Buffer.from(str, 'latin1').toString('utf8');
+      const decoded = Buffer.from(str, 'latin1').toString('utf8');
+      if (decoded) return decoded;
     }
 
-    // Step 3: Try CP1251 → UTF-8 conversion (common in Russian streams)
+    // Step 3: Try CP1251 → UTF-8 conversion (common for Russian)
     const cp1251 = iconv.decode(Buffer.from(str, 'binary'), 'cp1251');
-    if (/[\u0400-\u04FF]/.test(cp1251)) { // contains Cyrillic
+    if (cp1251 && /[\u0400-\u04FF]/.test(cp1251)) { 
       return cp1251;
     }
   } catch (e) {
     log.error(`Encoding fix failed: ${e.message}`);
   }
 
-  // Fallback: return original if nothing worked
+  // Fallback: return original string, guaranteed
   return str;
 }
+
 
 /**
  * Tests if the provided URL is an audio stream and retrieves related information.
