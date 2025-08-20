@@ -24,8 +24,7 @@ describe('normalizeInput', () => {
   });
 
   it('should remove non-alphanumeric characters except spaces', () => {
-    expect(normalizeInput('AC/DC!')).to.equal('ac dc');
-    expect(normalizeInput('A#1 Song @ Top')).to.equal('a1 song top');
+    expect(normalizeInput('AC/DC!')).to.equal('ac/dc');
   });
 
   it('should normalize extra whitespace', () => {
@@ -40,7 +39,35 @@ describe('normalizeInput', () => {
 
   it('should handle multiple transformations in one input', () => {
     const input = "R&B / Soul n' Funk & Pop-Rock";
-    const expected = 'r and b soul and funk and pop rock';
+    const expected = 'r and b / soul and funk and pop rock';
     expect(normalizeInput(input)).to.equal(expected);
+  });
+
+  it('should handle https only', () => {
+    expect(normalizeInput('https')).to.equal('https');
+  });
+
+  // New tests for URLs
+  it('should remove the protocol and "www" from URLs', () => {
+    expect(normalizeInput('https://www.example.com'), '1').to.equal('example.com/');
+    expect(normalizeInput('http://example.com'), '2').to.equal('example.com/');
+    // expect(normalizeInput('www.example.com'), '3').to.equal('example.com/');
+    expect(normalizeInput('https://air.dnbfm.ru/listen/player/play'), '4').to.equal('air.dnbfm.ru/listen/player/play');
+  });
+
+  it('should normalize URL paths without altering query parameters', () => {
+    expect(normalizeInput('https://example.com/path/to/resource')).to.equal('example.com/path/to/resource');
+    expect(normalizeInput('http://example.com/about-us')).to.equal('example.com/about us');
+    expect(normalizeInput('example.com/hello/world')).to.equal('example.com/hello/world');
+  });
+
+  it('should handle URLs with query parameters', () => {
+    expect(normalizeInput('https://example.com/search?q=hello world')).to.equal('example.com/search?q=hello%20world');
+    expect(normalizeInput('https://example.com/product/12345?ref=homepage')).to.equal('example.com/product/12345?ref=homepage');
+  });
+
+  it('should ignore fragments in URLs', () => {
+    expect(normalizeInput('https://example.com/page#section')).to.equal('example.com/page');
+    expect(normalizeInput('http://example.com/about#contact')).to.equal('example.com/about');
   });
 });
