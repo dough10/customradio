@@ -107,11 +107,11 @@ async function streamTest(url) {
     });
     const isLive = response.status >= 200 && response.status < 300;
     let name = response.headers['icy-name'];
-    const description = response.headers['icy-description'];
-    const icyGenre = response.headers['icy-genre'];
+    const description = response.headers['icy-description'] || '';
+    const icyGenre = response.headers['icy-genre'] || 'Unknown';
     let bitrate = response.headers['icy-br'];
     const content = response.headers['content-type'];
-    const icyurl = response.headers['icy-url'];
+    const icyurl = response.headers['icy-url'] || '';
     const isAudioStream = content && content.startsWith('audio/');
 
     if (!isAudioStream) {
@@ -125,15 +125,14 @@ async function streamTest(url) {
 
     if (bitrate && bitrate.length > 3) bitrate = bitrate.split(',')[0];
     bitrate = Number(bitrate);
-    if (isNaN(bitrate)) bitrate = 'Unknown';
+    if (isNaN(bitrate)) bitrate = 0;
 
     if (name) {
       name = fixEncoding(name);
     }
 
-    // set name to homepage if no name is found
-    if (!name && icyurl || name && name.length <= 1 && icyurl) {
-      name = icyurl;
+    if (!name) {
+      name = icyurl || description || 'Unknown';
     }
 
     return {
@@ -145,7 +144,7 @@ async function streamTest(url) {
       isLive,
       icyGenre,
       content,
-      bitrate: Number(bitrate),
+      bitrate: bitrate,
       error: ''
     };
   } catch (error) {
