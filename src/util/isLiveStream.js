@@ -67,6 +67,7 @@ function fixEncoding(str) {
     if (cp1251 && /[\u0400-\u04FF]/.test(cp1251)) { 
       return cp1251;
     }
+    
   } catch (e) {
     log.error(`Encoding fix failed: ${e.message}`);
   }
@@ -125,6 +126,7 @@ async function streamTest(url) {
 
     if (bitrate && bitrate.length > 3) bitrate = bitrate.split(',')[0];
     bitrate = Number(bitrate);
+
     if (isNaN(bitrate)) bitrate = 0;
 
     if (name) {
@@ -132,7 +134,7 @@ async function streamTest(url) {
     }
 
     if (!name) {
-      name = icyurl || description || 'Unknown';
+      name = icyurl || url;
     }
 
     return {
