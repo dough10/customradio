@@ -47,7 +47,6 @@ describe('normalizeInput', () => {
     expect(normalizeInput('https')).to.equal('https');
   });
 
-  // New tests for URLs
   it('should remove the protocol and "www" from URLs', () => {
     expect(normalizeInput('https://www.example.com'), '1').to.equal('example.com/');
     expect(normalizeInput('http://example.com'), '2').to.equal('example.com/');
