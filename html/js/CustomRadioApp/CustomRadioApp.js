@@ -219,10 +219,8 @@ export default class CustomRadioApp {
       // update the genres datalist if the user input is a genre or if loadLocal is true
       await this._updateGenresDatalist(userInput, ev.loadLocal);
   
-      // filter analytics
       if (userInput.length) this._analyticsTrackEvent('Filter', 'Change', userInput);
     } catch (error) {
-      // failure
       this._filterFailed(error);
     } finally {
       // remove loading animation
