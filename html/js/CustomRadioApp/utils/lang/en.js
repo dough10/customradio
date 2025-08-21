@@ -24,10 +24,10 @@ export const en = {
 
   dismiss: 'Click to dismiss',
   news: `
-    <h2>We Updated - User list storage!</h2>
-    <p>You can now login using the WorkOS user portal and any stations you save to your list will not be cleared randomly by your browser.</p>
-    <p>No user identifying data is saved to this database. WorkOs used a sealed session cookie to hold user session info. all user profile info is saved to WorkOS servers.</p>
-    <p>On this server. I only save the WorkOS id and station id used for lookup of a users station list.</p>
+    <h2>We've Updated – User List Storage!</h2>
+    <p>You can now log in using the WorkOS user portal, and any stations you save to your list will no longer be randomly cleared by your browser.</p>
+    <p>No user-identifying data is saved to this database. All user profile data is saved on WorkOS servers.</p>
+    <p>This server only stores your WorkOS ID and station IDs, which are used to build your station list.</p>
     <p>Thanks!</p>
   `
 };
