@@ -152,7 +152,7 @@ module.exports = async (app, register) => {
   /**
    * Handles the request to retrieve the top genres from the database.
    *
-   * This function connects to a MongoDB database, aggregates the genres,
+   * This function connects to a SQLite database, aggregates the genres,
    * and returns the top 10 genres sorted alphabetically.
    *
    * @async
