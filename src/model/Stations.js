@@ -492,7 +492,7 @@ class Stations {
   getListedStations() {
     const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes
       FROM stations
-      WHERE inList = 1
+      WHERE inList > 0
       AND online = 1
       AND duplicate = 0
       ORDER BY name ASC`;
