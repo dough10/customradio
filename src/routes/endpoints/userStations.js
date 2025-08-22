@@ -23,8 +23,8 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const user = req.user.id;
-    const stations = await sql.userStations(user);
+    const userID = req.user.id;
+    const stations = await sql.userStations(userID);
 
     if (!stations || stations.length === 0) {
       res.send([]);
