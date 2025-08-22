@@ -13,29 +13,28 @@ module.exports = async (req, res) => {
   const userSql = new UserData(DB_FILE);
   const stationsSql = new Stations(DB_FILE);
 
-  const user = req.user ? req.user.id : null;
-  
   const state = req.query.state === '1' ? 1 : 0;
+  
+  const userID = req.user ? req.user.id : null;
+  const stationID = req.params.id;
 
-  const id = req.params.id;
-
-  if (!user) {
+  if (!userID) {
     res.status(204).send();
     return;
   }
 
-  if (!id || isNaN(id)) {
+  if (!stationID || isNaN(stationID)) {
     res.status(400).send('Invalid station data');
     return;
   }
 
   try {
     if (state) {
-      !blacklist.includes(req.ip) ? await stationsSql.addToList(id) : null;
-      await userSql.addStation(user, id);
+      !blacklist.includes(req.ip) ? await stationsSql.addToList(stationID) : null;
+      await userSql.addStation(userID, stationID);
     } else {
-      await stationsSql.removeFromList(id);
-      await userSql.removeStation(user, id);
+      await stationsSql.removeFromList(stationID);
+      await userSql.removeStation(userID, stationID);
     }
     res.status(204).send();
   } catch(e) {
