@@ -79,16 +79,9 @@ export default class CustomRadioApp {
    * @returns {Promise<{ stations: Array, selected: Number, list: Number }>}
    */
   async _createStationList(userInput, loadLocal, container) {
-    // get stations added to the download list from localstorage or already in container
     const selected = await this._stationManager.getSelectedStations(loadLocal, container);
-
-    // get stations from db based on user input
     const stations = await this._stationManager.fetchStations(userInput);
-
-    // removes any duplicate station already in selected list
     const list = this._stationManager.filterStations(selected, stations);
-
-    // combine selected and list to create the final stations array
     return {
       stations: [...selected, ...list],
       selected: selected.length,
@@ -105,14 +98,8 @@ export default class CustomRadioApp {
    * @param {HTMLElement} container
    */
   _updateUIStationsList({stations, selected, list}, container) {
-    // update stations count
     this._uiManager.setCounts(selected, list);
-
-    // remove children leaving only the loading element created with this._uiManager.loadingStart
-    // finally block in _finterChanged method will remove the loading element
     container.replaceChildren(document.querySelector(selectors.loading));
-
-    // push items to the UI and load more elements when scrolling close to bottom of page
     this._lzldr ? this._lzldr.reset(stations) : this._lzldr = new LazyLoader(
       stations,                    // list of audio streams
       container,                   // page "main" element
@@ -127,7 +114,6 @@ export default class CustomRadioApp {
    * @param {Boolean} loadLocal 
    */
   async _updateGenresDatalist(userInput, loadLocal) {
-    // if a genre was searched and not in the current datalist, load the genres again
     const currentGenres = this._uiManager.currentGenres();
     const isNewGenreSearch = userInput.length && !currentGenres.includes(userInput);
     if (isNewGenreSearch || loadLocal) {
@@ -160,13 +146,8 @@ export default class CustomRadioApp {
       this._lzldr.destroy();
       this._lzldr = null;
     }
-
-    // english error message
     console.error(`Error fetching stations: ${error.message}`);
-    // user language translated toast message
     new Toast(t('stationsError', error.message));
-    
-    // analytics
     this._analyticsTrackEvent('Fetch Error', error.message, '');
   }
 
@@ -178,14 +159,9 @@ export default class CustomRadioApp {
    * @returns {String} userInput
    */
   _getuserInput(ev) {
-    // drop / remove focus of input element
     ev.target.blur();
-
-    // empty userInput means "show all"
     const userInput = normalizeMemo(ev.target.value.trim() || '');
-
     if (userInput.length) console.log(`Filter changed: ${userInput}`);
-
     return userInput;
   }
 
@@ -203,28 +179,17 @@ export default class CustomRadioApp {
    */
   async _filterChanged(ev) {
     const userInput = this._getuserInput(ev);
-
     const container = document.querySelector(selectors.stationsContainer);
-    
-    // start loading animation
     this._uiManager.loadingStart(container);
-
     try {
-      // create a list of stations based on the users input
       const stationList = await this._createStationList(userInput, ev.loadLocal, container);
-
-      // update the UI with the new stations list
       this._updateUIStationsList(stationList, container);
-  
-      // update the genres datalist if the user input is a genre or if loadLocal is true
       await this._updateGenresDatalist(userInput, ev.loadLocal);
-  
       if (userInput.length) this._analyticsTrackEvent('Filter', 'Change', userInput);
     } catch (error) {
       this._filterFailed(error);
     } finally {
-      // remove loading animation
-      this._uiManager.loadingEnd();      
+      this._uiManager.loadingEnd();
     }
   }
 }
