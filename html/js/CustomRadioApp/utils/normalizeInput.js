@@ -6,21 +6,17 @@
  */
 export default function normalizeInput(str) {
   try {
-    const url = new URL(str); // Try parsing the input as a URL
+    const url = new URL(str);
     let hostname = url.hostname;
 
-    // Remove "www." if present
     if (hostname.startsWith('www.')) {
       hostname = hostname.substring(4);
     }
 
-    // Normalize pathname (replace hyphens with spaces)
     let pathname = url.pathname ? url.pathname.replace(/-/g, ' ') : '';
 
-    // Return the normalized URL (hostname + pathname + search/query)
     return hostname + pathname + (url.search ? url.search : '');
   } catch {
-    // If not a valid URL, perform the usual normalization
     return str
       .toLowerCase()
       .replace(/&|\band\b|(?:\bn\b|'n'|n'|n)(?=\s|$|\W)/g, ' and ') // Normalize 'n' and '&' to 'and'
