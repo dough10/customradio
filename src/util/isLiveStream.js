@@ -51,6 +51,10 @@ function cleanURL(url) {
   return url;
 }
 
+function looksReadable(str) {
+  return /[\p{L}\p{N}]/u.test(str);
+}
+
 /**
  * Fixes common encoding issues in a string.
  * 
@@ -59,31 +63,43 @@ function cleanURL(url) {
  * @returns {String} 
  */
 function fixEncoding(str) {
-  if (typeof str !== 'string') {
-    str = String(str);
-  }
+  if (typeof str !== 'string') str = String(str);
 
-  if (/^[\x00-\x7F]*$/.test(str)) {
-    return str;
-  }
+  if (/^[\x00-\x7F]*$/.test(str)) return str;
 
   try {
     if (/[ÐÃÂ]/.test(str)) {
       const decoded = Buffer.from(str, 'latin1').toString('utf8');
-      if (decoded) return decoded;
+      if (looksReadable(decoded)) return decoded;
     }
 
     const cp1251 = iconv.decode(Buffer.from(str, 'binary'), 'cp1251');
-    if (cp1251 && /[\u0400-\u04FF]/.test(cp1251)) { 
+    if (cp1251 && /[\u0400-\u04FF]/.test(cp1251)) {
       return cp1251;
     }
-    
+
+    const bytes = [];
+    for (const ch of str) {
+      try {
+        const b = iconv.encode(ch, 'cp1251');
+        if (b.length === 1) bytes.push(b[0]);
+      } catch {}
+    }
+
+    if (bytes.length) {
+      const recovered = Buffer.from(bytes).toString('utf8');
+      if (looksReadable(recovered)) return recovered;
+    }
+
   } catch (e) {
-    log.error(`Encoding fix failed: ${e.message}`);
+    if (typeof log !== 'undefined') {
+      log.error(`Encoding fix failed: ${e.message}`);
+    }
   }
 
   return str;
 }
+
 
 
 /**
