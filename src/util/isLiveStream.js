@@ -10,14 +10,24 @@ const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
 /**
+ * An array of unhelpful stream names to ignore.
+ *
+ * @constant {string[]} unhelpfulNames
+ * @default
+ */
+const unhelpfulNames = [
+  'stream',
+  '.',
+  'no name',
+  'radio',
+  'online radio'
+];
+
+/**
  * An array containing default port numbers used in network protocols.
  * 
  * @constant {string[]} defaultPorts
  * @default
- * @example
- * // Accessing the default ports
- * console.log.info(defaultPorts[0]); // Output: ':80/'
- * console.log.info(defaultPorts[1]); // Output: ':443/'
  */
 const defaultPorts = [
   ':80/',
@@ -131,6 +141,9 @@ async function streamTest(url) {
 
     if (name) {
       name = fixEncoding(name);
+      if (unhelpfulNames.includes(name.toLowerCase().trim())) {
+        name = null;
+      }
     }
 
     if (!name) {
