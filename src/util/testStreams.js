@@ -197,16 +197,14 @@ async function processStream(station, ndx, offset, length, sql, totalStationCoun
   try {
     const startTime = Date.now()
     log.debug(`[${station.id}] Testing url ${station.url}`);
-    const stream = await retry(() => isLiveStream(station.url));
-  
     log.debug(`[${station.id}] Station: ${partCount}/${length}, ${partPrecent}%`);
     log.debug(`[${station.id}] Part: ${ndx + 1}/${parts}, Total progress: ${totalPrecent}%`);
     
+    const stream = await retry(() => isLiveStream(station.url));
     if (stationDataIsUnchanged(station, stream)) {
       log.debug(`[${station.id}] No change.. ${Date.now() - startTime}ms`);
       return;
     }
-
     await updateStationData(sql, station, stream);
     log.debug(`[${station.id}] Updated.. ${Date.now() - startTime}ms`);
     // count changes
