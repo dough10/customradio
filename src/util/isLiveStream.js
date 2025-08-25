@@ -26,7 +26,7 @@ const unhelpfulNames = [
   "online radio",
   "n/a",
   "this is my server name",
-  /\b\d{1,4}\b/
+  /\b\d{1,2}\b/
 ];
 
 /**
@@ -115,7 +115,7 @@ async function streamTest(url) {
     }
 
     if (!name) {
-      name = icyurl || url;
+      name = url;
     }
 
     return {
