@@ -292,18 +292,18 @@ class Stations {
       inList
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const values = [
-      obj.name,
-      obj.url,
-      obj.genre,
-      obj.online,
-      obj['content-type'],
-      obj.bitrate,
-      obj.icon,
-      obj.homepage,
-      obj.error,
-      obj.duplicate,
-      obj.playMinutes || 0,
-      obj.inList || 0
+      String(obj.name),
+      String(obj.url),
+      String(obj.genre),
+      Boolean(obj.online),
+      String(obj['content-type']),
+      Number(obj.bitrate),
+      String(obj.icon),
+      String(obj.homepage),
+      String(obj.error),
+      Boolean(obj.duplicate),
+      Number(obj.playMinutes) || 0,
+      Number(obj.inList) || 0
     ];
 
     return new Promise((resolve, reject) => {
@@ -357,18 +357,18 @@ class Stations {
       inList = ?
       WHERE id = ?`;
     const values = [
-      obj.name,
-      obj.url,
-      obj.genre,
-      obj.online,
-      obj['content-type'],
-      obj.bitrate,
-      obj.icon,
-      obj.homepage,
-      obj.error,
-      obj.duplicate,
-      obj.playMinutes || 0,
-      obj.inList || 0,
+      String(obj.name),
+      String(obj.url),
+      String(obj.genre),
+      Boolean(obj.online),
+      String(obj['content-type']),
+      Number(obj.bitrate) || 0,
+      String(obj.icon),
+      String(obj.homepage),
+      String(obj.error),
+      Boolean(obj.duplicate),
+      Number(obj.playMinutes) || 0,
+      Number(obj.inList) || 0,
       obj.id
     ];
 
