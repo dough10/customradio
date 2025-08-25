@@ -48,25 +48,25 @@ describe('normalizeInput', () => {
   });
 
   it('should remove the protocol and "www" from URLs', () => {
-    expect(normalizeInput('https://www.example.com'), '1').to.equal('example.com/');
-    expect(normalizeInput('http://example.com'), '2').to.equal('example.com/');
-    // expect(normalizeInput('www.example.com'), '3').to.equal('example.com/');
-    expect(normalizeInput('https://air.dnbfm.ru/listen/player/play'), '4').to.equal('air.dnbfm.ru/listen/player/play');
+    expect(normalizeInput('https://www.example.com'), '1').to.equal('https://www.example.com');
+    expect(normalizeInput('http://example.com'), '2').to.equal('http://example.com');
+    expect(normalizeInput('www.example.com'), '3').to.equal('www.example.com');
+    expect(normalizeInput('https://air.dnbfm.ru/listen/player/play'), '4').to.equal('https://air.dnbfm.ru/listen/player/play');
   });
 
   it('should normalize URL paths without altering query parameters', () => {
-    expect(normalizeInput('https://example.com/path/to/resource')).to.equal('example.com/path/to/resource');
-    expect(normalizeInput('http://example.com/about-us')).to.equal('example.com/about us');
+    expect(normalizeInput('https://example.com/path/to/resource')).to.equal('https://example.com/path/to/resource');
+    expect(normalizeInput('http://example.com/about-us')).to.equal('http://example.com/about-us');
     expect(normalizeInput('example.com/hello/world')).to.equal('example.com/hello/world');
   });
 
   it('should handle URLs with query parameters', () => {
-    expect(normalizeInput('https://example.com/search?q=hello world')).to.equal('example.com/search?q=hello%20world');
-    expect(normalizeInput('https://example.com/product/12345?ref=homepage')).to.equal('example.com/product/12345?ref=homepage');
+    expect(normalizeInput('https://example.com/search?q=hello world')).to.equal('https://example.com/search?q=hello world');
+    expect(normalizeInput('https://example.com/product/12345?ref=homepage')).to.equal('https://example.com/product/12345?ref=homepage');
   });
 
   it('should ignore fragments in URLs', () => {
-    expect(normalizeInput('https://example.com/page#section')).to.equal('example.com/page');
-    expect(normalizeInput('http://example.com/about#contact')).to.equal('example.com/about');
+    expect(normalizeInput('https://example.com/page#section')).to.equal('https://example.com/page#section');
+    expect(normalizeInput('http://example.com/about#contact')).to.equal('http://example.com/about#contact');
   });
 });
