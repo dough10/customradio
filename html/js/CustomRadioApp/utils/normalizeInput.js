@@ -6,16 +6,8 @@
  */
 export default function normalizeInput(str) {
   try {
-    const url = new URL(str);
-    let hostname = url.hostname;
-
-    if (hostname.startsWith('www.')) {
-      hostname = hostname.substring(4);
-    }
-
-    let pathname = url.pathname ? url.pathname.replace(/-/g, ' ') : '';
-
-    return hostname + pathname + (url.search ? url.search : '');
+    new URL(str);
+    return str;
   } catch {
     return str
       .toLowerCase()
