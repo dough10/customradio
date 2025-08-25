@@ -72,7 +72,7 @@ function cleanURL(url) {
  *   @property {boolean} isLive - Indicates if the stream is live (i.e., responds with status 200).
  *   @property {string} [icyGenre='Unknown'] - The genre of the stream, or 'Unknown' if not available.
  *   @property {string} content - The content type of the stream (e.g., 'audio/mp3').
- *   @property {number|string} [bitrate='Unknown'] - The bitrate of the stream, or 'Unknown' if not available.
+ *   @property {number} [bitrate=0] - The bitrate of the stream, or 'Unknown' if not available.
  *
  * @throws {Error} Throws an error if the HTTP request fails or if there is an issue with the URL.
  */
