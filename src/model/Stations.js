@@ -216,6 +216,7 @@ class Stations {
     const genrePatterns = genres.map(g => `%${g.toLowerCase()}%`);
   
     const nameConditions = genrePatterns.map(() => 'LOWER(name) LIKE ?').join(' OR ');
+    const urlConditions = genrePatterns.map(() => 'LOWER(url) LIKE ?').join(' OR ');
     const genreConditions = genrePatterns.map(() => "LOWER(REPLACE(REPLACE(genre, '&', 'and'), '-', '')) LIKE ?").join(' OR ');
   
     const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList, (inList * ${DB_CONFIG.POPULARITY_MULTIPLIER} + playMinutes) as popularity
@@ -224,9 +225,9 @@ class Stations {
       AND online = 1
       AND duplicate = 0
       AND bitrate IS NOT NULL
-      AND (${nameConditions} OR ${genreConditions})
+      AND (${nameConditions} OR ${genreConditions} OR ${urlConditions})
     ORDER BY popularity DESC, name ASC;`;
-    const params = [...usedTypes, ...genrePatterns, ...genrePatterns];
+    const params = [...usedTypes, ...genrePatterns, ...genrePatterns, ...genrePatterns];
 
     return this._ensureInitialized(() => this._runQuery(query, params));
   }
