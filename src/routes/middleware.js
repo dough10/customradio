@@ -62,7 +62,7 @@ module.exports = (app, httpRequestCounter) => {
     const start = performance.now();
     res.on("finish", () => {
       const hasBody = req.body && Object.keys(req.body).length > 0;
-      log.info(`${req.ip} -> [${req.method}] ${req.originalUrl}, count: ${req.count !== null ? `${req.count}` : '-'}, lang: ${req.loadedLang}, body: ${hasBody ? `${JSON.stringify(req.body)}` : '-'}, status: ${res.statusCode}, type: ${res.getHeader('Content-Type') || '-'}, bytes: ${res.getHeader('Content-Length') || '-'}, ms: ${(performance.now() - start).toFixed(2)}`);
+      log.info(`${req.ip} -> [${req.method}] ${req.originalUrl}, count: ${req.count !== undefined ? `${req.count}` : '-'}, lang: ${req.loadedLang}, body: ${hasBody ? `${JSON.stringify(req.body)}` : '-'}, status: ${res.statusCode}, type: ${res.getHeader('Content-Type') || '-'}, bytes: ${res.getHeader('Content-Length') || '-'}, ms: ${(performance.now() - start).toFixed(2)}`);
     });
     next();
   });
