@@ -1,5 +1,6 @@
 {
   "Current": [
+    "Attempt to improve database searchability",
     "More translations added (CS, KK, TR, and PT)",
     "Authentication system for station list memory (uses WorkOS, no data other then station are stored in this database, also resets inList stat for stations allowing for more accurate popularity tracking)"
   ],
