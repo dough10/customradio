@@ -18,6 +18,7 @@ module.exports = async (req, res) => {
   const sql = new UserData('data/customradio.db');
 
   if (!req.user) {
+    req.count = 0;
     res.send([]);
     return;
   }
@@ -25,13 +26,13 @@ module.exports = async (req, res) => {
   try {
     const userID = req.user.id;
     const stations = await sql.userStations(userID);
+    req.count = stations.length;
 
     if (!stations || stations.length === 0) {
       res.send([]);
       return;
     }
 
-    req.count = stations.length;
     res.json(stations);
   } catch(e) {
     log.error(`Error fetching user stations: ${e.message}`);
