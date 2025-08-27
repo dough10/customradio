@@ -62,7 +62,7 @@ module.exports = (app, httpRequestCounter) => {
     const start = performance.now();
     res.on("finish", () => {
       const hasBody = req.body && Object.keys(req.body).length > 0;
-      log.info(`${req.ip} -> [${req.method}] ${req.originalUrl},${req.count !== undefined ? ` count: ${req.count}, ` : ' '}lang: ${req.loadedLang},${hasBody ? ` body: ${JSON.stringify(req.body)}, ` : ' '}status: ${res.statusCode},${res.getHeader('Content-Type') ? ` type: ${res.getHeader('Content-Type')}` : ' '}bytes: ${res.getHeader('Content-Length') || '-'}, ms: ${(performance.now() - start).toFixed(2)}`);
+      log.info(`${req.ip} -> [${req.method}] ${req.originalUrl},${req.count !== undefined ? ` count: ${req.count}, ` : ' '}lang: ${req.loadedLang},${hasBody ? ` body: ${JSON.stringify(req.body)}, ` : ' '}status: ${res.statusCode},${res.getHeader('Content-Type') ? ` type: ${res.getHeader('Content-Type')}, ` : ' '}${res.getHeader('Content-Length') ? ` bytes: ${res.getHeader('Content-Length')}, ` : ' '}ms: ${(performance.now() - start).toFixed(2)}`);
     });
     next();
   });
