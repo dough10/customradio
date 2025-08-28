@@ -42,11 +42,7 @@ export default class UIManager {
     initDialogInteractions();
 
     this._player.init();
-    this._em.add(this._login, 'click', () => {
-      if (window.user) return;
-      hapticFeedback();
-      window.location.href = '/auth';
-    }, { passive: true });
+    this._em.add(this._loginButton, 'click', this._loginRedirect, { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
     this._em.add(this._resetButton, 'click', ev => {
@@ -55,6 +51,17 @@ export default class UIManager {
     }, { passive: true });
     this._em.add(this._toTop, 'click', this._toTopHandler.bind(this), { passive: true });
     this._em.add(this._downloadButton, 'click', this._dl, { passive: true });
+  }
+
+  /**
+   * Redirects to the login page if the user is not authenticated
+   *
+   * @returns {void}
+   */
+  _loginRedirect() {
+    if (window.user) return;
+    hapticFeedback();
+    window.location.href = '/auth';
   }
 
   /**
@@ -128,7 +135,7 @@ export default class UIManager {
    * @private
    * @returns {HTMLElement}
    */
-  get _login() {
+  get _loginButton() {
     return document.querySelector(this._selectors.login);
   }
 
@@ -171,7 +178,7 @@ export default class UIManager {
    */
   _loadUser() {
     if (!window.user) return;
-    const button = this._login;
+    const button = this._loginRedirect;
     if (!button) {
       console.error('Login button element is missing.');
       return;
