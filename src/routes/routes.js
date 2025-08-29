@@ -17,6 +17,7 @@ const authenticate = require('../util/auth.js');
 const updatedb = require('./endpoints/updatedb.js');
 const auth = require('./endpoints/auth.js');
 const authCallback = require('./endpoints/auth.callback.js');
+const authLogout = require('./endpoints/auth.logout.js');
 const userStations = require('./endpoints/userStations.js');
 const index = require('./endpoints/index.js');
 
@@ -372,6 +373,11 @@ module.exports = async (app, register) => {
    * Endpoint for handling the authentication callback from WorkOS.
    */
   app.get('/auth/callback', authCallback);
+
+  /**
+   * Endpoint for logging out the user.
+   */
+  app.get('/auth/logout', authLogout);
 
   /**
    * Catch-all route for handling 404 errors.
