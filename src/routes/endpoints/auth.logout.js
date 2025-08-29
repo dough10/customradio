@@ -9,7 +9,7 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
 module.exports = async (req, res) => {
   const session = workos.userManagement.loadSealedSession({
     sessionData: req.cookies['wos-session'],
-    cookiePassword: process.env.WORKOS_COOKIE_PASSWORD,
+    cookiePassword: process.env.COOKIE_SECRET,
   });
 
   const url = await session.getLogoutUrl();
