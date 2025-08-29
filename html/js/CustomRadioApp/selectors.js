@@ -41,7 +41,7 @@
  */
 const selectors = {
   /** @type {String} header element */
-  header: 'header',
+  header: 'body>header',
 
   /** @type {String} container for input elements */
   formGroup: '.form-group',
@@ -149,7 +149,13 @@ const selectors = {
   changelog: '#changelog',
 
   /** @type {String} login */
-  login: '#login',
+  login: 'nav>button[title="login"]',
+
+  /** @type {String} nav button */
+  userMenuButton: '#login',
+
+  /** @type {String} user menu */
+  userMenu: 'nav',
 };
 
 export default selectors;

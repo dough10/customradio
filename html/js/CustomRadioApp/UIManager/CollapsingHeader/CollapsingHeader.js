@@ -57,7 +57,7 @@ export default class CollapsingHeader {
     this.infoButton = document.querySelector(selectors.infoButton);
 
     /** @type {HTMLElement|null} login button element */
-    this.loginButton = document.querySelector(selectors.login);
+    this.loginButton = document.querySelector(selectors.userMenuButton);
 
     /** @type {HTMLElement|null} Main content wrapper */
     this.main = document.querySelector(selectors.main);

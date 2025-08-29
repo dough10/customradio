@@ -43,6 +43,7 @@ export default class UIManager {
 
     this._player.init();
     this._em.add(this._loginButton, 'click', this._loginRedirect, { passive: true });
+    this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
     this._em.add(this._resetButton, 'click', ev => {
@@ -51,6 +52,44 @@ export default class UIManager {
     }, { passive: true });
     this._em.add(this._toTop, 'click', this._toTopHandler.bind(this), { passive: true });
     this._em.add(this._downloadButton, 'click', this._dl, { passive: true });
+  }
+
+  /**
+   * Closes the user menu
+   */
+  _userMenuClose() {
+    const bd = document.querySelector('.backdrop');
+    this._em.add(bd, 'transitionend', _ => {
+      bd.remove();
+      this._em.removeByNamespace('backdrop-click');
+    }, null, 'backdrop-click');
+    requestAnimationFrame(_ => {
+      this._userMenu.removeAttribute('open');
+      bd.removeAttribute('visable');
+    });
+  }
+
+  /**
+   * Toggles the user menu open/close state
+   *
+   * @private
+   * @returns {void}
+   */
+  _userMenuOpen(ev) {
+    const bd = document.createElement('div');
+    bd.classList.add('backdrop');
+    document.body.appendChild(bd);
+    this._em.add(bd, 'click', this._userMenuClose.bind(this), { passive: true }, 'backdrop-click');
+    
+    const { top } = ev.target.getBoundingClientRect();
+    const left = 10;
+    const menu = this._userMenu;
+    menu.style.top = `${top}px`;
+    menu.style.left = `${left}px`;
+    requestAnimationFrame(_ => {
+      bd.setAttribute('visable', true);
+      menu.setAttribute('open', true);
+    });
   }
 
   /**
@@ -140,6 +179,26 @@ export default class UIManager {
   }
 
   /**
+   * querySelector for user menu
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _userMenu() {
+    return document.querySelector(this._selectors.userMenu);
+  }
+
+  /**
+   * querySelector for user menu button
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _userMenuButton() {
+    return document.querySelector(this._selectors.userMenuButton);
+  }
+
+  /**
    * querySelector for 'main' element
    * 
    * @private
@@ -188,8 +247,11 @@ export default class UIManager {
     img.src = user.picture;
     img.alt = 'user profile picture';
     img.width = '24';
-    button.setAttribute('disabled', true);
-    button.title = `${user.firstName} ${user.lastName}`;
+    const avatar = document.createElement('img');
+    avatar.src = user.picture;
+    avatar.alt = 'user profile picture';
+    avatar.width = '70';
+    document.querySelector('.user-avatar').replaceChildren(avatar);
     button.replaceChildren(img);
   }
 

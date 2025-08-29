@@ -1,0 +1,13 @@
+.menu-button {
+  padding: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  border-bottom: var(--seperator-line);
+  width: 100%;
+}
+
+.menu-button>svg {
+  margin: 0 16px 0 16px;
+}
