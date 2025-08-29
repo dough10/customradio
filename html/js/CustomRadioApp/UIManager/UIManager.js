@@ -255,7 +255,7 @@ export default class UIManager {
    */
   _loadUser() {
     if (!window.user) return;
-    const button = this._loginButton;
+    const button = this._userMenuButton;
     if (!button) {
       console.error('Login button element is missing.');
       return;
