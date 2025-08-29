@@ -276,6 +276,7 @@ export default class UIManager {
    * loads the user data to UI
    */
   _loadUser() {
+    this._logoutButton.style.display = 'none';
     const user = window.user;
     if (!user) return;
     const button = this._userMenuButton;
@@ -288,7 +289,7 @@ export default class UIManager {
     document.querySelector(this._selectors.userAvatar).replaceChildren(big);
     button.replaceChildren(small);
     this._loginButton.style.display = 'none';
-    this._logoutButton.style.display = 'block';
+    this._logoutButton.style.display = 'flex';
   }
 
   /**
