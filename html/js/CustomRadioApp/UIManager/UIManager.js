@@ -196,16 +196,6 @@ export default class UIManager {
   }
 
   /**
-   * checks if the device is mobile
-   * 
-   * @private
-   * @returns {boolean}
-   */
-  get _isMobile() {
-    return window.innerWidth <= 450;
-  }
-
-  /**
    * Closes the user menu
    */
   _userMenuClose() {
@@ -233,9 +223,9 @@ export default class UIManager {
     document.body.appendChild(bd);
     
     const { top } = ev.target.getBoundingClientRect();
-    const left = 10;
+    const left = 8;
     const menu = this._userMenu;
-    menu.style.top = `${top}px`;
+    menu.style.top = `${top + 8}px`;
     menu.style.left = `${left}px`;
     requestAnimationFrame(_ => {
       bd.setAttribute('visable', true);
@@ -290,11 +280,8 @@ export default class UIManager {
     this._logoutButton.style.display = 'none';
     
     const user = window.user;
-    if (!user) {
-      if (this._isMobile) new Toast('You are not logged in', 5, `${window.location.origin}/auth`, 'login');
-      return;
-    }
-    
+    if (!user) return;
+
     const button = this._userMenuButton;
     if (!button) {
       console.error('Login button element is missing.');
@@ -308,6 +295,7 @@ export default class UIManager {
 
     document.querySelector('.firstname').textContent = user.firstName;
     document.querySelector('.lastname').textContent = user.lastName;
+
     this._loginButton.style.display = 'none';
     this._logoutButton.style.display = 'flex';
   }
