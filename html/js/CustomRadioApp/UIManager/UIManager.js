@@ -241,7 +241,7 @@ export default class UIManager {
   _loginRedirect() {
     if (window.user) return;
     hapticFeedback();
-    window.location.href = '/auth';
+    window.location.href = `${window.location.origin}/auth`;
   }
 
   /**
@@ -252,7 +252,7 @@ export default class UIManager {
   _logoutRedirect() {
     if (!window.user) return;
     hapticFeedback();
-    window.location.href = '/auth/logout';
+    window.location.href = `${window.location.origin}/auth/logout`;
   }
 
   /**
