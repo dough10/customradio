@@ -233,6 +233,24 @@ export default class UIManager {
   }
 
   /**
+   * creates a user image element
+   * 
+   * @private
+   * @function
+   * 
+   * @param {Object} user
+   * @param {Number} size
+   * @returns {HTMLElement}
+   */
+  _userImage({picture}, size) {
+    const img = document.createElement('img');
+    img.src = picture;
+    img.alt = 'user profile picture';
+    img.width = size;
+    return img;
+  }
+
+  /**
    * loads the user data to UI
    */
   _loadUser() {
@@ -243,14 +261,8 @@ export default class UIManager {
       return;
     }
     const user = window.user;
-    const img = document.createElement('img');
-    img.src = user.picture;
-    img.alt = 'user profile picture';
-    img.width = '24';
-    const avatar = document.createElement('img');
-    avatar.src = user.picture;
-    avatar.alt = 'user profile picture';
-    avatar.width = '70';
+    const img = this._userImage(user, 24);
+    const avatar = this._userImage(user, 70);
     document.querySelector(this._selectors.userAvatar).replaceChildren(avatar);
     button.replaceChildren(img);
   }
