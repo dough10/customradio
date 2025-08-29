@@ -1,3 +1,4 @@
+import Toast from './../Toast/Toast.js';
 import Analytics from './Analytics/Analytics.js';
 import AudioPlayer from './AudioPlayer/AudioPlayer.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
@@ -195,6 +196,16 @@ export default class UIManager {
   }
 
   /**
+   * checks if the device is mobile
+   * 
+   * @private
+   * @returns {boolean}
+   */
+  get _isMobile() {
+    return window.innerWidth <= 450;
+  }
+
+  /**
    * Closes the user menu
    */
   _userMenuClose() {
@@ -277,17 +288,26 @@ export default class UIManager {
    */
   _loadUser() {
     this._logoutButton.style.display = 'none';
+    
     const user = window.user;
-    if (!user) return;
+    if (!user) {
+      if (this._isMobile) new Toast('You are not logged in', 5, '/auth', 'login');
+      return;
+    }
+    
     const button = this._userMenuButton;
     if (!button) {
       console.error('Login button element is missing.');
       return;
     }
+
     const small = this._userImage(user, 24)
     const big = this._userImage(user, 70)
     document.querySelector(this._selectors.userAvatar).replaceChildren(big);
     button.replaceChildren(small);
+
+    document.querySelector('.firstname').textContent = user.firstName;
+    document.querySelector('.lastname').textContent = user.lastName;
     this._loginButton.style.display = 'none';
     this._logoutButton.style.display = 'flex';
   }
