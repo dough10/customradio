@@ -156,6 +156,9 @@ const selectors = {
 
   /** @type {String} user menu */
   userMenu: 'nav',
+
+  /** @type {String} user avatar */
+  userAvatar: '.avatar-wrapper',
 };
 
 export default selectors;

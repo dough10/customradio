@@ -251,7 +251,7 @@ export default class UIManager {
     avatar.src = user.picture;
     avatar.alt = 'user profile picture';
     avatar.width = '70';
-    document.querySelector('.user-avatar').replaceChildren(avatar);
+    document.querySelector(this._selectors.userAvatar).replaceChildren(avatar);
     button.replaceChildren(img);
   }
 
