@@ -56,7 +56,7 @@ nav>header {
 .firstname {
   position: absolute;
   left: 95px;
-  top: 20px;
+  top: 18px;
   font-size: 18px;
   font-weight: bold;
 }
@@ -64,7 +64,7 @@ nav>header {
 .lastname {
   position: absolute;
   left: 95px;
-  top: 50px;
+  top: 45px;
   font-size: 14px;
   font-weight: normal;
 }
