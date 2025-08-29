@@ -255,16 +255,14 @@ export default class UIManager {
    */
   _loadUser() {
     if (!window.user) return;
-    const button = this._loginRedirect;
+    const button = this._loginButton;
     if (!button) {
       console.error('Login button element is missing.');
       return;
     }
     const user = window.user;
-    const img = this._userImage(user, 24);
-    const avatar = this._userImage(user, 70);
-    document.querySelector(this._selectors.userAvatar).replaceChildren(avatar);
-    button.replaceChildren(img);
+    document.querySelector(this._selectors.userAvatar).replaceChildren(this._userImage(user, 70));
+    button.replaceChildren(this._userImage(user, 24));
   }
 
   /**
