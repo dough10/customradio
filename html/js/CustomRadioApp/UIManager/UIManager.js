@@ -42,7 +42,8 @@ export default class UIManager {
     initDialogInteractions();
 
     this._player.init();
-    this._em.add(this._loginButton, 'click', this._loginRedirect, { passive: true }, 'login-redirect');
+    this._em.add(this._loginButton, 'click', this._loginRedirect, { passive: true });
+    this._em.add(this._logoutButton, 'click', this._logoutRedirect, { passive: true });
     this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
@@ -120,7 +121,7 @@ export default class UIManager {
   }
 
   /**
-   * querySelector for 'reset' button
+   * querySelector for 'login' button
    * 
    * @private
    * @returns {HTMLElement}
@@ -128,6 +129,16 @@ export default class UIManager {
   get _loginButton() {
     return document.querySelector(this._selectors.login);
   }
+
+  /**
+   * querySelector for 'logout' button
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _logoutButton() {
+    return document.querySelector(this._selectors.logout);
+  } 
 
   /**
    * querySelector for user menu
@@ -232,6 +243,11 @@ export default class UIManager {
     window.location.href = '/auth';
   }
 
+  /**
+   * Redirects to the logout page if the user is authenticated
+   *
+   * @returns {void}
+   */
   _logoutRedirect() {
     if (!window.user) return;
     hapticFeedback();
@@ -271,13 +287,8 @@ export default class UIManager {
     const big = this._userImage(user, 70)
     document.querySelector(this._selectors.userAvatar).replaceChildren(big);
     button.replaceChildren(small);
-
-    this._em.removeByNamespace('login-redirect');
-    const logout = document.createElement('button');
-    logout.textContent = 'Logout';
-    this._em.add(logout, 'click', this._logoutRedirect, { passive: true });
-    this._loginButton.remove();
-    this._userMenu.append(logout);
+    this._loginButton.style.display = 'none';
+    this._logoutButton.style.display = 'block';
   }
 
   /**

@@ -151,6 +151,9 @@ const selectors = {
   /** @type {String} login */
   login: 'nav>button[title="login"]',
 
+  /** @type {String} login */
+  logout: 'nav>button[title="logout"]',
+
   /** @type {String} nav button */
   userMenuButton: '#login',
 
