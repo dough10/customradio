@@ -35,7 +35,7 @@ nav>header {
 
 .avatar-wrapper {
   position: absolute;
-  left: 16px;
+  left: 0px;
   font-family: 'Courier New', Courier, monospace;
   margin: 8px;
   display: flex;
@@ -51,4 +51,20 @@ nav>header {
   border: 2px solid #3e3e3e;
   box-shadow: inset 0px 5px 6px -3px rgba(0,0,0,0.4);
   transition: filter 150ms linear;
+}
+
+.firstname {
+  position: absolute;
+  left: 80px;
+  top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.lastname {
+  position: absolute;
+  left: 80px;
+  top: 50px;
+  font-size: 14px;
+  font-weight: normal;
 }
