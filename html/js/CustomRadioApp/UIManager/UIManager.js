@@ -232,6 +232,12 @@ export default class UIManager {
     window.location.href = '/auth';
   }
 
+  _logoutRedirect() {
+    if (!window.user) return;
+    hapticFeedback();
+    window.location.href = '/auth/logout';
+  }
+
   /**
    * creates a user image element
    * 
@@ -265,10 +271,13 @@ export default class UIManager {
     const big = this._userImage(user, 70)
     document.querySelector(this._selectors.userAvatar).replaceChildren(big);
     button.replaceChildren(small);
+
     this._em.removeByNamespace('login-redirect');
     const logout = document.createElement('button');
     logout.textContent = 'Logout';
-    this._em.add(logout, 'click', this._logout.bind(this), { passive: true });
+    this._em.add(logout, 'click', this._logoutRedirect, { passive: true });
+    this._loginButton.remove();
+    this._userMenu.append(logout);
   }
 
   /**
