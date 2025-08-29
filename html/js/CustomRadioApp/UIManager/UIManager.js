@@ -42,7 +42,7 @@ export default class UIManager {
     initDialogInteractions();
 
     this._player.init();
-    this._em.add(this._loginButton, 'click', this._loginRedirect, { passive: true });
+    this._em.add(this._loginButton, 'click', this._loginRedirect, { passive: true }, 'login-redirect');
     this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
@@ -52,55 +52,6 @@ export default class UIManager {
     }, { passive: true });
     this._em.add(this._toTop, 'click', this._toTopHandler.bind(this), { passive: true });
     this._em.add(this._downloadButton, 'click', this._dl, { passive: true });
-  }
-
-  /**
-   * Closes the user menu
-   */
-  _userMenuClose() {
-    const bd = document.querySelector('.backdrop');
-    this._em.add(bd, 'transitionend', _ => {
-      bd.remove();
-      this._em.removeByNamespace('backdrop-click');
-    }, null, 'backdrop-click');
-    requestAnimationFrame(_ => {
-      this._userMenu.removeAttribute('open');
-      bd.removeAttribute('visable');
-    });
-  }
-
-  /**
-   * Toggles the user menu open/close state
-   *
-   * @private
-   * @returns {void}
-   */
-  _userMenuOpen(ev) {
-    const bd = document.createElement('div');
-    bd.classList.add('backdrop');
-    document.body.appendChild(bd);
-    this._em.add(bd, 'click', this._userMenuClose.bind(this), { passive: true }, 'backdrop-click');
-    
-    const { top } = ev.target.getBoundingClientRect();
-    const left = 10;
-    const menu = this._userMenu;
-    menu.style.top = `${top}px`;
-    menu.style.left = `${left}px`;
-    requestAnimationFrame(_ => {
-      bd.setAttribute('visable', true);
-      menu.setAttribute('open', true);
-    });
-  }
-
-  /**
-   * Redirects to the login page if the user is not authenticated
-   *
-   * @returns {void}
-   */
-  _loginRedirect() {
-    if (window.user) return;
-    hapticFeedback();
-    window.location.href = '/auth';
   }
 
   /**
@@ -233,6 +184,55 @@ export default class UIManager {
   }
 
   /**
+   * Closes the user menu
+   */
+  _userMenuClose() {
+    const bd = document.querySelector('.backdrop');
+    this._em.add(bd, 'transitionend', _ => {
+      bd.remove();
+      this._em.removeByNamespace('backdrop-click');
+    }, null, 'backdrop-click');
+    requestAnimationFrame(_ => {
+      this._userMenu.removeAttribute('open');
+      bd.removeAttribute('visable');
+    });
+  }
+
+  /**
+   * Toggles the user menu open/close state
+   *
+   * @private
+   * @returns {void}
+   */
+  _userMenuOpen(ev) {
+    const bd = document.createElement('div');
+    bd.classList.add('backdrop');
+    this._em.add(bd, 'click', this._userMenuClose.bind(this), { passive: true }, 'backdrop-click');
+    document.body.appendChild(bd);
+    
+    const { top } = ev.target.getBoundingClientRect();
+    const left = 10;
+    const menu = this._userMenu;
+    menu.style.top = `${top}px`;
+    menu.style.left = `${left}px`;
+    requestAnimationFrame(_ => {
+      bd.setAttribute('visable', true);
+      menu.setAttribute('open', true);
+    });
+  }
+
+  /**
+   * Redirects to the login page if the user is not authenticated
+   *
+   * @returns {void}
+   */
+  _loginRedirect() {
+    if (window.user) return;
+    hapticFeedback();
+    window.location.href = '/auth';
+  }
+
+  /**
    * creates a user image element
    * 
    * @private
@@ -254,15 +254,21 @@ export default class UIManager {
    * loads the user data to UI
    */
   _loadUser() {
-    if (!window.user) return;
+    const user = window.user;
+    if (!user) return;
     const button = this._userMenuButton;
     if (!button) {
       console.error('Login button element is missing.');
       return;
     }
-    const user = window.user;
-    document.querySelector(this._selectors.userAvatar).replaceChildren(this._userImage(user, 70));
-    button.replaceChildren(this._userImage(user, 24));
+    const small = this._userImage(user, 24)
+    const big = this._userImage(user, 70)
+    document.querySelector(this._selectors.userAvatar).replaceChildren(big);
+    button.replaceChildren(small);
+    this._em.removeByNamespace('login-redirect');
+    const logout = document.createElement('button');
+    logout.textContent = 'Logout';
+    this._em.add(logout, 'click', this._logout.bind(this), { passive: true });
   }
 
   /**
