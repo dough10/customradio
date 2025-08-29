@@ -291,7 +291,7 @@ export default class UIManager {
     
     const user = window.user;
     if (!user) {
-      if (this._isMobile) new Toast('You are not logged in', 5, '/auth', 'login');
+      if (this._isMobile) new Toast('You are not logged in', 5, `${window.location.origin}/auth`, 'login');
       return;
     }
     
