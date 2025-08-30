@@ -6,6 +6,9 @@
   align-items: center;
   border-bottom: var(--seperator-line);
   width: -webkit-fill-available;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .menu-button:last-of-type {
