@@ -14,7 +14,7 @@ nav {
   opacity: 0;
   pointer-events: none;
   transition: all 150ms linear;
-  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 5px 0 hsla(0, 0%, 0%, 0.14), 0 1px 10px 0 hsla(0, 0%, 0%, 0.12), 0 2px 4px -1px hsla(0, 0%, 0%, 0.4);
   z-index: 4;
 }
 
@@ -30,7 +30,8 @@ nav>header {
   background-color: var(--main-color);
   display: flex;
   align-items: center;
-  box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  box-shadow: 0px 2px 5px 0 hsla(0, 0%, 0%, 0.14), 0 1px 5px 0 hsla(0, 0%, 0%, 0.12), 0 2px 4px -1px #00000066;
 }
 
 .avatar-wrapper {
@@ -49,7 +50,7 @@ nav>header {
   font-size: 50px;
   overflow: hidden;
   border: 2px solid #3e3e3e;
-  box-shadow: inset 0px 5px 6px -3px rgba(0,0,0,0.4);
+  box-shadow: inset 0px 5px 6px -3px hsla(0, 0%, 0%, 0.4);
   transition: filter 150ms linear;
 }
 
@@ -58,7 +59,11 @@ nav>header {
   left: 95px;
   top: 18px;
   font-size: 18px;
+  max-width: 59%;
   font-weight: bold;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .lastname {
@@ -66,5 +71,9 @@ nav>header {
   left: 95px;
   top: 45px;
   font-size: 14px;
+  max-width: 59%;
   font-weight: normal;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
