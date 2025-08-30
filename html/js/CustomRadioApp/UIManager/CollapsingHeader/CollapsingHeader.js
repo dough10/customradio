@@ -1,6 +1,8 @@
 import EventManager from "../../EventManager/EventManager.js";
 import selectors from "../../selectors.js";
 
+const MOBILE_THRESHOLD = 450;
+
 /**
  * Class representing a scroll-responsive collapsing header.
  * Shrinks the header and adjusts element visibility based on scroll position,
@@ -37,7 +39,7 @@ export default class CollapsingHeader {
    * @type {Number}
    * dappening factor for info button transition
    */
-  _infoTranslateFactor = 1.5;
+  _infoTranslateFactor = 1.5; // the 1.5 seems to land the info button center of the collapsed header
 
   /**
    * @private
@@ -64,9 +66,11 @@ export default class CollapsingHeader {
 
     /** recalculate header on window resize */
     this._em.add(window, 'resize', this._onResize.bind(this));
-
-    /** @type {Boolean} mobile device */
-    this._isMobile = window.innerWidth < 450;
+  }
+  
+  /** @type {Boolean} mobile device */
+  get _isMobile() {
+    return window.innerWidth < MOBILE_THRESHOLD;
   }
 
   /**
@@ -75,7 +79,6 @@ export default class CollapsingHeader {
    * recalculates header transition effects on window resize
    */
   _onResize() {
-    this._isMobile = window.innerWidth < 450;
     this.scroll(this.main?.scrollTop || 0);
   }
 
@@ -144,7 +147,6 @@ export default class CollapsingHeader {
         this.infoButton
       ].filter(button => button !== null);
       
-      // the 1.5 seems to land the info button center of the collapsed header
       buttons.forEach(button => {
         button.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
       });
