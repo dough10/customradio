@@ -54,18 +54,22 @@ export default class CollapsingHeader {
 
     /** @type {HTMLElement|null} Input container element */
     this.input = document.querySelector(selectors.formGroup);
-
-    /** @type {HTMLElement|null} Info button element */
-    this.infoButton = document.querySelector(selectors.infoButton);
-
-    /** @type {HTMLElement|null} login button element */
-    this.loginButton = document.querySelector(selectors.userMenuButton);
-
+    
     /** @type {HTMLElement|null} Main content wrapper */
     this.main = document.querySelector(selectors.main);
-
+    
     /** recalculate header on window resize */
     this._em.add(window, 'resize', this._onResize.bind(this));
+  }
+  
+  /** @type {HTMLElement|null} Info button element */
+  get infoButton() {
+    return document.querySelector(selectors.infoButton);
+  }
+  
+  /** @type {HTMLElement|null} login button element */
+  get loginButton() {
+    return document.querySelector(selectors.userMenuButton);
   }
   
   /** @type {Boolean} mobile device */
@@ -154,15 +158,11 @@ export default class CollapsingHeader {
       if (this._isMobile) {
         const infoOpacity = this._mobileOpacity(transform);
 
-        buttons.forEach(button => {
-          button.style.opacity = infoOpacity.toFixed(2);
-          button.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
-        });
+        this.infoButton.style.opacity = infoOpacity.toFixed(2);
+        this.infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
       } else {
-        buttons.forEach(button => {
-          button.style.opacity = '1';
-          button.style.display = 'flex';
-        });
+        this.infoButton.style.opacity = '1';
+        this.infoButton.style.display = 'flex';
       }
     });
   }

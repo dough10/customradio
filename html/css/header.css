@@ -73,11 +73,8 @@ header {
     opacity: 0;
     display: none;
   }
-  #login {
-    opacity: 0;
-    display: none;
-  }
   .form-group {
     min-width: 16em;
+    transform: translateX(20px);
   }
 }
