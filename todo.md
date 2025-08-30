@@ -8,4 +8,5 @@
 
 - [x] Script that generates translation files
 - [x] User menu — login button when logged out, logout button when logged in
-- [ ] Set up production WorkOS environment
+- [ ] Set up WorkOS production environment
+- [ ] refactor header so that user menu is not hidden on mobile. maybe shift input block right to allow space for use of the button. refactor js to have seperate behavior for the buttons
