@@ -47,7 +47,6 @@ header {
 
 #login>img {
   border-radius: 50%;
-  /* border: solid 1px var(--text-color); */
 }
 
 .w93 {
@@ -77,5 +76,8 @@ header {
   #login {
     opacity: 0;
     display: none;
+  }
+  .form-group {
+    min-width: 16em;
   }
 }
