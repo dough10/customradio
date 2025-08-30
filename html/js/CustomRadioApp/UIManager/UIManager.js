@@ -1,4 +1,3 @@
-import Toast from './../Toast/Toast.js';
 import Analytics from './Analytics/Analytics.js';
 import AudioPlayer from './AudioPlayer/AudioPlayer.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
@@ -7,6 +6,7 @@ import EventManager from '../EventManager/EventManager.js';
 import {initDialogInteractions, destroyDialogInteractions} from './dialogs/dialog.js';
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
+import sleep from '../utils/sleep.js';
 import toggleActiveState from '../utils/toggleActiveState.js';
 import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
@@ -216,7 +216,7 @@ export default class UIManager {
    * @private
    * @returns {void}
    */
-  _userMenuOpen(ev) {
+  async _userMenuOpen(ev) {
     const bd = document.createElement('div');
     bd.classList.add('backdrop');
     this._em.add(bd, 'click', this._userMenuClose.bind(this), { passive: true }, 'backdrop-click');
@@ -227,6 +227,7 @@ export default class UIManager {
     const menu = this._userMenu;
     menu.style.top = `${top + 8}px`;
     menu.style.left = `${left}px`;
+    await sleep(20);
     requestAnimationFrame(_ => {
       bd.setAttribute('visable', true);
       menu.setAttribute('open', true);
