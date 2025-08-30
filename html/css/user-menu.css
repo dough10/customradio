@@ -10,7 +10,7 @@ nav {
   padding: 0;
   color: var(--text-color);
   text-shadow: none;
-  transform: translate(calc(-50% + 8), calc(-50% + 8)) scale(0.1);
+  transform: translate(calc(-50% + 8px), calc(-50% + 8px)) scale(0.1);
   opacity: 0;
   pointer-events: none;
   transition: all 150ms linear;
