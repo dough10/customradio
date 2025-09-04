@@ -20,3 +20,4 @@ src/logs
 **/*-doc.md
 /translated
 /og-translations
+git.sh
