@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
   const sql = new Stations('data/customradio.db');
   try {
     await sql.incrementPlayMinutes(id);
-    res.json({ minutes: await sql.getPlayMinutes(id) });
+    res.status(204).json();
   } catch(e) {
     const eMessage = `Error incrimenting play minutes: ${e.message}`;
     res.status(500).json({error: eMessage});
