@@ -21,7 +21,7 @@ docker run \
   --env=SESSION_SECRET="$session_secret" \
   --env=LOG_LEVEL="$LOG_LEVEL" \
   --env=AUTH_SERVER_URL="$AUTH_SERVER_URL" \
-  --env "$BLACKLIST" \
+  --env=BLACKLIST="$BLACKLIST" \
   --env=NODE_ENV=production \
   --env=TZ=America/Chicago \
   --volume=/Users/dough10/Documents/customradio/data:/usr/src/app/data \
