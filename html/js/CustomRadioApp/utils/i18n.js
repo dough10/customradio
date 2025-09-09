@@ -15,7 +15,7 @@ import { cs } from './lang/cs.js';
 import { pt } from './lang/pt.js';
 import { kk } from './lang/kk.js';
 import { tr } from './lang/tr.js';
-import { uk } from './lang/tr.js';
+import { uk } from './lang/uk.js';
 import { nl } from './lang/nl.js';
 
 
