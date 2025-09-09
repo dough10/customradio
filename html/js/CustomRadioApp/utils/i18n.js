@@ -15,24 +15,29 @@ import { cs } from './lang/cs.js';
 import { pt } from './lang/pt.js';
 import { kk } from './lang/kk.js';
 import { tr } from './lang/tr.js';
+import { uk } from './lang/tr.js';
+import { nl } from './lang/nl.js';
 
-const languages = { 
-  en, 
-  es, 
-  fr, 
-  zh, 
-  ru, 
-  it,
-  de, 
-  ja, 
-  ko, 
-  sv, 
-  sk, 
-  pl, 
+
+const languages = {
+  en,
   cs,
-  pt, 
-  kk, 
-  tr
+  de,
+  es,
+  fr,
+  it,
+  nl,
+  ja,
+  kk,
+  ko,
+  pl,
+  pt,
+  ru,
+  sk,
+  sv,
+  tr,
+  uk,
+  zh
 };
 
 let currentLang = 'en';
