@@ -6,10 +6,12 @@ import EventManager from '../EventManager/EventManager.js';
 import {initDialogInteractions, destroyDialogInteractions} from './dialogs/dialog.js';
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
+import sleep from '../utils/sleep.js';
 import toggleActiveState from '../utils/toggleActiveState.js';
 import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
+import news from '../utils/news.js';
 
 /**
  * manages UI elements
@@ -23,6 +25,8 @@ export default class UIManager {
     this._em = new EventManager();
     this._analytics = new Analytics();
     this._header = new CollapsingHeader();
+    this._loadUser();
+    news();
   }
   
   /**
@@ -39,9 +43,11 @@ export default class UIManager {
     initDialogInteractions();
 
     this._player.init();
-    const filter = this._filter;
-    this._em.add(filter, 'change', onFilterChange, { passive: true });
-    this._em.add(filter, 'focus', this._filterFocus.bind(this), { passive: true });
+    this._em.add(this._loginButton, 'click', this._loginRedirect, { passive: true });
+    this._em.add(this._logoutButton, 'click', this._logoutRedirect, { passive: true });
+    this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
+    this._em.add(this._filter, 'change', onFilterChange, { passive: true });
+    this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
     this._em.add(this._resetButton, 'click', ev => {
       this._filterFocus(ev);
       onReset();
@@ -116,6 +122,46 @@ export default class UIManager {
   }
 
   /**
+   * querySelector for 'login' button
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _loginButton() {
+    return document.querySelector(this._selectors.login);
+  }
+
+  /**
+   * querySelector for 'logout' button
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _logoutButton() {
+    return document.querySelector(this._selectors.logout);
+  } 
+
+  /**
+   * querySelector for user menu
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _userMenu() {
+    return document.querySelector(this._selectors.userMenu);
+  }
+
+  /**
+   * querySelector for user menu button
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _userMenuButton() {
+    return document.querySelector(this._selectors.userMenuButton);
+  }
+
+  /**
    * querySelector for 'main' element
    * 
    * @private
@@ -147,6 +193,112 @@ export default class UIManager {
    */
   get header() {
     return this._header;
+  }
+
+  /**
+   * Closes the user menu
+   */
+  _userMenuClose() {
+    const bd = document.querySelector('.backdrop');
+    this._em.add(bd, 'transitionend', _ => {
+      bd.remove();
+      this._em.removeByNamespace('backdrop-click');
+    }, null, 'backdrop-click');
+    requestAnimationFrame(_ => {
+      this._userMenu.removeAttribute('open');
+      bd.removeAttribute('visable');
+    });
+  }
+
+  /**
+   * Toggles the user menu open/close state
+   *
+   * @private
+   * @returns {void}
+   */
+  async _userMenuOpen(ev) {
+    const bd = document.createElement('div');
+    bd.classList.add('backdrop');
+    this._em.add(bd, 'click', this._userMenuClose.bind(this), { passive: true }, 'backdrop-click');
+    document.body.appendChild(bd);
+    
+    const { top } = ev.target.getBoundingClientRect();
+    const left = 8;
+    const menu = this._userMenu;
+    menu.style.top = `${top + 8}px`;
+    menu.style.left = `${left}px`;
+    await sleep(20);
+    requestAnimationFrame(_ => {
+      bd.setAttribute('visable', true);
+      menu.setAttribute('open', true);
+    });
+  }
+
+  /**
+   * Redirects to the login page if the user is not authenticated
+   *
+   * @returns {void}
+   */
+  _loginRedirect() {
+    if (window.user) return;
+    hapticFeedback();
+    window.location.href = `${window.location.origin}/auth`;
+  }
+
+  /**
+   * Redirects to the logout page if the user is authenticated
+   *
+   * @returns {void}
+   */
+  _logoutRedirect() {
+    if (!window.user) return;
+    hapticFeedback();
+    window.location.href = `${window.location.origin}/auth/logout`;
+  }
+
+  /**
+   * creates a user image element
+   * 
+   * @private
+   * @function
+   * 
+   * @param {Object} user
+   * @param {Number} size
+   * @returns {HTMLElement}
+   */
+  _userImage({picture}, size) {
+    const img = document.createElement('img');
+    img.src = picture;
+    img.alt = 'user profile picture';
+    img.width = size;
+    return img;
+  }
+
+  /**
+   * loads the user data to UI
+   */
+  _loadUser() {
+    this._logoutButton.style.display = 'none';
+    
+    const user = window.user;
+    if (!user) return;
+
+    const button = this._userMenuButton;
+    if (!button) {
+      console.error('Login button element is missing.');
+      return;
+    }
+
+    const small = this._userImage(user, 24)
+    const big = this._userImage(user, 70)
+    document.querySelector(this._selectors.userAvatar).replaceChildren(big);
+    button.replaceChildren(small);
+
+    document.querySelector('.firstname').textContent = user.firstName;
+    document.querySelector('.lastname').textContent = user.lastName;
+
+    this._loginButton.style.display = 'none';
+    this._logoutButton.style.display = 'flex';
   }
 
   /**

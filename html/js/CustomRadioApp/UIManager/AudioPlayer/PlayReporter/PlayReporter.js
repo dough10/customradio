@@ -5,7 +5,7 @@ import retry from '../../../utils/retry.js';
 export const REPORTING_INTERVAL = 1;
 
 const CONFIG = Object.freeze({
-  REPORT_ENDPOINT: id => `/reportPlay/${encodeURIComponent(id)}`,
+  REPORT_ENDPOINT: id => new URL(`/reportPlay/${encodeURIComponent(id)}`, window.location.origin).toString(),
   IDLE_TIMEOUT: 2000,
   REPORT_INTERVAL_MS: minsToMs(REPORTING_INTERVAL)
 });
@@ -60,21 +60,14 @@ export default class PlayReporter {
   }
 
   /**
-   * Initiates the play report process using requestIdleCallback
+   * Initiates the play report process (no longer uses requestIdleCallback)
    * 
    * @private
    */
   _reportPlay() {
     if (this._state === STATES.STOPPED) return;
     this._state = STATES.REPORTING;
-
-    requestIdleCallback((deadline) => {
-      if (deadline.timeRemaining() > 0) {
-        this._sendReport();
-      } else {
-        requestIdleCallback(this._reportPlay.bind(this));
-      }
-    }, { timeout: CONFIG.IDLE_TIMEOUT });
+    this._sendReport();
   }
 
   /**

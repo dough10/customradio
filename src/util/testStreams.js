@@ -38,7 +38,7 @@ function sleep(ms) {
  * 
  * plural(1);
  * // Returns: 'y'
-@@
+ * 
  * plural(5);
  * // Returns: 'ies'
  */
@@ -108,7 +108,7 @@ async function updateStationData(sql, old, updated) {
 
   const updatedData = {
     id: old.id,
-    name: (updated.name && typeof updated.name === 'string') ? updated.name : old.name,
+    name: (typeof updated.name === 'string') ? updated.name : old.name,
     url: updated.url || old.url,
     genre: (updated.icyGenre && typeof updated.icyGenre === 'string') ? updated.icyGenre : old.genre || 'Unknown',
     online: (typeof updated.isLive === 'boolean') ? updated.isLive : false,
@@ -197,16 +197,14 @@ async function processStream(station, ndx, offset, length, sql, totalStationCoun
   try {
     const startTime = Date.now()
     log.debug(`[${station.id}] Testing url ${station.url}`);
-    const stream = await retry(() => isLiveStream(station.url));
-  
     log.debug(`[${station.id}] Station: ${partCount}/${length}, ${partPrecent}%`);
     log.debug(`[${station.id}] Part: ${ndx + 1}/${parts}, Total progress: ${totalPrecent}%`);
     
+    const stream = await retry(() => isLiveStream(station.url));
     if (stationDataIsUnchanged(station, stream)) {
       log.debug(`[${station.id}] No change.. ${Date.now() - startTime}ms`);
       return;
     }
-
     await updateStationData(sql, station, stream);
     log.debug(`[${station.id}] Updated.. ${Date.now() - startTime}ms`);
     // count changes

@@ -1,41 +1,55 @@
-const axios = require('axios');
-const pack = require('../../package.json');
+const axios = require("axios");
+const pack = require("../../package.json");
+const iconv = require("iconv-lite");
 
-const isValidURL = require('./isValidURL.js');
-const Logger = require('./logger.js');
-const retry = require('./retry.js');
+const isValidURL = require("./isValidURL.js");
+const Logger = require("./logger.js");
+const retry = require("./retry.js");
+const fixEncoding = require("./fixEncoding.js");
 
-const logLevel = process.env.LOG_LEVEL || 'info';
+const logLevel = process.env.LOG_LEVEL || "info";
 const log = new Logger(logLevel);
 
 /**
- * An array containing default port numbers used in network protocols.
- * 
- * @constant {string[]} defaultPorts
+ * An array of unhelpful stream names to ignore.
+ *
+ * @constant {string[]} unhelpfulNames
  * @default
- * @example
- * // Accessing the default ports
- * console.log.info(defaultPorts[0]); // Output: ':80/'
- * console.log.info(defaultPorts[1]); // Output: ':443/'
  */
-const defaultPorts = [
-  ':80/',
-  ':443/'
+const unhelpfulNames = [
+  "stream",
+  ".",
+  ":",
+  "-",
+  "no name",
+  "radio",
+  "online radio",
+  "n/a",
+  "this is my server name",
+  /\b\d{1,2}\b/
 ];
 
 /**
+ * An array containing default port numbers used in network protocols.
+ *
+ * @constant {string[]} defaultPorts
+ * @default
+ */
+const defaultPorts = [":80/", ":443/"];
+
+/**
  * Clean the URL by removing default ports and trailing question marks.
- * 
+ *
  * @param {string} url - The URL to clean.
- * 
+ *
  * @returns {string} The cleaned URL.
  */
 function cleanURL(url) {
   if (url.endsWith("?")) {
     url = url.slice(0, -1);
   }
-  defaultPorts.forEach(port => {
-    url = url.replace(port, '/');
+  defaultPorts.forEach((port) => {
+    url = url.replace(port, "/");
   });
   return url;
 }
@@ -48,7 +62,7 @@ function cleanURL(url) {
  * returning an object with stream details if the URL points to a valid audio stream.
  *
  * @param {string} url - The URL to be tested for streaming.
- * 
+ *
  * @returns {Promise<Object|boolean>} Returns a promise that resolves to an object containing
  * stream information (if the URL is an audio stream) or `false` if it is not an audio stream
  * or if an error occurs.
@@ -58,43 +72,50 @@ function cleanURL(url) {
  *   @property {boolean} isLive - Indicates if the stream is live (i.e., responds with status 200).
  *   @property {string} [icyGenre='Unknown'] - The genre of the stream, or 'Unknown' if not available.
  *   @property {string} content - The content type of the stream (e.g., 'audio/mp3').
- *   @property {number|string} [bitrate='Unknown'] - The bitrate of the stream, or 'Unknown' if not available.
- * 
+ *   @property {number} [bitrate=0] - The bitrate of the stream, or 'Unknown' if not available.
+ *
  * @throws {Error} Throws an error if the HTTP request fails or if there is an issue with the URL.
  */
 async function streamTest(url) {
   try {
     const response = await axios.head(url, {
       headers: {
-        'User-Agent': `radiotxt.site/${pack.version}`
+        "User-Agent": `radiotxt.site/${pack.version}`,
       },
-      timeout: 1500
+      timeout: 1500,
     });
     const isLive = response.status >= 200 && response.status < 300;
-    let name = response.headers['icy-name'];
-    const description = response.headers['icy-description'];
-    const icyGenre = response.headers['icy-genre'];
-    let bitrate = response.headers['icy-br'];
-    const content = response.headers['content-type'];
-    const icyurl = response.headers['icy-url'];
-    const isAudioStream = content && content.startsWith('audio/');
+    let name = response.headers["icy-name"];
+    const description = response.headers["icy-description"] || "";
+    const icyGenre = response.headers["icy-genre"] || "Unknown";
+    let bitrate = response.headers["icy-br"];
+    const content = response.headers["content-type"];
+    const icyurl = response.headers["icy-url"] || "";
+    const isAudioStream = content && content.startsWith("audio/");
 
     if (!isAudioStream) {
       const errorMessage = `Test error: ${url} - invalid content-type: ${content}`;
       log.debug(errorMessage);
       return {
         ok: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
 
-    if (bitrate && bitrate.length > 3) bitrate = bitrate.split(',')[0];
+    if (bitrate && bitrate.length > 3) bitrate = bitrate.split(",")[0];
     bitrate = Number(bitrate);
-    if (isNaN(bitrate)) bitrate = 'Unknown';
 
-    // set name to homepage if no name is found
-    if (!name && icyurl || name && name.length <= 1 && icyurl) {
-      name = icyurl;
+    if (isNaN(bitrate)) bitrate = 0;
+
+    if (name) {
+      name = fixEncoding(name);
+      if (unhelpfulNames.includes(name.toLowerCase().trim())) {
+        name = null;
+      }
+    }
+
+    if (!name) {
+      name = url;
     }
 
     return {
@@ -106,31 +127,31 @@ async function streamTest(url) {
       isLive,
       icyGenre,
       content,
-      bitrate: Number(bitrate),
-      error: ''
+      bitrate: bitrate,
+      error: "",
     };
   } catch (error) {
     const errorMessage = `Test failed: ${url} - ${error.message}`;
     log.debug(errorMessage);
     return {
       ok: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
 
 /**
  * Checks if the provided URL is a live stream and retrieves its metadata.
- * 
+ *
  * This function attempts to send a HEAD request to the URL (or its HTTPS equivalent) to determine if the stream is live.
  * It extracts metadata such as the stream's name, genre, bitrate, and content type from the response headers.
  * If the request fails or the URL does not point to a live stream, it returns `false`.
- * 
+ *
  * @async
  * @function
- * 
+ *
  * @param {string} url - The URL of the stream to check.
- * 
+ *
  * @returns {Promise<Object|boolean>} A promise that resolves to an object containing the stream's metadata if live,
  * or `false` if the stream is not live or if an error occurs. The object has the following properties:
  *   - {string} url - The URL of the stream.
@@ -139,11 +160,11 @@ async function streamTest(url) {
  *   - {string} [icyGenre] - The genre of the stream (if available).
  *   - {string} [bitrate] - The bitrate of the stream (if available).
  *   - {string} [content] - The content type of the stream (if available).
- * 
+ *
  * @throws {Error} Throws an error if the request fails or if there are issues processing the URL.
- * 
+ *
  * @example
- * 
+ *
  * isLiveStream('http://example.com/stream')
  *   .then(data => {
  *     if (data) {
@@ -157,18 +178,18 @@ async function streamTest(url) {
  *   });
  */
 module.exports = async (url) => {
-  if (!url || typeof url !== 'string' || !isValidURL(url)) {
+  if (!url || typeof url !== "string" || !isValidURL(url)) {
     return {
       ok: false,
-      error: `url must be a string with a valid URL format: ${url}`
+      error: `url must be a string with a valid URL format: ${url}`,
     };
   }
 
   url = cleanURL(url);
 
   // Always test HTTPS first
-  if (url.startsWith('http://')) {
-    const httpsUrl = url.replace('http://', 'https://');
+  if (url.startsWith("http://")) {
+    const httpsUrl = url.replace("http://", "https://");
     try {
       return await retry(() => streamTest(httpsUrl));
     } catch (error) {
@@ -179,7 +200,7 @@ module.exports = async (url) => {
 
   try {
     return await retry(() => streamTest(url));
-  } catch(e) {
+  } catch (e) {
     log.error(`Failed testing http: ${e.message}`);
   }
 };

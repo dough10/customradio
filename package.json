@@ -12,11 +12,14 @@
     "version++": "node build_assets/incriment-version.js && node assets/make-docs.js",
     "build-docker": "sh build_assets/build-container.sh \"registry.dough10.me/customradio\"",
     "docs": "node make-docs.js",
-    "run container": "bash build_assets/run.sh"
+    "run container": "bash build_assets/run.sh",
+    "translate-front": "node scripts/translate-js.js front cs de es fr it nl ja kk ko pl pt ru sk sv tr zh",
+    "translate-back": "node scripts/translate-js.js back cs de es fr it nl ja kk ko pl pt ru sk sv tr zh"
   },
   "author": "dough10",
   "license": "ISC",
   "dependencies": {
+    "@workos-inc/node": "^7.62.1",
     "axios": "^1.7.4",
     "compression": "^1.7.4",
     "connect-redis": "^8.0.3",
@@ -53,6 +56,7 @@
     "mini-css-extract-plugin": "^2.9.0",
     "mocha": "^10.7.3",
     "mongodb": "^6.15.0",
+    "openai": "^5.12.2",
     "sinon": "^19.0.4",
     "sinon-chai": "^4.0.0",
     "terser-webpack-plugin": "^5.3.10",

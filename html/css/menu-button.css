@@ -1,0 +1,20 @@
+.menu-button {
+  padding: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  border-bottom: var(--seperator-line);
+  width: -webkit-fill-available;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.menu-button:last-of-type {
+  border-bottom: none;
+}
+
+.menu-button>svg {
+  margin: 0 16px 0 16px;
+}

@@ -25,7 +25,7 @@ describe('PlayReporter', () => {
     const reporter = new PlayReporter('test-station');
     clock.tick(REPORTING_INTERVAL * 60 * 1000);
     await Promise.resolve();
-    expect(fetchStub.calledWith('/reportPlay/test-station')).to.be.true;
+    expect(fetchStub.calledWith('http://localhost:8000/reportPlay/test-station')).to.be.true;
   });
 
   it('should retry failed reports', async () => {
@@ -51,7 +51,7 @@ describe('PlayReporter', () => {
     const reporter = new PlayReporter('test/station');
     clock.tick(REPORTING_INTERVAL * 60 * 1000);
     await Promise.resolve();
-    expect(fetchStub.calledWith('/reportPlay/test%2Fstation')).to.be.true;
+    expect(fetchStub.calledWith('http://localhost:8000/reportPlay/test%2Fstation')).to.be.true;
   });
 
   it('should clean up resources when destroyed', () => {

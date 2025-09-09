@@ -10,30 +10,6 @@ const log = new Logger(logLevel);
 const blacklist = process.env.BLACKLIST?.split(',') || [];
 
 /**
- * Generates a query string for the given value.
- * 
- * This function creates a query string in the format `?genres=value` if the provided value is not an empty string.
- * If the value is an empty string, it returns an empty string.
- * 
- * @function
- * 
- * @param {string} value - The value to be included in the query string.
- * 
- * @returns {string} The query string, or an empty string if the value is empty.
- * 
- * @example
- * 
- * queryString('rock');
- * // Returns: '?genres=rock'
- * 
- * queryString('');
- * // Returns: ''
- */
-function queryString(value) {
-  return (value.length === 0) ? '' : `?genres=${value}`;
-}
-
-/**
  * Handles the request to fetch and return a list of audio stations based on query parameters.
  * 
  * This function validates the incoming request, processes the genres from the query parameters, 
@@ -81,11 +57,9 @@ module.exports = async (req, res) => {
     const genreString = genres.join(',');
 
     if (genreString && !blacklist.includes(req.ip) && stations.length) {
-      log.debug(`Saving genres: ${genreString}`);
       await sql.logGenres(genreString);
     }
-
-    log.info(`Fetched ${stations.length} stations for genres: ${genreString}`);
+    req.count = stations.length;
     res.json(stations);
   } catch (error) {
     log.error(`Error fetching stations: ${error.message}`);

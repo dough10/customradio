@@ -36,9 +36,7 @@ export default class AudioPlayer {
 
     
     this._bouncedToggle = debounce(this._togglePlay, PLAY_DEBOUNCE_DURATION);
-    this._saveVolume = debounce(value => {
-      localStorage.setItem('volume', value);
-    }, VOLUME_DEBOUNCE_DURATION);
+    this._saveVolume = debounce(value => localStorage.setItem('volume', value), VOLUME_DEBOUNCE_DURATION);
   }
 
   /**

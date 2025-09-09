@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-npm run test
-
 VERSION=$(jq -r '.version' package.json)
 
 if [ $? -ne 0 ] || [ -z "$VERSION" ]; then

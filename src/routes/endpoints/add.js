@@ -53,13 +53,13 @@ module.exports = async (req, res) => {
     const exists = await sql.exists(url);
 
     if (exists) {
-      log.warning(`Station already exists ${Date.now() - req.startTime}ms`);
+      log.warning(`Station already exists`);
       return res.status(409).json({ message: t('stationExists') });
     }
 
     const status = await isLiveStream(url);
     if (!status.ok) {
-      log.warning(`Connection test failed: ${status.error}, ${Date.now() - req.startTime}ms`);
+      log.warning(`Connection test failed: ${status.error}`);
       return res.status(400).json({ message: t('conTestFailed', status.error)});
     }
 
@@ -77,10 +77,9 @@ module.exports = async (req, res) => {
     };
 
     const id = await sql.addStation(data);
-    log.info(`${message} ${Date.now() - req.startTime}ms`);
     res.status(201).json({ message: t('stationSaved', id) });
   } catch (e) {
-    log.critical(`Failed to add station: ${e.message}, ${Date.now() - req.startTime}ms`);
+    log.critical(`Failed to add station: ${e.message}`);
     res.status(500).json({ message: t('addFail', e.message) });
   } finally {
     await sql.close();

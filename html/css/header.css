@@ -34,6 +34,21 @@ header {
   display: flex;
 }
 
+#login {
+  position: absolute;
+  top: 34px;
+  left: 0px;
+  z-index: 1;
+  will-change: transform;
+  transition: all 0.2s ease-out;
+  opacity: 1;
+  display: flex;
+}
+
+#login>img {
+  border-radius: 50%;
+}
+
 .w93 {
   width: 93%;
 }
@@ -51,4 +66,15 @@ header {
 
 .form-group>.button {
   margin: auto;
+}
+
+@media screen and (max-width: 450px) {
+  #info {
+    opacity: 0;
+    display: none;
+  }
+  .form-group {
+    min-width: 16em;
+    transform: translateX(20px);
+  }
 }

@@ -41,7 +41,7 @@
  */
 const selectors = {
   /** @type {String} header element */
-  header: 'header',
+  header: 'body>header',
 
   /** @type {String} container for input elements */
   formGroup: '.form-group',
@@ -146,7 +146,22 @@ const selectors = {
   dialogClose: 'dialog>.close',
 
   /** @type {String} changelog */
-  changelog: '#changelog'
+  changelog: '#changelog',
+
+  /** @type {String} login */
+  login: 'nav>button[title="login"]',
+
+  /** @type {String} login */
+  logout: 'nav>button[title="logout"]',
+
+  /** @type {String} nav button */
+  userMenuButton: '#login',
+
+  /** @type {String} user menu */
+  userMenu: 'nav',
+
+  /** @type {String} user avatar */
+  userAvatar: '.avatar-wrapper',
 };
 
 export default selectors;

@@ -1,8 +1,3 @@
-const { query, body } = require('express-validator');
-const pug = require('pug');
-const validator = require('validator');
-
-const Logger = require('./../util/logger.js');
 const addToDatabase = require('./endpoints/add.js');
 const getStations = require('./endpoints/stations.js');
 const streamIssue = require('./endpoints/stream-issue.js');
@@ -11,36 +6,30 @@ const markDuplicate = require('./endpoints/markDuplicate.js');
 const sitemap = require('./endpoints/sitemap.js');
 const robots = require('./endpoints/robots.js');
 const reportPlay = require('./endpoints/reportPlay.js');
-const reportInList = require('./endpoints/reportInList.js');
+const saveStation = require('./endpoints/saveStation.js');
 const securitytxt = require('./endpoints/securitytxt.js');
 const ads = require('./endpoints/ads.js');
 const topGenres = require('./endpoints/topGenres.js');
 const fourohfour = require('./endpoints/fourohfour.js');
 const info = require('./endpoints/info.js');
 const changelog = require('./endpoints/changeLog.js');
-const { t } = require('../util/i18n.js');
 const authenticate = require('../util/auth.js');
 const updatedb = require('./endpoints/updatedb.js');
+const auth = require('./endpoints/auth.js');
+const authCallback = require('./endpoints/auth.callback.js');
+const authLogout = require('./endpoints/auth.logout.js');
+const userStations = require('./endpoints/userStations.js');
+const index = require('./endpoints/index.js');
 
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const cspValidator = require('../schema/cspValidaton.js');
+const addStationValidator = require('../schema/addStationValidator.js');
+const streamIssueValidator = require('../schema/streamIssueValidator.js');
+const markDuplicateValidator = require('../schema/markDuplicateValidator.js');
+const stationsValidator = require('../schema/stationsValidator.js');
+const userStationValidatior = require('../schema/userStationValidatior.js');
 
-/**
- * enviroment options for csp report. 
- * allows localhost as url when not in production.
- * 
- * @returns {undefined|String}
- */
-const envOptions = (_ => {
-  const option = {
-    require_tld: false,
-    require_protocol: true,
-    require_port: true
-  };
-  return process.env.NODE_ENV === 'production' ? undefined : option; 
-})();
+const wosMiddleware = require('./../util/wosMiddleware.js');
 
-log.debug(envOptions);
 
 module.exports = async (app, register) => {
   /** 
@@ -61,10 +50,7 @@ module.exports = async (app, register) => {
   /**
    * assetLinks
    */
-  app.get('/.well-known/assetLinks.json', (req,res) => {
-    log.info(`${req.ip} -> ${req.originalUrl} ${Date.now() - req.startTime}ms`);
-    res.json([]);
-  });
+  app.get('/.well-known/assetLinks.json', (req,res) => res.json([]));
 
   /**
    * security.txt
@@ -84,52 +70,19 @@ module.exports = async (app, register) => {
   /**
    * sellers.json
    */
-  app.get('/sellers.json', (req, res) => {
-    log.info(`${req.ip} -> ${req.originalUrl} ${Date.now() - req.startTime}ms`);
-    res.json({
-      "sellers": []
-    });
-  });
+  app.get('/sellers.json', (req, res) => res.json({
+    "sellers": []
+  }));
 
   /**
    * Index
    */
-  app.get('/', (req, res) => {
-    log.info(`${req.ip} -> /?lang=${req.loadedLang} ${Date.now() - req.startTime}ms`);
-    res.send(
-      pug.renderFile('./templates/index.pug', {
-        lang: req.loadedLang,
-        csrf: req.session.csrfToken,
-        nonce: res.locals.nonce,
-        title: t('title'),
-        intro: t('intro'),
-        hibyLink: t('hibyLink'),
-        siteUse: t('siteUse'),
-        step1: t('step1'),
-        step2: t('step2'),
-        filterLabel: t('filterLabel'),
-        closeButtonText: t('closeButtonText'),
-        downloadButtonText: t('downloadButtonText'),
-        volume: t('volume'),
-        thanks: t('thanks'),
-        securityContact: t('securityContact'),
-        clickDismiss: t('clickDismiss'),
-        addStation: t('addStation'),
-        addCase1: t('addCase1'),
-        addCase2: t('addCase2'),
-        stationURL: t('stationURL'),
-        addButtonText: t('addButtonText'),
-        stations: t('stations')
-      })
-    );
-  });
+  app.get('/', await wosMiddleware, index);
 
   /**
    * index.htnml redirect to /
    */
-  app.get('/index.html', (req, res) => {
-    res.redirect('/');
-  });
+  app.get('/index.html', (req, res) => res.redirect('/'));
 
   /**
    * GET /metrics
@@ -175,14 +128,7 @@ module.exports = async (app, register) => {
    * @throws {express.Response} 400 - If validation fails or required fields are missing.
    * @throws {express.Response} 500 - If an error occurs while adding the station to the database.
    */
-  app.post('/mark-duplicate', [
-    body('id')
-      .trim()
-      .escape()
-      .isString()
-      .notEmpty()
-      .withMessage('Invalid ID paramater')
-  ], markDuplicate);
+  app.post('/mark-duplicate', markDuplicateValidator, markDuplicate);
 
   /**
    * An endpoint for audio stream playback error callback
@@ -202,25 +148,12 @@ module.exports = async (app, register) => {
    * @throws {express.Response} 400 - If validation fails or required fields are missing.
    * @throws {express.Response} 500 - If an error occurs while adding the station with the issue to the database.
    */
-  app.post('/stream-issue', [
-    body('id')
-      .trim()
-      .escape()
-      .isString()
-      .notEmpty()
-      .withMessage('Invalid or missing ID paramater'),
-    body('error')
-      .trim()
-      .escape()
-      .isString()
-      .notEmpty()
-      .withMessage('Error meessage must be a string')
-  ], streamIssue);
+  app.post('/stream-issue', streamIssueValidator, streamIssue);
 
   /**
    * Handles the request to retrieve the top genres from the database.
    *
-   * This function connects to a MongoDB database, aggregates the genres,
+   * This function connects to a SQLite database, aggregates the genres,
    * and returns the top 10 genres sorted alphabetically.
    *
    * @async
@@ -278,13 +211,44 @@ module.exports = async (app, register) => {
    *   }
    * ]
    */
-  app.get('/stations', [
-    query('genres')
-      .trim()
-      .escape()
-      .isString()
-      .withMessage('Genres must be a string'),
-  ], getStations);
+  app.get('/stations', await wosMiddleware, stationsValidator, getStations);
+
+  /**
+   * Handles GET requests to the '/userStations' endpoint.
+   * 
+   * Validates the request to ensure the user is authenticated. Fetches and returns a list of
+   * user-specific audio stations from the database.
+   * 
+   * @function
+   * @param {express.Request} req - The request object.
+   * @param {express.Response} res - The response object.
+   * 
+   * @returns {Promise<void>} - A promise that resolves when the response has been sent.
+   * 
+   * @throws {express.Response} 401 - If the user is not authenticated.
+   * @throws {express.Response} 500 - If an error occurs while fetching user stations.
+   * 
+   * @example
+   * // Example request:
+   * app.get('/userStations', (req, res) => {
+   *   // Request headers:
+   *   // Authorization: Bearer <token>
+   * });
+   * // Example response:
+   * [
+   *   {
+   *     "name": "My Favorite Station",
+   *     "url": "http://example.com/my-favorite",
+   *     "bitrate": 128
+   *   },
+   *   {
+   *     "name": "Another Station",
+   *     "url": "http://example.com/another-station",
+   *     "bitrate": 256
+   *   }
+   * ]
+   */
+  app.get('/userStations', await wosMiddleware, userStations);
 
   /**
    * Handles POST requests to the '/add' endpoint.
@@ -330,12 +294,7 @@ module.exports = async (app, register) => {
    *   "error": "Failed to add station"
    * }
    */
-  app.post('/add', [
-    body('url')
-      .isURL()
-      .notEmpty()
-      .withMessage('Invalid URL')
-  ], addToDatabase);
+  app.post('/add', addStationValidator, await wosMiddleware, addToDatabase);
 
   /**
    * @api {post} /csp-report Receive Content Security Policy Violation Reports
@@ -380,25 +339,7 @@ module.exports = async (app, register) => {
    * @apiSuccessExample {json} Success-Response:
    * HTTP/1.1 204 No Content
    */
-  app.post('/csp-report', [
-    body('csp-report')
-      .isObject()
-      .withMessage('csp-report must be an object'),
-    body('csp-report.referrer')
-      .optional()
-      .custom(value => {
-      if (value === '' || value === null) return true;
-      return validator.isURL(value, envOptions);
-    }).withMessage('referrer must be a valid URL'),
-    body('csp-report.violated-directive')
-      .escape()
-      .isString()
-      .withMessage('violated-directive must be a string'),
-    body('csp-report.original-policy')
-      .escape()
-      .isString()
-      .withMessage('original-policy must be a string'),
-  ], cspReport);
+  app.post('/csp-report', cspValidator, cspReport);
 
   /**
    * Reports a playMinute for a station and increments its playMinute count
@@ -411,17 +352,32 @@ module.exports = async (app, register) => {
    * 
    * @throws {Error} If play count increment fails
    */
-  app.post('/reportPlay/:id', reportPlay);
+  app.post('/reportPlay/:id', await wosMiddleware, reportPlay);
 
   /**
    * report if station is in a users txt list
    */
-  app.post('/reportInList/:id/:state', reportInList);
+  app.post('/reportInList/:id', await wosMiddleware, userStationValidatior, saveStation);
 
   /** 
    * Endpoint to begin updating the database.
    */
   app.get('/updatedb', await authenticate, updatedb);
+
+  /**
+   * Endpoint for authentication using WorkOS SSO.
+   */
+  app.get('/auth', auth);
+
+  /**
+   * Endpoint for handling the authentication callback from WorkOS.
+   */
+  app.get('/auth/callback', authCallback);
+
+  /**
+   * Endpoint for logging out the user.
+   */
+  app.get('/auth/logout', authLogout);
 
   /**
    * Catch-all route for handling 404 errors.

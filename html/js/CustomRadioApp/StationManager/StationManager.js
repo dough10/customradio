@@ -1,16 +1,4 @@
 /**
- * add query string based on length of input value 
- * 
- * @param {String} value
- * 
- * @returns {String}
- */
-function queryString(value) {
-  const uriEncoded = encodeURIComponent(value);
-  return (value.length === 0) ? '' : `?genres=${uriEncoded}`;
-}
-
-/**
  * retry 
  * 
  * @param {String} url 
@@ -44,6 +32,24 @@ export default class StationManager {
   }
 
   /**
+   * generates a URL with the given path and query parameters
+   * 
+   * @param {String} path 
+   * @param {Object} query 
+   * 
+   * @returns {String}
+   */
+  #url(path, query) {
+    const u = new URL(path, this.apiBaseUrl);
+    if (query) {
+      Object.keys(query).forEach(key => {
+        u.searchParams.append(key, query[key]);
+      });
+    }
+    return u.toString();
+  }
+
+  /**
    * fetches station list from API
    * 
    * @param {String} genreFilter 
@@ -51,7 +57,9 @@ export default class StationManager {
    * @returns {Object}
    */
   async fetchStations(genreFilter) {
-    const res = await retryFetch(`${this.apiBaseUrl}/stations${queryString(genreFilter)}`);
+    const query = genreFilter ? { genres: genreFilter } : null;
+    const url = this.#url('/stations', query);
+    const res = await retryFetch(url);
     if (res.status !== 200) {
       throw new Error(`Error fetching stations: ${res.statusText}`);
     }
@@ -77,7 +85,8 @@ export default class StationManager {
    * @returns {String[]}
    */
   async getGenres() {
-    const res = await retryFetch(`${this.apiBaseUrl}/topGenres`);
+    const url = this.#url('/topGenres');
+    const res = await retryFetch(url);
     if (res.status !== 200) {
       throw new Error(`Error fetching genres: ${res.statusText}`);
     }
@@ -85,18 +94,42 @@ export default class StationManager {
   }
 
   /**
-   * loads list of stations from localstorage if "loadFromLocal" is true
+   * adds selected: true to object
+   * 
+   * @param {Object} obj 
+   * 
+   * @returns {Object}
+   */
+  #mapSelected(elements) {
+    return elements.map(obj => {
+      return {
+        ...obj, 
+        selected: true
+      };
+    });
+  }
+
+  /**
+   * loads list of stations from localstorage or API if "loadSaved" is true
    * otherwise grabs the selected station from UI
    * 
-   * @param {Boolean} loadFromLocal 
+   * @param {Boolean} loadSaved 
    * @param {HTMLElement} container 
    * 
-   * @returns {Array<String>}
+   * @returns {Array<Object>}
    */
-  getSelectedStations(loadFromLocal, container) {
-    if (loadFromLocal) {
-      const storedElements = JSON.parse(localStorage.getItem('selected')) || [];
-      return storedElements.map(obj => ({ ...obj, selected: true }));
+  async getSelectedStations(loadSaved, container) {
+    if (loadSaved) {
+      try {
+        const url = this.#url('/userStations');
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`Error fetching user stations: ${res.statusText}`);
+        }
+        return this.#mapSelected(await res.json());
+      } catch(e) {
+        return [];
+      }
     }
     return Array.from(container.querySelectorAll('li[selected]'))
       .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name))

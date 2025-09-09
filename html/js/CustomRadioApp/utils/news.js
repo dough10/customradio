@@ -2,12 +2,9 @@ import Alert from '../Alerts/Alerts.js';
 import { t } from './i18n.js';
 
 export default function news() {
-  const newURL = 'https://radiotxt.site';
-  const currentURL = 'https://customradio.dough10.me';
   const time = 2500;
-  const lsKey = 'newUrlTransitionAlertShown3';
+  const lsKey = 'loginNews';
 
-  if (window.location.origin === newURL) return;
   if (localStorage.getItem(lsKey)) return;
 
   if (document.querySelector('#alert')) {
@@ -15,7 +12,6 @@ export default function news() {
   }
 
   setTimeout(_ => {
-    localStorage.setItem(lsKey, 1);
-    new Alert(t('moving', newURL, currentURL));
+    new Alert(t('news'), lsKey);
   }, time);
 }

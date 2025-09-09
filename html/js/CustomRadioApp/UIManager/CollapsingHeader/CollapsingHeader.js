@@ -1,6 +1,8 @@
 import EventManager from "../../EventManager/EventManager.js";
 import selectors from "../../selectors.js";
 
+const MOBILE_THRESHOLD = 450;
+
 /**
  * Class representing a scroll-responsive collapsing header.
  * Shrinks the header and adjusts element visibility based on scroll position,
@@ -37,7 +39,7 @@ export default class CollapsingHeader {
    * @type {Number}
    * dappening factor for info button transition
    */
-  _infoTranslateFactor = 1.5;
+  _infoTranslateFactor = 1.5; // the 1.5 seems to land the info button center of the collapsed header
 
   /**
    * @private
@@ -52,18 +54,27 @@ export default class CollapsingHeader {
 
     /** @type {HTMLElement|null} Input container element */
     this.input = document.querySelector(selectors.formGroup);
-
-    /** @type {HTMLElement|null} Info button element */
-    this.infoButton = document.querySelector(selectors.infoButton);
-
+    
     /** @type {HTMLElement|null} Main content wrapper */
     this.main = document.querySelector(selectors.main);
-
+    
     /** recalculate header on window resize */
     this._em.add(window, 'resize', this._onResize.bind(this));
-
-    /** @type {Boolean} mobile device */
-    this._isMobile = window.innerWidth < 450;
+  }
+  
+  /** @type {HTMLElement|null} Info button element */
+  get infoButton() {
+    return document.querySelector(selectors.infoButton);
+  }
+  
+  /** @type {HTMLElement|null} login button element */
+  get loginButton() {
+    return document.querySelector(selectors.userMenuButton);
+  }
+  
+  /** @type {Boolean} mobile device */
+  get _isMobile() {
+    return window.innerWidth < MOBILE_THRESHOLD;
   }
 
   /**
@@ -72,7 +83,6 @@ export default class CollapsingHeader {
    * recalculates header transition effects on window resize
    */
   _onResize() {
-    this._isMobile = window.innerWidth < 450;
     this.scroll(this.main?.scrollTop || 0);
   }
 
@@ -135,20 +145,24 @@ export default class CollapsingHeader {
       if (this.input) this.input.style.opacity = (1 - opacity).toFixed(2);
       if (this.header) this.header.style.transform = `translateY(-${transform}px)`;
       if (this.main) this.main.style.transform = `translateY(-${transform}px)`;
+      
+      const buttons = [
+        this.loginButton,
+        this.infoButton
+      ].filter(button => button !== null);
+      
+      buttons.forEach(button => {
+        button.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
+      });
 
-      if (this.infoButton) {
-        // the 1.5 seems to land the info button center of the collapsed header
-        this.infoButton.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
+      if (this._isMobile) {
+        const infoOpacity = this._mobileOpacity(transform);
 
-        if (this._isMobile) {
-          const infoOpacity = this._mobileOpacity(transform);
-
-          this.infoButton.style.opacity = infoOpacity.toFixed(2);
-          this.infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
-        } else {
-          this.infoButton.style.opacity = '1';
-          this.infoButton.style.display = 'flex';
-        }
+        this.infoButton.style.opacity = infoOpacity.toFixed(2);
+        this.infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
+      } else {
+        this.infoButton.style.opacity = '1';
+        this.infoButton.style.display = 'flex';
       }
     });
   }

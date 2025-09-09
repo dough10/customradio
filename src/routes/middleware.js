@@ -9,6 +9,7 @@ const compression = require("compression");
 const path = require("path");
 const crypto = require("crypto");
 const cookieParser = require('cookie-parser');
+const { performance } = require('perf_hooks');
 
 const { setLanguage } = require("../util/i18n.js");
 const Logger = require("../util/logger.js");
@@ -57,16 +58,12 @@ function initSessionStorage() {
  * @returns {void}
  */
 module.exports = (app, httpRequestCounter) => {
-  /**
-   * Middleware to track request timing
-   * Adds startTime to request object for response time calculation
-   *
-   * @param {express.Request} req - Express request object
-   * @param {express.Response} res - Express response object
-   * @param {express.NextFunction} next - Express next middleware function
-   */
   app.use((req, res, next) => {
-    req.startTime = Date.now();
+    const start = performance.now();
+    res.on("finish", () => {
+      const hasBody = req.body && Object.keys(req.body).length > 0;
+      log.info(`${req.ip} -> [${req.method}] ${req.originalUrl},${req.count !== undefined ? ` count: ${req.count}, ` : ' '}lang: ${req.loadedLang},${hasBody ? ` body: ${JSON.stringify(req.body)}, ` : ' '}status: ${res.statusCode},${res.getHeader('Content-Type') ? ` type: ${res.getHeader('Content-Type')}, ` : ' '}${res.getHeader('Content-Length') ? ` bytes: ${res.getHeader('Content-Length')}, ` : ' '}ms: ${(performance.now() - start).toFixed(2)}`);
+    });
     next();
   });
 
@@ -127,7 +124,8 @@ module.exports = (app, httpRequestCounter) => {
           ],
           imgSrc: [
             "'self'", 
-            "data:"
+            "data:",
+            "https://workoscdn.com/"
           ],
           connectSrc: [
             "*"
@@ -245,7 +243,6 @@ module.exports = (app, httpRequestCounter) => {
     next();
   });
 
-
   /**
    * Set response language
    */
@@ -332,11 +329,6 @@ module.exports = (app, httpRequestCounter) => {
       });
     }
 
-    next();
-  });
-
-  app.use((req, res, next) => {
-    log.info(`${req.ip} -> ${req.originalUrl}`);
     next();
   });
 

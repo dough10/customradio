@@ -93,7 +93,13 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
   const url = event.request.url;
-  if (url.includes('/info') || url.includes('/reportPlay/') || url.includes('/reportInList/')) {
+  if (
+    url.includes('/info') || 
+    url.includes('/reportPlay/') || 
+    url.includes('/reportInList/') ||
+    url.includes('/auth') ||
+    url.includes('/auth/callback')
+  ) {
     event.respondWith(fetch(event.request));
     return;
   }
