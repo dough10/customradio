@@ -80,8 +80,10 @@ export default class PlayReporter {
     try {
       const url = CONFIG.REPORT_ENDPOINT(this._stationId);
       const res = await retry(() => fetch(url, _OPTIONS()));
-      const {message} = await res.json();
-      if (message === 'ip in blacklist') this.playStopped();
+      if (res.status !== 204) {
+        const {message} = await res.json();
+        if (message === 'ip in blacklist') this.playStopped();
+      }
       if (![403, 419, 440].includes(res?.status)) return;
       await updateCsrf();
     } catch (error) {
