@@ -16,6 +16,7 @@ docker run \
   --env=REDIS_PASSWORD="$REDIS_PASSWORD" \
   --env=WORKOS_API_KEY="$WORKOS_API_KEY" \
   --env=WORKOS_CLIENT_ID="$WORKOS_CLIENT_ID" \
+  --env=WORKOS_REDIRECT_URL="$WORKOS_REDIRECT_URL" \
   --env=COOKIE_SECRET="$cookie_secret" \
   --env=JWT_SECRET="$jwt_secret" \
   --env=SESSION_SECRET="$session_secret" \
