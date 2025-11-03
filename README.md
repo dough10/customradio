@@ -1,4 +1,4 @@
-# customradio V:1.12.7
+# customradio V:1.12.8
 
 An online radio station browser with the ability to create a radio.txt file for use in Hiby digital audio players.
 
@@ -11,6 +11,8 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 - **LOG_LEVEL** = *console and file log level: Defaults to INFO*
 
 - **BLACKLIST** = *IP addresses blocked from reporting playmin or inList and genre searches*
+
+
 
 ### contact me
 
