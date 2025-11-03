@@ -106,9 +106,13 @@ async function updateStationData(sql, old, updated) {
       return null;
     });
 
+  log.debug(typeof updated.name);
+  log.debug(updated.name);
+  log.debug(old.name);
+
   const updatedData = {
     id: old.id,
-    name: (typeof updated.name === 'string') ? updated.name : old.name,
+    name: updated.name || old.name,
     url: updated.url || old.url,
     genre: (updated.icyGenre && typeof updated.icyGenre === 'string') ? updated.icyGenre : old.genre || 'Unknown',
     online: (typeof updated.isLive === 'boolean') ? updated.isLive : false,

@@ -7,13 +7,13 @@ const log = new Logger(logLevel);
 module.exports = async (req, res) => {
   try {
     testStreams();
+    res.json({
+      message: 'update began.'
+    });
   } catch(e) {
     log.error(`Error while updating database: ${e.message}`);
     return res.status(500).json({
       error: 'Failed to start update process.'
     });
   }
-  res.json({
-    message: 'update began.'
-  });
 }
