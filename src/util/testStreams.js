@@ -106,9 +106,9 @@ async function updateStationData(sql, old, updated) {
       return null;
     });
 
-  log.debug(typeof updated.name);
-  log.debug(updated.name);
-  log.debug(old.name);
+  // log.debug(typeof updated.name);
+  // log.debug(updated.name);
+  // log.debug(old.name);
 
   const updatedData = {
     id: old.id,
