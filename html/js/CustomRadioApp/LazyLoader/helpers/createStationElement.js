@@ -213,7 +213,8 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
     li.dataset.url = new URL(url).toString();
   }
   catch (e) {
-    console.error(`Invalid URL for station ${name}: ${url}`);
+    console.error(`Invalid URL for station ${id}: ${url}`);
+    return;
   }
   li.dataset.bitrate = bitrate;
   li.dataset.genre = genre;

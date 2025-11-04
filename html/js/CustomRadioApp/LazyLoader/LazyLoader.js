@@ -108,6 +108,7 @@ export default class LazyLoader {
     const localFragment = document.createDocumentFragment();
     stationList.forEach(element => {
       const stationElement = this._createStationElement(element, this._player);
+      if (!stationElement) return;
       if (element.selected) stationElement.toggleAttribute('selected');
       localFragment.append(stationElement);
     });
