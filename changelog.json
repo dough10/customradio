@@ -1,8 +1,8 @@
 {
   "Current": [
-    "Fix bug Where some stations were not highlighted when playing"
+    "Fix bug where some stations were not highlighted when playing"
   ],
-  "1.22.7": [
+  "1.12.7": [
     "Attempt to improve database searchability",
     "More translations added (CS, NL, KK, TR, and PT. also added script to generate translations using chatGPT)",
     "Authentication system for station list memory (uses WorkOS, no data other then station are stored in this database, also resets inList stat for stations allowing for more accurate popularity tracking)"
