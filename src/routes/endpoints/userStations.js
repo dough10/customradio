@@ -15,15 +15,15 @@ const log = new Logger(logLevel);
  * @returns {Promise<void>} A promise that resolves when the response has been sent.
  */
 module.exports = async (req, res) => {
-  const sql = new UserData('data/customradio.db');
-
   if (!req.user) {
     req.count = 0;
     res.send([]);
     return;
   }
-
+  
+  let sql;
   try {
+    sql = new UserData('data/customradio.db');
     const userID = req.user.id;
     const stations = await sql.userStations(userID);
     req.count = stations.length;
@@ -40,6 +40,13 @@ module.exports = async (req, res) => {
     return;
   }
   finally {
-    await sql.close();
+    if (!sql || typeof sql.close !== 'function') {
+      return;
+    }
+    try {
+      await sql.close();
+    } catch (err) {
+      log.error(`Error closing DB: ${err.message}`);
+    }
   }
 };

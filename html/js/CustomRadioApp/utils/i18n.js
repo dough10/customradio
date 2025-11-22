@@ -2,6 +2,7 @@
 import { en } from './lang/en.js';
 import { es } from './lang/es.js';
 import { fr } from './lang/fr.js';
+import { fi } from './lang/fi.js';
 import { zh } from './lang/zh.js';
 import { ru } from './lang/ru.js';
 import { it } from './lang/it.js';
@@ -37,7 +38,8 @@ const languages = {
   sv,
   tr,
   uk,
-  zh
+  zh,
+  fi
 };
 
 let currentLang = 'en';

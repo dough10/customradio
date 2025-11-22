@@ -12,6 +12,7 @@ import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
 import news from '../utils/news.js';
+import Toast from '../Toast/Toast.js';
 
 /**
  * manages UI elements
@@ -26,7 +27,7 @@ export default class UIManager {
     this._analytics = new Analytics();
     this._header = new CollapsingHeader();
     this._loadUser();
-    news();
+    // news();
   }
   
   /**
@@ -43,8 +44,9 @@ export default class UIManager {
     initDialogInteractions();
 
     this._player.init();
-    this._em.add(this._loginButton, 'click', this._loginRedirect, { passive: true });
-    this._em.add(this._logoutButton, 'click', this._logoutRedirect, { passive: true });
+    this._em.add(this._loginButton, 'click', this._loginRedirect.bind(this), { passive: true });
+    this._em.add(this._logoutButton, 'click', this._logoutRedirect.bind(this), { passive: true });
+    this._em.add(this._clipboardlink, 'click', this._copytoclipboard, { passive: true });
     this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
@@ -140,6 +142,16 @@ export default class UIManager {
   get _logoutButton() {
     return document.querySelector(this._selectors.logout);
   } 
+
+  /**
+   * querySelector for 'clipboard link' button
+   * 
+   * @private
+   * @returns {HTMLElement}
+   */
+  get _clipboardlink() {
+    return document.querySelector(this._selectors.clipboardlink);
+  }
 
   /**
    * querySelector for user menu
@@ -241,7 +253,7 @@ export default class UIManager {
    */
   _loginRedirect() {
     if (window.user) return;
-    hapticFeedback();
+    this._userMenuClose();
     window.location.href = `${window.location.origin}/auth`;
   }
 
@@ -252,8 +264,25 @@ export default class UIManager {
    */
   _logoutRedirect() {
     if (!window.user) return;
-    hapticFeedback();
+    this._userMenuClose();
     window.location.href = `${window.location.origin}/auth/logout`;
+  }
+
+  /**
+   * copies the user download link to clipboard
+   * 
+   * @returns {void}
+   */
+  _copytoclipboard() {
+    try {
+      navigator.clipboard.writeText(`${window.location.origin}/downloadtxt/${window.user.id}`);
+      new Toast(t('clipboard_success'));
+      this._userMenuClose();
+    } catch (err) {
+      new Toast(t('clipboard_failure'));
+      console.error('User is not logged in.');
+      return;
+    }
   }
 
   /**
@@ -279,6 +308,7 @@ export default class UIManager {
    */
   _loadUser() {
     this._logoutButton.style.display = 'none';
+    this._clipboardlink.style.display = 'none';
     
     const user = window.user;
     if (!user) return;
@@ -299,6 +329,7 @@ export default class UIManager {
 
     this._loginButton.style.display = 'none';
     this._logoutButton.style.display = 'flex';
+    this._clipboardlink.style.display = 'flex';
   }
 
   /**

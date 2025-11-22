@@ -44,7 +44,7 @@ module.exports = class UserData {
         FROM user_stations us
         JOIN stations s ON us.station_id = s.id
         WHERE us.user = ?
-        ORDER BY s.name ASC
+        ORDER BY s.name COLLATE NOCASE ASC
       `;
       this.#db.all(query, [user], (err, rows) => {
         if (err) {

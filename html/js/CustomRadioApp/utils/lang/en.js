@@ -19,11 +19,7 @@ export const en = {
   appUpdated: 'App updated',
   pressToRefresh: 'Press to refresh',
   dismiss: 'Click to dismiss',
-  news: `
-    <h2>We've Updated – User List Storage!</h2>
-    <p>You can now log in using the WorkOS user portal, and any stations you save to your list will no longer be randomly cleared by your browser.</p>
-    <p>No user-identifying data is saved to this database. All user profile data is saved on WorkOS servers.</p>
-    <p>This server only stores your WorkOS ID and station IDs, which are used to build your station list.</p>
-    <p>Thanks!</p>
-  `
+  clipboard_success: 'Copied to clipboard',
+  clipboard_failure: 'Copy to clipboard failed',
+  news: ``
 };

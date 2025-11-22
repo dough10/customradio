@@ -32,8 +32,9 @@ const log = new Logger(logLevel);
  * app.get('/topGenres', getTopGenres);
  */
 module.exports = async (req, res) => {
-  const sql = new Stations('data/customradio.db');
+  let sql;
   try{
+    sql = new Stations('data/customradio.db');
     const topGenres = await sql.topGenres();
     res.count = topGenres.length;
     res.json(topGenres);
@@ -41,6 +42,13 @@ module.exports = async (req, res) => {
     log.critical(`Error getting genres: ${error.message}`);
     res.status(500).json({error: t('genresFail', error.message)});
   } finally {
-    await sql.close();
+    if (!sql || typeof sql.close !== 'function') {
+      return;
+    }
+    try {
+      await sql.close();
+    } catch (err) {
+      log.error(`Error closing DB: ${err.message}`);
+    }
   }
 };

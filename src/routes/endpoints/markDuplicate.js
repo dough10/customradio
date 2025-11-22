@@ -29,10 +29,10 @@ module.exports = async (req, res) => {
     log.error(message);
     return res.status(400).json({message});
   }
-
-  const sql = new Stations('data/customradio.db');
+  let sql;
   const {id} = req.body;
   try {
+    sql = new Stations('data/customradio.db');
     await sql.markDuplicate(id);
     res.json({
       message: t('dupLogged')
@@ -41,6 +41,13 @@ module.exports = async (req, res) => {
     log.error(`Failed to log error: ${error.message}`);
     res.status(500).json({message: t('dupLogFail', error.message)});
   } finally {
-    await sql.close();
+    if (!sql || typeof sql.close !== 'function') {
+      return;
+    }
+    try {
+      await sql.close();
+    } catch (err) {
+      log.error(`Error closing DB: ${err.message}`);
+    }
   }
 };

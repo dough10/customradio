@@ -48,8 +48,9 @@ module.exports = async (req, res) => {
     log.error(error);
     return res.status(400).json({error});
   }  
-  const sql = new Stations('data/customradio.db');
+  let sql;
   try {
+    sql = new Stations('data/customradio.db');
     const decoded = decodeURIComponent(req.query.genres);
     const genres = decoded.split(',').map(genre => genre.toLowerCase());
     const stations = await sql.getStationsByGenre(genres);
@@ -65,6 +66,13 @@ module.exports = async (req, res) => {
     log.error(`Error fetching stations: ${error.message}`);
     res.status(500).json({error: t('stationsFail', error.message)});
   } finally {
-    await sql.close();
+    if (!sql || typeof sql.close !== 'function') {
+      return;
+    }
+    try {
+      await sql.close();
+    } catch (err) {
+      log.error(`Error closing DB: ${err.message}`);
+    }
   }
 };

@@ -1,5 +1,10 @@
 {
   "Current": [
+    "Added 'share download link' button to user menu (copies a link to download your saved stations as a txt file)",
+    "fix issue making context menu appear behind other elements",
+    "Minor UI tweaks"
+  ],
+  "1.12.8": [
     "Fix bug where some stations were not highlighted when playing"
   ],
   "1.12.7": [

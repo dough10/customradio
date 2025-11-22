@@ -46,10 +46,11 @@ module.exports = async (req, res) => {
     return res.status(400).json({ message });
   }
 
-  const sql = new Stations('data/customradio.db');
+  let sql;
   const { url } = req.body;
-
+  
   try {
+    sql = new Stations('data/customradio.db');
     const exists = await sql.exists(url);
 
     if (exists) {
@@ -82,6 +83,13 @@ module.exports = async (req, res) => {
     log.critical(`Failed to add station: ${e.message}`);
     res.status(500).json({ message: t('addFail', e.message) });
   } finally {
-    await sql.close();
+    if (!sql || typeof sql.close !== 'function') {
+      return;
+    }
+    try {
+      await sql.close();
+    } catch (err) {
+      log.error(`Error closing DB: ${err.message}`);
+    }
   }
 };

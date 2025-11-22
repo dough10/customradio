@@ -20,6 +20,7 @@ const authCallback = require('./endpoints/auth.callback.js');
 const authLogout = require('./endpoints/auth.logout.js');
 const userStations = require('./endpoints/userStations.js');
 const index = require('./endpoints/index.js');
+const downloadtxt = require('./endpoints/downloadtxt.js');
 
 const cspValidator = require('../schema/cspValidaton.js');
 const addStationValidator = require('../schema/addStationValidator.js');
@@ -378,6 +379,11 @@ module.exports = async (app, register) => {
    * Endpoint for logging out the user.
    */
   app.get('/auth/logout', authLogout);
+
+  /**
+   * Endpoint to download user stations as a TXT file.
+   */
+  app.get('/downloadtxt/:uid', downloadtxt);
 
   /**
    * Catch-all route for handling 404 errors.

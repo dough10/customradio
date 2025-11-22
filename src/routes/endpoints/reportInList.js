@@ -10,14 +10,14 @@ module.exports = async (req, res) => {
   const ip = req.ip;
   const id = req.params.id;
   const state = Number(req.params.state);
-  const sql = new Stations('data/customradio.db');
-
+  
   if (state && blacklist.includes(ip)) {
     res.json({ message: 'ip in blacklist' });
     return;
   }
-
+  let sql;
   try {
+    sql = new Stations('data/customradio.db');
     if (state) {
       await sql.addToList(id);
     } else {
@@ -29,6 +29,13 @@ module.exports = async (req, res) => {
     res.status(500).json({error: eMessage});
     log.error();
   } finally {
-    await sql.close();
+    if (!sql || typeof sql.close !== 'function') {
+      return;
+    }
+    try {
+      await sql.close();
+    } catch (err) {
+      log.error(`Error closing DB: ${err.message}`);
+    }
   }
 };

@@ -33,9 +33,10 @@ module.exports = async (req, res) => {
     res.status(400).json({error});
     return;
   }
-  const sql = new Stations('data/customradio.db');
+  let sql;
   const {id, error} = req.body;
   try {
+    sql = new Stations('data/customradio.db');
     await sql.logStreamError(id, error);
     res.json({
       message: t('errorLog')
@@ -44,6 +45,13 @@ module.exports = async (req, res) => {
     log.critical(`Failed to log error: ${error.message}`);
     res.status(500).json({message: t('errorLogFail', error.message)});
   } finally {
-    await sql.close();
+    if (!sql || typeof sql.close !== 'function') {
+      return;
+    }
+    try {
+      await sql.close();
+    } catch (err) {
+      log.error(`Error closing DB: ${err.message}`);
+    }
   }
 };
