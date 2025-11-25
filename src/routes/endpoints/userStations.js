@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
     const stations = await sql.userStations(userID);
     req.count = stations.length;
 
-    if (!stations || stations.length === 0) {
+    if (!stations || req.count === 0) {
       res.send([]);
       return;
     }

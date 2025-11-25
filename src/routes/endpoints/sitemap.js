@@ -58,7 +58,7 @@ module.exports = (req, res) => {
       res.set('Content-Type', 'application/xml');
       res.send(xml);
     } catch(e) {
-      res.status(500).json({error: `Failed gettings XML: ${e.message}`})
+      res.status(500).json({error: `Failed creating XML: ${e.message}`})
     }
   });
 };

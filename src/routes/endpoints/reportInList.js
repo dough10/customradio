@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
     }
     res.json({ state });
   } catch(e) {
-    const eMessage = `Failed ${state ? 'adding' : 'removing'} from inList: ${e.message}`;
+    const eMessage = `Failed ${state ? 'adding' : 'removing'} station inList attribute: ${e.message}`;
     res.status(500).json({error: eMessage});
     log.error();
   } finally {
