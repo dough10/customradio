@@ -40,6 +40,12 @@ export default class StationManager {
    * @returns {String}
    */
   #url(path, query) {
+    if (!path || typeof path !== 'string') {
+      throw new Error('Path must be present and of type string');
+    }
+    if (query && typeof query !== 'object') {
+      throw new Error('Query must be an object');
+    }
     const u = new URL(path, this.apiBaseUrl);
     if (query) {
       Object.keys(query).forEach(key => {
@@ -57,13 +63,18 @@ export default class StationManager {
    * @returns {Object}
    */
   async fetchStations(genreFilter) {
-    const query = genreFilter ? { genres: genreFilter } : null;
-    const url = this.#url('/stations', query);
-    const res = await retryFetch(url);
-    if (res.status !== 200) {
-      throw new Error(`Error fetching stations: ${res.statusText}`);
+    try {
+      const query = genreFilter ? { genres: genreFilter } : null;
+      const url = this.#url('/stations', query);
+      const res = await retryFetch(url);
+      if (res.status !== 200) {
+        throw new Error(`Error fetching stations: ${res.statusText}`);
+      }
+      return res.json();
+    } catch (e) {
+      console.error(e);
+      return [];
     }
-    return res.json();
   }
 
   /**
@@ -85,12 +96,17 @@ export default class StationManager {
    * @returns {String[]}
    */
   async getGenres() {
-    const url = this.#url('/topGenres');
-    const res = await retryFetch(url);
-    if (res.status !== 200) {
-      throw new Error(`Error fetching genres: ${res.statusText}`);
+    try {
+      const url = this.#url('/topGenres');
+      const res = await retryFetch(url);
+      if (res.status !== 200) {
+        throw new Error(`Error fetching genres: ${res.statusText}`);
+      }
+      return await res.json();
+    } catch (e) {
+      console.error(e);
+      return [];
     }
-    return await res.json();
   }
 
   /**
