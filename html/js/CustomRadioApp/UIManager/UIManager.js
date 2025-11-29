@@ -46,7 +46,7 @@ export default class UIManager {
     this._player.init();
     this._em.add(this._loginButton, 'click', this._loginRedirect.bind(this), { passive: true });
     this._em.add(this._logoutButton, 'click', this._logoutRedirect.bind(this), { passive: true });
-    this._em.add(this._clipboardlink, 'click', this._copytoclipboard, { passive: true });
+    this._em.add(this._clipboardlink, 'click', this._copytoclipboard.bind(this), { passive: true });
     this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
@@ -211,6 +211,7 @@ export default class UIManager {
    * Closes the user menu
    */
   _userMenuClose() {
+    console.log('UIManager: closing user menu');
     const bd = document.querySelector('.backdrop');
     this._em.add(bd, 'transitionend', _ => {
       bd.remove();
@@ -274,13 +275,15 @@ export default class UIManager {
    * @returns {void}
    */
   _copytoclipboard() {
+    if (!window.user) return;
     try {
-      navigator.clipboard.writeText(`${window.location.origin}/downloadtxt/${window.user.id}`);
+      const url = new URL(`/downloadtxt/${window.user.id}`, window.location.origin);
+      navigator.clipboard.writeText(url.toString());
       new Toast(t('clipboard_success'));
       this._userMenuClose();
     } catch (err) {
       new Toast(t('clipboard_failure'));
-      console.error('User is not logged in.');
+      console.error(err);
       return;
     }
   }
