@@ -171,7 +171,7 @@ function createList(entrys) {
 }
 
 /**
- * creates html elements for most recent 2 versions of changelog
+ * creates html elements for most recent 3 versions of changelog
  * 
  * @param {Object} changes - changelog object from backend
  * 
@@ -180,24 +180,25 @@ function createList(entrys) {
 function createChangelog(changes) {
   const fragment = document.createDocumentFragment();
   let count = 0;
+  
   for (const version in changes) {
-    if (count >= 3) break;
+    if (count++ >= 3) break;
 
     const header = document.createElement('h3');
     header.textContent = `${version}:`;
 
     const list = document.createElement('ul');
     
-    fragment.append(header, list);
-    
-    changes[version].forEach(change => {
-      const cleanedChange = change.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+    const items = changes[version].map(change => {
       const li = document.createElement('li');
-      li.textContent = cleanedChange;
-      list.append(li);
+      li.textContent = change.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+      return li;
     });
-    count++;
+    
+    list.append(...items);
+    fragment.append(header, list);
   }
+  
   return fragment;
 }
 
