@@ -162,12 +162,15 @@ function wobbleDialog(ev) {
  */
 function createList(entrys) {
   const fragment = document.createDocumentFragment();
-  Object.entries(entrys).forEach(([key, value]) => {
+  
+  const items = Object.entries(entrys).map(([key, value]) => {
     const li = document.createElement('li');
     li.textContent = `${key}: ${rmArrow(value)}`;
-    fragment.appendChild(li);
+    return li;
   });
-  return fragment; 
+  
+  fragment.append(...items);
+  return fragment;
 }
 
 /**
