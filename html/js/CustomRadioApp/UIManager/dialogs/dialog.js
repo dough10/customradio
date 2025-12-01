@@ -54,38 +54,54 @@ function toggleButtonActivity() {
  * @throws {Error} - Throws an error if the fetch request fails.
  */
 async function submitStation(ev) {
+  const SUBMISSION_RESET_TIME = 2000;
+
   ev.preventDefault();
 
-  
   const submit = document.querySelector(selectors.stationSubmit);
-  submit.setAttribute('disabled', true);
-  
   const responseElement = document.querySelector(selectors.response);
+  const stationUrlElement = document.querySelector(selectors.stationUrl);
 
-  const url = document.querySelector('#station-url').value;
+  if (!submit || !responseElement || !stationUrlElement) {
+    console.error('Required DOM elements not found');
+    return;
+  }
+
+  submit.setAttribute('disabled', true);
+  const url = stationUrlElement.value;
 
   try {
-    const response = await retry( _ => fetch('/add', _OPTIONS({url})));
+    const post_options = _OPTIONS({url});
+    const response = await retry(_ => fetch('/add', post_options));
+    
     if ([403, 419, 440].includes(response?.status)) {
       const success = await updateCsrf();
-      if (success) submitStation(ev);
+      if (success) await submitStation(ev);
       return;
     }
+
     if (!response) throw Error('network error adding Station');
+    
     const result = await response.json();
     const message = result.message;
+    
     responseElement.textContent = message;
-    if (message.length) new Toast(result.message);
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'URL Submission', document.querySelector(selectors.stationUrl).value, message]);
-    await sleep(2000);
-    const inputElement = document.querySelector(selectors.stationUrl);
-    inputElement.value = '';
-    document.getElementById('response').innerText = '';
+    if (message.length) new Toast(message);
+    if (typeof _paq !== 'undefined') {
+      _paq.push(['trackEvent', 'URL Submission', url, message]);
+    }
+
+    await sleep(SUBMISSION_RESET_TIME);
+    stationUrlElement.value = '';
+    responseElement.innerText = '';
   } catch (e) {
-    submit.removeAttribute('disabled');
     responseElement.textContent = 'An error occurred!';
     console.error(`Error: ${e.message}`);
-    if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
+    if (typeof _paq !== 'undefined') {
+      _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
+    }
+  } finally {
+    submit.removeAttribute('disabled');
   }
 }
 
