@@ -125,6 +125,7 @@ module.exports = (app, httpRequestCounter) => {
           imgSrc: [
             "'self'", 
             "data:",
+            "https://analytics.dough10.me",
             "https://workoscdn.com/"
           ],
           connectSrc: [
