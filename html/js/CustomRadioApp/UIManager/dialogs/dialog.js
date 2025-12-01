@@ -240,7 +240,7 @@ async function info() {
   loadingAnimation(depDiv);
 
   try {
-    const response = await retry( _ => fetch('/info'));
+    const response = await retry(_ => fetch('/info'));
     const pack = await response.json();
 
     dialog.querySelector('h1').textContent = `v${pack.version}`;
