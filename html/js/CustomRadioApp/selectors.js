@@ -157,6 +157,9 @@ const selectors = {
   /** @type {String} clipboard link button */
   sharelink: 'nav>button[title="share"]',
 
+  /** @type {String} share dialog */
+  shareDialog: '#linkshare',
+
   /** @type {String} nav button */
   userMenuButton: '#login',
 

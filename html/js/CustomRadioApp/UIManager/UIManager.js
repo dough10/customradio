@@ -46,7 +46,7 @@ export default class UIManager {
     this._player.init();
     this._em.add(this._loginButton, 'click', this._loginRedirect.bind(this), { passive: true });
     this._em.add(this._logoutButton, 'click', this._logoutRedirect.bind(this), { passive: true });
-    this._em.add(this._sharelink, 'click', _ => document.querySelector("#linkshare").showModal(), { passive: true });
+    this._em.add(this._sharelink, 'click', this._openShareDialog.bind(this), { passive: true });
     this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
@@ -151,6 +151,10 @@ export default class UIManager {
    */
   get _sharelink() {
     return document.querySelector(this._selectors.sharelink);
+  }
+
+  get _shareDialog() {
+    return document.querySelector(this._selectors.shareDialog);
   }
 
   /**
@@ -334,6 +338,17 @@ export default class UIManager {
     this._loginButton.style.display = 'none';
     this._logoutButton.style.display = 'flex';
     this._sharelink.style.display = 'flex';
+  }
+
+  /**
+   * opens the share dialog
+   * 
+   * @private
+   * @function
+   */
+  _openShareDialog() {
+    this._shareDialog.showModal();
+    this._userMenuClose();
   }
 
   /**
