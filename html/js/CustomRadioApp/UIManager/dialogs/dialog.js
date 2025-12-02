@@ -306,6 +306,7 @@ function openAddDialog() {
 function copytoclipboard() {
   if (!window.user) return;
   try {
+    hapticFeedback();
     navigator.clipboard.writeText(document.querySelector('#linkshare-input').value);
     new Toast(t('clipboard_success'));
   } catch (err) {
@@ -345,6 +346,14 @@ function initDialogInteractions() {
   
   const copyLinkButton = document.querySelector(selectors.copyLink);
   em.add(copyLinkButton, 'click', copytoclipboard);
+
+  const facebookshare = document.querySelector('#facebookshare');
+  em.add(facebookshare, 'click',  _ => {
+    hapticFeedback();
+    const shareUrl = encodeURIComponent(document.querySelector('#linkshare-input').value);
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+    window.open(facebookUrl, '_blank', 'noopener');
+  });
 
   greetUser();
 }
