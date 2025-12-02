@@ -46,7 +46,7 @@ export default class UIManager {
     this._player.init();
     this._em.add(this._loginButton, 'click', this._loginRedirect.bind(this), { passive: true });
     this._em.add(this._logoutButton, 'click', this._logoutRedirect.bind(this), { passive: true });
-    this._em.add(this._sharelink, 'click', document.querySelector("#linkshare").showModal, { passive: true });
+    this._em.add(this._sharelink, 'click', _ => document.querySelector("#linkshare").showModal(), { passive: true });
     this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
