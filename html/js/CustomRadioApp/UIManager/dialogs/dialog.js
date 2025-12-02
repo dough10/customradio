@@ -9,6 +9,7 @@ import selectors from '../../selectors.js';
 import _OPTIONS from '../../utils/post_options.js';
 import updateCsrf from '../../utils/updateCsrf.js';
 import retry from '../../utils/retry.js';
+import t from '../../i18n/i18n.js';
 
 const em = new EventManager();
 
