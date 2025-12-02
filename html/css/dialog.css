@@ -65,6 +65,11 @@ dialog>.small-button.close {
   width: auto;
 }
 
+#linkshare-input {
+  pointer-events: none;
+  margin-bottom: 16px;
+}
+
 #matomo-opt-out>label {
   position: inherit;
   font-size: inherit;

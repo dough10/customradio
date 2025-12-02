@@ -38,7 +38,10 @@ module.exports = async (req, res) => {
       addCase2: t('addCase2'),
       stationURL: t('stationURL'),
       addButtonText: t('addButtonText'),
-      stations: t('stations')
+      stations: t('stations'),
+      shareDownloadLink: t('shareDownloadLink'),
+      linkshareInstructions: t('linkshareInstructions'),
+      copyLinkText: t('copyLinkText'),
     }));
   } catch(e) {
     log.error(`index render: ${e.message}`);

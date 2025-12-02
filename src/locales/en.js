@@ -29,5 +29,8 @@ module.exports = {
   stationsFail: error => `Error fetching stations: ${error}`,
   errorLog: 'error logged',
   errorLogFail: error => `Failed to log error: ${error}`,
-  genresFail: error => `Error getting genres: ${error}`
+  genresFail: error => `Error getting genres: ${error}`,
+  shareDownloadLink: 'Share Download Link',
+  linkshareInstructions: 'Copy and share the link below to allow others to download your custom radio.txt file:',
+  copyLinkText: 'Copy Link',
 };

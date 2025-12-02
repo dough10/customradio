@@ -46,7 +46,7 @@ export default class UIManager {
     this._player.init();
     this._em.add(this._loginButton, 'click', this._loginRedirect.bind(this), { passive: true });
     this._em.add(this._logoutButton, 'click', this._logoutRedirect.bind(this), { passive: true });
-    this._em.add(this._clipboardlink, 'click', this._copytoclipboard.bind(this), { passive: true });
+    this._em.add(this._sharelink, 'click', document.querySelector("#linkshare").showModal, { passive: true });
     this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
@@ -149,8 +149,8 @@ export default class UIManager {
    * @private
    * @returns {HTMLElement}
    */
-  get _clipboardlink() {
-    return document.querySelector(this._selectors.clipboardlink);
+  get _sharelink() {
+    return document.querySelector(this._selectors.sharelink);
   }
 
   /**
@@ -277,10 +277,8 @@ export default class UIManager {
   _copytoclipboard() {
     if (!window.user) return;
     try {
-      const url = new URL(`/downloadtxt/${window.user.id}`, window.location.origin);
-      navigator.clipboard.writeText(url.toString());
+      navigator.clipboard.writeText(document.querySelector('#linkshare-input').value);
       new Toast(t('clipboard_success'));
-      this._userMenuClose();
     } catch (err) {
       new Toast(t('clipboard_failure'));
       console.error(err);
@@ -311,10 +309,12 @@ export default class UIManager {
    */
   _loadUser() {
     this._logoutButton.style.display = 'none';
-    this._clipboardlink.style.display = 'none';
+    this._sharelink.style.display = 'none';
     
     const user = window.user;
     if (!user) return;
+
+    const downloadUrl = new URL(`/downloadtxt/${user.id}`, window.location.origin);
 
     const button = this._userMenuButton;
     if (!button) {
@@ -329,10 +329,11 @@ export default class UIManager {
 
     document.querySelector('.firstname').textContent = user.firstName;
     document.querySelector('.lastname').textContent = user.lastName;
+    document.querySelector('#linkshare-input').value = downloadUrl.toString();
 
     this._loginButton.style.display = 'none';
     this._logoutButton.style.display = 'flex';
-    this._clipboardlink.style.display = 'flex';
+    this._sharelink.style.display = 'flex';
   }
 
   /**

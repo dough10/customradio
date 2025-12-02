@@ -155,7 +155,7 @@ const selectors = {
   logout: 'nav>button[title="logout"]',
 
   /** @type {String} clipboard link button */
-  clipboardlink: 'nav>button[title="download link"]',
+  sharelink: 'nav>button[title="share"]',
 
   /** @type {String} nav button */
   userMenuButton: '#login',
