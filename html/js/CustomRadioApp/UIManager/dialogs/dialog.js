@@ -101,8 +101,6 @@ async function submitStation(ev) {
     if (typeof _paq !== 'undefined') {
       _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
     }
-  } finally {
-    submit.removeAttribute('disabled');
   }
 }
 
