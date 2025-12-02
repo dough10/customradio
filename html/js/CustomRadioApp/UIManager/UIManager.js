@@ -12,7 +12,6 @@ import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
 import news from '../utils/news.js';
-import Toast from '../Toast/Toast.js';
 
 /**
  * manages UI elements
@@ -271,23 +270,6 @@ export default class UIManager {
     if (!window.user) return;
     this._userMenuClose();
     window.location.href = `${window.location.origin}/auth/logout`;
-  }
-
-  /**
-   * copies the user download link to clipboard
-   * 
-   * @returns {void}
-   */
-  _copytoclipboard() {
-    if (!window.user) return;
-    try {
-      navigator.clipboard.writeText(document.querySelector('#linkshare-input').value);
-      new Toast(t('clipboard_success'));
-    } catch (err) {
-      new Toast(t('clipboard_failure'));
-      console.error(err);
-      return;
-    }
   }
 
   /**

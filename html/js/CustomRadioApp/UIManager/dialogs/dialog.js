@@ -296,6 +296,24 @@ function openAddDialog() {
   if (add) add.showModal();
 }
 
+
+/**
+ * copies the user download link to clipboard
+ * 
+ * @returns {void}
+ */
+function copytoclipboard() {
+  if (!window.user) return;
+  try {
+    navigator.clipboard.writeText(document.querySelector('#linkshare-input').value);
+    new Toast(t('clipboard_success'));
+  } catch (err) {
+    new Toast(t('clipboard_failure'));
+    console.error(err);
+    return;
+  }
+}
+
 /**
  * dialog interactions
  */
@@ -324,6 +342,9 @@ function initDialogInteractions() {
   const inputElement = document.querySelector(selectors.stationUrl);
   em.add(inputElement, 'input', toggleButtonActivity);
   
+  const copyLinkButton = document.querySelector(selectors.copyLink);
+  em.add(copyLinkButton, 'click', copytoclipboard);
+
   greetUser();
 }
 

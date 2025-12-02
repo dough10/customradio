@@ -160,6 +160,9 @@ const selectors = {
   /** @type {String} share dialog */
   shareDialog: '#linkshare',
 
+  /** @type {String} copy link button */
+  copyLink: '#copy-link',
+
   /** @type {String} nav button */
   userMenuButton: '#login',
 
