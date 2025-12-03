@@ -198,6 +198,13 @@ export default class UIManager {
     return this._header;
   }
 
+  /**
+   * querySelector for 'share link' element
+   * 
+   * @private
+   * @readonly
+   * @returns {HTMLElement}
+   */
   get _sharelink() {
     return document.querySelector(this._selectors.sharelink);
   }
@@ -344,8 +351,16 @@ export default class UIManager {
     this._logoutButton.style.display = 'flex';
   }
   
-  loadShareButton(length) {
-    if (length) this._sharelink.style.display = 'flex';
+  /**
+   * displays the share button if user is logged in and has selected stations
+   * 
+   * @public
+   * @function
+   * 
+   * @return {void}
+   */
+  loadShareButton() {
+    this._sharelink.style.display = 'flex';
   }
 
   /**
