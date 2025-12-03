@@ -300,7 +300,10 @@ export default class UIManager {
     const user = window.user;
     if (!user) return;
 
-    const downloadUrl = new URL(`/txt/${user.id.replace('user_', '')}`, window.location.origin);
+    const downloadUrl = new URL(
+      `/txt/${user.id.replace('user_', '')}`, 
+      window.location.origin
+    ).toString();
 
     const button = this._userMenuButton;
     if (!button) {
@@ -308,14 +311,28 @@ export default class UIManager {
       return;
     }
 
-    const small = this._userImage(user, 24)
-    const big = this._userImage(user, 70)
+    const small = this._userImage(user, 24);
+    const big = this._userImage(user, 70);
+
     document.querySelector(this._selectors.userAvatar).replaceChildren(big);
     button.replaceChildren(small);
 
     document.querySelector('.firstname').textContent = user.firstName;
     document.querySelector('.lastname').textContent = user.lastName;
-    document.querySelector('#linkshare-input').value = downloadUrl.toString();
+
+    const input = document.querySelector('#linkshare-input');
+    if (input) {
+      input.value = downloadUrl;
+      Object.freeze(input);
+      Object.freeze(input.__proto__);
+  
+      input.addEventListener("input", () => {
+        if (input.value !== downloadUrl) {
+          console.warn("Downloadurl value was tampered with!");
+          input.value = downloadUrl;
+        }
+      });
+    }
 
     this._loginButton.style.display = 'none';
     this._logoutButton.style.display = 'flex';
