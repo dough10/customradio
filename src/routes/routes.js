@@ -383,7 +383,7 @@ module.exports = async (app, register) => {
   /**
    * Endpoint to download user stations as a TXT file.
    */
-  app.get('/downloadtxt/:uid', downloadtxt);
+  app.get('/txt/:uid', downloadtxt);
 
   /**
    * Catch-all route for handling 404 errors.

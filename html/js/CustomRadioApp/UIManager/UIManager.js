@@ -300,7 +300,7 @@ export default class UIManager {
     const user = window.user;
     if (!user) return;
 
-    const downloadUrl = new URL(`/downloadtxt/${user.id}`, window.location.origin);
+    const downloadUrl = new URL(`/txt/${user.id}`, window.location.origin);
 
     const button = this._userMenuButton;
     if (!button) {
