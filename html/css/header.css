@@ -73,7 +73,7 @@ header {
     opacity: 0;
     display: none;
   }
-  .form-group {
+  header>.form-group {
     min-width: 16em;
     transform: translateX(20px);
   }
