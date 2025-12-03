@@ -103,3 +103,10 @@ dialog>.small-button.close {
 #greeting>p>a {
   margin-left: 2px;
 }
+
+#social-media {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
