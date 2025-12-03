@@ -325,7 +325,7 @@ async function copytoclipboard() {
     new Toast(failureMessage);
     console.error(err);
   } finally {
-    await sleep(2000);
+    await sleep(3000);
     messageElement.textContent = '';
   }
 }
