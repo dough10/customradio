@@ -303,18 +303,30 @@ function openAddDialog() {
  */
 async function copytoclipboard() {
   if (!window.user) return;
+
+  const linkInput = document.querySelector('#linkshare-input');
+  const messageElement = document.querySelector('#linkshare-message');
+  
+  if (!linkInput || !messageElement) {
+    console.error('Required clipboard elements not found');
+    return;
+  }
+
+  const successMessage = t('clipboard_success');
+  const failureMessage = t('clipboard_failure');
+
   try {
     hapticFeedback();
-    navigator.clipboard.writeText(document.querySelector('#linkshare-input').value);
-    document.querySelector('#linkshare-message').textContent = t('clipboard_success');
-    new Toast(t('clipboard_success'));
+    await navigator.clipboard.writeText(linkInput.value);
+    messageElement.textContent = successMessage;
+    new Toast(successMessage);
   } catch (err) {
-    document.querySelector('#linkshare-message').textContent = t('clipboard_failure');
-    new Toast(t('clipboard_failure'));
+    messageElement.textContent = failureMessage;
+    new Toast(failureMessage);
     console.error(err);
   } finally {
     await sleep(2000);
-    document.querySelector('#linkshare-message').textContent = '';
+    messageElement.textContent = '';
   }
 }
 
