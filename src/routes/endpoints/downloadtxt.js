@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
   try {
     sql = new UserData('data/customradio.db');
   
-    const stations = await sql.userStations(uid);
+    const stations = await sql.userStations(`user_${uid}`);
     if (!stations || stations.length === 0) {
       res.status(404).send('No stations found for the specified user ID');
       return;
@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
     res.send(`${timestamp(req)}\n${stations.map(mapToTxt).join('\n')}`);
   }
   catch(e) {
-    log.error(`/downloadtxt/${uid} endpoint: ${e.message}`);
+    log.error(`/txt/${uid} endpoint: ${e.message}`);
     res.status(500).send('Internal Server Error');
     return;
   }
