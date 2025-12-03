@@ -308,12 +308,13 @@ async function copytoclipboard() {
     navigator.clipboard.writeText(document.querySelector('#linkshare-input').value);
     document.querySelector('#linkshare-message').textContent = t('clipboard_success');
     new Toast(t('clipboard_success'));
-    await sleep(2000);
-    document.querySelector('#linkshare-message').textContent = '';
   } catch (err) {
+    document.querySelector('#linkshare-message').textContent = t('clipboard_failure');
     new Toast(t('clipboard_failure'));
     console.error(err);
-    return;
+  } finally {
+    await sleep(2000);
+    document.querySelector('#linkshare-message').textContent = '';
   }
 }
 
