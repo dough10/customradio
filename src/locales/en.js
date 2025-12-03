@@ -30,8 +30,8 @@ module.exports = {
   errorLog: 'error logged',
   errorLogFail: error => `Failed to log error: ${error}`,
   genresFail: error => `Error getting genres: ${error}`,
-  shareDownloadLink: 'Share Download Link',
-  linkshareInstructions: 'Copy and share the link below to allow others to download your custom radio.txt file:',
-  copyLinkText: 'Copy Link',
+  shareDownloadLink: 'Share Link',
+  linkshareInstructions: 'Share the link below to allow others to download your custom radio.txt file:',
+  copyLinkText: 'Copy URL',
   shareOnSocialMedia: 'Share on Social Media'
 };
