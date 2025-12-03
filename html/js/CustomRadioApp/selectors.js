@@ -160,6 +160,12 @@ const selectors = {
   /** @type {String} share dialog */
   shareDialog: '#linkshare',
 
+  /** @type {String} share link input */
+  shareInput: '#linkshare-input',
+
+  /** @type {String} share message */
+  shareMessage: '#linkshare-message',
+
   /** @type {String} copy link button */
   copyLink: '#copy-link',
 
@@ -171,6 +177,9 @@ const selectors = {
 
   /** @type {String} user avatar */
   userAvatar: '.avatar-wrapper',
+
+  /** @type {String} facebook share button */
+  fbShare: '#facebookshare',
 };
 
 export default selectors;

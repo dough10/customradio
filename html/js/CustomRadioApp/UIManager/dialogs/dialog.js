@@ -304,8 +304,8 @@ function openAddDialog() {
 async function copytoclipboard() {
   if (!window.user) return;
 
-  const linkInput = document.querySelector('#linkshare-input');
-  const messageElement = document.querySelector('#linkshare-message');
+  const linkInput = document.querySelector(selectors.shareInput);
+  const messageElement = document.querySelector(selectors.shareMessage);
   
   if (!linkInput || !messageElement) {
     console.error('Required clipboard elements not found');
@@ -361,10 +361,10 @@ function initDialogInteractions() {
   const copyLinkButton = document.querySelector(selectors.copyLink);
   em.add(copyLinkButton, 'click', copytoclipboard);
 
-  const facebookshare = document.querySelector('#facebookshare');
+  const facebookshare = document.querySelector(selectors.fbShare);
   em.add(facebookshare, 'click',  _ => {
     hapticFeedback();
-    const shareUrl = encodeURIComponent(document.querySelector('#linkshare-input').value);
+    const shareUrl = encodeURIComponent(document.querySelector(selectors.shareInput).value);
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
     window.open(facebookUrl, '_blank', 'noopener');
   });
