@@ -45,7 +45,6 @@ export default class UIManager {
     this._player.init();
     this._em.add(this._loginButton, 'click', this._loginRedirect.bind(this), { passive: true });
     this._em.add(this._logoutButton, 'click', this._logoutRedirect.bind(this), { passive: true });
-    this._em.add(this._sharelink, 'click', this._openShareDialog.bind(this), { passive: true });
     this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
     this._em.add(this._filter, 'change', onFilterChange, { passive: true });
     this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
@@ -55,6 +54,9 @@ export default class UIManager {
     }, { passive: true });
     this._em.add(this._toTop, 'click', this._toTopHandler.bind(this), { passive: true });
     this._em.add(this._downloadButton, 'click', this._dl, { passive: true });
+    document.querySelectorAll('.menu-button').forEach(btn => {
+      this._em.add(btn, 'click', this._userMenuClose.bind(this), { passive: true });
+    });
   }
 
   /**
@@ -140,20 +142,6 @@ export default class UIManager {
    */
   get _logoutButton() {
     return document.querySelector(this._selectors.logout);
-  } 
-
-  /**
-   * querySelector for 'clipboard link' button
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _sharelink() {
-    return document.querySelector(this._selectors.sharelink);
-  }
-
-  get _shareDialog() {
-    return document.querySelector(this._selectors.shareDialog);
   }
 
   /**
@@ -210,6 +198,10 @@ export default class UIManager {
     return this._header;
   }
 
+  get _sharelink() {
+    return document.querySelector(this._selectors.sharelink);
+  }
+
   /**
    * Closes the user menu
    */
@@ -258,7 +250,6 @@ export default class UIManager {
   _loginRedirect() {
     if (window.user) return;    
     try {
-      this._userMenuClose();
       window.location.href = new URL(
         '/auth',
         window.location.origin
@@ -277,7 +268,6 @@ export default class UIManager {
   _logoutRedirect() {
     if (!window.user) return;
     try {
-      this._userMenuClose();
       window.location.href = new URL(
         '/auth/logout',
         window.location.origin
@@ -352,18 +342,10 @@ export default class UIManager {
 
     this._loginButton.style.display = 'none';
     this._logoutButton.style.display = 'flex';
-    this._sharelink.style.display = 'flex';
   }
-
-  /**
-   * opens the share dialog
-   * 
-   * @private
-   * @function
-   */
-  _openShareDialog() {
-    this._shareDialog.showModal();
-    this._userMenuClose();
+  
+  loadShareButton(length) {
+    if (length) this._sharelink.style.display = 'flex';
   }
 
   /**
