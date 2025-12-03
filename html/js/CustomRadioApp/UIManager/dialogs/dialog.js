@@ -50,6 +50,21 @@ class ShareDialog {
     window.open(facebookUrl, '_blank', 'noopener');
   }
 
+  /**
+   * shares the user download link to twitter
+   * 
+   * @returns {void}
+   */
+  _shareToTwitter() {
+    hapticFeedback();
+    const shareUrl = encodeURIComponent(document.querySelector(selectors.shareInput).value);
+    const twitterUrl = "https://twitter.com/intent/tweet?" + new URLSearchParams({
+      url: shareUrl,
+      text: "My radio.txt download link:",
+      hashtags: "sharing,radiotxt,customradio"
+    }).toString();
+    window.open(twitterUrl, '_blank', 'noopener');
+  }
 
   /**
    * shares the user download link to facebook
@@ -327,7 +342,7 @@ class Dialogs {
     const dialogs = document.querySelectorAll('dialog');
     dialogs.forEach(dialog => em.add(dialog, 'click', this._wobbleDialog.bind(this)));
     
-    // close dialogs
+    // X closes dialogs
     document.querySelectorAll(selectors.dialogClose).forEach(el => {
       em.add(el, 'click', _ => this._closeDialog(el));
     });
