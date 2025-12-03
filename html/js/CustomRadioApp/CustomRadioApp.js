@@ -82,6 +82,9 @@ export default class CustomRadioApp {
     const selected = await this._stationManager.getSelectedStations(loadLocal, container);
     const stations = await this._stationManager.fetchStations(userInput);
     const list = this._stationManager.filterStations(selected, stations);
+
+    if (loadLocal) this._uiManager.loadShareButton(selected.length);
+
     return {
       stations: [...selected, ...list],
       selected: selected.length,
