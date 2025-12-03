@@ -110,3 +110,11 @@ dialog>.small-button.close {
   justify-content: center;
   align-items: center;
 }
+
+#linkshare-message {
+  margin: 8px 0;
+  min-height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -301,12 +301,15 @@ function openAddDialog() {
  * 
  * @returns {void}
  */
-function copytoclipboard() {
+async function copytoclipboard() {
   if (!window.user) return;
   try {
     hapticFeedback();
     navigator.clipboard.writeText(document.querySelector('#linkshare-input').value);
+    document.querySelector('#linkshare-message').textContent = t('clipboard_success');
     new Toast(t('clipboard_success'));
+    await sleep(2000);
+    document.querySelector('#linkshare-message').textContent = '';
   } catch (err) {
     new Toast(t('clipboard_failure'));
     console.error(err);
