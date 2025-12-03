@@ -256,9 +256,17 @@ export default class UIManager {
    * @returns {void}
    */
   _loginRedirect() {
-    if (window.user) return;
-    this._userMenuClose();
-    window.location.href = `${window.location.origin}/auth`;
+    if (window.user) return;    
+    try {
+      this._userMenuClose();
+      window.location.href = new URL(
+        '/auth',
+        window.location.origin
+      ).toString();
+    } catch (e) {
+      console.error('UIManager: login redirect failed', e);
+      return;
+    }
   }
 
   /**
@@ -268,8 +276,16 @@ export default class UIManager {
    */
   _logoutRedirect() {
     if (!window.user) return;
-    this._userMenuClose();
-    window.location.href = `${window.location.origin}/auth/logout`;
+    try {
+      this._userMenuClose();
+      window.location.href = new URL(
+        '/auth/logout',
+        window.location.origin
+      ).toString();
+    } catch (e) {
+      console.error('UIManager: logout redirect failed', e);
+      return;
+    }
   }
 
   /**
