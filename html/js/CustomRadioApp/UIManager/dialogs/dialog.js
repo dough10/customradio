@@ -12,6 +12,7 @@ import retry from '../../utils/retry.js';
 import {t} from '../../utils/i18n.js';
 
 const em = new EventManager();
+const MAX_CSRF_RETRIES = 1;
 
 /**
  * Dialog for sharing user download link
@@ -258,7 +259,7 @@ class AddStreamDialog {
    * 
    * @throws {Error} - Throws an error if the fetch request fails.
    */
-  async _submitStation(ev) {
+  async _submitStation(ev, retryCount = 0) {
     const SUBMISSION_RESET_TIME = 2000;
 
     ev.preventDefault();
@@ -278,18 +279,22 @@ class AddStreamDialog {
     try {
       const post_options = _OPTIONS({url});
       const response = await retry(_ => fetch('/add', post_options));
-      
+
       if ([403, 419, 440].includes(response?.status)) {
-        const success = await updateCsrf();
-        if (success) await this._submitStation(ev);
+        if (retryCount < MAX_CSRF_RETRIES) {
+          const success = await updateCsrf();
+          if (success) await this._submitStation(ev, retryCount + 1);
+        } else {
+          responseElement.textContent = 'Authentication error. Please try again.';
+        }
         return;
       }
 
       if (!response) throw Error('network error adding Station');
-      
+
       const result = await response.json();
       const message = result.message;
-      
+
       responseElement.textContent = message;
       if (message.length) new Toast(message);
       if (typeof _paq !== 'undefined') {
@@ -305,6 +310,8 @@ class AddStreamDialog {
       if (typeof _paq !== 'undefined') {
         _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
       }
+    } finally {
+      submit.removeAttribute('disabled');
     }
   }
   
