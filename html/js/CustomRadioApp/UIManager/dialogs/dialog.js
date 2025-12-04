@@ -31,6 +31,12 @@ class ShareDialog {
     
     // share to twitter
     em.add(this._twittershare, 'click',  this._shareToTwitter.bind(this));
+
+    // share to email
+    em.add(this._emailshare, 'click',  this._shareToEmail.bind(this));
+
+    // share to sms
+    em.add(this._smsshare, 'click',  this._shareToSMS.bind(this));
   }
 
   /**
@@ -76,6 +82,24 @@ class ShareDialog {
    */
   get _twittershare() {
     return document.querySelector(selectors.twitterShare);
+  }
+
+  /**
+   * gets email share button
+   * 
+   * @returns {HTMLElement} email share button
+   */
+  get _emailshare() {
+    return document.querySelector(selectors.emailShare);
+  }
+
+  /**
+   * gets sms share button
+   * 
+   * @returns {HTMLElement} sms share button
+   */
+  get _smsshare() {
+    return document.querySelector(selectors.smsShare);
   }
 
   /**
@@ -127,6 +151,30 @@ class ShareDialog {
   }
 
   /**
+   * shares the user download link to sms
+   * 
+   * @returns {void}
+   */
+  _shareToSMS() {
+    hapticFeedback();
+    const body = encodeURIComponent(`My radio.txt download link: ${this._shareURL}`);
+    // iOS/Android vary; use generic sms: URI
+    window.open(`sms:?&body=${body}`, '_self');
+  }
+
+  /**
+   * shares the user download link to email
+   * 
+   * @returns {void}
+   */
+  _shareToEmail() {
+    hapticFeedback();
+    const subject = encodeURIComponent('My radio.txt download link');
+    const body = encodeURIComponent(this._shareURL);
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
+  }
+
+  /**
    * shares the user download link to facebook
    * 
    * @returns {void}
@@ -134,10 +182,9 @@ class ShareDialog {
   async _copytoclipboard() {
     if (!window.user) return;
 
-    const linkInput = document.querySelector(selectors.shareInput);
     const messageElement = document.querySelector(selectors.shareMessage);
     
-    if (!linkInput || !messageElement) {
+    if (!messageElement) {
       console.error('Required clipboard elements not found');
       return;
     }
@@ -434,17 +481,34 @@ class AddStreamDialog {
 class Dialogs {
   constructor() {
     // animation telling user to click the x
-    const dialogs = document.querySelectorAll('dialog');
-    dialogs.forEach(dialog => em.add(dialog, 'click', this._wobbleDialog.bind(this)));
+    this._dialogList.forEach(dialog => em.add(dialog, 'click', this._wobbleDialog.bind(this)));
     
     // X closes dialogs
-    document.querySelectorAll(selectors.dialogClose).forEach(el => {
+    this._dialogCloseButtons.forEach(el => {
       em.add(el, 'click', _ => this._closeDialog(el));
     });
 
     new InfoDialog();
     new AddStreamDialog();
     new ShareDialog();
+  }
+
+  /**
+   * all dialogs in the document
+   * 
+   * @returns {NodeList} list of dialogs
+   */
+  _dialogList() {
+    return document.querySelectorAll('dialog');
+  }
+
+  /**
+   * all dialog close buttons in the document
+   * 
+   * @returns {NodeList} list of close buttons
+   */
+  _dialogCloseButtons() {
+    return document.querySelectorAll(selectors.dialogClose);
   }
 
   /**
