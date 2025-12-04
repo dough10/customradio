@@ -159,7 +159,7 @@ class ShareDialog {
     hapticFeedback();
     const body = encodeURIComponent(`My radio.txt download link: ${this._shareURL}`);
     // iOS/Android vary; use generic sms: URI
-    window.open(`sms:?&body=${body}`, '_self');
+    window.open(`sms:?&body=${body}`, '_blank', 'noopener');
   }
 
   /**
@@ -171,7 +171,7 @@ class ShareDialog {
     hapticFeedback();
     const subject = encodeURIComponent('My radio.txt download link');
     const body = encodeURIComponent(this._shareURL);
-    window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank', 'noopener');
   }
 
   /**
