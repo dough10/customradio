@@ -161,7 +161,7 @@ const selectors = {
   shareDialog: '#linkshare',
 
   /** @type {String} email share button */
-  emailshare: '#emailshare',
+  emailShare: '#emailshare',
 
   /** @type {String} sms share button */
   smsShare: '#smsshare',
