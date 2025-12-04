@@ -312,7 +312,7 @@ class AddStreamDialog {
    * 
    * @returns {HTMLElement} station submit form
    */
-  get _stattionSubmitForm() {
+  get _stationSubmitForm() {
     return document.querySelector(selectors.stationSubmitForm);
   }
 
