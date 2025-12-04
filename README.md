@@ -1,4 +1,4 @@
-# customradio V:1.12.8
+# customradio V:1.12.9
 
 An online radio station browser with the ability to create a radio.txt file for use in Hiby digital audio players.
 
