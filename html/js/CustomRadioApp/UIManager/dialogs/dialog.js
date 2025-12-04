@@ -11,15 +11,17 @@ import updateCsrf from '../../utils/updateCsrf.js';
 import retry from '../../utils/retry.js';
 import {t} from '../../utils/i18n.js';
 
-const em = new EventManager();
 const MAX_CSRF_RETRIES = 1;
+const SUBMISSION_RESET_TIME = 2000;
+
+const em = new EventManager();
 
 /**
  * Dialog for sharing user download link
  */
 class ShareDialog {
   constructor() {
-    em.add(document.querySelector(selectors.sharelink), 'click', this._open.bind(this), { passive: true });
+    em.add(document.querySelector(selectors.sharelink), 'click', this._open.bind(this));
     
     // copy link to clipboard
     const copyLinkButton = document.querySelector(selectors.copyLink);
@@ -260,8 +262,6 @@ class AddStreamDialog {
    * @throws {Error} - Throws an error if the fetch request fails.
    */
   async _submitStation(ev, retryCount = 0) {
-    const SUBMISSION_RESET_TIME = 2000;
-
     ev.preventDefault();
 
     const submit = document.querySelector(selectors.stationSubmit);
