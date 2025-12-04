@@ -21,19 +21,71 @@ const em = new EventManager();
  */
 class ShareDialog {
   constructor() {
-    em.add(document.querySelector(selectors.sharelink), 'click', this._open.bind(this));
+    em.add(this._shareLink, 'click', this._open.bind(this));
     
     // copy link to clipboard
-    const copyLinkButton = document.querySelector(selectors.copyLink);
-    em.add(copyLinkButton, 'click', this._copytoclipboard.bind(this));
+    em.add(this._copyLinkButton, 'click', this._copytoclipboard.bind(this));
 
     // share to facebook
-    const facebookshare = document.querySelector(selectors.fbShare);
-    em.add(facebookshare, 'click',  this._shareToFacebook.bind(this));
+    em.add(this._facebookshare, 'click',  this._shareToFacebook.bind(this));
     
     // share to twitter
-    const twittershare = document.querySelector(selectors.twitterShare);
-    em.add(twittershare, 'click',  this._shareToTwitter.bind(this));
+    em.add(this._twittershare, 'click',  this._shareToTwitter.bind(this));
+  }
+
+  /**
+   * gets share dialog
+   * 
+   * @returns {HTMLElement} share dialog
+   */
+  get _dialog() {
+    return document.querySelector(selectors.shareDialog);
+  }
+
+  /**
+   * gets share link button
+   * 
+   * @returns {HTMLElement} share link button
+   */
+  get _shareLink() {
+    return document.querySelector(selectors.sharelink);
+  }
+
+  /**
+   * gets copy link button
+   * 
+   * @returns {HTMLElement} copy link button
+   */
+  get _copyLinkButton() {
+    return document.querySelector(selectors.copyLink);
+  }
+
+  /**
+   * gets facebook share button
+   * 
+   * @returns {HTMLElement} facebook share button
+   */
+  get _facebookshare() {
+    return document.querySelector(selectors.fbShare);
+  }
+
+  /**
+   * gets twitter share button
+   * 
+   * @returns {HTMLElement} twitter share button
+   */
+  get _twittershare() {
+    return document.querySelector(selectors.twitterShare);
+  }
+
+  /**
+   * gets the share URL from input field
+   * 
+   * @returns {String} share URL
+   */
+  get _shareURL() {
+    const url = new URL(`/txt/${window.user.id.replace('user_', '')}`, window.location.origin);
+    return url.toString();
   }
 
   /**
@@ -42,7 +94,8 @@ class ShareDialog {
    * @returns {void}
    */
   _open() {
-    document.querySelector(selectors.shareDialog).showModal();
+    if (!window.user) return;
+    this._dialog.showModal();
   }
 
   /**
@@ -52,7 +105,7 @@ class ShareDialog {
    */
   _shareToFacebook() {
     hapticFeedback();
-    const shareUrl = encodeURIComponent(document.querySelector(selectors.shareInput).value);
+    const shareUrl = encodeURIComponent(this._shareURL);
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
     window.open(facebookUrl, '_blank', 'noopener');
   }
@@ -64,8 +117,8 @@ class ShareDialog {
    */
   _shareToTwitter() {
     hapticFeedback();
-    const shareUrl = encodeURIComponent(document.querySelector(selectors.shareInput).value);
-    const twitterUrl = "https://twitter.com/intent/tweet?" + new URLSearchParams({
+    const shareUrl = encodeURIComponent(this._shareURL);
+    const twitterUrl = "https://x.com/intent/post?" + new URLSearchParams({
       url: shareUrl,
       text: "My radio.txt download link:",
       hashtags: "sharing,radiotxt,customradio"
@@ -94,7 +147,7 @@ class ShareDialog {
 
     try {
       hapticFeedback();
-      await navigator.clipboard.writeText(linkInput.value);
+      await navigator.clipboard.writeText(this._shareURL);
       messageElement.textContent = successMessage;
       new Toast(successMessage);
     } catch (err) {
@@ -413,7 +466,7 @@ class Dialogs {
 }
 
 /**
- * shows a greeting dialog to the user
+ * shows a greeting dialog to the user, removes it if they have seen it before
  * 
  * @returns {void}
  */
@@ -431,7 +484,7 @@ function greetUser() {
   greetingElement.showModal();
 
   // remove after closing
-  const gClose = em.add(greetingElement, 'transitionend', () => {
+  em.add(greetingElement, 'transitionend', () => {
     if (!greetingElement.hasAttribute('open')) {
       em.remove(gClose);
       greetingElement.remove();
