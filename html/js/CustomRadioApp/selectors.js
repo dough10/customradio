@@ -180,6 +180,9 @@ const selectors = {
 
   /** @type {String} facebook share button */
   fbShare: '#facebookshare',
+
+  /** @type {String} twitter share button */
+  twitterShare: '#twittershare',
 };
 
 export default selectors;

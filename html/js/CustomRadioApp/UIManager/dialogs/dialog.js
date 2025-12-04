@@ -29,7 +29,11 @@ class ShareDialog {
 
     // share to facebook
     const facebookshare = document.querySelector(selectors.fbShare);
-    em.add(facebookshare, 'click',  this._shareToFacebook.bind(this));    
+    em.add(facebookshare, 'click',  this._shareToFacebook.bind(this));
+    
+    // share to twitter
+    const twittershare = document.querySelector(selectors.twitterShare);
+    em.add(twittershare, 'click',  this._shareToTwitter.bind(this));
   }
 
   /**
