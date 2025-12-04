@@ -481,34 +481,16 @@ class AddStreamDialog {
 class Dialogs {
   constructor() {
     // animation telling user to click the x
-    this._dialogList.forEach(dialog => em.add(dialog, 'click', this._wobbleDialog.bind(this)));
+    document.querySelectorAll('dialog').forEach(dialog => em.add(dialog, 'click', this._wobbleDialog.bind(this)));
     
     // X closes dialogs
-    this._dialogCloseButtons.forEach(el => {
+    document.querySelectorAll(selectors.dialogClose).forEach(el => {
       em.add(el, 'click', _ => this._closeDialog(el));
     });
 
     new InfoDialog();
     new AddStreamDialog();
     new ShareDialog();
-  }
-
-  /**
-   * all dialogs in the document
-   * 
-   * @returns {NodeList} list of dialogs
-   */
-  _dialogList() {
-    return document.querySelectorAll('dialog');
-  }
-
-  /**
-   * all dialog close buttons in the document
-   * 
-   * @returns {NodeList} list of close buttons
-   */
-  _dialogCloseButtons() {
-    return document.querySelectorAll(selectors.dialogClose);
   }
 
   /**
