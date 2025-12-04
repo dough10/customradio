@@ -166,7 +166,16 @@ class ShareDialog {
  */
 class InfoDialog {
   constructor() {
-    em.add(document.querySelector(selectors.infoButton), 'click', this._info.bind(this));
+    em.add(this._infoButton, 'click', this._info.bind(this));
+  }
+
+  /**
+   * gets info button
+   * 
+   * @returns {HTMLElement} info button
+   */
+  get _infoButton() {
+    return document.querySelector(selectors.infoButton);
   }
 
   /**
@@ -280,16 +289,40 @@ class InfoDialog {
 class AddStreamDialog {
   constructor() {
     // opens add  stream dialog
-    const addButton = document.querySelector(selectors.add);
-    em.add(addButton, 'click', this._openAddDialog.bind(this));
+    em.add(this._addButton, 'click', this._openAddDialog.bind(this));
     
     // submit button for add stream dialog form submission
-    const stationSubmitForm = document.querySelector(selectors.stationSubmitForm);
-    em.add(stationSubmitForm, 'submit', this._submitStation.bind(this));
+    em.add(this._stationSubmitForm, 'submit', this._submitStation.bind(this));
     
     // toggle submit button activity on Valid URL input
-    const inputElement = document.querySelector(selectors.stationUrl);
-    em.add(inputElement, 'input', this._toggleButtonActivity.bind(this));
+    em.add(this._inputElement, 'input', this._toggleButtonActivity.bind(this));
+  }
+
+  /**
+   * gets add stream button
+   * 
+   * @returns {HTMLElement} add stream button
+   */
+  get _addButton() {
+    return document.querySelector(selectors.add);
+  }
+
+  /**
+   * gets station submit form
+   * 
+   * @returns {HTMLElement} station submit form
+   */
+  get _stattionSubmitForm() {
+    return document.querySelector(selectors.stationSubmitForm);
+  }
+
+  /**
+   * gets station URL input element
+   * 
+   * @returns {HTMLElement} station URL input element
+   */
+  get _inputElement() {
+    return document.querySelector(selectors.stationUrl);
   }
 
   /**
