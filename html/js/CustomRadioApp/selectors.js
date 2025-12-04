@@ -38,6 +38,23 @@
  * @property {String} smallDialogCloseButton - The small dialog close button.
  * @property {String} dialogCloseButton - The dialog close button.
  * @property {String} dialogClose - All dialog close buttons.
+ * @property {String} changelog - The changelog.
+ * @property {String} login - The login button.
+ * @property {String} logout - The logout button.
+ * @property {String} sharelink - The clipboard link button.
+ * @property {String} shareDialog - The share dialog.
+ * @property {String} emailShare - The email share button.
+ * @property {String} smsShare - The SMS share button.
+ * @property {String} shareInput - The share link input.
+ * @property {String} shareMessage - The share message.
+ * @property {String} copyLink - The copy link button.
+ * @property {String} userMenuButton - The nav button.
+ * @property {String} userMenu - The user menu.
+ * @property {String} userAvatar - The user avatar.
+ * @property {String} fbShare - The Facebook share button.
+ * @property {String} twitterShare - The Twitter share button.
+ * 
+ * @module Selectors
  */
 const selectors = {
   /** @type {String} header element */
