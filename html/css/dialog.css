@@ -104,6 +104,11 @@ dialog>.small-button.close {
   margin-left: 2px;
 }
 
+#linkshare>p {
+  font-size: 14px;
+  color: var(--disabled-color);
+}
+
 #social-media {
   display: flex;
   flex-direction: column;
