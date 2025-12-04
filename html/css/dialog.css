@@ -105,7 +105,7 @@ dialog>.small-button.close {
 }
 
 #linkshare>p {
-  color: var(--disabled-color);
+  text-align: center;
 }
 
 #linkshare-message {
