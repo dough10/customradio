@@ -113,6 +113,15 @@ class ShareDialog {
   }
 
   /**
+   * gets share message element
+   * 
+   * @returns {HTMLElement} share message element
+   */
+  get _shareMessage() {
+    return document.querySelector(selectors.shareMessage);
+  }
+
+  /**
    * opens the share dialog
    * 
    * @returns {void}
@@ -182,7 +191,7 @@ class ShareDialog {
   async _copytoclipboard() {
     if (!window.user) return;
 
-    const messageElement = document.querySelector(selectors.shareMessage);
+    const messageElement = this._shareMessage;
     
     if (!messageElement) {
       console.error('Required clipboard elements not found');
@@ -202,7 +211,7 @@ class ShareDialog {
       new Toast(failureMessage);
       console.error(err);
     } finally {
-      await sleep(3000);
+      await sleep(SUBMISSION_RESET_TIME);
       messageElement.textContent = '';
     }
   }
@@ -223,6 +232,15 @@ class InfoDialog {
    */
   get _infoButton() {
     return document.querySelector(selectors.infoButton);
+  }
+
+  /**
+   * gets info dialog
+   * 
+   * @returns {HTMLElement} info dialog
+   */
+  get _infoDialog() {
+    return document.querySelector(selectors.infoDialog);
   }
 
   /**
@@ -297,7 +315,7 @@ class InfoDialog {
    * @returns {void}
    */
   async _info() {
-    const dialog = document.querySelector(selectors.infoDialog);
+    const dialog = this._infoDialog;
     const depDiv = dialog.querySelector(selectors.dependencies);
     const changelog = dialog.querySelector(selectors.changelog);
 
@@ -437,16 +455,16 @@ class AddStreamDialog {
       if (typeof _paq !== 'undefined') {
         _paq.push(['trackEvent', 'URL Submission', url, message]);
       }
-
-      await sleep(SUBMISSION_RESET_TIME);
-      stationUrlElement.value = '';
-      responseElement.innerText = '';
     } catch (e) {
       responseElement.textContent = 'An error occurred!';
       console.error(`Error: ${e.message}`);
       if (typeof _paq !== 'undefined') {
         _paq.push(['trackEvent', 'Error', e.message || 'Could not get Message']);
       }
+    } finally {
+      await sleep(SUBMISSION_RESET_TIME);
+      stationUrlElement.value = '';
+      responseElement.innerText = '';
     }
   }
   
