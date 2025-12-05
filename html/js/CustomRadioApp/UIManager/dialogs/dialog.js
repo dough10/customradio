@@ -10,6 +10,7 @@ import _OPTIONS from '../../utils/post_options.js';
 import updateCsrf from '../../utils/updateCsrf.js';
 import retry from '../../utils/retry.js';
 import {t} from '../../utils/i18n.js';
+import txtDownloadUrl from '../../utils/txtDownloadUrl.js';
 
 const MAX_CSRF_RETRIES = 1;
 const SUBMISSION_RESET_TIME = 2000;
@@ -108,8 +109,7 @@ class ShareDialog {
    * @returns {String} share URL
    */
   get _shareURL() {
-    const url = new URL(`/txt/${window.user.id.replace('user_', '')}`, window.location.origin);
-    return url.toString();
+    return txtDownloadUrl();
   }
 
   /**

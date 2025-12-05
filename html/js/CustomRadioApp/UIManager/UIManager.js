@@ -12,6 +12,7 @@ import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
 import news from '../utils/news.js';
+import txtDownloadUrl from '../utils/txtDownloadUrl.js';
 
 /**
  * manages UI elements
@@ -313,10 +314,7 @@ export default class UIManager {
     const user = window.user;
     if (!user) return;
 
-    const downloadUrl = new URL(
-      `/txt/${user.id.replace('user_', '')}`, 
-      window.location.origin
-    ).toString();
+    const downloadUrl = txtDownloadUrl();
 
     const button = this._userMenuButton;
     if (!button) {
@@ -341,7 +339,6 @@ export default class UIManager {
   
       input.addEventListener("input", () => {
         if (input.value !== downloadUrl) {
-          console.warn("Downloadurl value was tampered with!");
           input.value = downloadUrl;
         }
       });
