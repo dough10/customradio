@@ -137,6 +137,7 @@ class ShareDialog {
    * @returns {void}
    */
   _shareToFacebook() {
+    if (!window.user) return;
     hapticFeedback();
     const shareUrl = encodeURIComponent(this._shareURL);
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
@@ -149,6 +150,7 @@ class ShareDialog {
    * @returns {void}
    */
   _shareToTwitter() {
+    if (!window.user) return;
     hapticFeedback();
     const shareUrl = encodeURIComponent(this._shareURL);
     const twitterUrl = "https://x.com/intent/post?" + new URLSearchParams({
@@ -165,6 +167,7 @@ class ShareDialog {
    * @returns {void}
    */
   _shareToSMS() {
+    if (!window.user) return;
     hapticFeedback();
     const body = encodeURIComponent(`My radio.txt download link: ${this._shareURL}`);
     // iOS/Android vary; use generic sms: URI
@@ -177,6 +180,7 @@ class ShareDialog {
    * @returns {void}
    */
   _shareToEmail() {
+    if (!window.user) return;
     hapticFeedback();
     const subject = encodeURIComponent('My radio.txt download link');
     const body = encodeURIComponent(this._shareURL);
