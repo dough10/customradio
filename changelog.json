@@ -1,6 +1,6 @@
 {
   "Current": [
-    "Added 'share download link' button to user menu (displays a dialog to copy the download url for your saved stations as a txt file)",
+    "Added 'share download link' button and dialog to UI (allows users to copy the download url for their radio.txt file)",
     "fix issue making context menu appear behind other elements",
     "Minor UI tweaks"
   ],
