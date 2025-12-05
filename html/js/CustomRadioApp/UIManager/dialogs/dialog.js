@@ -503,7 +503,7 @@ class AddStreamDialog {
 class Dialogs {
   constructor() {
     // animation telling user to click the x
-    document.querySelectorAll('dialog').forEach(dialog => em.add(dialog, 'click', this._wobbleDialog.bind(this)));
+    document.querySelectorAll(selectors.dialog).forEach(dialog => em.add(dialog, 'click', this._wobbleDialog.bind(this)));
     
     // X closes dialogs
     document.querySelectorAll(selectors.dialogClose).forEach(el => {

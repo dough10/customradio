@@ -78,6 +78,9 @@ const selectors = {
   /** @type {String} site info dialog */
   infoDialog: '#info-dialog',
 
+  /** @type {String} generic dialog element */
+  dialog: 'dialog',
+
   /** @type {String} main page content */
   main: 'main',
 
