@@ -33,5 +33,7 @@ module.exports = {
   shareDownloadLink: 'Share Link',
   linkshareInstructions: 'Share the link below to allow others to download your custom radio.txt file:',
   copyLinkText: 'Copy URL',
-  shareOnSocialMedia: 'Share on Social Media'
+  shareTXT: 'Share radio.txt',
+  login: 'login',
+  logout: 'logout',
 };

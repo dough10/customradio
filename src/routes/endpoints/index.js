@@ -43,6 +43,9 @@ module.exports = async (req, res) => {
       linkshareInstructions: t('linkshareInstructions'),
       copyLinkText: t('copyLinkText'),
       shareOnSocialMedia: t('shareOnSocialMedia'),
+      login: t('login'),
+      logout: t('logout'),
+      shareTXT: t('shareTXT'),
     }));
   } catch(e) {
     log.error(`index render: ${e.message}`);
