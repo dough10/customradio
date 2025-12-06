@@ -10,6 +10,7 @@ export default class GreetingDialog extends Base {
 
     const greeted = Number(localStorage.getItem("greeted"));
     if (greeted) {
+      super.destroy();
       this.$dialog.remove();
       return;
     }
