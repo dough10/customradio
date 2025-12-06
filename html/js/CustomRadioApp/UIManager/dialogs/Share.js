@@ -1,4 +1,4 @@
-// ShareDialog.js
+// Share.js
 import Base from './DialogBase.js';
 
 import Toast from '../../Toast/Toast.js';
@@ -41,15 +41,6 @@ export default class ShareDialog extends Base {
       return;
     }
 
-    this._attachEvents();
-  }
-
-  /**
-   * Attach event listeners
-   *
-   * @returns {void}
-   */
-  _attachEvents() {
     this.em.add(this.$trigger, "click", () => this.open());
     this.em.add(this.$copy, "click", () => this._copy());
     this.em.add(this.$fb, "click", () => this._facebook());
