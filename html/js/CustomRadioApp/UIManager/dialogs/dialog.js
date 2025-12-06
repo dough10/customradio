@@ -332,7 +332,7 @@ class InfoDialog {
     loadingAnimation(depDiv);
 
     try {
-      const url = new URL('/info', window.location.href);
+      const url = new URL('/info', window.location.origin);
 
       const response = await retry(_ => fetch(url.toString()));
       const pack = await response.json();
