@@ -18,9 +18,9 @@ export default class GreetingDialog extends Base {
 
     this.em.add(this.$dialog, 'transitionend', () => {
       if (!this.$dialog.hasAttribute('open')) {
+        super.destroy();
         localStorage.setItem("greeted", "1");
         this.$dialog.remove();
-        super.destroy();
       }
     });
   }
