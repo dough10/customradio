@@ -22,19 +22,19 @@ const em = new EventManager();
  */
 class ShareDialog {
   constructor() {
-    this._dialog = document.querySelector(selectors.shareDialog);
-    this._shareLink = document.querySelector(selectors.sharelink);
-    this._copyLinkButton = document.querySelector(selectors.copyLink);
-    this._facebookShare = document.querySelector(selectors.fbShare);
-    this._twitterShare = document.querySelector(selectors.twitterShare);
-    this._emailShare = document.querySelector(selectors.emailShare);
-    this._smsShare = document.querySelector(selectors.smsShare);
-    this._shareMessage = document.querySelector(selectors.shareMessage);
+    this.$dialog = document.querySelector(selectors.shareDialog);
+    this.$shareLink = document.querySelector(selectors.sharelink);
+    this.$copyLinkButton = document.querySelector(selectors.copyLink);
+    this.$facebookShare = document.querySelector(selectors.fbShare);
+    this.$twitterShare = document.querySelector(selectors.twitterShare);
+    this.$emailShare = document.querySelector(selectors.emailShare);
+    this.$smsShare = document.querySelector(selectors.smsShare);
+    this.$shareMessage = document.querySelector(selectors.shareMessage);
 
     const required = [
-      this._dialog, this._shareLink, this._copyLinkButton,
-      this._facebookShare, this._twitterShare,
-      this._emailShare, this._smsShare
+      this.$dialog, this.$shareLink, this.$copyLinkButton,
+      this.$facebookShare, this.$twitterShare,
+      this.$emailShare, this.$smsShare, this.$shareMessage
     ];
 
     if (required.some(el => !el)) {
@@ -42,22 +42,22 @@ class ShareDialog {
       return;
     }
 
-    em.add(this._shareLink, 'click', this._open.bind(this));
+    em.add(this.$shareLink, 'click', this._open.bind(this));
     
     // copy link to clipboard
-    em.add(this._copyLinkButton, 'click', this._copytoclipboard.bind(this));
+    em.add(this.$copyLinkButton, 'click', this._copyToClipboard.bind(this));
 
     // share to facebook
-    em.add(this._facebookShare, 'click',  this._shareToFacebook.bind(this));
+    em.add(this.$facebookShare, 'click',  this._shareToFacebook.bind(this));
     
     // share to twitter
-    em.add(this._twitterShare, 'click',  this._shareToTwitter.bind(this));
+    em.add(this.$twitterShare, 'click',  this._shareToTwitter.bind(this));
 
     // share to email
-    em.add(this._emailShare, 'click',  this._shareToEmail.bind(this));
+    em.add(this.$emailShare, 'click',  this._shareToEmail.bind(this));
 
     // share to sms
-    em.add(this._smsShare, 'click',  this._shareToSMS.bind(this));
+    em.add(this.$smsShare, 'click',  this._shareToSMS.bind(this));
   }
 
   /**
@@ -76,7 +76,7 @@ class ShareDialog {
    */
   _open() {
     if (!window.user) return;
-    this._dialog.showModal();
+    this.$dialog.showModal();
   }
 
   /**
@@ -119,7 +119,7 @@ class ShareDialog {
     hapticFeedback();
     const body = encodeURIComponent(`My radio.txt download link: ${this._shareURL}`);
     // iOS/Android vary; use generic sms: URI
-    window.open(`sms:?&body=${body}`, '_blank', 'noopener,noreferrer');
+    window.open(`sms:?body=${body}`, '_blank', 'noopener,noreferrer');
   }
 
   /**
@@ -140,10 +140,10 @@ class ShareDialog {
    * 
    * @returns {void}
    */  
-  async _copytoclipboard() {
+  async _copyToClipboard() {
     if (!window.user) return;
 
-    const messageElement = this._shareMessage;
+    const messageElement = this.$shareMessage;
     
     if (!messageElement) {
       console.error('Required clipboard elements not found');
