@@ -332,7 +332,9 @@ class InfoDialog {
     loadingAnimation(depDiv);
 
     try {
-      const response = await retry(_ => fetch('/info'));
+      const url = new URL('/info', window.location.href);
+
+      const response = await retry(_ => fetch(url.toString()));
       const pack = await response.json();
 
       dialog.querySelector('h1').textContent = `v${pack.version}`;
