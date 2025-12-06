@@ -76,7 +76,7 @@ export default class ShareDialog extends Base {
 
     try {
       hapticFeedback();
-      await navigator.clipboard.writeText(this._shareURL);
+      await navigator.clipboard.writeText(this.shareURL);
       this.$shareMessage.textContent = successMessage;
       new Toast(successMessage);
     } catch (err) {
