@@ -141,7 +141,7 @@ class ShareDialog {
     hapticFeedback();
     const shareUrl = encodeURIComponent(this._shareURL);
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
-    window.open(facebookUrl, '_blank', 'noopener');
+    window.open(facebookUrl, '_blank', 'noopener,noreferrer');
   }
 
   /**
@@ -158,7 +158,7 @@ class ShareDialog {
       text: "My radio.txt download link:",
       hashtags: "sharing,radiotxt,customradio"
     }).toString();
-    window.open(twitterUrl, '_blank', 'noopener');
+    window.open(twitterUrl, '_blank', 'noopener,noreferrer');
   }
 
   /**
@@ -171,7 +171,7 @@ class ShareDialog {
     hapticFeedback();
     const body = encodeURIComponent(`My radio.txt download link: ${this._shareURL}`);
     // iOS/Android vary; use generic sms: URI
-    window.open(`sms:?&body=${body}`, '_blank', 'noopener');
+    window.open(`sms:?&body=${body}`, '_blank', 'noopener,noreferrer');
   }
 
   /**
@@ -184,7 +184,7 @@ class ShareDialog {
     hapticFeedback();
     const subject = encodeURIComponent('My radio.txt download link');
     const body = encodeURIComponent(this._shareURL);
-    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank', 'noopener');
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank', 'noopener,noreferrer');
   }
 
   /**
