@@ -22,85 +22,42 @@ const em = new EventManager();
  */
 class ShareDialog {
   constructor() {
+    this._dialog = document.querySelector(selectors.shareDialog);
+    this._shareLink = document.querySelector(selectors.sharelink);
+    this._copyLinkButton = document.querySelector(selectors.copyLink);
+    this._facebookShare = document.querySelector(selectors.fbShare);
+    this._twitterShare = document.querySelector(selectors.twitterShare);
+    this._emailShare = document.querySelector(selectors.emailShare);
+    this._smsShare = document.querySelector(selectors.smsShare);
+    this._shareMessage = document.querySelector(selectors.shareMessage);
+
+    const required = [
+      this._dialog, this._shareLink, this._copyLinkButton,
+      this._facebookShare, this._twitterShare,
+      this._emailShare, this._smsShare
+    ];
+
+    if (required.some(el => !el)) {
+      console.error("ShareDialog initialization failed — missing DOM elements.");
+      return;
+    }
+
     em.add(this._shareLink, 'click', this._open.bind(this));
     
     // copy link to clipboard
     em.add(this._copyLinkButton, 'click', this._copytoclipboard.bind(this));
 
     // share to facebook
-    em.add(this._facebookshare, 'click',  this._shareToFacebook.bind(this));
+    em.add(this._facebookShare, 'click',  this._shareToFacebook.bind(this));
     
     // share to twitter
-    em.add(this._twittershare, 'click',  this._shareToTwitter.bind(this));
+    em.add(this._twitterShare, 'click',  this._shareToTwitter.bind(this));
 
     // share to email
-    em.add(this._emailshare, 'click',  this._shareToEmail.bind(this));
+    em.add(this._emailShare, 'click',  this._shareToEmail.bind(this));
 
     // share to sms
-    em.add(this._smsshare, 'click',  this._shareToSMS.bind(this));
-  }
-
-  /**
-   * gets share dialog
-   * 
-   * @returns {HTMLElement} share dialog
-   */
-  get _dialog() {
-    return document.querySelector(selectors.shareDialog);
-  }
-
-  /**
-   * gets share link button
-   * 
-   * @returns {HTMLElement} share link button
-   */
-  get _shareLink() {
-    return document.querySelector(selectors.sharelink);
-  }
-
-  /**
-   * gets copy link button
-   * 
-   * @returns {HTMLElement} copy link button
-   */
-  get _copyLinkButton() {
-    return document.querySelector(selectors.copyLink);
-  }
-
-  /**
-   * gets facebook share button
-   * 
-   * @returns {HTMLElement} facebook share button
-   */
-  get _facebookshare() {
-    return document.querySelector(selectors.fbShare);
-  }
-
-  /**
-   * gets twitter share button
-   * 
-   * @returns {HTMLElement} twitter share button
-   */
-  get _twittershare() {
-    return document.querySelector(selectors.twitterShare);
-  }
-
-  /**
-   * gets email share button
-   * 
-   * @returns {HTMLElement} email share button
-   */
-  get _emailshare() {
-    return document.querySelector(selectors.emailShare);
-  }
-
-  /**
-   * gets sms share button
-   * 
-   * @returns {HTMLElement} sms share button
-   */
-  get _smsshare() {
-    return document.querySelector(selectors.smsShare);
+    em.add(this._smsShare, 'click',  this._shareToSMS.bind(this));
   }
 
   /**
@@ -110,15 +67,6 @@ class ShareDialog {
    */
   get _shareURL() {
     return txtDownloadUrl();
-  }
-
-  /**
-   * gets share message element
-   * 
-   * @returns {HTMLElement} share message element
-   */
-  get _shareMessage() {
-    return document.querySelector(selectors.shareMessage);
   }
 
   /**
