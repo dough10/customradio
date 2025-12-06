@@ -23,12 +23,8 @@ export default class AddStreamDialog extends Base {
     this.$submit = this.$(selectors.stationSubmit);
     this.$response = this.$(selectors.response);
 
-    if (!this.$dialog || !this.$trigger || !this.$form) return;
+    if (!this.$dialog || !this.$trigger || !this.$form || !this.$input) return;
 
-    this._attachEvents();
-  }
-
-  _attachEvents() {
     this.em.add(this.$trigger, "click", () => this.open());
     this.em.add(this.$input, "input", () => this._validate());
     this.em.add(this.$form, "submit", ev => this._submit(ev));
