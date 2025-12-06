@@ -13,8 +13,8 @@
     "build-docker": "sh build_assets/build-container.sh \"registry.dough10.me/customradio\"",
     "docs": "node make-docs.js",
     "run container": "bash build_assets/run.sh",
-    "translate-front": "node scripts/translate-js.js front cs de es fr fi it nl ja kk ko pl pt ru sk sr sv tr uk vi zh",
-    "translate-back": "node scripts/translate-js.js back cs de es fr fi it nl ja kk ko pl pt ru sk sr sv tr uk vi zh"
+    "translate-front": "node scripts/translate-js.js front cs de es fr fi it nl hu ja kk ko pl pt ru sk sr sv tr uk vi zh",
+    "translate-back": "node scripts/translate-js.js back cs de es fr fi it nl hu ja kk ko pl pt ru sk sr sv tr uk vi zh"
   },
   "author": "dough10",
   "license": "ISC",
