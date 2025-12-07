@@ -85,8 +85,11 @@ export default class ShareDialog extends Base {
    */
   _facebook() {
     hapticFeedback();
+    const searchParams = new URLSearchParams({
+      u: this.shareURL
+    });
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(this.shareURL)}`,
+      `https://www.facebook.com/sharer/sharer.php?${searchParams.toString()}`,
       "_blank",
       "noopener,noreferrer"
     );
@@ -99,12 +102,12 @@ export default class ShareDialog extends Base {
    */
   _twitter() {
     hapticFeedback();
-    const q = new URLSearchParams({
+    const searchParams = new URLSearchParams({
       url: this.shareURL,
       text: "My radio.txt download link:"
     });
 
-    window.open(`https://x.com/intent/post?${q}`, "_blank", "noopener,noreferrer");
+    window.open(`https://x.com/intent/post?${searchParams.toString()}`, "_blank", "noopener,noreferrer");
   }
 
   /**
@@ -114,8 +117,12 @@ export default class ShareDialog extends Base {
    */
   _email() {
     hapticFeedback();
+    const searchParams = new URLSearchParams({
+      subject: "My radio.txt link",
+      body: this.shareURL
+    });
     window.open(
-      `mailto:?subject=My radio.txt link&body=${encodeURIComponent(this.shareURL)}`,
+      `mailto:?${searchParams.toString()}`,
       "_blank"
     );
   }
@@ -127,6 +134,9 @@ export default class ShareDialog extends Base {
    */
   _sms() {
     hapticFeedback();
-    window.open(`sms:?body=${encodeURIComponent(this.shareURL)}`, "_blank");
+    const searchParams = new URLSearchParams({
+      body: this.shareURL
+    });
+    window.open(`sms:?${searchParams.toString()}`, "_blank");
   }
 }
