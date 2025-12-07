@@ -59,8 +59,6 @@ export default class ShareDialog extends Base {
       console.error('Required clipboard elements not found');
       return;
     }
-
-    hapticFeedback();
     
     const successMessage = t('clipboard_success');
     const failureMessage = t('clipboard_failure');
