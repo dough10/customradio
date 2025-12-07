@@ -55,13 +55,13 @@ export default class ShareDialog extends Base {
    * @returns {void}
    */
   async _copy() {
-    hapticFeedback();
-    
     if (!this.$shareMessage) {
       console.error('Required clipboard elements not found');
       return;
     }
 
+    hapticFeedback();
+    
     const successMessage = t('clipboard_success');
     const failureMessage = t('clipboard_failure');
 
