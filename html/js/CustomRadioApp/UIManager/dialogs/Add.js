@@ -1,5 +1,5 @@
 // Add.js
-import Base from './DialogBase.js';
+import DialogBase from './DialogBase.js';
 
 import Toast from '../../Toast/Toast.js';
 
@@ -13,7 +13,7 @@ import sleep from '../../utils/sleep.js';
 
 const SUBMISSION_RESET = 2000;
 
-export default class AddStreamDialog extends Base {
+export default class AddStreamDialog extends DialogBase {
   constructor() {
     super(selectors.addDialog);
 

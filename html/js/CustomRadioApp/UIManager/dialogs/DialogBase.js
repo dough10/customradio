@@ -1,9 +1,9 @@
-// Base.js
+// DialogBase.js
 import hapticFeedback from '../../utils/hapticFeedback.js';
 import EventManager from '../../EventManager/EventManager.js';
 import selectors from '../../selectors.js';
 
-export default class Base {
+export default class DialogBase {
   constructor(selector) {
     this.$dialog = document.querySelector(selector);
     if (!this.$dialog) {

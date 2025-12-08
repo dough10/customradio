@@ -1,5 +1,5 @@
 // Info.js
-import Base from './DialogBase.js';
+import DialogBase from './DialogBase.js';
 
 import Toast from '../../Toast/Toast.js';
 
@@ -10,7 +10,7 @@ import loadingAnimation from '../helpers/insertLoadingAnimation.js';
 import hapticFeedback from '../../utils/hapticFeedback.js';
 import retry from '../../utils/retry.js';
 
-export default class InfoDialog extends Base {
+export default class InfoDialog extends DialogBase {
   constructor() {
     super(selectors.infoDialog);
 

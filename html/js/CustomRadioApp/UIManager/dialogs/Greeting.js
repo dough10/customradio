@@ -1,8 +1,8 @@
 // Greeting.js
-import Base from './DialogBase.js';
+import DialogBase from './DialogBase.js';
 import selectors from '../../selectors.js';
 
-export default class GreetingDialog extends Base {
+export default class GreetingDialog extends DialogBase {
   constructor() {
     super(selectors.greeting);
 

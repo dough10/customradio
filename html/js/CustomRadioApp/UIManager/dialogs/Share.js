@@ -1,5 +1,5 @@
 // Share.js
-import Base from './DialogBase.js';
+import DialogBase from './DialogBase.js';
 
 import Toast from '../../Toast/Toast.js';
 
@@ -12,7 +12,7 @@ import sleep from '../../utils/sleep.js';
 
 const SUBMISSION_RESET_TIME = 3000; // ms
 
-export default class ShareDialog extends Base {
+export default class ShareDialog extends DialogBase {
   constructor() {
     super(selectors.shareDialog);
 
@@ -104,10 +104,14 @@ export default class ShareDialog extends Base {
     hapticFeedback();
     const searchParams = new URLSearchParams({
       url: this.shareURL,
-      text: "My radio.txt download link:"
+      text: "My radio.txt download link"
     });
 
-    window.open(`https://x.com/intent/post?${searchParams.toString()}`, "_blank", "noopener,noreferrer");
+    window.open(
+      `https://x.com/intent/post?${searchParams.toString()}`, 
+      "_blank", 
+      "noopener,noreferrer"
+    );
   }
 
   /**
@@ -137,6 +141,9 @@ export default class ShareDialog extends Base {
     const searchParams = new URLSearchParams({
       body: this.shareURL
     });
-    window.open(`sms:?${searchParams.toString()}`, "_blank");
+    window.open(
+      `sms:?${searchParams.toString()}`, 
+      "_blank"
+    );
   }
 }
