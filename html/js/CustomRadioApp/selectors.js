@@ -209,6 +209,12 @@ const selectors = {
 
   /** @type {String} twitter share button */
   twitterShare: '#twittershare',
+
+  /** @type {String} first name input */
+  firstname: '#firstname',
+
+  /** @type {String} last name input */
+  lastname: '#lastname',
 };
 
 export default selectors;
