@@ -233,10 +233,10 @@ export default class UIManager {
    * @returns {void}
    */
   async _userMenuOpen(ev) {
-    const bd = document.createElement('div');
-    bd.classList.add('backdrop');
-    this._em.add(bd, 'click', this._userMenuClose.bind(this), { passive: true }, 'backdrop-click');
-    document.body.appendChild(bd);
+    const backdrop = document.createElement('div');
+    backdrop.classList.add('backdrop');
+    this._em.add(backdrop, 'click', this._userMenuClose.bind(this), { passive: true }, 'backdrop-click');
+    document.body.appendChild(backdrop);
     
     const { top } = ev.target.getBoundingClientRect();
     const left = 8;
@@ -245,7 +245,7 @@ export default class UIManager {
     menu.style.left = `${left}px`;
     await sleep(20);
     requestAnimationFrame(_ => {
-      bd.setAttribute('visable', true);
+      backdrop.setAttribute('visable', true);
       menu.setAttribute('open', true);
     });
   }
@@ -328,10 +328,10 @@ export default class UIManager {
     document.querySelector(this._selectors.userAvatar).replaceChildren(big);
     button.replaceChildren(small);
 
-    document.querySelector('.firstname').textContent = user.firstName;
-    document.querySelector('.lastname').textContent = user.lastName;
+    document.querySelector(this._selectors.firstname).textContent = user.firstName;
+    document.querySelector(this._selectors.lastname).textContent = user.lastName;
 
-    const input = document.querySelector('#linkshare-input');
+    const input = document.querySelector(this._selectors.shareInput);
     if (input) {
       input.value = downloadUrl;
       Object.freeze(input);
