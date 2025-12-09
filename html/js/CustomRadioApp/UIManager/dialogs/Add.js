@@ -30,12 +30,25 @@ export default class AddStreamDialog extends DialogBase {
     this.em.add(this.$form, "submit", ev => this._submit(ev));
   }
 
+  /**
+   * Validate the input URL
+   * 
+   * @returns {void}
+   */
   _validate() {
     const valid = isValidURL(this.$input.value);
     if (valid) this.$submit.removeAttribute("disabled");
     else this.$submit.setAttribute("disabled", true);
   }
 
+  /**
+   * Submit the add stream form
+   * 
+   * @param {Event} ev 
+   * @param {Number} retryCount 
+   * 
+   * @returns {Promise<void>}
+   */
   async _submit(ev, retryCount = 0) {
     ev.preventDefault();
 
