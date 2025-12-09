@@ -21,6 +21,11 @@ export default class InfoDialog extends DialogBase {
     this.em.add(this.$trigger, "click", () => this.open());
   }
 
+  /**
+   * open info dialog and load content
+   * 
+   * @returns {Promise<void>}
+   */
   async open() {
     super.open();
     await this._loadContent();
