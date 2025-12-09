@@ -211,10 +211,10 @@ const selectors = {
   twitterShare: '#twittershare',
 
   /** @type {String} first name input */
-  firstname: '#firstname',
+  firstname: '.firstname',
 
   /** @type {String} last name input */
-  lastname: '#lastname',
+  lastname: '.lastname',
 };
 
 export default selectors;
