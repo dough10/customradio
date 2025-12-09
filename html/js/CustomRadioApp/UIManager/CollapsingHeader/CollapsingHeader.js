@@ -50,13 +50,13 @@ export default class CollapsingHeader {
 
   constructor() {
     /** @type {HTMLElement|null} Header element */
-    this.header = document.querySelector(selectors.header);
+    this.$header = document.querySelector(selectors.header);
 
     /** @type {HTMLElement|null} Input container element */
-    this.input = document.querySelector(selectors.formGroup);
+    this.$input = document.querySelector(selectors.formGroup);
     
     /** @type {HTMLElement|null} Main content wrapper */
-    this.main = document.querySelector(selectors.main);
+    this.$main = document.querySelector(selectors.main);
     
     /** recalculate header on window resize */
     this._em.add(window, 'resize', this._onResize.bind(this));
@@ -83,7 +83,7 @@ export default class CollapsingHeader {
    * recalculates header transition effects on window resize
    */
   _onResize() {
-    this.scroll(this.main?.scrollTop || 0);
+    this.scroll(this.$main?.scrollTop || 0);
   }
 
   /**
@@ -138,20 +138,18 @@ export default class CollapsingHeader {
    * @returns {void}
    */
   scroll(scrollTop) {
-    if (!this.main) return;
+    if (!this.$main) return;
     const { transform, opacity } = this._calculateAnimation(scrollTop);
 
     requestAnimationFrame(() => {
-      if (this.input) this.input.style.opacity = (1 - opacity).toFixed(2);
-      if (this.header) this.header.style.transform = `translateY(-${transform}px)`;
-      if (this.main) this.main.style.transform = `translateY(-${transform}px)`;
+      if (this.$input) this.$input.style.opacity = (1 - opacity).toFixed(2);
+      if (this.$header) this.$header.style.transform = `translateY(-${transform}px)`;
+      if (this.$main) this.$main.style.transform = `translateY(-${transform}px)`;
       
-      const buttons = [
+      [
         this.loginButton,
         this.infoButton
-      ].filter(button => button !== null);
-      
-      buttons.forEach(button => {
+      ].filter(button => button !== null).forEach(button => {
         button.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
       });
 
