@@ -17,12 +17,19 @@ export default class GreetingDialog extends DialogBase {
 
     super.open();
 
-    this.em.add(this.$dialog, 'transitionend', () => {
-      if (!this.$dialog.hasAttribute('open')) {
-        super.destroy();
-        localStorage.setItem("greeted", "1");
-        this.$dialog.remove();
-      }
-    });
+    this.em.add(this.$dialog, 'transitionend', () => this._afterTransition());
+  }
+
+  /**
+   * remove the dialog from the DOM
+   * 
+   * @returns {void}
+   */
+  _afterTransition() {
+    if (!this.$dialog.hasAttribute('open')) {
+      super.destroy();
+      localStorage.setItem("greeted", "1");
+      this.$dialog.remove();
+    }
   }
 }
