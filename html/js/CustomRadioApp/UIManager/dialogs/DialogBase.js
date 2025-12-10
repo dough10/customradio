@@ -46,8 +46,7 @@ export default class DialogBase {
   constructor(selector) {
     this.$dialog = document.querySelector(selector);
     if (!this.$dialog) {
-      console.error(`Dialog not found: ${selector}`);
-      return;
+      throw new Error(`Dialog not found: ${selector}`);
     }
 
     this.em = new EventManager();
@@ -64,7 +63,11 @@ export default class DialogBase {
   open() {
     if (!this.$dialog) return;
     hapticFeedback();
-    this.$dialog.showModal();
+    try {
+      this.$dialog.showModal();
+    } catch {
+      this.$dialog.setAttribute("open", "");
+    }
   }
 
   /**
@@ -96,18 +99,14 @@ export default class DialogBase {
    */
   _attachWobbleOnOutsideClick() {
     const ns = "wobble";
+    const closeButton = this.$(selectors.smallDialogCloseButton);
+    const bigCloseButton = this.$(selectors.dialogCloseButton);
+
     this.em.add(this.$dialog, "click", ev => {
-      const dialogRect = this.$dialog.getBoundingClientRect();
-      const closeButton = this.$(selectors.smallDialogCloseButton);
-      const bigCloseButton = this.$(selectors.dialogCloseButton);
+      const { left, right, top, bottom } = this.$dialog.getBoundingClientRect();
+      const { clientX: x, clientY: y } = ev;
 
-      const { clientX, clientY } = ev;
-
-      const inside =
-        clientX >= dialogRect.left &&
-        clientX <= dialogRect.right &&
-        clientY >= dialogRect.top &&
-        clientY <= dialogRect.bottom;
+      const inside = x >= left && x <= right && y >= top && y <= bottom;
 
       if (inside) return;
 
