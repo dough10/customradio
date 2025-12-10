@@ -3,6 +3,45 @@ import hapticFeedback from '../../utils/hapticFeedback.js';
 import EventManager from '../../EventManager/EventManager.js';
 import selectors from '../../selectors.js';
 
+/**
+ * Base class for dialogs. Handles common functionality like open/close,
+ * close button, and outside click wobble animation.
+ * 
+ * @class DialogBase
+ * 
+ * @author James Doughten
+ * @version 1.0.0
+ * 
+ * @requires ../../utils/hapticFeedback.js
+ * @requires ../../EventManager/EventManager.js
+ * @requires ../../selectors.js
+ * 
+ * @returns {void}
+ * 
+ * @param {String} selector - The dialog selector
+ * 
+ * @property {Element|null} $dialog - The dialog element
+ * @property {EventManager} em - The event manager for handling events
+ * 
+ * @method open - Opens the dialog
+ * @method close - Closes the dialog
+ * @method destroy - Destroys the dialog and its event listeners
+ * @method $ - Query selector within dialog
+ * 
+ * @example
+ * import DialogBase from './DialogBase.js';
+ * export default class MyDialog extends DialogBase {
+ *   constructor() {
+ *     // Call the parent constructor with the dialog selector
+ *     super('#my-dialog');
+ *     console.log(this.$dialog); // Access the dialog element
+ * 
+ *     // Attach additional event listeners or initialization here
+ *     const button = document.querySelector('.my-button');
+ *     this.em.add(button, 'click', _ => this.open());
+ *   }
+ * }
+ */
 export default class DialogBase {
   constructor(selector) {
     this.$dialog = document.querySelector(selector);
