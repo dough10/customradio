@@ -17,7 +17,7 @@ export default class GreetingDialog extends DialogBase {
 
     
     this.em.add(this.$dialog, 'transitionend', () => this._afterTransition());
-    requestAnimationFrame(super.open);
+    requestAnimationFrame(_ => super.open());
   }
 
   /**
