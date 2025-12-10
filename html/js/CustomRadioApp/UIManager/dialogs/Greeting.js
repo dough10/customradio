@@ -2,6 +2,13 @@
 import DialogBase from './DialogBase.js';
 import selectors from '../../selectors.js';
 
+/**
+ * Greeting Dialog
+ * Displays a greeting message to first-time users with instrctions for how to use the site.
+ * Closes when the user clicks the close button and the dialog removes itself from the DOM.
+ * 
+ * @extends {DialogBase}
+ */
 export default class GreetingDialog extends DialogBase {
   constructor() {
     super(selectors.greeting);
@@ -16,7 +23,7 @@ export default class GreetingDialog extends DialogBase {
     }
 
     
-    this.em.add(this.$dialog, 'transitionend', () => this._afterTransition());
+    this.em.add(this.$dialog, 'transitionend', _ => this._afterTransition());
     requestAnimationFrame(_ => super.open());
   }
 
