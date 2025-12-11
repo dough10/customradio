@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log(cspReport);
+    // console.log(cspReport);
     res.status(204).send();
   } catch(error) {
     log.critical(`Error Saving CSP-Report: ${error.message}`);
