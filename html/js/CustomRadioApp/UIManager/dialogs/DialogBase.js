@@ -38,7 +38,7 @@ import selectors from '../../selectors.js';
  * 
  *     // Attach additional event listeners or initialization here
  *     const button = document.querySelector('.my-button');
- *     this.em.add(button, 'click', _ => this.open());
+ *     if (button) this.em.add(button, 'click', _ => this.open());
  *   }
  * }
  */
