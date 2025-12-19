@@ -56,7 +56,8 @@ export default class DialogBase {
   }
 
   /** 
-   * Opens the dialog 
+   * Opens the dialog
+   * @public
    *
    * @returns {void} 
    */
@@ -72,6 +73,7 @@ export default class DialogBase {
 
   /**
    * Closes the dialog
+   * @public
    * 
    * @returns {void}
    */
@@ -83,6 +85,7 @@ export default class DialogBase {
 
   /**
    * Attach close button listener
+   * @private
    * 
    * @returns {void}
    */
@@ -94,6 +97,7 @@ export default class DialogBase {
 
   /**
    * Attach wobble animation on outside click
+   * @private
    * 
    * @returns {void}
    */
@@ -132,6 +136,7 @@ export default class DialogBase {
 
   /**
    * Query selector within dialog
+   * @public
    * 
    * @param {String} sel - The selector
    * 
@@ -143,6 +148,7 @@ export default class DialogBase {
 
   /**
    * Destroy the dialog and its event listeners
+   * @public
    * 
    * @returns {void}
    */
