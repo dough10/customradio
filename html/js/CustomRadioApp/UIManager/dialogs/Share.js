@@ -12,6 +12,8 @@ import sleep from '../../utils/sleep.js';
 
 const SUBMISSION_RESET_TIME = 3000; // ms
 
+const SHARE_TEXT = "My radio.txt download link";
+
 export default class ShareDialog extends DialogBase {
   constructor() {
     super(selectors.shareDialog);
@@ -104,7 +106,7 @@ export default class ShareDialog extends DialogBase {
     hapticFeedback();
     const searchParams = new URLSearchParams({
       url: this.shareURL,
-      text: "My radio.txt download link"
+      text: SHARE_TEXT
     });
 
     window.open(
@@ -122,7 +124,7 @@ export default class ShareDialog extends DialogBase {
   _email() {
     hapticFeedback();
     const searchParams = new URLSearchParams({
-      subject: "My radio.txt link",
+      subject: SHARE_TEXT,
       body: this.shareURL
     });
     window.open(
