@@ -26,7 +26,9 @@ export default class ShareDialog extends DialogBase {
     this.$sms = this.$(selectors.smsShare);
     this.$shareMessage = this.$(selectors.shareMessage);
 
-    this.shareURL = txtDownloadUrl();
+    txtDownloadUrl().then(url => {
+      this.shareURL = url;
+    });
 
     const required = [
       this.$trigger,
