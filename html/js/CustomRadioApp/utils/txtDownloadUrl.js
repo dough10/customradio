@@ -8,7 +8,7 @@ export default async function txtDownloadUrl() {
     return;
   }
   return new URL(
-    `/txt/${window.user.lookup}`, 
+    `/txt/${window.user.id.replace('user_', '')}`, 
     window.location.origin
   ).toString();
 }
