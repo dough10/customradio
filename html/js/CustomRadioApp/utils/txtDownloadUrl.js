@@ -3,8 +3,8 @@
  * 
  * @returns {String} URL for downloading user's TXT file
  */
-export default async function txtDownloadUrl() {
-  if (!window.user || !window.user.lookup) {
+export default function txtDownloadUrl() {
+  if (!window.user || !window.user.id) {
     return;
   }
   return new URL(
