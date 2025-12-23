@@ -4,16 +4,6 @@ const Logger = require('../../util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-async function decompress(b64) {
-  const ds = new DecompressionStream("gzip");
-  const writer = ds.writable.getWriter();
-  writer.write(Buffer.from(b64, "base64url"));
-  writer.close();
-
-  const decompressed = await new Response(ds.readable).arrayBuffer();
-  return new TextDecoder().decode(decompressed);
-}
-
 function mapToTxt(station) {
   return `${station.name}, ${station.url}`;
 }
@@ -28,7 +18,7 @@ function timestamp(req) {
 module.exports = async (req, res) => {
   let sql;
   
-  const uid = String(decompress(req.params.uid || '').trim());
+  const uid = String(req.params.uid || '').trim();
   if (!uid) {
     res.status(400).send('Bad Request: Missing user ID');
     return;

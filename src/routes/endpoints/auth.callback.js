@@ -12,16 +12,6 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
 
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
 
-async function compress(str) {
-  const cs = new CompressionStream("gzip");
-  const writer = cs.writable.getWriter();
-  writer.write(new TextEncoder().encode(str));
-  writer.close();
-
-  const compressed = await new Response(cs.readable).arrayBuffer();
-  return Buffer.from(compressed).toString("base64url");
-}
-
 module.exports = async (req, res) => {
   try {
     const { code } = req.query;
@@ -33,8 +23,6 @@ module.exports = async (req, res) => {
         cookiePassword: process.env.COOKIE_SECRET,
       },
     });
-    user.lookup = await compress(user.id.replace('user_', ''));
-    console.log(user);
     req.user = user;
     res.cookie('wos-session', sealedSession, {
       path: '/',
