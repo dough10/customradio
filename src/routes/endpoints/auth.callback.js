@@ -34,6 +34,7 @@ module.exports = async (req, res) => {
       },
     });
     user.lookup = await compress(user.id.replace('user_', ''));
+    console.log(user);
     req.user = user;
     res.cookie('wos-session', sealedSession, {
       path: '/',
