@@ -52,10 +52,10 @@ export default class AddStreamDialog extends DialogBase {
   async _submit(ev, retryCount = 0) {
     ev.preventDefault();
 
-    const url = this.$input.value;
-    this.$submit.setAttribute("disabled", true);
-
     try {
+      const url = new URL(this.$input.value).toString();
+      this.$submit.setAttribute("disabled", true);
+
       const opts = _OPTIONS({ url });
       const res = await retry(() => fetch("/add", opts));
       
@@ -76,6 +76,7 @@ export default class AddStreamDialog extends DialogBase {
 
     } catch (err) {
       new Toast("An error occurred");
+      console.error(err);
     } finally {
       await sleep(SUBMISSION_RESET);
       this.$input.value = "";
