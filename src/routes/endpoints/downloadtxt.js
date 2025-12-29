@@ -4,8 +4,8 @@ const Logger = require('../../util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-function mapToTxt(station) {
-  return `${station.name}, ${station.url}`;
+function mapToTxt({name, url}) {
+  return `${name.replace(/,/g, '')}, ${url}`;
 }
 
 function timestamp(req) {
