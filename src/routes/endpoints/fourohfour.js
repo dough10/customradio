@@ -7,7 +7,15 @@ const log = new Logger(logLevel);
  * Set of sensitive path segments that indicate potential attacks or probing.
  * @type {Set<string>}
  */
-const sensitivePaths = new Set(['.env', 'wp-admin', '.git', '.ssh', '.json', '.yml', '.sql']);
+const sensitivePaths = new Set([
+  '.env',
+  'wp-admin',
+  '.git',
+  '.ssh',
+  '.json',
+  '.yml',
+  '.sql'
+]);
 
 /**
  * Express handler for 404 errors, logs request details.
@@ -28,7 +36,7 @@ module.exports = async (req, res) => {
     for (const sensitive of sensitivePaths) {
       if (requestedPath.includes(sensitive)) {
         log.security(`Sensitive path accessed: ${requestedPath} | IP: ${req.ip} | User-Agent: ${req.get('User-Agent')}`);
-        break; // Log only once per request
+        break;
       }
     }
   
