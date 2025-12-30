@@ -141,6 +141,15 @@ class Logger {
   }
 
   /**
+   * Logs a security-related message if the current log level allows it.
+   * 
+   * @param {String} message 
+   */
+  async security(message) {
+    await this._log(this._timestamp(), 'SECURITY', message);
+  }
+
+  /**
    * Generates a timestamp string for the current date and time.
    * 
    * @returns {string} The formatted timestamp.
@@ -180,12 +189,19 @@ class Logger {
     await this._rotateLogFile();
 
     this._logQueue = this._logQueue.then(() => {
-      return appendFile(this._baseLogFile, `${logEntry}\n`).catch((err) => {
-        const errorMessage = `Failed to write log entry: ${err.message}`;
-        console.error(`${this._timestamp()} [CRITICAL] ${errorMessage}`);
-        throw new Error(errorMessage);
-      });
+      return appendFile(this._baseLogFile, `${logEntry}\n`).catch((err) => this._errorLogging(err));
     });
+  }
+
+  /**
+   * Logs an error message to the console and throws a new error.
+   * 
+   * @param {Error} err 
+   */
+  _errorLogging(err) {
+    const errorMessage = `Failed to write log entry: ${err.message}`;
+    console.error(`${this._timestamp()} [CRITICAL] ${errorMessage}`);
+    throw new Error(errorMessage);
   }
 
   /**
