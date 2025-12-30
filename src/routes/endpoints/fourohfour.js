@@ -1,3 +1,8 @@
+const Logger = require('../../util/logger.js');
+
+const logLevel = process.env.LOG_LEVEL || 'info';
+const log = new Logger(logLevel);
+
 /**
  * Express handler for 404 errors, logs request details, saves to collection, 
  * and redirects to a Rickroll for certain paths.
@@ -22,6 +27,7 @@ module.exports = async (req, res) => {
     const sensitivePaths = ['.env', 'wp-admin', '.git', '.ssh', '.json', '.yml', '.sql'];
     for (const path of sensitivePaths) {
       if (requestedPath.includes(path)) {
+        log.security(`path: ${requestedPath} | IP: ${req.ip} | User-Agent: ${req.get('User-Agent')}`);
         // Rickroll
         return res.redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
       }
