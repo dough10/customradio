@@ -20,6 +20,7 @@ const levels = {
   warning: 2,
   error: 3,
   critical: 4,
+  security: 5
 };
 
 /**
