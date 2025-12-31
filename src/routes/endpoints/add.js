@@ -48,6 +48,13 @@ module.exports = async (req, res) => {
 
   let sql;
   const { url } = req.body;
+
+  try {
+    new URL(url);
+  } catch(e) {
+    log.error(`Invalid URL: ${url}`);
+    return res.status(400).json({ message: t('addFail', 'invalid URL provided') });
+  }
   
   try {
     sql = new Stations('data/customradio.db');
