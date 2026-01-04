@@ -694,14 +694,19 @@ function validateStation(obj) {
 
 /**
  * Check if a URL is valid.
+ * Uses the standard URL API for robust validation.
  * 
  * @param {String} url 
  * 
  * @returns {Boolean}
  */
 function isValidURL(url) {
-  const regex = /^(ftp|http|https):\/\/[^ "]+$/;
-  return regex.test(url);
+  try {
+    new URL(url);
+    return true
+  } catch (e) {
+    return false;
+  }
 }
 
 module.exports = Stations;
