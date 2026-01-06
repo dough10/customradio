@@ -37,19 +37,7 @@ export default class AudioPlayer {
     this._bouncedToggle = debounce(this._togglePlay, PLAY_DEBOUNCE_DURATION);
     this._saveVolume = debounce(value => localStorage.setItem('volume', value), VOLUME_DEBOUNCE_DURATION);
   
-    setTimeout(_ => {
-      const lastPlayed = localStorage.getItem('lastStation');
-      if (!lastPlayed) return;
-      const station = document.querySelector(selectors.lastPlayedURL(lastPlayed));
-      if (!station) return;
-      const stationName = station.parentElement.dataset.name;
-      new Toast(
-        t('lastPlayedStation', stationName),
-        5, 
-        _ => station.click(), 
-        t('resume')
-      );
-    }, 1000);
+    setTimeout(_ => this._offerResume(), 1000);
   }
 
   /**
@@ -102,6 +90,28 @@ export default class AudioPlayer {
     return document.querySelector(selectors.playingURL(this.player.src));
   }
   
+  /**
+   * Offers the user to resume the last played station
+   * 
+   * @private
+   * @function
+   * 
+   * @returns {Void}
+   */
+  _offerResume() {
+    const lastPlayed = localStorage.getItem('lastStation');
+    if (!lastPlayed) return;
+    const station = document.querySelector(selectors.lastPlayedURL(lastPlayed));
+    if (!station) return;
+    const stationName = station.parentElement.dataset.name;
+    new Toast(
+      t('lastPlayedStation', stationName),
+      5, 
+      _ => station.click(), 
+      t('resume')
+    );
+  }
+
   /**
    * checks if the element is currently focused
    * 
