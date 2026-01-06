@@ -33,7 +33,7 @@ export default class GreetingDialog extends DialogBase {
    */
   _afterTransition() {
     if (!this.$dialog.hasAttribute('open')) {
-      super.destroy();
+      this.destroy();
       localStorage.setItem("greeted", "1");
       this.$dialog.remove();
     }
