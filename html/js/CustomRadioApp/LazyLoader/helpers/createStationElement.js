@@ -138,6 +138,7 @@ async function playStream(ev, player) {
     (homepage === 'Unknown') ? new Toast(playing, 3) : new Toast(playing, 3, homepage, t('homepage'));
   } catch (error) {
     const str = t('playingError', error.message);
+    await sleep(500);
     new Toast(str, 3);
     console.error(str);
     postStreamIssue(id, error.message);
