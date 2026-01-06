@@ -132,6 +132,9 @@ const selectors = {
   /** @type {Function} find a station by it's data-url attribute */
   playingURL: url => `#stations>li[data-url="${url}"]`,
 
+  /** @type {Function} find a station's playbutton by it's data-url attribute */
+  lastPlayedURL: url => `#stations>li[data-url="${url}"]>.play`,
+
   /** @type {String} find the station marked as playing */
   playingStation: '#stations>li[playing]',
 

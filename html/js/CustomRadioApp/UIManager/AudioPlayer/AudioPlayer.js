@@ -33,10 +33,23 @@ export default class AudioPlayer {
     
     this._notifications = notifications || new Notifications();
     this._em = new EventManager();
-
     
     this._bouncedToggle = debounce(this._togglePlay, PLAY_DEBOUNCE_DURATION);
     this._saveVolume = debounce(value => localStorage.setItem('volume', value), VOLUME_DEBOUNCE_DURATION);
+  
+    setTimeout(_ => {
+      const lastPlayed = localStorage.getItem('lastStation');
+      if (!lastPlayed) return;
+      const station = document.querySelector(selectors.lastPlayedURL(lastPlayed));
+      if (!station) return;
+      const stationName = station.parentElement.dataset.name;
+      new Toast(
+        t('lastPlayedStation', stationName),
+        5, 
+        _ => station.click(), 
+        t('resume')
+      );
+    }, 1000);
   }
 
   /**
@@ -436,6 +449,8 @@ export default class AudioPlayer {
 
     this._updateMediaSession({ name, bitrate });
 
+    localStorage.setItem('lastStation', url);
+
     if (this._reporter) this._reporter.destroy();
     this._reporter = new PlayReporter(id);
 
@@ -458,6 +473,7 @@ export default class AudioPlayer {
     allStations.forEach(el => el.removeAttribute('playing'));
     this.currentPlayingElement = null;
     if (this._reporter) this._reporter.playStopped();
+    localStorage.removeItem('lastStation');
   }
 
   /**

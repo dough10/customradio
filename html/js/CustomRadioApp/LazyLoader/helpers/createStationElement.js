@@ -8,7 +8,7 @@ import selectors from '../../selectors.js';
 import _OPTIONS from '../../utils/post_options.js';
 import updateCsrf from '../../utils/updateCsrf.js';
 import retry from '../../utils/retry.js';
-
+import sleep from '../../utils/sleep.js';
 
 const LONG_PRESS_DURATION = 500;
 
@@ -134,6 +134,7 @@ async function playStream(ev, player) {
   try {
     player.playStream(stream);
     const playing = t('playing', name);
+    await sleep(500);
     (homepage === 'Unknown') ? new Toast(playing, 3) : new Toast(playing, 3, homepage, t('homepage'));
   } catch (error) {
     const str = t('playingError', error.message);
