@@ -1,6 +1,6 @@
 {
   "Current": [
-    "Added 'share download link' button and dialog to UI (allows users to copy the download url for their radio.txt file)",
+    "Added 'share' button and dialog to UI (allows users to copy the download url for their radio.txt file)",
     "fix issue making context menu appear behind other elements",
     "Minor UI tweaks",
     "Options to resume playback of last played station on app load (only works for stations in user list or that are in DOM on first load)"
