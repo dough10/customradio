@@ -219,7 +219,7 @@ export default class Toast {
     // debug
     if (!this.toast) throw new Error(`Toast element disapeared`);
 
-    // clean up listeners added when creating the toast element
+    // clean up listeners added when the toast element was created
     em.removeByNamespace(NAMESPACES.USER_INTERACTIONS);
     em.removeByNamespace(NAMESPACES.OPEN_ANIMATION);
 
