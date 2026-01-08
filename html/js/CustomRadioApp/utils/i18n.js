@@ -1,23 +1,26 @@
 // i18n.js
+import { cs } from './lang/cs.js';
+import { de } from './lang/de.js';
 import { en } from './lang/en.js';
 import { es } from './lang/es.js';
-import { fr } from './lang/fr.js';
 import { fi } from './lang/fi.js';
-import { zh } from './lang/zh.js';
-import { ru } from './lang/ru.js';
+import { fr } from './lang/fr.js';
+import { hu } from './lang/hu.js';
 import { it } from './lang/it.js';
-import { de } from './lang/de.js';
 import { ja } from './lang/ja.js';
-import { ko } from './lang/ko.js';
-import { sv } from './lang/sv.js';
-import { sk } from './lang/sk.js';
-import { pl } from './lang/pl.js';
-import { cs } from './lang/cs.js';
-import { pt } from './lang/pt.js';
 import { kk } from './lang/kk.js';
+import { ko } from './lang/ko.js';
+import { nl } from './lang/nl.js';
+import { pl } from './lang/pl.js';
+import { pt } from './lang/pt.js';
+import { ro } from './lang/ro.js';
+import { ru } from './lang/ru.js';
+import { sk } from './lang/sk.js';
+import { sv } from './lang/sv.js';
 import { tr } from './lang/tr.js';
 import { uk } from './lang/uk.js';
-import { nl } from './lang/nl.js';
+import { vi } from './lang/vi.js';
+import { zh } from './lang/zh.js';
 
 
 const languages = {
@@ -39,7 +42,10 @@ const languages = {
   tr,
   uk,
   zh,
-  fi
+  fi,
+  hu,
+  ro,
+  vi
 };
 
 let currentLang = 'en';
