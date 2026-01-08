@@ -104,10 +104,10 @@ export default class CustomRadioApp {
     this._uiManager.setCounts(selected, list);
     container.replaceChildren(document.querySelector(selectors.loading));
     this._lzldr ? this._lzldr.reset(stations) : this._lzldr = new LazyLoader(
-      stations,                    // list of audio streams
-      container,                   // page "main" element
-      this._uiManager.audioPlayer, // audio player instance
-      this._uiManager.onScroll     // scroll handler
+      stations,                                            // list of audio streams
+      container,                                           // page "main" element
+      this._uiManager.audioPlayer,                         // audio player instance
+      scrollTop => this._uiManager.onScroll(scrollTop)     // scroll handler
     );
   }
 

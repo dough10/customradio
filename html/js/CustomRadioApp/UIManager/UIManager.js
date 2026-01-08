@@ -14,19 +14,55 @@ import selectors from '../selectors.js';
 import news from '../utils/news.js';
 import txtDownloadUrl from '../utils/txtDownloadUrl.js';
 
+
+const NAMESPACE = {
+  backdropClick: 'backdrop-click'
+};
+
 /**
  * manages UI elements
  */
 export default class UIManager {
 
   constructor(s) {
+    this.$toTop = document.querySelector(selectors.toTop);
+    this.$filter = document.querySelector(selectors.filter);
+    this.$downloadButton = document.querySelector(selectors.downloadButton);
+    this.$stationCount = document.querySelector(selectors.stationCount);
+    this.$resetButton = document.querySelector(selectors.resetButton);
+    this.$loginButton = document.querySelector(selectors.login);
+    this.$logoutButton = document.querySelector(selectors.logout);
+    this.$userMenu = document.querySelector(selectors.userMenu);
+    this.$userMenuButton = document.querySelector(selectors.userMenuButton);
+    this.$main = document.querySelector(selectors.main);
+    this.$sharelink = document.querySelector(selectors.sharelink);
+
+    const required = [
+      this.$toTop,
+      this.$filter,
+      this.$downloadButton,
+      this.$stationCount,
+      this.$resetButton,
+      this.$loginButton,
+      this.$logoutButton,
+      this.$userMenu,
+      this.$userMenuButton,
+      this.$main,
+      this.$sharelink
+    ]
+
+    if (required.some(el => !el)) {
+      throw new Error("Initialization failed — missing DOM elements.");
+    }
+
     this._selectors = s || selectors;
-    this.onScroll = this.onScroll.bind(this);
+    this._lastTop = 0;
     this._player = new AudioPlayer();
     this._em = new EventManager();
     this._analytics = new Analytics();
     this._header = new CollapsingHeader();
-    this._loadUser();
+    this._loadUser(window.user);
+
     // news();
   }
   
@@ -44,19 +80,19 @@ export default class UIManager {
     initDialogInteractions();
 
     this._player.init();
-    this._em.add(this._loginButton, 'click', this._loginRedirect.bind(this), { passive: true });
-    this._em.add(this._logoutButton, 'click', this._logoutRedirect.bind(this), { passive: true });
-    this._em.add(this._userMenuButton, 'click', this._userMenuOpen.bind(this), { passive: true });
-    this._em.add(this._filter, 'change', onFilterChange, { passive: true });
-    this._em.add(this._filter, 'focus', this._filterFocus.bind(this), { passive: true });
-    this._em.add(this._resetButton, 'click', ev => {
+    this._em.add(this.$loginButton, 'click', _ => this._loginRedirect(), { passive: true });
+    this._em.add(this.$logoutButton, 'click', _ => this._logoutRedirect(), { passive: true });
+    this._em.add(this.$userMenuButton, 'click', ev => this._userMenuOpen(ev), { passive: true });
+    this._em.add(this.$filter, 'change', onFilterChange, { passive: true });
+    this._em.add(this.$filter, 'focus', ev => this._filterFocus(ev), { passive: true });
+    this._em.add(this.$resetButton, 'click', ev => {
       this._filterFocus(ev);
       onReset();
     }, { passive: true });
-    this._em.add(this._toTop, 'click', this._toTopHandler.bind(this), { passive: true });
-    this._em.add(this._downloadButton, 'click', this._dl, { passive: true });
+    this._em.add(this.$toTop, 'click', _ => this._toTopHandler(), { passive: true });
+    this._em.add(this.$downloadButton, 'click', _ => this._dl(), { passive: true });
     document.querySelectorAll('.menu-button').forEach(btn => {
-      this._em.add(btn, 'click', this._userMenuClose.bind(this), { passive: true });
+      this._em.add(btn, 'click', _ => this._userMenuClose(), { passive: true });
     });
   }
 
@@ -73,106 +109,6 @@ export default class UIManager {
     this._header.destroy();
     this._em.removeAll();
     console.log('UIManager: listeners removed');
-  }
-
-  /**
-   * querySelector for the 'to top' button
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _toTop() {
-    return document.querySelector(this._selectors.toTop);
-  }
-
-  /**
-   * querySelector for genre filter input element
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _filter() {
-    return document.querySelector(this._selectors.filter);
-  }
-
-  /**
-   * qs for download button
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _downloadButton() {
-    return document.querySelector(this._selectors.downloadButton);
-  }
-
-  /**
-   * querySelector for 'station count' element
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _stationCount() {
-    return document.querySelector(this._selectors.stationCount);
-  }
-
-  /**
-   * querySelector for 'reset' button
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _resetButton() {
-    return document.querySelector(this._selectors.resetButton);
-  }
-
-  /**
-   * querySelector for 'login' button
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _loginButton() {
-    return document.querySelector(this._selectors.login);
-  }
-
-  /**
-   * querySelector for 'logout' button
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _logoutButton() {
-    return document.querySelector(this._selectors.logout);
-  }
-
-  /**
-   * querySelector for user menu
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _userMenu() {
-    return document.querySelector(this._selectors.userMenu);
-  }
-
-  /**
-   * querySelector for user menu button
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _userMenuButton() {
-    return document.querySelector(this._selectors.userMenuButton);
-  }
-
-  /**
-   * querySelector for 'main' element
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _main() {
-    return document.querySelector(this._selectors.main);
   }
 
   /**
@@ -200,29 +136,18 @@ export default class UIManager {
   }
 
   /**
-   * querySelector for 'share link' element
-   * 
-   * @private
-   * @readonly
-   * @returns {HTMLElement}
-   */
-  get _sharelink() {
-    return document.querySelector(this._selectors.sharelink);
-  }
-
-  /**
    * Closes the user menu
    */
   _userMenuClose() {
-    console.log('UIManager: closing user menu');
     const bd = document.querySelector('.backdrop');
+    if (!bd) return;
     this._em.add(bd, 'transitionend', _ => {
       bd.remove();
-      this._em.removeByNamespace('backdrop-click');
-    }, null, 'backdrop-click');
+      this._em.removeByNamespace(NAMESPACE.backdropClick);
+    }, null, NAMESPACE.backdropClick);
     requestAnimationFrame(_ => {
-      this._userMenu.removeAttribute('open');
-      bd.removeAttribute('visable');
+      this.$userMenu.removeAttribute('open');
+      bd.removeAttribute('visible');
     });
   }
 
@@ -235,18 +160,17 @@ export default class UIManager {
   async _userMenuOpen(ev) {
     const backdrop = document.createElement('div');
     backdrop.classList.add('backdrop');
-    this._em.add(backdrop, 'click', this._userMenuClose.bind(this), { passive: true }, 'backdrop-click');
+    this._em.add(backdrop, 'click', _ => this._userMenuClose(), { passive: true }, NAMESPACE.backdropClick);
     document.body.appendChild(backdrop);
     
     const { top } = ev.target.getBoundingClientRect();
     const left = 8;
-    const menu = this._userMenu;
-    menu.style.top = `${top + 8}px`;
-    menu.style.left = `${left}px`;
+    this.$userMenu.style.top = `${top + 8}px`;
+    this.$userMenu.style.left = `${left}px`;
     await sleep(20);
     requestAnimationFrame(_ => {
-      backdrop.setAttribute('visable', true);
-      menu.setAttribute('open', true);
+      backdrop.setAttribute('visible', true);
+      this.$userMenu.setAttribute('open', true);
     });
   }
 
@@ -307,17 +231,13 @@ export default class UIManager {
   /**
    * loads the user data to UI
    */
-  _loadUser() {
-    this._logoutButton.style.display = 'none';
-    this._sharelink.style.display = 'none';
+  _loadUser(user) {
+    this.$logoutButton.style.display = 'none';
+    this.$sharelink.style.display = 'none';
     
-    const user = window.user;
     if (!user) return;
 
-    const downloadUrl = txtDownloadUrl();
-
-    const button = this._userMenuButton;
-    if (!button) {
+    if (!this.$userMenuButton) {
       console.error('Login button element is missing.');
       return;
     }
@@ -326,26 +246,20 @@ export default class UIManager {
     const big = this._userImage(user, 70);
 
     document.querySelector(this._selectors.userAvatar).replaceChildren(big);
-    button.replaceChildren(small);
+    this.$userMenuButton.replaceChildren(small);
 
     document.querySelector(this._selectors.firstname).textContent = user.firstName;
     document.querySelector(this._selectors.lastname).textContent = user.lastName;
 
     const input = document.querySelector(this._selectors.shareInput);
-    if (input) {
-      input.value = downloadUrl;
-      Object.freeze(input);
-      Object.freeze(input.__proto__);
-  
-      input.addEventListener("input", () => {
-        if (input.value !== downloadUrl) {
-          input.value = downloadUrl;
-        }
-      });
+    if (!input) {
+      console.error('Share input element is missing.');
+      return;
     }
+    input.value = txtDownloadUrl();
 
-    this._loginButton.style.display = 'none';
-    this._logoutButton.style.display = 'flex';
+    this.$loginButton.style.display = 'none';
+    this.$logoutButton.style.display = 'flex';
   }
   
   /**
@@ -357,7 +271,7 @@ export default class UIManager {
    * @return {void}
    */
   loadShareButton() {
-    this._sharelink.style.display = 'flex';
+    this.$sharelink.style.display = 'flex';
   }
 
   /**
@@ -372,21 +286,7 @@ export default class UIManager {
   }
 
   /**
-   * listen for alt + ˙ key
-   * 
-   * @private
-   * @function
-   * 
-   * @param {Event} event 
-   */
-  _keyDown(event) {
-    if (event.altKey && event.key.toLowerCase() === '˙') {
-      this.toggleSelectedVisability();
-    }
-  }
-
-  /**
-   * scroll to top of page if user focuses input while sctolltop not = 0
+   * scroll to top of page if user focuses input while scrollTop not = 0
    * 
    * @private
    * @function
@@ -394,8 +294,7 @@ export default class UIManager {
    * @param {Event} ev 
    */
   _filterFocus(ev) {
-    const wrapper = this._main;
-    if (document.activeElement === ev.target && wrapper.scrollTop !== 0) {
+    if (document.activeElement === ev.target && this.$main.scrollTop !== 0) {
       this._toTopHandler();
     }
   }
@@ -412,7 +311,7 @@ export default class UIManager {
   onScroll(scrollTop) {
     this._header.scroll(scrollTop);
     const closeToTop = scrollTop < (window.innerHeight * 0.2);
-    closeToTop ? this._toTop.classList.add('hidden') : this._toTop.classList.remove('hidden');
+    closeToTop ? this.$toTop.classList.add('hidden') : this.$toTop.classList.remove('hidden');
     this._lastTop = scrollTop;
   }
   
@@ -427,8 +326,8 @@ export default class UIManager {
    * @param {Number} total 
    */
   setCounts(selected, total) {
-    toggleActiveState(this._downloadButton, selected);
-    this._stationCount.textContent = t('stations', total, selected);
+    toggleActiveState(this.$downloadButton, selected);
+    this.$stationCount.textContent = t('stations', total, selected);
   }
 
   /**
@@ -467,13 +366,12 @@ export default class UIManager {
    * @function
    */
   _toTopHandler() {
-    const wrapper = this._main;
-    if (!wrapper) {
+    if (!this.$main) {
       console.error('Main wrapper element is missing.');
       return;
     }
     hapticFeedback();
-    wrapper.scrollTo({
+    this.$main.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
@@ -486,11 +384,11 @@ export default class UIManager {
    * @public
    * @function
    * 
-   * @param {HTMLElement} container - element to place a loadin animation
+   * @param {HTMLElement} container - element to place a loading animation
    */
   loadingStart(container) {
     insertLoadingAnimation(container);
-    this._stationCount.style.display = 'none';
+    this.$stationCount.style.display = 'none';
   }
 
   /**
@@ -503,24 +401,23 @@ export default class UIManager {
   loadingEnd() {
     const loadingEl = document.querySelector(this._selectors.loading);
     if (loadingEl) loadingEl.remove();
-    this._stationCount.style.removeProperty('display');
+    this.$stationCount.style.removeProperty('display');
   }
 
   /**
-   * toggle visability of selected elements
+   * toggle visibility of selected elements
    * 
    * @public
    * @function
    */
-  toggleSelectedVisability() {
+  toggleSelectedVisibility() {
     const selected = document.querySelectorAll(this._selectors.selectedStation);
     if (!selected.length) return;
   
     const isHidden = selected[0].style.display === 'none';
-    const displayValue = isHidden ? 'flex' : 'none';
   
     selected.forEach(el => {
-      el.style.display = displayValue;
+      el.style.display = isHidden ? 'flex' : 'none';
     });
   }
 }
