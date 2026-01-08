@@ -26,9 +26,25 @@ export default class AudioPlayer {
   _OGTitle = document.title;
 
   constructor(notifications = null) {
+    this.$icon = document.querySelector(selectors.icon);
+    this.$playerElement = document.querySelector(selectors.player);
+    this.$name = document.querySelector(selectors.name);
+    this.$smallButton = document.querySelector(selectors.smallButton);
+
+    const required = [
+      this.$icon,
+      this.$playerElement,
+      this.$name,
+      this.$smallButton,
+    ];
+
+    if (required.some(el => !el)) {
+      throw new Error("Initialization failed — missing DOM elements.");
+    }
+
     this._bindUtilityFunctions();
 
-    this.player = new Audio();
+    this.$player = new Audio();
     this._bindPlayerEvents();
     
     this._notifications = notifications || new Notifications();
@@ -41,53 +57,13 @@ export default class AudioPlayer {
   }
 
   /**
-   * returns the audio player icon element
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _icon() {
-    return document.querySelector(selectors.icon);
-  }
-
-  /**
-   * returns the mini player UI element
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _playerElement() {
-    return document.querySelector(selectors.player);
-  }
-
-  /**
-   * returns the stream name element
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _name() {
-    return document.querySelector(selectors.name);
-  }
-
-  /**
-   * returns the small play button element
-   * 
-   * @private
-   * @returns {HTMLElement}
-   */
-  get _smallButton() {
-    return document.querySelector(selectors.smallButton);
-  }
-
-  /**
    * returns the current playing element in the UI
    * 
    * @private
    * @returns {HTMLElement|null}
    */
   get _currentPlayingElement() {
-    return document.querySelector(selectors.playingURL(this.player.src));
+    return document.querySelector(selectors.playingURL(this.$player.src));
   }
   
   /**
@@ -141,12 +117,12 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _bindPlayerEvents() {
-    this.player.onwaiting = this._onwaiting.bind(this);
-    this.player.onplaying = this._onplaying.bind(this);
-    this.player.onplay = this._onplay.bind(this);
-    this.player.onpause = this._onpause.bind(this);
-    this.player.ontimeupdate = this._ontimeupdate.bind(this);
-    this.player.onerror = this._playingError.bind(this);
+    this.$player.onwaiting = this._onwaiting.bind(this);
+    this.$player.onplaying = this._onplaying.bind(this);
+    this.$player.onplay = this._onplay.bind(this);
+    this.$player.onpause = this._onpause.bind(this);
+    this.$player.ontimeupdate = this._ontimeupdate.bind(this);
+    this.$player.onerror = this._playingError.bind(this);
   }
 
   /**
@@ -156,7 +132,7 @@ export default class AudioPlayer {
    * @function
    */
   _playingError() {
-    const code = this.player.error?.code;
+    const code = this.$player.error?.code;
     const msg = {
       1: 'MEDIA_ERR_ABORTED',
       2: 'MEDIA_ERR_NETWORK',
@@ -193,10 +169,8 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onwaiting() {
-    const icon = this._icon;
-    if (!icon) return;
-    icon.setAttribute('d', 'M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z');
-    icon.parentElement.classList.add('spin');
+    this.$icon.setAttribute('d', 'M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z');
+    this.$icon.parentElement.classList.add('spin');
     this._reporter?.pause();
   }
 
@@ -209,10 +183,8 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onplaying() {
-    const icon = this._icon;
-    if (!icon) return;
-    icon.parentElement.classList.remove('spin');
-    icon.setAttribute('d', 'M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
+    this.$icon.parentElement.classList.remove('spin');
+    this.$icon.setAttribute('d', 'M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z');
     this._reporter?.resume();
   }
 
@@ -225,7 +197,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _onplay() {
-    document.title = t('playing', this._name.textContent);
+    document.title = t('playing', this.$name.textContent);
     if (this.pauseTimer) {
       clearTimeout(this.pauseTimer);
       this.pauseTimer = 0;
@@ -244,10 +216,8 @@ export default class AudioPlayer {
   _onpause() {
     document.title = this._OGTitle;
     this.pauseTimer = setTimeout(this._clearPlaying, PAUSE_TIMER_DURATION);
-    const icon = this._icon;
-    if (!icon) return;
-    icon.parentElement.classList.remove('spin');
-    icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
+    this.$icon.parentElement.classList.remove('spin');
+    this.$icon.setAttribute('d', 'M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z');
     this._reporter?.pause();
   }
 
@@ -262,8 +232,7 @@ export default class AudioPlayer {
    * @returns {void} 
    */
   _ontimeupdate() {
-    const miniPlayer = this._playerElement;
-    !miniPlayer?.hasAttribute('playing') ? miniPlayer?.toggleAttribute('playing') : null;
+    !this.$playerElement?.hasAttribute('playing') ? this.$playerElement?.toggleAttribute('playing') : null;
  
     const currentPlayingElement = this._currentPlayingElement;
 
@@ -309,11 +278,11 @@ export default class AudioPlayer {
    * @returns {Boolean} 
    */
   async _canChangeVol() {
-    const initialVolume = this.player.volume;
-    this.player.volume = 0.1;
+    const initialVolume = this.$player.volume;
+    this.$player.volume = 0.1;
     await sleep(100);
-    const volumeChanged = this.player.volume !== initialVolume;
-    this.player.volume = initialVolume;
+    const volumeChanged = this.$player.volume !== initialVolume;
+    this.$player.volume = initialVolume;
     return volumeChanged;
   }
 
@@ -328,7 +297,7 @@ export default class AudioPlayer {
   _setVolumeSlider() {
     const slider = document.querySelector(selectors.volumeSlider);
     slider.value = localStorage.getItem('volume') ?? 100;
-    this.player.volume = slider.value / 100;
+    this.$player.volume = slider.value / 100;
     this._em.add(slider, 'input', this._setVolume, true);
   }
 
@@ -350,7 +319,7 @@ export default class AudioPlayer {
    */
   _setVolume(ev) {
     const slider = ev.target;
-    this.player.volume = slider.value / 100;
+    this.$player.volume = slider.value / 100;
     this._saveVolume(slider.value);
   }
 
@@ -364,7 +333,7 @@ export default class AudioPlayer {
    */
   _togglePlay() {
     hapticFeedback();
-    this.player.paused ? this.player.play() : this.player.pause();
+    this.$player.paused ? this.$player.play() : this.$player.pause();
   }
 
   /**
@@ -420,8 +389,8 @@ export default class AudioPlayer {
     navigator.mediaSession.metadata = new MediaMetadata(this._metadata(station));
 
     // Set media session action handlers
-    navigator.mediaSession.setActionHandler('play', () => this.player.play());
-    navigator.mediaSession.setActionHandler('pause', () => this.player.pause());
+    navigator.mediaSession.setActionHandler('play', () => this.$player.play());
+    navigator.mediaSession.setActionHandler('pause', () => this.$player.pause());
   }
 
   /**
@@ -446,16 +415,15 @@ export default class AudioPlayer {
     }
     
     document.title = t('playing', name);
-    this._name.textContent = name;
+    this.$name.textContent = name;
     document.querySelector(selectors.bitrate).textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
 
-    const miniPlayer = this._playerElement;
-    !miniPlayer.hasAttribute('playing') ? miniPlayer.toggleAttribute('playing') : null;
+    !this.$playerElement.hasAttribute('playing') ? this.$playerElement.toggleAttribute('playing') : null;
 
-    this.player.dataset.id = id;
-    this.player.src = url;
-    this.player.load();
-    this.player.play();
+    this.$player.dataset.id = id;
+    this.$player.src = url;
+    this.$player.load();
+    this.$player.play();
 
     this._updateMediaSession({ name, bitrate });
 
@@ -478,7 +446,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _clearPlaying() {
-    this._playerElement.removeAttribute('playing');
+    this.$playerElement.removeAttribute('playing');
     const allStations = document.querySelectorAll(selectors.stations);
     allStations.forEach(el => el.removeAttribute('playing'));
     this.currentPlayingElement = null;
@@ -495,8 +463,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _handleOffline() {
-    const playerElement = this._playerElement;
-    if (!playerElement.hasAttribute('playing')) return;
+    if (!this.$playerElement.hasAttribute('playing')) return;
     new Toast(t('offline'), 1.5);
   }
 
@@ -509,12 +476,11 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _handleOnline() {
-    const playerElement = this._playerElement;
-    if (!playerElement.hasAttribute('playing')) return;
+    if (!this.$playerElement.hasAttribute('playing')) return;
     new Toast(t('online'), 1.5);
-    this.player.src = this.player.src;
-    this.player.load();
-    this.player.play();
+    this.$player.src = this.$player.src;
+    this.$player.load();
+    this.$player.play();
   }
 
   /**
@@ -532,7 +498,7 @@ export default class AudioPlayer {
     switch (ev.code) {
       case 'Space': 
         ev.preventDefault();
-        if (this.player.src) this._bouncedToggle();
+        if (this.$player.src) this._bouncedToggle();
         break;
     }
   }
@@ -561,7 +527,7 @@ export default class AudioPlayer {
    * @function
    */
   async init() {
-    document.querySelector('body').append(this.player);
+    document.querySelector('body').append(this.$player);
     
     this._notMobile = await this._canChangeVol();
     
@@ -570,7 +536,7 @@ export default class AudioPlayer {
     this._em.add(window, 'offline', this._handleOffline);
     this._em.add(window, 'online', this._handleOnline);
     this._em.add(window, 'keypress', this._onKeyPress);
-    this._em.add(this._name, 'click', this._scrollToStation);
-    this._em.add(this._smallButton, 'click', this._togglePlay);
+    this._em.add(this.$name, 'click', this._scrollToStation);
+    this._em.add(this.$smallButton, 'click', this._togglePlay);
   }
 }
