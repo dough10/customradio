@@ -129,7 +129,7 @@ svg {
   transition: opacity 100ms linear;
 }
 
-.backdrop[visable] {
+.backdrop[visible] {
   opacity: 1;
 }
 
