@@ -142,8 +142,8 @@ export default class UIManager {
     const bd = document.querySelector('.backdrop');
     if (!bd) return;
     this._em.add(bd, 'transitionend', _ => {
-      bd.remove();
       this._em.removeByNamespace(NAMESPACE.backdropClick);
+      bd.remove();
     }, null, NAMESPACE.backdropClick);
     requestAnimationFrame(_ => {
       this.$userMenu.removeAttribute('open');
