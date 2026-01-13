@@ -4,7 +4,7 @@ const Logger = require('../../util/logger.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-function mapToTxt({name, url}) {
+function toTxt({name, url}) {
   return `${name.replace(/,/g, '')}, ${url}`;
 }
 
@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
     }
     res.setHeader('Content-Disposition', 'attachment; filename="radio.txt"');
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.send(`${timestamp(req)}\n${stations.map(mapToTxt).join('\n')}`);
+    res.send(`${timestamp(req)}\n${stations.map(toTxt).join('\n')}`);
   }
   catch(e) {
     log.error(`/txt/${uid} endpoint: ${e.message}`);
