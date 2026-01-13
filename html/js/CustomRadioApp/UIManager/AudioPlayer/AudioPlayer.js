@@ -62,7 +62,7 @@ export default class AudioPlayer {
    * @private
    * @returns {HTMLElement|null}
    */
-  get _currentPlayingElement() {
+  get $currentPlayingElement() {
     return document.querySelector(selectors.playingURL(this.$player.src));
   }
   
@@ -77,8 +77,10 @@ export default class AudioPlayer {
   _offerResume() {
     const lastPlayed = localStorage.getItem('lastStation');
     if (!lastPlayed) return;
+
     const station = document.querySelector(selectors.lastPlayedURL(lastPlayed));
     if (!station) return;
+    
     const stationName = station.parentElement.dataset.name;
     new Toast(
       t('lastPlayedStation', stationName),
@@ -234,7 +236,7 @@ export default class AudioPlayer {
   _ontimeupdate() {
     !this.$playerElement?.hasAttribute('playing') ? this.$playerElement?.toggleAttribute('playing') : null;
  
-    const currentPlayingElement = this._currentPlayingElement;
+    const currentPlayingElement = this.$currentPlayingElement;
 
     // already marked as playing
     if (currentPlayingElement && currentPlayingElement.hasAttribute('playing')) return;
@@ -258,7 +260,7 @@ export default class AudioPlayer {
    * @returns {void}
    */
   _scrollToStation() {
-    const currentPlayingElement = this._currentPlayingElement;
+    const currentPlayingElement = this.$currentPlayingElement;
     if (!currentPlayingElement) return;
     currentPlayingElement.scrollIntoView({
       behavior: 'smooth',
