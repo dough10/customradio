@@ -8,5 +8,5 @@
 export default function timestamp() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
-  return `# created by ${window.location.origin} [${formattedDate}]\n# name, url\n`;
+  return `# created by ${window.location.origin} [${formattedDate}]\n`;
 }
