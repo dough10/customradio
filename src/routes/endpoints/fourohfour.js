@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
     // Check if any sensitive path segment appears in the requested URL
     for (const sensitive of sensitivePaths) {
       if (requestedPath.includes(sensitive)) {
-        log.security(`Sensitive path accessed: ${requestedPath} | IP: ${req.ip} | User-Agent: ${req.get('User-Agent')}`);
+        log.warning(`Sensitive path accessed: ${requestedPath} | IP: ${req.ip} | User-Agent: ${req.get('User-Agent')}`);
         break;
       }
     }
