@@ -1,13 +1,14 @@
-const Logger = require('../../util/logger.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
-
 module.exports = (req, res) => {
-  const strings = [
-    'Contact: mailto:admin@dough10.me',
-    'Expires: 2026-01-01T06:00:00.000Z'
-  ];
+  const email = process.env.SECURITY_CONTACT || 'admin@dough10.me';
+  const nextYear = new Date().getUTCFullYear() + 1;
+  const expiresDate = new Date(Date.UTC(nextYear, 0, 1)).toISOString();
+  
+  const securityTxt = [
+    `Contact: mailto:${email}`,
+    `Expires: ${expiresDate}`,
+  ].join('\n');
+  
   res.type('text/plain');
-  res.send(strings.join('\n'));
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.send(securityTxt);
 };
