@@ -126,19 +126,6 @@ export default class CustomRadioApp {
   }
 
   /**
-   * reports an event to the matomo analytics service
-   * 
-   * @param {String} category 
-   * @param {String} action 
-   * @param {String} name 
-   */
-  _analyticsTrackEvent(category, action, name) {
-    if (typeof _paq !== 'undefined') {
-      _paq.push(['trackEvent', category, action, name]);
-    }
-  }
-
-  /**
    * Handles errors when fetching stations
    * 
    * @param {Object} error 
@@ -151,7 +138,6 @@ export default class CustomRadioApp {
     }
     console.error(`Error fetching stations: ${error.message}`);
     new Toast(t('stationsError', error.message));
-    this._analyticsTrackEvent('Fetch Error', error.message, '');
   }
 
   /**
@@ -188,7 +174,6 @@ export default class CustomRadioApp {
       const stationList = await this._createStationList(userInput, ev.loadLocal, container);
       this._updateUIStationsList(stationList, container);
       await this._updateGenresDatalist(userInput, ev.loadLocal);
-      if (userInput.length) this._analyticsTrackEvent('Filter', 'Change', userInput);
     } catch (error) {
       this._filterFailed(error);
     } finally {

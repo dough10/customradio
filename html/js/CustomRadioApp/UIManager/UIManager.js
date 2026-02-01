@@ -1,4 +1,3 @@
-import Analytics from './Analytics/Analytics.js';
 import AudioPlayer from './AudioPlayer/AudioPlayer.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import EventManager from '../EventManager/EventManager.js';
@@ -59,7 +58,6 @@ export default class UIManager {
     this._lastTop = 0;
     this._player = new AudioPlayer();
     this._em = new EventManager();
-    this._analytics = new Analytics();
     this._header = new CollapsingHeader();
     this._loadUser(window.user);
 
@@ -104,7 +102,6 @@ export default class UIManager {
    */
   detachListeners() {
     destroyDialogInteractions();
-    this._analytics.destroy();
     this._player.destroy();
     this._header.destroy();
     this._em.removeAll();

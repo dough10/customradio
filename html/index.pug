@@ -29,15 +29,12 @@ html(lang=lang)
     link(rel="manifest" href="customradio.webmanifest")
     link(rel="apple-touch-icon" href="/apple-touch-icon.png")
     link(rel="icon" href="favicon.ico" type="image/x-icon")
-    link(rel="dns-prefetch" href="https://analytics.dough10.me")
-    link(rel="preconnect" href="https://analytics.dough10.me" crossorigin)
     //- link(rel="preload" href="styles.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'")
     //- noscript 
     //-   link(rel='stylesheet' href='styles.min.css')
     link(rel="preload" href="styles.min.css" as="style")
     link(rel='stylesheet' href='styles.min.css')
     script(nonce=nonce, type="text/javascript") window.user = !{JSON.stringify(user)};
-    script(nonce=nonce, type="text/javascript", defer) var _paq = window._paq = window._paq || []; _paq.push(["trackPageView"]); _paq.push(["enableLinkTracking"]); (function() { var a = "https://analytics.dough10.me/"; _paq.push(["setTrackerUrl", a + "matomo.php"]); _paq.push(["setSiteId", "2"]); var e = document, t = e.createElement("script"), p = e.getElementsByTagName("script")[0]; t.async = true; t.src = a + "matomo.js"; p.parentNode.insertBefore(t, p);})();
     title #{title}
     script(nonce=nonce, type="application/ld+json")
       | {"@context":"https://schema.org","@type":"WebSite","name":"radio.txt creator","url":"https://radiotxt.site","description":"An online radio station browser with the ability to export .txt files for use in Hiby digital audio players."}

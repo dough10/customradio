@@ -1,5 +1,9 @@
 {
   "Current": [
+    "Removed Matomo analytics (to improve user privacy and reduce external requests)",
+    "Minor UI tweaks"
+  ],
+  "1.12.9": [
     "Added 'share' button and dialog to UI (allows users to copy the download url for their radio.txt file)",
     "fix issue making context menu appear behind other elements",
     "Minor UI tweaks",
