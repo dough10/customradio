@@ -35,6 +35,7 @@ export default class UIManager {
     this.$userMenuButton = document.querySelector(selectors.userMenuButton);
     this.$main = document.querySelector(selectors.main);
     this.$sharelink = document.querySelector(selectors.sharelink);
+    this.$toggleSelected = document.querySelector(selectors.toggleSelected);
 
     const required = [
       this.$toTop,
@@ -47,7 +48,8 @@ export default class UIManager {
       this.$userMenu,
       this.$userMenuButton,
       this.$main,
-      this.$sharelink
+      this.$sharelink,
+      this.$toggleSelected
     ]
 
     if (required.some(el => !el)) {
@@ -78,6 +80,7 @@ export default class UIManager {
     initDialogInteractions();
 
     this._player.init();
+    this._em.add(this.$toggleSelected, 'click', _ => this.toggleSelectedVisibility(), { passive: true });
     this._em.add(this.$loginButton, 'click', _ => this._loginRedirect(), { passive: true });
     this._em.add(this.$logoutButton, 'click', _ => this._logoutRedirect(), { passive: true });
     this._em.add(this.$userMenuButton, 'click', ev => this._userMenuOpen(ev), { passive: true });
@@ -385,7 +388,7 @@ export default class UIManager {
    */
   loadingStart(container) {
     insertLoadingAnimation(container);
-    this.$stationCount.style.display = 'none';
+    this.$stationCount.parentElement.style.display = 'none';
   }
 
   /**
@@ -398,7 +401,7 @@ export default class UIManager {
   loadingEnd() {
     const loadingEl = document.querySelector(this._selectors.loading);
     if (loadingEl) loadingEl.remove();
-    this.$stationCount.style.removeProperty('display');
+    this.$stationCount.parentElement.style.removeProperty('display');
   }
 
   /**
@@ -410,9 +413,9 @@ export default class UIManager {
   toggleSelectedVisibility() {
     const selected = document.querySelectorAll(this._selectors.selectedStation);
     if (!selected.length) return;
-  
+
     const isHidden = selected[0].style.display === 'none';
-  
+
     selected.forEach(el => {
       el.style.display = isHidden ? 'flex' : 'none';
     });

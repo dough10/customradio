@@ -218,6 +218,9 @@ const selectors = {
 
   /** @type {String} last name input */
   lastname: '.lastname',
+
+  /** @type {String} selected visibility toggle */
+  toggleSelected: '#toggle-selected',
 };
 
 export default selectors;
