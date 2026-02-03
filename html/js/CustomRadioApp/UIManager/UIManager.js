@@ -81,20 +81,27 @@ export default class UIManager {
   */
   attachListeners({ onFilterChange, onReset }) {
     initDialogInteractions();
-
     this._player.init();
-    this._em.add(this.$toggleSelected, 'click', _ => this.toggleSelectedVisibility(), { passive: true });
-    this._em.add(this.$loginButton, 'click', _ => this._loginRedirect(), { passive: true });
-    this._em.add(this.$logoutButton, 'click', _ => this._logoutRedirect(), { passive: true });
-    this._em.add(this.$userMenuButton, 'click', ev => this._userMenuOpen(ev), { passive: true });
-    this._em.add(this.$filter, 'change', onFilterChange, { passive: true });
-    this._em.add(this.$filter, 'focus', ev => this._filterFocus(ev), { passive: true });
-    this._em.add(this.$resetButton, 'click', ev => {
-      this._filterFocus(ev);
-      onReset();
-    }, { passive: true });
-    this._em.add(this.$toTop, 'click', _ => this._toTopHandler(), { passive: true });
-    this._em.add(this.$downloadButton, 'click', _ => this._dl(), { passive: true });
+
+    const listeners = [
+      {el: this.$toggleSelected, event: 'click', handler: _ => this.toggleSelectedVisibility() },
+      {el: this.$loginButton, event: 'click', handler: _ => this._loginRedirect() },
+      {el: this.$logoutButton, event: 'click', handler: _ => this._logoutRedirect() },
+      {el: this.$userMenuButton, event: 'click', handler: ev => this._userMenuOpen(ev) },
+      {el: this.$filter, event: 'change', handler: onFilterChange },
+      {el: this.$filter, event: 'focus', handler: ev => this._filterFocus(ev) },
+      {el: this.$resetButton, event: 'click', handler: ev => {
+        this._filterFocus(ev);
+        onReset();
+      } },
+      {el: this.$toTop, event: 'click', handler: _ => this._toTopHandler() },
+      {el: this.$downloadButton, event: 'click', handler: _ => this._dl() }
+    ];
+
+    for (const {el, event, handler} of listeners) {
+      this._em.add(el, event, handler, { passive: true });
+    }
+    
     document.querySelectorAll('.menu-button').forEach(btn => {
       this._em.add(btn, 'click', _ => this._userMenuClose(), { passive: true });
     });
