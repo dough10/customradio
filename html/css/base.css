@@ -189,3 +189,7 @@ ul {
 .margin-top-24 {
   margin-top: 24px;
 }
+
+.inverted {
+  transform: rotate(180deg);
+}

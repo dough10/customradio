@@ -63,6 +63,8 @@ export default class UIManager {
     this._header = new CollapsingHeader();
     this._loadUser(window.user);
 
+    this._selectedHidden = false;
+
     // news();
   }
   
@@ -414,10 +416,13 @@ export default class UIManager {
     const selected = document.querySelectorAll(this._selectors.selectedStation);
     if (!selected.length) return;
 
-    const isHidden = selected[0].style.display === 'none';
+    this._selectedHidden = !this._selectedHidden;
 
+    const icon = this.$toggleSelected.querySelector('svg');
+
+    this._selectedHidden ? icon.classList.remove('inverted') : icon.classList.add('inverted');
     selected.forEach(el => {
-      el.style.display = isHidden ? 'flex' : 'none';
+      el.style.display = this._selectedHidden ? 'flex' : 'none';
     });
   }
 }
