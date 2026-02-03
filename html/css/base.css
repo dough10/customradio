@@ -96,6 +96,14 @@ main>div {
   margin: 0 auto;
 }
 
+main.hide-selected>#stations>li[selected] {
+  display: none;
+}
+
+main.hide-selected>div>button>svg {
+  transform: rotate(180deg);
+}
+
 a {
   color: inherit;
 }
@@ -188,8 +196,4 @@ ul {
 
 .margin-top-24 {
   margin-top: 24px;
-}
-
-.inverted {
-  transform: rotate(180deg);
 }

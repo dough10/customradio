@@ -415,15 +415,8 @@ export default class UIManager {
   toggleSelectedVisibility() {
     const selected = document.querySelectorAll(this._selectors.selectedStation);
     if (!selected.length) return;
-
     this._selectedHidden = !this._selectedHidden;
-
-    const icon = this.$toggleSelected.querySelector('svg');
-
-    this._selectedHidden ? icon.classList.remove('inverted') : icon.classList.add('inverted');
-    selected.forEach(el => {
-      el.style.display = this._selectedHidden ? 'flex' : 'none';
-    });
+    this._selectedHidden ? this.$main.classList.add('hide-selected') : this.$main.classList.remove('hide-selected');
   }
 }
 
