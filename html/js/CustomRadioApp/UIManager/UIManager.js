@@ -219,6 +219,7 @@ export default class UIManager {
    * @function
    * 
    * @param {Object} user
+   * @param {String} user.picture
    * @param {Number} size
    * @returns {HTMLElement}
    */
@@ -232,6 +233,15 @@ export default class UIManager {
 
   /**
    * loads the user data to UI
+   * 
+   * @private
+   * @function
+   * 
+   * @param {Object} user
+   * @param {String} user.firstName
+   * @param {String} user.lastName
+   * @param {String} user.picture
+   * @return {void}
    */
   _loadUser(user) {
     this.$logoutButton.style.display = 'none';
