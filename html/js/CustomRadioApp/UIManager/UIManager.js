@@ -77,6 +77,7 @@ export default class UIManager {
    * @param {Object} param0
    * @param {Function} param0.onFilterChange
    * @param {Function} param0.onReset 
+   * @return {void}
   */
   attachListeners({ onFilterChange, onReset }) {
     initDialogInteractions();
@@ -104,6 +105,8 @@ export default class UIManager {
    * 
    * @public
    * @function
+   * 
+   * @return {void}
    */
   detachListeners() {
     destroyDialogInteractions();
@@ -118,6 +121,7 @@ export default class UIManager {
    * 
    * @public
    * @readonly
+   * 
    * @type {AudioPlayer}
    * @return {AudioPlayer}
    */
@@ -130,6 +134,7 @@ export default class UIManager {
    * 
    * @public
    * @readonly
+   * 
    * @type {CollapsingHeader}
    * @return {CollapsingHeader}
    */
@@ -139,6 +144,11 @@ export default class UIManager {
 
   /**
    * Closes the user menu
+   * 
+   * @private
+   * @function
+   * 
+   * @returns {void}
    */
   _userMenuClose() {
     const bd = document.querySelector('.backdrop');
@@ -157,6 +167,9 @@ export default class UIManager {
    * Toggles the user menu open/close state
    *
    * @private
+   * @function
+   * 
+   * @param {Event} ev
    * @returns {void}
    */
   async _userMenuOpen(ev) {
@@ -303,7 +316,8 @@ export default class UIManager {
    * @private
    * @function
    * 
-   * @param {Event} ev 
+   * @param {Event} ev
+   * @return {void}
    */
   _filterFocus(ev) {
     if (document.activeElement === ev.target && this.$main.scrollTop !== 0) {
@@ -318,7 +332,8 @@ export default class UIManager {
    * @public
    * @function 
    * 
-   * @param {HTMLElement} parent 
+   * @param {Number} scrollTop
+   * @return {void}
    */
   onScroll(scrollTop) {
     this._header.scroll(scrollTop);
@@ -335,7 +350,8 @@ export default class UIManager {
    * @function
    * 
    * @param {Number} selected 
-   * @param {Number} total 
+   * @param {Number} total
+   * @return {void}
    */
   setCounts(selected, total) {
     toggleActiveState(this.$downloadButton, selected);
@@ -365,6 +381,9 @@ export default class UIManager {
    * 
    * @public
    * @function
+   * 
+   * @param {Array<String>} genres - list of genre values
+   * @return {void}
    */
   async loadGenres(genres) {
     const options = genres.map(createOption);
@@ -376,6 +395,8 @@ export default class UIManager {
    * 
    * @private
    * @function
+   * 
+   * @return {void}
    */
   _toTopHandler() {
     if (!this.$main) {
@@ -397,6 +418,7 @@ export default class UIManager {
    * @function
    * 
    * @param {HTMLElement} container - element to place a loading animation
+   * @return {void}
    */
   loadingStart(container) {
     insertLoadingAnimation(container);
@@ -409,6 +431,8 @@ export default class UIManager {
    * 
    * @public
    * @function
+   * 
+   * @return {void}
    */
   loadingEnd() {
     const loadingEl = document.querySelector(this._selectors.loading);
@@ -421,6 +445,8 @@ export default class UIManager {
    * 
    * @public
    * @function
+   * 
+   * @return {void}
    */
   toggleSelectedVisibility() {
     const selected = document.querySelectorAll(this._selectors.selectedStation);
@@ -434,8 +460,7 @@ export default class UIManager {
 /**
  * creates a datalist option element
  * 
- * @param {String} str 
- * 
+ * @param {String} str - value for the option
  * @returns {HTMLElement}
  */
 function createOption(str) {
