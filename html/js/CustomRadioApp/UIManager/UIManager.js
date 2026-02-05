@@ -18,6 +18,13 @@ const NAMESPACE = {
   backdropClick: 'backdrop-click'
 };
 
+const EVENTNAMES = {
+  click: 'click',
+  change: 'change',
+  focus: 'focus',
+  transitionend: 'transitionend'
+}
+
 /**
  * manages UI elements
  */
@@ -57,7 +64,6 @@ export default class UIManager {
     }
 
     this._selectors = s || selectors;
-    this._lastTop = 0;
     this._player = new AudioPlayer();
     this._em = new EventManager();
     this._header = new CollapsingHeader();
@@ -84,26 +90,54 @@ export default class UIManager {
     this._player.init();
 
     const listeners = [
-      {el: this.$toggleSelected, event: 'click', handler: _ => this.toggleSelectedVisibility() },
-      {el: this.$loginButton, event: 'click', handler: _ => this._loginRedirect() },
-      {el: this.$logoutButton, event: 'click', handler: _ => this._logoutRedirect() },
-      {el: this.$userMenuButton, event: 'click', handler: ev => this._userMenuOpen(ev) },
-      {el: this.$filter, event: 'change', handler: onFilterChange },
-      {el: this.$filter, event: 'focus', handler: ev => this._filterFocus(ev) },
-      {el: this.$resetButton, event: 'click', handler: ev => {
-        this._filterFocus(ev);
-        onReset();
-      } },
-      {el: this.$toTop, event: 'click', handler: _ => this._toTopHandler() },
-      {el: this.$downloadButton, event: 'click', handler: _ => this._dl() }
+      {
+        el: this.$toggleSelected, 
+        event: EVENTNAMES.click, 
+        handler: _ => this.toggleSelectedVisibility() 
+      }, {
+        el: this.$loginButton, 
+        event: EVENTNAMES.click, 
+        handler: _ => this._loginRedirect() 
+      }, {
+        el: this.$logoutButton, 
+        event: EVENTNAMES.click, 
+        handler: _ => this._logoutRedirect() 
+      }, {
+        el: this.$userMenuButton, 
+        event: EVENTNAMES.click, 
+        handler: ev => this._userMenuOpen(ev) 
+      }, {
+        el: this.$filter, 
+        event: EVENTNAMES.change, 
+        handler: onFilterChange 
+      }, {
+        el: this.$filter, 
+        event: EVENTNAMES.focus, 
+        handler: ev => this._filterFocus(ev) 
+      }, {
+        el: this.$resetButton, 
+        event: EVENTNAMES.click, 
+        handler: ev => {
+          this._filterFocus(ev);
+          onReset();
+        } 
+      }, {
+        el: this.$toTop, 
+        event: EVENTNAMES.click, 
+        handler: _ => this._toTopHandler() 
+      }, {
+        el: this.$downloadButton, 
+        event: EVENTNAMES.click, 
+        handler: _ => this._dl() 
+      }
     ];
 
     for (const {el, event, handler} of listeners) {
-      this._em.add(el, event, handler, { passive: true });
+      this._em.add(el, event, handler);
     }
     
     document.querySelectorAll('.menu-button').forEach(btn => {
-      this._em.add(btn, 'click', _ => this._userMenuClose(), { passive: true });
+      this._em.add(btn, EVENTNAMES.click, _ => this._userMenuClose());
     });
   }
 
@@ -160,10 +194,13 @@ export default class UIManager {
   _userMenuClose() {
     const bd = document.querySelector('.backdrop');
     if (!bd) return;
-    this._em.add(bd, 'transitionend', _ => {
+    const cleanup = () => {
+      if (!bd) return;
       this._em.removeByNamespace(NAMESPACE.backdropClick);
       bd.remove();
-    }, null, NAMESPACE.backdropClick);
+    };
+    this._em.add(bd, EVENTNAMES.transitionend, _ => cleanup(), null, NAMESPACE.backdropClick);
+    setTimeout(() => cleanup(), 300);
     requestAnimationFrame(_ => {
       this.$userMenu.removeAttribute('open');
       bd.removeAttribute('visible');
@@ -180,12 +217,13 @@ export default class UIManager {
    * @returns {void}
    */
   async _userMenuOpen(ev) {
+    if (document.querySelector('.backdrop')) return;
     const backdrop = document.createElement('div');
     backdrop.classList.add('backdrop');
-    this._em.add(backdrop, 'click', _ => this._userMenuClose(), { passive: true }, NAMESPACE.backdropClick);
+    this._em.add(backdrop, EVENTNAMES.click, _ => this._userMenuClose(), null, NAMESPACE.backdropClick);
     document.body.appendChild(backdrop);
     
-    const { top } = ev.target.getBoundingClientRect();
+    const { top } = this.$userMenuButton.getBoundingClientRect();
     const left = 8;
     this.$userMenu.style.top = `${top + 8}px`;
     this.$userMenu.style.left = `${left}px`;
@@ -346,7 +384,6 @@ export default class UIManager {
     this._header.scroll(scrollTop);
     const closeToTop = scrollTop < (window.innerHeight * 0.2);
     closeToTop ? this.$toTop.classList.add('hidden') : this.$toTop.classList.remove('hidden');
-    this._lastTop = scrollTop;
   }
   
 
@@ -458,8 +495,7 @@ export default class UIManager {
   toggleSelectedVisibility() {
     const selected = document.querySelectorAll(this._selectors.selectedStation);
     if (!selected.length) return;
-    this._selectedHidden = !this._selectedHidden;
-    this._selectedHidden ? this.$main.classList.add('hide-selected') : this.$main.classList.remove('hide-selected');
+    this._selectedHidden = this.$main.classList.toggle('hide-selected');
   }
 }
 
