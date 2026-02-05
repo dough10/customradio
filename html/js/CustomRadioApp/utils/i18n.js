@@ -5,6 +5,7 @@ import { en } from './lang/en.js';
 import { es } from './lang/es.js';
 import { fi } from './lang/fi.js';
 import { fr } from './lang/fr.js';
+import { he } from './lang/he.js';
 import { hu } from './lang/hu.js';
 import { it } from './lang/it.js';
 import { ja } from './lang/ja.js';
@@ -45,7 +46,8 @@ const languages = {
   fi,
   hu,
   ro,
-  vi
+  vi,
+  he
 };
 
 let currentLang = 'en';
