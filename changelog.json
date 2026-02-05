@@ -1,5 +1,6 @@
 {
   "Current": [
+    "Added option to hide selected stations",
     "Removed Matomo analytics (to improve user privacy and reduce external requests)",
     "Minor UI tweaks"
   ],
