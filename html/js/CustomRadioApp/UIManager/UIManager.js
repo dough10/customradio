@@ -31,18 +31,26 @@ const EVENTNAMES = {
 export default class UIManager {
 
   constructor(s) {
-    this.$toTop = document.querySelector(selectors.toTop);
-    this.$filter = document.querySelector(selectors.filter);
-    this.$downloadButton = document.querySelector(selectors.downloadButton);
-    this.$stationCount = document.querySelector(selectors.stationCount);
-    this.$resetButton = document.querySelector(selectors.resetButton);
-    this.$loginButton = document.querySelector(selectors.login);
-    this.$logoutButton = document.querySelector(selectors.logout);
-    this.$userMenu = document.querySelector(selectors.userMenu);
-    this.$userMenuButton = document.querySelector(selectors.userMenuButton);
-    this.$main = document.querySelector(selectors.main);
-    this.$sharelink = document.querySelector(selectors.sharelink);
-    this.$toggleSelected = document.querySelector(selectors.toggleSelected);
+    this._selectors = s || selectors;
+    this._player = new AudioPlayer();
+    this._em = new EventManager();
+    this._header = new CollapsingHeader();
+    this._loadUser(window.user);
+
+    this._selectedHidden = false;
+
+    this.$toTop = document.querySelector(this._selectors.toTop);
+    this.$filter = document.querySelector(this._selectors.filter);
+    this.$downloadButton = document.querySelector(this._selectors.downloadButton);
+    this.$stationCount = document.querySelector(this._selectors.stationCount);
+    this.$resetButton = document.querySelector(this._selectors.resetButton);
+    this.$loginButton = document.querySelector(this._selectors.login);
+    this.$logoutButton = document.querySelector(this._selectors.logout);
+    this.$userMenu = document.querySelector(this._selectors.userMenu);
+    this.$userMenuButton = document.querySelector(this._selectors.userMenuButton);
+    this.$main = document.querySelector(this._selectors.main);
+    this.$sharelink = document.querySelector(this._selectors.sharelink);
+    this.$toggleSelected = document.querySelector(this._selectors.toggleSelected);
 
     const required = [
       this.$toTop,
@@ -62,14 +70,6 @@ export default class UIManager {
     if (required.some(el => !el)) {
       throw new Error("Initialization failed — missing DOM elements.");
     }
-
-    this._selectors = s || selectors;
-    this._player = new AudioPlayer();
-    this._em = new EventManager();
-    this._header = new CollapsingHeader();
-    this._loadUser(window.user);
-
-    this._selectedHidden = false;
 
     // news();
   }
