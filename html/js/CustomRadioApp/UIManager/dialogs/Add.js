@@ -25,9 +25,25 @@ export default class AddStreamDialog extends DialogBase {
 
     if (!this.$dialog || !this.$trigger || !this.$form || !this.$input) return;
 
-    this.em.add(this.$trigger, "click", () => this.open());
-    this.em.add(this.$input, "input", () => this._validate());
-    this.em.add(this.$form, "submit", ev => this._submit(ev));
+    const listeners = [
+      { 
+        el: this.$trigger, 
+        event: "click", 
+        handler: () => this.open()
+      }, { 
+        el: this.$input, 
+        event: "input", 
+        handler: () => this._validate()
+      }, { 
+        el: this.$form, 
+        event: "submit", 
+        handler: ev => this._submit(ev)
+      }
+    ];
+
+    for (const { el, event, handler } of listeners) {
+      this.em.add(el, event, handler);
+    }
   }
 
   /**

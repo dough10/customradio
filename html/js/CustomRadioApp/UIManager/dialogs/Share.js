@@ -43,12 +43,43 @@ export default class ShareDialog extends DialogBase {
       return;
     }
 
-    this.em.add(this.$trigger, "click", () => this.open());
-    this.em.add(this.$copy, "click", () => this._copy());
-    this.em.add(this.$fb, "click", () => this._facebook());
-    this.em.add(this.$tw, "click", () => this._twitter());
-    this.em.add(this.$email, "click", () => this._email());
-    this.em.add(this.$sms, "click", () => this._sms());
+    const listeners = [
+      { 
+        el: this.$trigger, 
+        event: "click", 
+        handler: () => this.open() 
+
+      }, { 
+        el: this.$copy, 
+        event: "click", 
+        handler: () => this._copy() 
+
+      }, { 
+        el: this.$fb, 
+        event: "click", 
+        handler: () => this._facebook() 
+
+      }, { 
+        el: this.$tw, 
+        event: "click", 
+        handler: () => this._twitter() 
+
+      }, { 
+        el: this.$email, 
+        event: "click", 
+        handler: () => this._email() 
+
+      }, { 
+        el: this.$sms, 
+        event: "click", 
+        handler: () => this._sms() 
+
+      }
+    ];
+
+    for (const { el, event, handler } of listeners) {
+      this.em.add(el, event, handler);
+    }
   }
 
   /**
