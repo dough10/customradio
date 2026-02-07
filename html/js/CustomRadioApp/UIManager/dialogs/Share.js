@@ -47,33 +47,27 @@ export default class ShareDialog extends DialogBase {
       { 
         el: this.$trigger, 
         event: "click", 
-        handler: () => this.open() 
-
+        handler: () => this.open()
       }, { 
         el: this.$copy, 
         event: "click", 
-        handler: () => this._copy() 
-
+        handler: () => this._copy()
       }, { 
         el: this.$fb, 
         event: "click", 
-        handler: () => this._facebook() 
-
+        handler: () => this._facebook()
       }, { 
         el: this.$tw, 
         event: "click", 
-        handler: () => this._twitter() 
-
+        handler: () => this._twitter()
       }, { 
         el: this.$email, 
         event: "click", 
-        handler: () => this._email() 
-
+        handler: () => this._email()
       }, { 
         el: this.$sms, 
         event: "click", 
-        handler: () => this._sms() 
-
+        handler: () => this._sms()
       }
     ];
 
