@@ -45,16 +45,6 @@ async function postStreamIssue(id, error, attempts = 3) {
 }
 
 /**
- * Send event to matomo
- * 
- * @param {String} event 
- * @param {String} str 
- */
-function _paqToggle(event, str) {
-  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', event, str]);
-}
-
-/**
  * reports station in user list state
  * 
  * @param {String} id 
@@ -97,11 +87,6 @@ function toggleSelect(ev) {
 
   const selected = el.hasAttribute('selected');
   reportInList(el.id, selected);
-  if (selected) {
-    _paqToggle('Add to file', el.dataset.url);
-  } else {
-    _paqToggle('Remove from file', el.dataset.url);
-  }
 }
 
 /**
@@ -143,7 +128,6 @@ async function playStream(ev, player) {
     console.error(str);
     postStreamIssue(id, error.message);
   }
-  if (typeof _paq !== 'undefined') _paq.push(['trackEvent', 'Play stream', url]);
 }
 
 /**

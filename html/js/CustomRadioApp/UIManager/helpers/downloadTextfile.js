@@ -27,8 +27,6 @@ export default async function downloadTextfile(ev, scopedStamp = timestamp) {
 
   document.body.append(link);
 
-  if (typeof _paq !== 'undefined') _paq.push(['trackLink', 'download', link.href]);
-
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(link.href);
