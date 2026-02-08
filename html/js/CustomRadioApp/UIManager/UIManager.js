@@ -35,7 +35,6 @@ export default class UIManager {
     this._player = new AudioPlayer();
     this._em = new EventManager();
     this._header = new CollapsingHeader();
-    this._loadUser(window.user);
 
     this._selectedHidden = false;
 
@@ -71,6 +70,7 @@ export default class UIManager {
       throw new Error("Initialization failed — missing DOM elements.");
     }
 
+    this._loadUser(window.user);
     // news();
   }
   
