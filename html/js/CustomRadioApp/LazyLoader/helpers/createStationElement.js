@@ -28,7 +28,7 @@ async function csrf(res) {
  * 
  * @returns {void}
  */
-async function postStreamIssue(id, error) {
+async function postStreamIssue(id, error, attempts = 3) {
   try {
     const url = new URL('/stream-issue', window.location.origin);
     const response = await retry(_ => fetch(url.toString(), _OPTIONS({
@@ -37,8 +37,8 @@ async function postStreamIssue(id, error) {
     })));
     const result = await response.json();
     console.log(result.message);
-    if (!await csrf(result)) return;
-    postStreamIssue(id, error);
+    if (!await csrf(result) || attempts === 0) return;
+    postStreamIssue(id, error, attempts - 1);
   } catch (err) {
     console.error(`Error reporting stream issue for ID ${id}:`, err);
   }
@@ -62,13 +62,13 @@ function _paqToggle(event, str) {
  * 
  * @returns {void}
  */
-async function reportInList(id, state) {
+async function reportInList(id, state, attempts = 1) {
   try {
     const url = new URL(`/reportInList/${id}`, window.location.origin);
     url.searchParams.append('state', state ? '1' : '0');
     const res = await retry(_ => fetch(url.toString(), _OPTIONS()));
-    if (!await csrf(res)) return;
-    reportInList(id, state);
+    if (!await csrf(res) || attempts === 0) return;
+    reportInList(id, state, attempts - 1);
   } catch(e) {
     console.error(e);
   }
