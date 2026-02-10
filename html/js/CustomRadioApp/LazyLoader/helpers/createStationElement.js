@@ -1,3 +1,5 @@
+import EventManager from '../../EventManager/EventManager.js';
+
 import Toast from '../../Toast/Toast.js';
 import createSmallButton from './createSmallButton.js';
 import contextMenu from './contextMenu.js';
@@ -11,6 +13,8 @@ import retry from '../../utils/retry.js';
 import sleep from '../../utils/sleep.js';
 
 const LONG_PRESS_DURATION = 500;
+
+const em = new EventManager();
 
 async function csrf(res) {
   if (![403, 419, 440].includes(res?.status)) return false;
@@ -207,20 +211,20 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
   li.dataset.icon = icon;
   li.dataset.homepage = homepage;
 
-  li.addEventListener('contextmenu', contextMenu);
+  em.add(li, 'contextmenu', contextMenu);
 
-  li.addEventListener('touchstart', ev => {
+  em.add(li, 'touchstart', ev => {
     isScrolling = false;
     pressTimer = setTimeout(_ => {
       if (!isScrolling) contextMenu(ev);
     }, LONG_PRESS_DURATION);
   }, passive);
 
-  li.addEventListener('touchend', _ => {
+  em.add(li, 'touchend', _ => {
     clearTimeout(pressTimer);
   }, passive);
-
-  li.addEventListener('touchmove', _ => {
+  
+  em.add(li, 'touchmove', _ => {
     isScrolling = true;
   }, passive);
 
