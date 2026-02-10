@@ -115,7 +115,6 @@ module.exports = (app, httpRequestCounter) => {
           ],
           scriptSrc: [
             "'self'",
-            "https://analytics.dough10.me",
             (req, res) => `'nonce-${res.locals.nonce}'`,
           ],
           styleSrc: [
@@ -125,7 +124,6 @@ module.exports = (app, httpRequestCounter) => {
           imgSrc: [
             "'self'", 
             "data:",
-            "https://analytics.dough10.me",
             "https://workoscdn.com/"
           ],
           connectSrc: [
