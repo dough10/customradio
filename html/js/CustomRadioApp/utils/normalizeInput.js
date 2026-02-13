@@ -11,7 +11,7 @@ export default function normalizeInput(str) {
   } catch {
     return str
       .toLowerCase()
-      .replace(/&|\band\b|(?:\bn\b|'n'|n'|n)(?=\s|$|\W)/g, ' and ') // Normalize 'n' and '&' to 'and'
+      .replace(/&|\band\b|(?:'n'|n')(?=\s|$|\W)/g, ' and ') // Normalize 'n' and '&' to 'and'
       .normalize("NFD").replace(/[\u0300-\u036f]/g, '') // Remove diacritics
       .replace(/\/+/g, '/') // Normalize multiple slashes to a single slash
       .replace(/-/g, ' ') // Replace hyphens with spaces
