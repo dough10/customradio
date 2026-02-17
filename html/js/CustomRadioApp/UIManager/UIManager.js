@@ -398,8 +398,10 @@ export default class UIManager {
    * @return {void}
    */
   setCounts(selected, total) {
-    toggleActiveState(this.$downloadButton, selected);
-    toggleActiveState(this.$toggleSelected, selected);
+    [
+      this.$downloadButton,
+      this.$toggleSelected
+    ].filter(Boolean).forEach(el => toggleActiveState(el, selected));
     this.$stationCount.textContent = t('stations', total, selected);
   }
 

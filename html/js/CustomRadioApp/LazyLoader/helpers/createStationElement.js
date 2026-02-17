@@ -87,8 +87,10 @@ function toggleSelect(ev) {
   const all = Array.from(el.parentNode.querySelectorAll(selectors.selectedStation));
 
   // show / hide download button
-  toggleActiveState(document.querySelector(selectors.downloadButton), all.length);
-  toggleActiveState(document.querySelector(selectors.toggleSelected), all.length);
+  [
+    document.querySelector(selectors.downloadButton),
+    document.querySelector(selectors.toggleSelected)
+  ].filter(Boolean).forEach(el => toggleActiveState(el, all.length));
 
   const selected = el.hasAttribute('selected');
   reportInList(el.id, selected);
