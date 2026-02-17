@@ -5,11 +5,5 @@
  * @param {Number} selected 
  */
 export default function toggleActiveState(button, selected) {
-  if (selected > 0) {
-    button.removeAttribute('disabled');
-    return;
-  }
-  if (!button.hasAttribute('disabled')) {
-    button.toggleAttribute('disabled');
-  }
+  selected > 0 ? button.removeAttribute('disabled') : button.setAttribute('disabled', '');
 }
