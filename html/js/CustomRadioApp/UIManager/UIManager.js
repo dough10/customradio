@@ -399,6 +399,7 @@ export default class UIManager {
    */
   setCounts(selected, total) {
     toggleActiveState(this.$downloadButton, selected);
+    selected ? this.$toggleSelected.removeAttribute('disabled') : this.$toggleSelected.setAttribute('disabled', true);
     this.$stationCount.textContent = t('stations', total, selected);
   }
 
