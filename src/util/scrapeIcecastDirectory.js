@@ -87,7 +87,7 @@ async function processStream(entry, length, sql) {
       url: stream.url,
       genre: stream.icyGenre || entry.genre[0] || 'Unknown',
       online: stream.isLive,
-      'content-type': stream.content || 'Unknown',
+      'content-type': stream.content,
       bitrate: stream.bitrate || 0,
       icon: 'Unknown',
       homepage: await retry(() => testHomepageConnection(stream.icyurl)) || 'Unknown',
