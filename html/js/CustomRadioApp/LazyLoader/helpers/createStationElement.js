@@ -29,10 +29,10 @@ async function csrf(res) {
  * 
  * @param {String} url 
  * @param {Object} error 
- * 
+ * @param {Number} attempts - number of retry attempts left
  * @returns {void}
  */
-async function postStreamIssue(id, error, attempts = 3) {
+async function postStreamIssue(id, error, attempts = 1) {
   try {
     const url = new URL('/stream-issue', window.location.origin);
     const response = await retry(_ => fetch(url.toString(), _OPTIONS({
@@ -53,6 +53,7 @@ async function postStreamIssue(id, error, attempts = 3) {
  * 
  * @param {String} id 
  * @param {Number} state 
+ * @param {Number} attempts - number of retry attempts left
  * 
  * @returns {void}
  */
