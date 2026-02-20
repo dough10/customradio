@@ -46,9 +46,7 @@ export default class LazyLoader {
     this._insertLoadingAnimation = loadingAnimation || insertLoadingAnimation;
 
     // bind this to the class instance
-    this._resizeHandler = this._onResize.bind(this);
-    this._scrollHandler = this._onScroll.bind(this);
-    this._debouncedLoad = debounce(this._load.bind(this), 100);
+    this._debouncedLoad = debounce(this.load.bind(this), 100);
 
     if (!this._container || !this._container.parentElement) {
       throw new Error('LazyLoader: container must exist and have a parent element.');
@@ -56,10 +54,26 @@ export default class LazyLoader {
     
     this._em = new EventManager();
 
-    this._em.add(this._parent, this._em.types.scroll, this._scrollHandler, { passive: true });
-    this._em.add(window, this._em.types.resize, this._resizeHandler, { passive: true });
+    const listeners = [
+      { 
+        type: this._em.types.scroll, 
+        handler: _ => this._onScroll(),
+        options: { passive: true },
+        target: this._parent,
+      },
+      { 
+        type: this._em.types.resize,
+        handler: _ => this._onResize(),
+        options: { passive: true },
+        target: window,
+      },
+    ];
 
-    this._load();
+    for (const {type, handler, options, target} of listeners) {
+      this._em.add(target, type, handler, options);
+    }
+
+    this.load();
   }
   
   /**
@@ -77,7 +91,7 @@ export default class LazyLoader {
     // if the user scrolled to the bottom of the container, load more elements
     const loadThreshold = (ELEMENT_HEIGHT * 4) + LI_BOTTOM_MARGIN;
     if (remainingScroll <= loadThreshold) {
-      this._load();
+      this.load();
     }
   }
 
@@ -140,7 +154,7 @@ export default class LazyLoader {
    * 
    * @returns {void}
    */
-  _load() {
+  load() {
     if (this._loading || this._ndx >= this._list.length) return;
     this._setLoading(true);
     try{
@@ -175,7 +189,7 @@ export default class LazyLoader {
     this._list = newList;
     this._ndx = 0;
     this._pullNumber = getPullCount();
-    this._load();
+    this.load();
   }  
 
   /**

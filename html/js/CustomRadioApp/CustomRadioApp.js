@@ -109,6 +109,7 @@ export default class CustomRadioApp {
       this._uiManager.audioPlayer,                         // audio player instance
       scrollTop => this._uiManager.onScroll(scrollTop)     // scroll handler
     );
+    this._uiManager.lzldr = this._lzldr;
   }
 
   /**

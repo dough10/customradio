@@ -176,6 +176,10 @@ export default class UIManager {
     return this._header;
   }
 
+  set lzldr(value) {
+    this._lzldr = value;
+  }
+
   /**
    * Closes the user menu
    * 
@@ -492,6 +496,9 @@ export default class UIManager {
     const selected = document.querySelectorAll(this._selectors.selectedStation);
     if (!selected.length) return;
     this._selectedHidden = this.$main.classList.toggle('hide-selected');
+    if (this._lzldr) {
+      this._lzldr.load();
+    }
   }
 }
 
