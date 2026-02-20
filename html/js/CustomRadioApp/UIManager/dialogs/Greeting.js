@@ -22,7 +22,7 @@ export default class GreetingDialog extends DialogBase {
       return;
     }
 
-    this.em.add(this.$dialog, 'transitionend', _ => this._afterTransition());
+    this.em.add(this.$dialog, this.em.types.transitionend, _ => this._afterTransition());
     requestAnimationFrame(_ => super.open());
   }
 

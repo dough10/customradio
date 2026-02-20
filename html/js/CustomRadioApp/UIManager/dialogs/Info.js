@@ -18,7 +18,7 @@ export default class InfoDialog extends DialogBase {
 
     if (!this.$dialog || !this.$trigger) return;
 
-    this.em.add(this.$trigger, "click", () => this.open());
+    this.em.add(this.$trigger, this.em.types.click, () => this.open());
   }
 
   /**

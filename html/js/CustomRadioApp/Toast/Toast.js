@@ -111,10 +111,10 @@ export default class Toast {
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'assertive');
 
-    em.add(toast, 'transitionend', this._transitionEnd, true, NAMESPACES.OPEN_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener`) : null;
-    em.add(toast, 'click', this._clicked, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add click listener`) : null;
-    em.add(toast, 'mouseenter', this._mouseIn, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseenter listener`) : null;
-    em.add(toast, 'mouseleave', this._mouseOut, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseleave listener`) : null;
+    em.add(toast, em.types.transitionend, this._transitionEnd, true, NAMESPACES.OPEN_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener`) : null;
+    em.add(toast, em.types.click, this._clicked, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add click listener`) : null;
+    em.add(toast, em.types.mouseenter, this._mouseIn, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseenter listener`) : null;
+    em.add(toast, em.types.mouseleave, this._mouseOut, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseleave listener`) : null;
     return toast;
   }
 
@@ -225,7 +225,7 @@ export default class Toast {
 
     // attach listener for closing transition
     // element will be deleted after
-    em.add(this.toast, 'transitionend', this._removeToast, true, NAMESPACES.CLOSE_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener for closing animation`) : null;
+    em.add(this.toast, em.types.transitionend, this._removeToast, true, NAMESPACES.CLOSE_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener for closing animation`) : null;
     requestAnimationFrame(() => {
       this.toast.removeAttribute('opened');
     });

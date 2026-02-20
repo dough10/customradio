@@ -10,6 +10,32 @@
  * eventManager.removeAll(); // Removes all listeners
  */
 export default class EventManager {
+  types = {
+    click: 'click',
+    change: 'change',
+    scroll: 'scroll',
+    resize: 'resize',
+    input: 'input',
+    focus: 'focus',
+    blur: 'blur',
+    submit: 'submit',
+    keydown: 'keydown',
+    keyup: 'keyup',
+    mouseover: 'mouseover',
+    mouseout: 'mouseout',
+    mouseenter: 'mouseenter',
+    mouseleave: 'mouseleave',
+    transitionend: 'transitionend',
+    animationend: 'animationend',
+    touchstart: 'touchstart',
+    touchmove: 'touchmove',
+    touchend: 'touchend',
+    touchcancel: 'touchcancel',
+    online: 'online',
+    offline: 'offline',
+    error: 'error',
+  };
+
   constructor() {
     this.listeners = [];
   }

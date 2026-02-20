@@ -300,7 +300,7 @@ export default class AudioPlayer {
     const slider = document.querySelector(selectors.volumeSlider);
     slider.value = localStorage.getItem('volume') ?? 100;
     this.$player.volume = slider.value / 100;
-    this._em.add(slider, 'input', this._setVolume, true);
+    this._em.add(slider, this._em.types.input, this._setVolume, true);
   }
 
   /**
@@ -543,10 +543,10 @@ export default class AudioPlayer {
     
     this._notMobile ? this._setVolumeSlider() : this._hideVolumeSlider();
 
-    this._em.add(window, 'offline', this._handleOffline);
-    this._em.add(window, 'online', this._handleOnline);
-    this._em.add(window, 'keypress', this._onKeyPress);
-    this._em.add(this.$name, 'click', this._scrollToStation);
-    this._em.add(this.$smallButton, 'click', this._togglePlay);
+    this._em.add(window, this._em.types.offline, this._handleOffline);
+    this._em.add(window, this._em.types.online, this._handleOnline);
+    this._em.add(window, this._em.types.keypress, this._onKeyPress);
+    this._em.add(this.$name, this._em.types.click, this._scrollToStation);
+    this._em.add(this.$smallButton, this._em.types.click, this._togglePlay);
   }
 }

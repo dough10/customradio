@@ -56,8 +56,8 @@ export default class LazyLoader {
     
     this._em = new EventManager();
 
-    this._em.add(this._parent, 'scroll', this._scrollHandler, { passive: true });
-    this._em.add(window, 'resize', this._resizeHandler, { passive: true });
+    this._em.add(this._parent, this._em.types.scroll, this._scrollHandler, { passive: true });
+    this._em.add(window, this._em.types.resize, this._resizeHandler, { passive: true });
 
     this._load();
   }

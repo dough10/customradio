@@ -46,27 +46,27 @@ export default class ShareDialog extends DialogBase {
     const listeners = [
       { 
         el: this.$trigger, 
-        event: "click", 
+        event: this.em.types.click, 
         handler: () => this.open()
       }, { 
         el: this.$copy, 
-        event: "click", 
+        event: this.em.types.click, 
         handler: () => this._copy()
       }, { 
         el: this.$fb, 
-        event: "click", 
+        event: this.em.types.click, 
         handler: () => this._facebook()
       }, { 
         el: this.$tw, 
-        event: "click", 
+        event: this.em.types.click, 
         handler: () => this._twitter()
       }, { 
         el: this.$email, 
-        event: "click", 
+        event: this.em.types.click, 
         handler: () => this._email()
       }, { 
         el: this.$sms, 
-        event: "click", 
+        event: this.em.types.click, 
         handler: () => this._sms()
       }
     ];

@@ -18,13 +18,6 @@ const NAMESPACE = {
   backdropClick: 'backdrop-click'
 };
 
-const EVENTNAMES = {
-  click: 'click',
-  change: 'change',
-  focus: 'focus',
-  transitionend: 'transitionend'
-}
-
 /**
  * manages UI elements
  */
@@ -92,42 +85,42 @@ export default class UIManager {
     const listeners = [
       {
         el: this.$toggleSelected, 
-        event: EVENTNAMES.click, 
+        event: this._em.types.click, 
         handler: _ => this.toggleSelectedVisibility() 
       }, {
         el: this.$loginButton, 
-        event: EVENTNAMES.click, 
+        event: this._em.types.click, 
         handler: _ => this._loginRedirect() 
       }, {
         el: this.$logoutButton, 
-        event: EVENTNAMES.click, 
+        event: this._em.types.click, 
         handler: _ => this._logoutRedirect() 
       }, {
         el: this.$userMenuButton, 
-        event: EVENTNAMES.click, 
+        event: this._em.types.click, 
         handler: ev => this._userMenuOpen(ev) 
       }, {
         el: this.$filter, 
-        event: EVENTNAMES.change, 
+        event: this._em.types.change, 
         handler: onFilterChange 
       }, {
         el: this.$filter, 
-        event: EVENTNAMES.focus, 
+        event: this._em.types.focus, 
         handler: ev => this._filterFocus(ev) 
       }, {
         el: this.$resetButton, 
-        event: EVENTNAMES.click, 
+        event: this._em.types.click, 
         handler: ev => {
           this._filterFocus(ev);
           onReset();
         } 
       }, {
         el: this.$toTop, 
-        event: EVENTNAMES.click, 
+        event: this._em.types.click, 
         handler: _ => this._toTopHandler() 
       }, {
         el: this.$downloadButton, 
-        event: EVENTNAMES.click, 
+        event: this._em.types.click, 
         handler: _ => this._dl() 
       }
     ];
@@ -137,7 +130,7 @@ export default class UIManager {
     }
     
     document.querySelectorAll('.menu-button').forEach(btn => {
-      this._em.add(btn, EVENTNAMES.click, _ => this._userMenuClose());
+      this._em.add(btn, this._em.types.click, _ => this._userMenuClose());
     });
   }
 
@@ -199,7 +192,7 @@ export default class UIManager {
       this._em.removeByNamespace(NAMESPACE.backdropClick);
       bd.remove();
     };
-    this._em.add(bd, EVENTNAMES.transitionend, _ => cleanup(), null, NAMESPACE.backdropClick);
+    this._em.add(bd, this._em.types.transitionend, _ => cleanup(), null, NAMESPACE.backdropClick);
     setTimeout(() => cleanup(), 300);
     requestAnimationFrame(_ => {
       this.$userMenu.removeAttribute('open');
@@ -220,7 +213,7 @@ export default class UIManager {
     if (document.querySelector('.backdrop')) return;
     const backdrop = document.createElement('div');
     backdrop.classList.add('backdrop');
-    this._em.add(backdrop, EVENTNAMES.click, _ => this._userMenuClose(), null, NAMESPACE.backdropClick);
+    this._em.add(backdrop, this._em.types.click, _ => this._userMenuClose(), null, NAMESPACE.backdropClick);
     document.body.appendChild(backdrop);
     
     const { top } = this.$userMenuButton.getBoundingClientRect();

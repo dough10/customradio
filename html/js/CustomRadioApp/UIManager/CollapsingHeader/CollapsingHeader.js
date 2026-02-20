@@ -59,7 +59,7 @@ export default class CollapsingHeader {
     this.$main = document.querySelector(selectors.main);
     
     /** recalculate header on window resize */
-    this._em.add(window, 'resize', this._onResize.bind(this));
+    this._em.add(window, this._em.types.resize, this._onResize.bind(this));
   }
   
   /** @type {HTMLElement|null} Info button element */
