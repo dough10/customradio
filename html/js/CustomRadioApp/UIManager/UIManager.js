@@ -507,7 +507,7 @@ export default class UIManager {
     this._selectedHidden = this.$main.classList.toggle('hide-selected');
     const inWindow = document.querySelectorAll(this._selectors.stations).length;
     console.log(this._lzldr.pullCount * 2, inWindow);
-    if (inWindow < this._lzldr.pullCount * 2 && this._lzldr) {
+    if (inWindow <= this._lzldr.pullCount * 2 && this._lzldr) {
       this._lzldr.load();
     }
   }
