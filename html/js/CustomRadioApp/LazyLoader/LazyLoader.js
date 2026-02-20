@@ -75,6 +75,19 @@ export default class LazyLoader {
 
     this.load();
   }
+
+  /**
+   * returns the current pull count (number of items loaded per scroll)
+   * 
+   * @public
+   * @readonly
+   * 
+   * @type {Number}
+   * @return {Number} current pull count
+   */
+  get pullCount() {
+    return this._pullNumber;
+  }
   
   /**
    * user scrolled the parent container
