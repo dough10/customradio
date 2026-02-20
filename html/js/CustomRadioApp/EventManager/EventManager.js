@@ -46,7 +46,7 @@ export default class EventManager {
    * @param {HTMLElement} target 
    * @param {String} type 
    * @param {Function} handler 
-   * @param {*} options 
+   * @param {Object|Boolean} options - Optional options for addEventListener (e.g., { capture: true } or false)
    * @param {String|null} namespace - Optional namespace for the listener
    * 
    * @returns {Number} index of the added listener in the listeners array
@@ -57,19 +57,6 @@ export default class EventManager {
       console.log('Expected: target (HTMLElement), type (String), handler (Function), options (Object), namespace (String|null)');
       console.log('Received:', { target, type, handler, options, namespace });
       return -1; // Return -1 to indicate failure
-    }
-
-    const isDuplicate = this.listeners.some(
-      listener =>
-        listener.target === target &&
-        listener.type === type &&
-        listener.handler === handler &&
-        JSON.stringify(listener.options) === JSON.stringify(options)
-    );
-  
-    if (isDuplicate) {
-      console.warn('Duplicate listener detected');
-      return -1;
     }
 
     target.addEventListener(type, handler, options);
@@ -84,6 +71,12 @@ export default class EventManager {
    * @returns {boolean} - Returns true if the listener was successfully removed, false otherwise.
    */
   remove(index) {
+    if (typeof index !== 'number' || index < 0 || index >= this.listeners.length) {
+      console.warn('Invalid index provided to EventManager.remove');
+      console.log('Expected: index (Number between 0 and', this.listeners.length - 1, ')');
+      console.log('Received:', { index });
+      return false;
+    }
     const listener = this.listeners[index];
     if (listener && listener.target) {
       const { target, type, handler, options } = listener;
@@ -100,6 +93,12 @@ export default class EventManager {
    * @param {String} namespace - The namespace of the listeners to remove.
    */
   removeByNamespace(namespace) {
+    if (typeof namespace !== 'string') {
+      console.warn('Invalid namespace provided to EventManager.removeByNamespace');
+      console.log('Expected: namespace (String)');
+      console.log(`Received: ${namespace} (${typeof namespace})`);
+      return;
+    }
     this.listeners = this.listeners.filter(listener => {
       if (listener.namespace === namespace) {
         const { target, type, handler, options } = listener;
