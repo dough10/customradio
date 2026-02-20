@@ -18,10 +18,10 @@ const NAMESPACES = {
  * @param {String} textContent 
  */
 function webLink(link, textContent) {
-  if (isValidURL(link)) {
+  try {
     window.open(link, "_blank");
-  } else {
-    console.error(`Invalid URL in Toast. Message: "${textContent}", Link: "${link}"`);
+  } catch (error) {
+    console.error(`Invalid URL in Toast. Message: "${textContent}", Link: "${link}", error: ${error.message}`);
   }
 }
 
