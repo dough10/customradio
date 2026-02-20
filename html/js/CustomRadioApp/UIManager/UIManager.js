@@ -176,6 +176,15 @@ export default class UIManager {
     return this._header;
   }
 
+  /**
+   * exposes LazyLoader instance
+   * 
+   * @public
+   * @readonly
+   * 
+   * @type {LazyLoader}
+   * @return {LazyLoader}
+   */
   set lzldr(value) {
     this._lzldr = value;
   }
@@ -496,7 +505,7 @@ export default class UIManager {
     const selected = document.querySelectorAll(this._selectors.selectedStation);
     if (!selected.length) return;
     this._selectedHidden = this.$main.classList.toggle('hide-selected');
-    if (this._lzldr) {
+    if (window.innerWidth < 700 && this._lzldr) {
       this._lzldr.load();
     }
   }
