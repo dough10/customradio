@@ -4,11 +4,11 @@ import hapticFeedback from '../utils/hapticFeedback.js';
 import ToastCache from './ToastCache.js';
 import sleep from '../utils/sleep.js';
 
-const NAMESPACES = {
+const NAMESPACES = Object.freeze({
   OPEN_ANIMATION: 'open-animation',
   CLOSE_ANIMATION: 'close-animation',
   USER_INTERACTIONS: 'user-interactions',
-};
+});
 
 /**
  * text link used in toast

@@ -10,7 +10,7 @@
  * eventManager.removeAll(); // Removes all listeners
  */
 export default class EventManager {
-  types = {
+  types = Object.freeze({
     click: 'click',
     change: 'change',
     scroll: 'scroll',
@@ -35,7 +35,7 @@ export default class EventManager {
     online: 'online',
     offline: 'offline',
     error: 'error',
-  };
+  });
 
   constructor() {
     this.listeners = [];
