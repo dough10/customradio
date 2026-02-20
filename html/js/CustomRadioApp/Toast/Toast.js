@@ -103,10 +103,36 @@ export default class Toast {
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'assertive');
 
-    em.add(toast, em.types.transitionend, _ => this._transitionEnd(), true, NAMESPACES.OPEN_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener`) : null;
-    em.add(toast, em.types.click, _ => this._clicked(), true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add click listener`) : null;
-    em.add(toast, em.types.mouseenter, _ => this._mouseIn(), true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseenter listener`) : null;
-    em.add(toast, em.types.mouseleave, _ => this._mouseOut(), true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseleave listener`) : null;
+    const listeners = [
+      { 
+        type: em.types.transitionend, 
+        handler: _ => this._transitionEnd(), 
+        options: true, 
+        namespace: NAMESPACES.OPEN_ANIMATION 
+      }, { 
+        type: em.types.click, 
+        handler: _ => this._clicked(), 
+        options: true, 
+        namespace: NAMESPACES.USER_INTERACTIONS 
+      }, { 
+        type: em.types.mouseenter,
+         handler: _ => this._mouseIn(), 
+        options: true, 
+        namespace: NAMESPACES.USER_INTERACTIONS 
+      }, { 
+        type: em.types.mouseleave, 
+        handler: _ => this._mouseOut(), 
+        options: true, 
+        namespace: NAMESPACES.USER_INTERACTIONS 
+      },
+    ];
+
+    for (const { type, handler, options, namespace } of listeners) {
+      if (em.add(toast, type, handler, options, namespace) < 0) {
+        console.warn(`Failed to add ${type} listener for ${namespace}`);
+      }
+    }
+
     return toast;
   }
 
@@ -250,7 +276,7 @@ export default class Toast {
 
     // set starttime for mouse in / out behavor
     this._startTime = Date.now();
-    this._timer = setTimeout(this._cleanupToast, this._timeout);
+    this._timer = setTimeout(_ => this._cleanupToast(), this._timeout);
   }
 }
 
