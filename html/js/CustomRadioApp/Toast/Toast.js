@@ -4,8 +4,6 @@ import hapticFeedback from '../utils/hapticFeedback.js';
 import ToastCache from './ToastCache.js';
 import sleep from '../utils/sleep.js';
 
-const em = new EventManager();
-
 const NAMESPACES = {
   OPEN_ANIMATION: 'open-animation',
   CLOSE_ANIMATION: 'close-animation',
@@ -63,6 +61,7 @@ export default class Toast {
 
     // set the timeout duration in milliseconds
     this._timeout = _timeout * 1000;
+    this._em = new EventManager();
 
     // message container
     this.toast = this._createToast();
@@ -83,7 +82,6 @@ export default class Toast {
     sleep(25).then(() => requestAnimationFrame(() => {
       if (!this.toast) throw new Error(`Failed to create toast with message: ${message}`);
       this.toast.toggleAttribute('opened');
-      console.log(message);
     }));
 
   }
@@ -105,22 +103,22 @@ export default class Toast {
 
     const listeners = [
       { 
-        type: em.types.transitionend, 
+        type: this._em.types.transitionend, 
         handler: _ => this._transitionEnd(), 
         options: true, 
         namespace: NAMESPACES.OPEN_ANIMATION 
       }, { 
-        type: em.types.click, 
+        type: this._em.types.click, 
         handler: _ => this._clicked(), 
         options: true, 
         namespace: NAMESPACES.USER_INTERACTIONS 
       }, { 
-        type: em.types.mouseenter,
-         handler: _ => this._mouseIn(), 
+        type: this._em.types.mouseenter,
+        handler: _ => this._mouseIn(), 
         options: true, 
         namespace: NAMESPACES.USER_INTERACTIONS 
       }, { 
-        type: em.types.mouseleave, 
+        type: this._em.types.mouseleave, 
         handler: _ => this._mouseOut(), 
         options: true, 
         namespace: NAMESPACES.USER_INTERACTIONS 
@@ -128,7 +126,7 @@ export default class Toast {
     ];
 
     for (const { type, handler, options, namespace } of listeners) {
-      if (em.add(toast, type, handler, options, namespace) < 0) {
+      if (this._em.add(toast, type, handler, options, namespace) < 0) {
         console.warn(`Failed to add ${type} listener for ${namespace}`);
       }
     }
@@ -156,8 +154,9 @@ export default class Toast {
    * @function
    */
   _mouseOut() {
+    if (this._timer || !this._remainingTime) return;
     this._startTime = Date.now();
-    this._timer = setTimeout(this._cleanupToast, this._remainingTime);
+    this._timer = setTimeout(_ => this._cleanupToast(), this._remainingTime);
   }
 
   /**
@@ -173,12 +172,13 @@ export default class Toast {
    * @returns {HTMLElement} The toast element with the link.
    */
   _createLink(message, link, linkText) {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('toast-wrapper');
+
     const mText = document.createElement('div');
     mText.textContent = message;
 
     if (typeof link === 'string' && !isValidURL(link)) {
-      const wrapper = document.createElement('div');
-      wrapper.classList.add('toast-wrapper');
       wrapper.append(mText);
       return wrapper;
     }
@@ -187,8 +187,6 @@ export default class Toast {
     lText.textContent = linkText;
     lText.classList.add('yellow-text');
 
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('toast-wrapper');
     wrapper.setAttribute('role', 'link');
     wrapper.setAttribute('aria-label', `Link: ${linkText}`);
     wrapper.append(mText, lText);
@@ -210,15 +208,14 @@ export default class Toast {
     }
 
     const linkType = typeof this.link;
+    const textContent = this.toast.textContent;
 
     if (linkType === 'string') {
-      webLink(this.link, this.toast.textContent);
-
+      webLink(this.link, textContent);
     } else if (linkType === 'function') {
-      linkIsFunction(this.link, this.toast.textContent);
-
+      linkIsFunction(this.link, textContent);
     } else {
-      console.error(`Invalid "link" parameter in Toast. Message: "${this.toast.textContent}", Link: "${this.link}", Type: ${typeof this.link}`);
+      console.error(`Invalid "link" parameter in Toast. Message: "${textContent}", Link: "${this.link}", Type: ${linkType}`);
     }
 
     this._cleanupToast();
@@ -235,15 +232,17 @@ export default class Toast {
     this._timer = 0;
     
     // debug
-    if (!this.toast) throw new Error(`Toast element disapeared`);
+    if (!this.toast) throw new Error(`Toast element disappeared`);
 
     // clean up listeners added when the toast element was created
-    em.removeByNamespace(NAMESPACES.USER_INTERACTIONS);
-    em.removeByNamespace(NAMESPACES.OPEN_ANIMATION);
+    this._em.removeByNamespace(NAMESPACES.USER_INTERACTIONS);
+    this._em.removeByNamespace(NAMESPACES.OPEN_ANIMATION);
 
     // attach listener for closing transition
     // element will be deleted after
-    em.add(this.toast, em.types.transitionend, ev => this._removeToast(ev), true, NAMESPACES.CLOSE_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener for closing animation`) : null;
+    if (this._em.add(this.toast, this._em.types.transitionend, ev => this._removeToast(ev), true, NAMESPACES.CLOSE_ANIMATION) < 0) {
+      console.warn(`Failed to add transitionend listener for closing animation`);
+    }
     requestAnimationFrame(() => {
       this.toast.removeAttribute('opened');
     });
@@ -256,7 +255,7 @@ export default class Toast {
    * @function
    */
   _removeToast() {
-    em.removeAll();
+    this._em.removeAll();
     this.toast.remove();
   }
 
@@ -269,10 +268,10 @@ export default class Toast {
    */
   _transitionEnd() {
     // debug
-    if (!this.toast) throw new Error(`Toast element disapeared in opening animation`);
+    if (!this.toast) throw new Error(`Toast element disappeared in opening animation`);
 
     // remove opening transition listener
-    em.removeByNamespace(NAMESPACES.OPEN_ANIMATION);
+    this._em.removeByNamespace(NAMESPACES.OPEN_ANIMATION);
 
     // set starttime for mouse in / out behavor
     this._startTime = Date.now();
