@@ -21,6 +21,7 @@ export default class EventManager {
     submit: 'submit',
     keydown: 'keydown',
     keyup: 'keyup',
+    keypress: 'keypress',
     mouseover: 'mouseover',
     mouseout: 'mouseout',
     mouseenter: 'mouseenter',
