@@ -60,14 +60,6 @@ export default class Toast {
       ToastCache.addToCache(message, _timeout, link, linkText, (msg, t, l, lt) => new Toast(msg, t, l, lt));
       return;
     }
-    
-    //bind this
-    this._transitionEnd = this._transitionEnd.bind(this);
-    this._clicked = this._clicked.bind(this);
-    this._cleanupToast = this._cleanupToast.bind(this);
-    this._mouseIn = this._mouseIn.bind(this);
-    this._mouseOut = this._mouseOut.bind(this);
-    this._removeToast = this._removeToast.bind(this);
 
     // set the timeout duration in milliseconds
     this._timeout = _timeout * 1000;
@@ -111,10 +103,10 @@ export default class Toast {
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'assertive');
 
-    em.add(toast, em.types.transitionend, this._transitionEnd, true, NAMESPACES.OPEN_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener`) : null;
-    em.add(toast, em.types.click, this._clicked, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add click listener`) : null;
-    em.add(toast, em.types.mouseenter, this._mouseIn, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseenter listener`) : null;
-    em.add(toast, em.types.mouseleave, this._mouseOut, true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseleave listener`) : null;
+    em.add(toast, em.types.transitionend, _ => this._transitionEnd(), true, NAMESPACES.OPEN_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener`) : null;
+    em.add(toast, em.types.click, _ => this._clicked(), true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add click listener`) : null;
+    em.add(toast, em.types.mouseenter, _ => this._mouseIn(), true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseenter listener`) : null;
+    em.add(toast, em.types.mouseleave, _ => this._mouseOut(), true, NAMESPACES.USER_INTERACTIONS) < 0 ? console.warn(`Failed to add mouseleave listener`) : null;
     return toast;
   }
 
@@ -225,7 +217,7 @@ export default class Toast {
 
     // attach listener for closing transition
     // element will be deleted after
-    em.add(this.toast, em.types.transitionend, this._removeToast, true, NAMESPACES.CLOSE_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener for closing animation`) : null;
+    em.add(this.toast, em.types.transitionend, ev => this._removeToast(ev), true, NAMESPACES.CLOSE_ANIMATION) < 0 ? console.warn(`Failed to add transitionend listener for closing animation`) : null;
     requestAnimationFrame(() => {
       this.toast.removeAttribute('opened');
     });
