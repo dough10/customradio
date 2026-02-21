@@ -50,8 +50,9 @@ main.hide-selected>#stations>li[selected] {
   display: none;
 }
 
-main.hide-selected>#stations>li:not([selected]):first-of-type {
-  margin-top: 0;  
+main.hide-selected > #stations > li:not([selected]):first-child,
+main.hide-selected > #stations > li[selected] + li:not([selected]) {
+  margin-top: 0;
 }
 
 #stations>li[playing][selected]>div {
