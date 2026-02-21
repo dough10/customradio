@@ -46,6 +46,14 @@
   pointer-events: none;
 }
 
+main.hide-selected>#stations>li[selected] {
+  display: none;
+}
+
+main.hide-selected>#stations>li:not([selected]):first-of-type {
+  margin-top: 0;  
+}
+
 #stations>li[playing][selected]>div {
   background: var(--main-color);
   color: var(--text-color);
