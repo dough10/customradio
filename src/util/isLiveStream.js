@@ -82,7 +82,7 @@ async function streamTest(url) {
       headers: {
         "User-Agent": `radiotxt.site/${pack.version}`,
       },
-      timeout: 1500,
+      timeout: 3000,
     });
     const isLive = response.status >= 200 && response.status < 300;
     let name = response.headers["icy-name"];
