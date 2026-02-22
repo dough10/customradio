@@ -46,7 +46,7 @@ export default class LazyLoader {
     this._insertLoadingAnimation = loadingAnimation || insertLoadingAnimation;
 
     // bind this to the class instance
-    this._debouncedLoad = debounce(this.load.bind(this), 100);
+    this._debouncedLoad = debounce(_ => this.load(), 100);
 
     if (!this._container || !this._container.parentElement) {
       throw new Error('LazyLoader: container must exist and have a parent element.');
@@ -60,8 +60,7 @@ export default class LazyLoader {
         handler: _ => this._onScroll(),
         options: { passive: true },
         target: this._parent,
-      },
-      { 
+      }, { 
         type: this._em.types.resize,
         handler: _ => this._onResize(),
         options: { passive: true },
