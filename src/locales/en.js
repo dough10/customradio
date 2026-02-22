@@ -19,7 +19,7 @@ module.exports = {
   addButtonText: 'add',
   stations: 'stations',
   stationExists: 'Station already exists',
-  conTestFailed: error => `Connection test failed: ${error}`,
+  conTestFailed: error => `Test failed: ${error}`,
   noName: 'Failed to retrieve station name',
   stationSaved: id => `Station saved, ID: ${id}`,
   addFail: error => `Failed to add station: ${error}`,
