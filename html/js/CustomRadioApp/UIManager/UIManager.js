@@ -29,8 +29,6 @@ export default class UIManager {
     this._em = new EventManager();
     this._header = new CollapsingHeader();
 
-    this._selectedHidden = false;
-
     this.$toTop = document.querySelector(this._selectors.toTop);
     this.$filter = document.querySelector(this._selectors.filter);
     this.$downloadButton = document.querySelector(this._selectors.downloadButton);
@@ -504,7 +502,7 @@ export default class UIManager {
   toggleSelectedVisibility() {
     const selected = document.querySelectorAll(this._selectors.selectedStation);
     if (!selected.length) return;
-    this._selectedHidden = this.$main.classList.toggle('hide-selected');
+    this.$main.classList.toggle('hide-selected');
     const inWindow = document.querySelectorAll(this._selectors.stations).length;
     if (inWindow <= this._lzldr.pullCount * 2 && this._lzldr) {
       this._lzldr.load();
