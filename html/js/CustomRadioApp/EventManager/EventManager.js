@@ -35,6 +35,11 @@ export default class EventManager {
     online: 'online',
     offline: 'offline',
     error: 'error',
+    beforeUnload: 'beforeunload',
+    focusin: 'focusin',
+    focusout: 'focusout',
+    contextmenu: 'contextmenu',
+    enterPressed: 'enter-pressed',
   });
 
   constructor() {
