@@ -8,26 +8,6 @@ const { t } = require('../../util/i18n.js');
 const logLevel = process.env.LOG_LEVEL || 'info';
 const log = new Logger(logLevel);
 
-const RESPONSE_CODES = Object.freeze({
-  400: 'Bad Request',
-  401: 'Unauthorized',
-  402: 'Payment Required',
-  403: 'Forbidden',
-  404: 'Not Found',
-  405: 'Method Not Allowed',
-  406: 'Not Acceptable',
-  408: 'Request Timeout',
-  409: 'Conflict',
-  410: 'Gone',
-  411: 'Length Required',
-  500: 'Internal Server Error',
-  501: 'Not Implemented',
-  502: 'Bad Gateway',
-  503: 'Service Unavailable',
-  504: 'Gateway Timeout',
-});
-
-
 /**
  * Handles the request to add a new station to the database.
  * 
@@ -78,27 +58,35 @@ module.exports = async (req, res) => {
       return res.status(409).json({ message: t('stationExists') });
     }
 
-    const status = await isLiveStream(url);
-    if (!status.ok) {
-      if (!RESPONSE_CODES[status.error]) {
-        log.error(`Unknown error code: ${status.error}`);
-        return res.status(500).json({ message: t('conTestFailed', 'Unknown error') });
-      }
-      log.warning(`Test failed: ${RESPONSE_CODES[status.error]}`);
-      return res.status(status.error).json({ message: t('conTestFailed', RESPONSE_CODES[status.error]) });
+    const { 
+      ok, 
+      error, 
+      status, 
+      name, 
+      isLive, 
+      genre, 
+      content, 
+      bitrate, 
+      icon, 
+      icyurl 
+    } = await isLiveStream(url);
+
+    if (!ok) {
+      log.warning(`Test failed: ${error}`);
+      return res.status(status).json({ message: t('conTestFailed', error) });
     }
 
     const data = {
-      name: status.name || 'Unknown',
+      name: name || 'Unknown',
       url,
-      online: status.isLive,
-      genre: status.genre || 'Unknown',
-      'content-type': status.content || 'Unknown',
-      bitrate: status.bitrate || 0,
-      icon: status.icon || 'Unknown',
-      homepage: status.icyurl || 'Unknown',
+      online: isLive,
+      genre: genre || 'Unknown',
+      'content-type': content,
+      bitrate: bitrate || 0,
+      icon: icon || 'Unknown',
+      homepage: icyurl || 'Unknown',
       error: '',
-      duplicate: false,
+      duplicate: false
     };
 
     const id = await sql.addStation(data);
