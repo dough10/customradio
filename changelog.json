@@ -1,7 +1,8 @@
 {
   "Current": [
     "Added option to hide selected stations",
-    "Removed Matomo analytics (to improve user privacy and reduce external requests)"
+    "Removed Matomo analytics (to improve user privacy and reduce external requests)",
+    "Extended the timeout when adding / updating stations to allow for slower servers"
   ],
   "1.12.9": [
     "Added 'share' button and dialog to UI (allows users to copy the download url for their radio.txt file)",
