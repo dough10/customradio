@@ -25,8 +25,7 @@ const unhelpfulNames = [
   "radio",
   "online radio",
   "n/a",
-  "this is my server name",
-  /\b\d{1,2}\b/
+  "this is my server name"
 ];
 
 /**
@@ -82,7 +81,7 @@ async function streamTest(url) {
       headers: {
         "User-Agent": `radiotxt.site/${pack.version}`,
       },
-      timeout: 3000,
+      timeout: 4500,
     });
     const isLive = response.status >= 200 && response.status < 300;
     let name = response.headers["icy-name"];
@@ -99,17 +98,22 @@ async function streamTest(url) {
       return {
         ok: false,
         error: errorMessage,
+        status: response.status,
       };
     }
 
-    if (bitrate && bitrate.length > 3) bitrate = bitrate.split(",")[0];
-    bitrate = Number(bitrate);
+    if (bitrate) {
+      bitrate = bitrate.includes(',') ? bitrate.split(',')[0] : bitrate;
+      bitrate = Number(bitrate) || 0;
+    }
 
     if (isNaN(bitrate)) bitrate = 0;
 
     if (name) {
       name = fixEncoding(name);
-      if (unhelpfulNames.includes(name.toLowerCase().trim())) {
+      const unhelpfulRegex = /^\d{1,2}$/;
+      const cleanName = name.toLowerCase().trim();
+      if (unhelpfulNames.includes(cleanName) || unhelpfulRegex.test(cleanName)) {
         name = null;
       }
     }
@@ -129,13 +133,14 @@ async function streamTest(url) {
       content,
       bitrate: bitrate,
       error: "",
+      status: response.status,
     };
   } catch (error) {
-    const errorMessage = `Test failed: ${url} - ${error.message}`;
-    log.debug(errorMessage);
+    log.debug(error.message);
     return {
       ok: false,
       error: error.message,
+      status: error.response ? error.response.status : 500,
     };
   }
 }
