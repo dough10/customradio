@@ -19,12 +19,6 @@ module.exports = [
   body('csp-report')
     .isObject()
     .withMessage('csp-report must be an object'),
-  body('csp-report.referrer')
-    .optional()
-    .custom(value => {
-    if (value === '' || value === null) return true;
-    return validator.isURL(value, envOptions);
-  }).withMessage('referrer must be a valid URL'),
   body('csp-report.violated-directive')
     .escape()
     .isString()
