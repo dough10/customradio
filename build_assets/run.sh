@@ -1,9 +1,17 @@
 #!/bin/bash
+set -euo pipefail
 
+if [ ! -f .env ]; then
+  echo ".env file missing"
+  exit 1
+fi
+
+set -o allexport
 source .env
+set +o allexport
 
 generate_secret() {
-  openssl rand -base64 32 | tr -d '/+' | cut -c1-32
+  openssl rand -hex 32
 }
 
 jwt_secret=$(generate_secret)
@@ -12,17 +20,10 @@ cookie_secret=$(generate_secret)
 
 docker run \
   --name=testradio \
-  --env=REDIS_URL="$REDIS_URL" \
-  --env=REDIS_PASSWORD="$REDIS_PASSWORD" \
-  --env=WORKOS_API_KEY="$WORKOS_API_KEY" \
-  --env=WORKOS_CLIENT_ID="$WORKOS_CLIENT_ID" \
-  --env=WORKOS_REDIRECT_URL="$WORKOS_REDIRECT_URL" \
+  --env-file=.env \
   --env=COOKIE_SECRET="$cookie_secret" \
   --env=JWT_SECRET="$jwt_secret" \
   --env=SESSION_SECRET="$session_secret" \
-  --env=LOG_LEVEL="$LOG_LEVEL" \
-  --env=AUTH_SERVER_URL="$AUTH_SERVER_URL" \
-  --env=BLACKLIST="$BLACKLIST" \
   --env=NODE_ENV=production \
   --env=TZ=America/Chicago \
   --volume=/Users/dough10/Documents/customradio/data:/usr/src/app/data \
