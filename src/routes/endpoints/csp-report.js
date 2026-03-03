@@ -2,10 +2,8 @@ require('dotenv').config();
 const {validationResult} = require('express-validator');
 
 const { t } = require('../../util/i18n.js');
-const Logger = require('../../util/logger.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const { logger } = require('../../services.js');
+const asyncHandler = require('../../util/asyncHandler.js');
 
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports
@@ -50,7 +48,7 @@ const log = new Logger(logLevel);
  * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 204 No Content
  */
-module.exports = async (req, res) => {
+module.exports = asyncHandler(async (req, res) => {
   const cspReport = req.body['csp-report'];
   cspReport.time = new Date().toLocaleString();
 
@@ -58,16 +56,12 @@ module.exports = async (req, res) => {
 
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
-    log.error(`${req.ip} -> ${error}`);
+    logger.error(`${req.ip} -> ${error}`);
     res.status(400).json({error});
     return; 
   }
 
-  try {
-    // console.log(cspReport);
-    res.status(204).send();
-  } catch(error) {
-    log.critical(`Error Saving CSP-Report: ${error.message}`);
-    res.status(500).send(t('cspError', error.message));
-  }
-};
+
+  // console.log(cspReport);
+  res.status(204).send();
+});

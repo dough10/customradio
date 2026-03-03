@@ -1,9 +1,5 @@
-const Logger = require('../../util/logger.js');
-const Stations = require('../../model/Stations.js');
-const { t } = require('../../util/i18n.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const {stations} = require('../../services.js');
+const asyncHandler = require('../../util/asyncHandler.js');
 
 const blacklist = process.env.BLACKLIST?.split(',') || [];
 
@@ -18,7 +14,7 @@ const blacklist = process.env.BLACKLIST?.split(',') || [];
  * 
  * @throws {Error} If play count increment fails
  */
-module.exports = async (req, res) => {
+module.exports = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const ip = req.ip;
 
@@ -31,23 +27,7 @@ module.exports = async (req, res) => {
     res.json({ message: 'ip in blacklist' });
     return;
   }
-  let sql;
-  try {
-    sql = new Stations('data/customradio.db');
-    await sql.incrementPlayMinutes(id);
-    res.status(204).send();
-  } catch(e) {
-    const eMessage = `Error incrimenting play minutes: ${e.message}`;
-    res.status(500).json({error: eMessage});
-    log.error(eMessage);
-  } finally {
-    if (!sql || typeof sql.close !== 'function') {
-      return;
-    }
-    try {
-      await sql.close();
-    } catch (err) {
-      log.error(`Error closing DB: ${err.message}`);
-    }
-  }
-};
+
+  await stations.incrementPlayMinutes(id);
+  res.status(204).send();
+});

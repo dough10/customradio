@@ -1,12 +1,9 @@
-const Logger = require('../../util/logger.js');
-const Stations = require('../../model/Stations.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const {stations} = require('../../services.js');
+const asyncHandler = require('../../util/asyncHandler.js');
 
 const blacklist = process.env.BLACKLIST?.split(',') || [];
 
-module.exports = async (req, res) => {
+module.exports = asyncHandler(async (req, res) => {
   const ip = req.ip;
   const id = req.params.id;
   const state = Number(req.params.state);
@@ -15,27 +12,10 @@ module.exports = async (req, res) => {
     res.json({ message: 'ip in blacklist' });
     return;
   }
-  let sql;
-  try {
-    sql = new Stations('data/customradio.db');
-    if (state) {
-      await sql.addToList(id);
-    } else {
-      await sql.removeFromList(id);
-    }
-    res.json({ state });
-  } catch(e) {
-    const eMessage = `Failed ${state ? 'adding' : 'removing'} station inList attribute: ${e.message}`;
-    res.status(500).json({error: eMessage});
-    log.error();
-  } finally {
-    if (!sql || typeof sql.close !== 'function') {
-      return;
-    }
-    try {
-      await sql.close();
-    } catch (err) {
-      log.error(`Error closing DB: ${err.message}`);
-    }
+  if (state) {
+    await stations.addToList(id);
+  } else {
+    await stations.removeFromList(id);
   }
-};
+  res.json({ state });
+});

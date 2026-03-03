@@ -1,12 +1,9 @@
 const { validationResult } = require('express-validator');
 
-const Logger = require('../../util/logger.js');
 const isLiveStream = require('../../util/isLiveStream.js');
-const Stations = require('../../model/Stations.js');
 const { t } = require('../../util/i18n.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const { logger, stations } = require('../../services.js');
+const asyncHandler = require('../../util/asyncHandler.js');
 
 /**
  * Handles the request to add a new station to the database.
@@ -38,70 +35,54 @@ const log = new Logger(logLevel);
  *     });
  * });
  */
-module.exports = async (req, res) => {
+module.exports = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const message = errors.array().map(e => e.msg).join(', ');
-    log.error(message);
+    logger.error(message);
     return res.status(400).json({ message });
   }
 
-  let sql;
   const { url } = req.body;
-  
-  try {
-    sql = new Stations('data/customradio.db');
-    const exists = await sql.exists(url);
 
-    if (exists) {
-      log.warning(`Station already exists`);
-      return res.status(409).json({ message: t('stationExists') });
-    }
+  const exists = await stations.exists(url);
 
-    const { 
-      ok, 
-      error, 
-      status, 
-      name, 
-      isLive, 
-      genre, 
-      content, 
-      bitrate, 
-      icon, 
-      icyurl 
-    } = await isLiveStream(url);
-
-    if (!ok) {
-      log.warning(`Test failed: ${error}`);
-      return res.status(status).json({ message: t('conTestFailed', error) });
-    }
-
-    const data = {
-      name: name || 'Unknown',
-      url,
-      online: isLive,
-      genre: genre || 'Unknown',
-      'content-type': content,
-      bitrate: bitrate || 0,
-      icon: icon || 'Unknown',
-      homepage: icyurl || 'Unknown',
-      error: '',
-      duplicate: false
-    };
-
-    const id = await sql.addStation(data);
-    res.status(201).json({ message: t('stationSaved', id) });
-  } catch (e) {
-    log.critical(`Failed to add station: ${e.message}`);
-    res.status(500).json({ message: t('addFail', e.message) });
-  } finally {
-    if (!sql || typeof sql.close !== 'function') {
-      return;
-    }
-    try {
-      await sql.close();
-    } catch (err) {
-      log.error(`Error closing DB: ${err.message}`);
-    }
+  if (exists) {
+    logger.warning(`Station already exists`);
+    return res.status(409).json({ message: t('stationExists') });
   }
-};
+
+  const { 
+    ok, 
+    error, 
+    status, 
+    name, 
+    isLive, 
+    genre, 
+    content, 
+    bitrate, 
+    icon, 
+    icyurl 
+  } = await isLiveStream(url);
+
+  if (!ok) {
+    logger.warning(`Test failed: ${error}`);
+    return res.status(status).json({ message: t('conTestFailed', error) });
+  }
+
+  const data = {
+    name: name || 'Unknown',
+    url,
+    online: isLive,
+    genre: genre || 'Unknown',
+    'content-type': content,
+    bitrate: bitrate || 0,
+    icon: icon || 'Unknown',
+    homepage: icyurl || 'Unknown',
+    error: '',
+    duplicate: false
+  };
+
+  const id = await stations.addStation(data);
+  res.status(201).json({ message: t('stationSaved', id) });
+});

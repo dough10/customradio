@@ -26,13 +26,36 @@ function mapPlaceholders(arr) {
  * 
  * This function is bound to the `Stations` class instance to ensure
  * that the `this` context refers to the class instance.
- * 
- * @param {Error} err - The error object, if any error occurred during the connection.
  */
-function connectionEstablished(err) {
-  if (err) throw new Error(`Failed to create database file at ${filePath}: ${err.message}`);
+function connectionEstablished() {
+  const run = (query, errorMsg) => {
+    return new Promise((resolve, reject) => {
+      this.db.run(query, err => {
+        if (err) {
+          reject(new Error(`${errorMsg}: ${err.message}`));
+        } else {
+          resolve();
+        }
+      });
+    });
+  };
 
-  const queries = [
+  const pragmas = [
+    {
+      query: "PRAGMA journal_mode = WAL;",
+      errorMsg: "Failed to enable WAL mode"
+    },
+    {
+      query: "PRAGMA synchronous = NORMAL;",
+      errorMsg: "Failed to set synchronous mode"
+    },
+    {
+      query: "PRAGMA foreign_keys = ON;",
+      errorMsg: "Failed to enable foreign keys"
+    }
+  ];
+
+  const schema = [
     {
       query: `CREATE TABLE IF NOT EXISTS stations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,7 +72,7 @@ function connectionEstablished(err) {
         playMinutes INTEGER DEFAULT 0,
         inList INTEGER DEFAULT 0
       )`,
-      errorMsg: 'Failed to create the stations table'
+      errorMsg: "Failed to create stations table"
     },
     {
       query: `CREATE TABLE IF NOT EXISTS genres (
@@ -57,46 +80,38 @@ function connectionEstablished(err) {
         genres TEXT,
         time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
-      errorMsg: 'Failed to create the genres table'
+      errorMsg: "Failed to create genres table"
     },
     {
       query: `CREATE INDEX IF NOT EXISTS idx_stations_url ON stations(url)`,
-      errorMsg: 'Failed to create index on stations table (url)'
+      errorMsg: "Failed to create idx_stations_url"
     },
     {
       query: `CREATE INDEX IF NOT EXISTS idx_stations_id ON stations(id)`,
-      errorMsg: 'Failed to create index on stations table (id)'
+      errorMsg: "Failed to create idx_stations_id"
     },
     {
       query: `CREATE INDEX IF NOT EXISTS idx_genres_genres ON genres(genres)`,
-      errorMsg: 'Failed to create index on genres table (genres)'
+      errorMsg: "Failed to create idx_genres_genres"
     },
     {
       query: `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`,
-      errorMsg: 'Failed to create index on genres table (time)'
+      errorMsg: "Failed to create idx_genres_time"
     },
     {
       query: `CREATE INDEX IF NOT EXISTS idx_stations_playMinutes ON stations(playMinutes)`,
-      errorMsg: 'Failed to create index on stations table (playMinutes)'
+      errorMsg: "Failed to create idx_stations_playMinutes"
     },
     {
-      query: `CREATE INDEX IF NOT EXISTS idx_stations_compound ON stations(online, duplicate, content_type)`,
-      errorMsg: 'Failed to create compound index on stations table'
+      query: `CREATE INDEX IF NOT EXISTS idx_stations_compound 
+        ON stations(online, duplicate, content_type)`,
+      errorMsg: "Failed to create idx_stations_compound"
     }
   ];
 
-  return queries.reduce((promise, { query, errorMsg }) => {
-    return promise.then(() => {
-      return new Promise((resolve, reject) => {
-        this.db.run(query, error => {
-          if (error) {
-            reject(new Error(`${errorMsg}: ${error.message}`));
-          } else {
-            resolve();
-          }
-        });
-      });
-    });
+  // Execute PRAGMAs first, then schema setup
+  return [...pragmas, ...schema].reduce((promise, { query, errorMsg }) => {
+    return promise.then(() => run(query, errorMsg));
   }, Promise.resolve());
 }
 
@@ -114,7 +129,11 @@ class Stations {
    */
   constructor(filePath) {
     if (!filePath) throw new Error('Database file path is required');
-    this.db = new sqlite3.Database(filePath);
+    this.db = new sqlite3.Database(filePath, (err) => {
+      if (err) {
+        throw new Error(`Failed to connect to database: ${err.message}`);
+      }
+    });
     this.initializationPromise = connectionEstablished.call(this);
   }
 
@@ -605,6 +624,16 @@ class Stations {
         }
       });
     }));
+  }
+
+  /**
+   * Logs an issue with the stream
+   * 
+   * @param {Number} id 
+   * @param {String} error 
+   */
+  logStreamError(id, error) {
+    console.log(id, error);
   }
 
   /**

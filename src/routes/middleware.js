@@ -12,10 +12,7 @@ const cookieParser = require('cookie-parser');
 const { performance } = require('perf_hooks');
 
 const { setLanguage } = require("../util/i18n.js");
-const Logger = require("../util/logger.js");
-
-const logLevel = process.env.LOG_LEVEL || "info";
-const log = new Logger(logLevel);
+const {logger} = require('../services.js');
 
 const corsOptions = {
   origin: '*',
@@ -36,12 +33,12 @@ function initSessionStorage() {
   });
 
   redisClient.connect().catch((error) => {
-    log.error("Redis connection error:", error);
+    logger.error("Redis connection error:", error);
     process.exit(1);
   });
 
-  redisClient.on("error", err => log.error(`Redis Client ${err}`));
-  redisClient.on("connect", () => log.debug("Redis Connected"));
+  redisClient.on("error", err => logger.error(`Redis Client ${err}`));
+  redisClient.on("connect", () => logger.debug("Redis Connected"));
 
   const redisStore = new RedisStore({
     client: redisClient,
@@ -62,7 +59,7 @@ module.exports = (app, httpRequestCounter) => {
     const start = performance.now();
     res.on("finish", () => {
       const hasBody = req.body && Object.keys(req.body).length > 0;
-      log.info(`${req.ip} -> [${req.method}] ${req.originalUrl},${req.count !== undefined ? ` count: ${req.count}, ` : ' '}lang: ${req.loadedLang},${hasBody ? ` body: ${JSON.stringify(req.body)}, ` : ' '}status: ${res.statusCode},${res.getHeader('Content-Type') ? ` type: ${res.getHeader('Content-Type')}, ` : ' '}${res.getHeader('Content-Length') ? ` bytes: ${res.getHeader('Content-Length')}, ` : ' '}ms: ${(performance.now() - start).toFixed(2)}`);
+      logger.info(`${req.ip} -> [${req.method}] ${req.originalUrl},${req.count !== undefined ? ` count: ${req.count}, ` : ' '}lang: ${req.loadedLang},${hasBody ? ` body: ${JSON.stringify(req.body)}, ` : ' '}status: ${res.statusCode},${res.getHeader('Content-Type') ? ` type: ${res.getHeader('Content-Type')}, ` : ' '}${res.getHeader('Content-Length') ? ` bytes: ${res.getHeader('Content-Length')}, ` : ' '}ms: ${(performance.now() - start).toFixed(2)}`);
     });
     next();
   });
@@ -225,17 +222,17 @@ module.exports = (app, httpRequestCounter) => {
     const sessionToken = req.session?.csrfToken;
 
     if (!req.session) {
-      log.warning(`${req.ip} Missing session for ${req.method} ${req.originalUrl}`);
+      logger.warning(`${req.ip} Missing session for ${req.method} ${req.originalUrl}`);
       return res.status(440).json({ error: "Session expired or not established" });
     }
 
     if (!sessionToken) {
-      log.warning(`${req.ip} CSRF token missing from session for ${req.method} ${req.originalUrl}`);
+      logger.warning(`${req.ip} CSRF token missing from session for ${req.method} ${req.originalUrl}`);
       return res.status(419).json({ error: "CSRF token missing in session" });
     }
 
     if (!token || token !== sessionToken) {
-      log.warning(`${req.ip} Invalid CSRF token on ${req.method} ${req.originalUrl}`);
+      logger.warning(`${req.ip} Invalid CSRF token on ${req.method} ${req.originalUrl}`);
       return res.status(403).json({ error: "Invalid CSRF token" });
     }
 
@@ -322,13 +319,25 @@ module.exports = (app, httpRequestCounter) => {
       : [];
 
     if (forwardedIps.length && !forwardedIps.includes(clientInfo.ip)) {
-      log.warning(`IP not in x-forwarded-for: req.ip=${clientInfo.ip}, x-forwarded-for=${clientInfo.forwardedFor}`);
+      logger.warning(`IP not in x-forwarded-for: req.ip=${clientInfo.ip}, x-forwarded-for=${clientInfo.forwardedFor}`);
       return res.status(403).json({
         error: "Invalid request origin",
       });
     }
 
     next();
+  });
+
+  /**
+   * error handling middleware
+   */
+  app.use((err, req, res, next) => {
+    logger.error(err.stack);
+
+    res.status(err.status || 500).json({
+      success: false,
+      message: err.message || 'Internal Server Error'
+    });
   });
 
   /**

@@ -1,10 +1,7 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const xml2js = require('xml2js');
 
-const Logger = require('../../util/logger.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const asyncHandler = require('../../util/asyncHandler.js');
 
 /**
  * generates a sitemap.xml file
@@ -44,21 +41,11 @@ function sitemapxml(req, stats) {
  * @param {Object} req 
  * @param {Object} res 
  */
-module.exports = (req, res) => {
-  fs.stat('dist/index.js', (error, stats) => {
-    if (error) {
-      log.error(`Failed getting sitemap: ${error.message}`);
-      res.status(500).json({
-        message: 'Failed getting sitemap.xml'
-      });
-      return;
-    }
-    try {
-      const xml = sitemapxml(req, stats);
-      res.set('Content-Type', 'application/xml');
-      res.send(xml);
-    } catch(e) {
-      res.status(500).json({error: `Failed creating XML: ${e.message}`})
-    }
-  });
-};
+module.exports = asyncHandler(async (req, res) => {
+  const stats = await fs.stat('dist/index.js');
+
+  const xml = sitemapxml(req, stats);
+
+  res.set('Content-Type', 'application/xml');
+  res.send(xml);
+});

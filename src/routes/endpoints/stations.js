@@ -1,11 +1,7 @@
 const { validationResult } = require('express-validator');
 
-const { t } = require('../../util/i18n.js');
-const Logger = require('../../util/logger.js');
-const Stations = require('../../model/Stations.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const {stations, logger} = require('../../services.js');
+const asyncHandler = require('../../util/asyncHandler.js');
 
 const blacklist = process.env.BLACKLIST?.split(',') || [];
 
@@ -41,38 +37,23 @@ const blacklist = process.env.BLACKLIST?.split(',') || [];
  *     });
  * });
  */
-module.exports = async (req, res) => {
+module.exports = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error =  errors.array().map(e => e.msg).join(', ');
-    log.error(error);
+    logger.error(error);
     return res.status(400).json({error});
   }  
-  let sql;
-  try {
-    sql = new Stations('data/customradio.db');
-    const decoded = decodeURIComponent(req.query.genres);
-    const genres = decoded.split(',').map(genre => genre.toLowerCase());
-    const stations = await sql.getStationsByGenre(genres);
-    
-    const genreString = genres.join(',');
 
-    if (genreString && !blacklist.includes(req.ip) && stations.length) {
-      await sql.logGenres(genreString);
-    }
-    req.count = stations.length;
-    res.json(stations);
-  } catch (error) {
-    log.error(`Error fetching stations: ${error.message}`);
-    res.status(500).json({error: t('stationsFail', error.message)});
-  } finally {
-    if (!sql || typeof sql.close !== 'function') {
-      return;
-    }
-    try {
-      await sql.close();
-    } catch (err) {
-      log.error(`Error closing DB: ${err.message}`);
-    }
+  const decoded = decodeURIComponent(req.query.genres);
+  const genres = decoded.split(',').map(genre => genre.toLowerCase());
+  const stationData = await stations.getStationsByGenre(genres);
+  
+  const genreString = genres.join(',');
+
+  if (genreString && !blacklist.includes(req.ip) && stationData.length) {
+    await stations.logGenres(genreString);
   }
-};
+  req.count = stationData.length;
+  res.json(stationData);
+});

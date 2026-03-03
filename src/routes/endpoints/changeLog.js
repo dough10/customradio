@@ -1,8 +1,3 @@
-const Logger = require('../../util/logger.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
-
 const changelog = require('../../../changelog.json');
 
 function format() {

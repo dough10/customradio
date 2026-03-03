@@ -1,7 +1,5 @@
-const Logger = require('../../util/logger.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const {logger} = require('../../services.js');
+const asyncHandler = require('../../util/asyncHandler.js');
 
 /**
  * Set of sensitive path segments that indicate potential attacks or probing.
@@ -28,21 +26,17 @@ const sensitivePaths = new Set([
  * 
  * @returns {void}
  */
-module.exports = async (req, res) => {
-  try {
-    const requestedPath = decodeURIComponent(req.originalUrl);
-    
-    // Check if any sensitive path segment appears in the requested URL
-    for (const sensitive of sensitivePaths) {
-      if (requestedPath.includes(sensitive)) {
-        log.warning(`Sensitive path accessed: ${requestedPath} | IP: ${req.ip} | User-Agent: ${req.get('User-Agent')}`);
-        break;
-      }
-    }
+module.exports = asyncHandler(async (req, res) => {
+
+  const requestedPath = decodeURIComponent(req.originalUrl);
   
-    res.status(404).send();
-  } catch(err) {
-    log.error(`Unhandled error in 404 handler: ${err.message}`);
-    res.status(404).send();
+  // Check if any sensitive path segment appears in the requested URL
+  for (const sensitive of sensitivePaths) {
+    if (requestedPath.includes(sensitive)) {
+      logger.warning(`Sensitive path accessed: ${requestedPath} | IP: ${req.ip} | User-Agent: ${req.get('User-Agent')}`);
+      break;
+    }
   }
-};
+
+  res.status(404).send();
+});
