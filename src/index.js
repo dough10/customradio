@@ -9,10 +9,7 @@ const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./routes/middleware.js');
 const routes = require('./routes/routes.js');
 const { httpRequestCounter, register } = require('./util/promClient.js');
-const Logger = require('./util/logger.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const {logger, logLevel} = require('./services.js');
 
 /**
  * Starts the Express server and sets up necessary initializations.
@@ -40,5 +37,5 @@ app.listen(3000, _ => {
   schedule.scheduleJob('0 0 * * 0', testStreams);
   schedule.scheduleJob('0 12 1 * *', scrapeIceDir);
   
-  log.critical(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
+  logger.critical(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
 });
