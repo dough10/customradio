@@ -21,6 +21,7 @@ const authLogout = require('./endpoints/auth.logout.js');
 const userStations = require('./endpoints/userStations.js');
 const index = require('./endpoints/index.js');
 const downloadtxt = require('./endpoints/downloadtxt.js');
+const scrape = require('./endpoints/scrape.js');
 
 const cspValidator = require('../schema/cspValidaton.js');
 const addStationValidator = require('../schema/addStationValidator.js');
@@ -364,6 +365,11 @@ module.exports = async (app, register) => {
    * Endpoint to begin updating the database.
    */
   app.get('/updatedb', await authenticate, updatedb);
+
+  /**
+   * Endpoint to test icecastdb scrape
+   */
+  app.get('/scrape', await authenticate, scrape);
 
   /**
    * Endpoint for authentication using WorkOS SSO.
