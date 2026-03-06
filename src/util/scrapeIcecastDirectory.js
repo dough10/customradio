@@ -9,12 +9,10 @@ const rmRef = require('./rmRef.js');
 const isLiveStream = require('./isLiveStream.js');
 const usedTypes = require("./usedTypes.js");
 const retry = require('./retry.js');
-const Logger = require('./logger.js');
-const Stations = require('../model/Stations.js');
+const {stations, logger} = require('./../services.js');
 
 const limit = pLimit(5);
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+
 
 
 let progressCounter = 0;
@@ -46,7 +44,7 @@ async function requestData() {
  * 
  * @param {Object} entry 
  * @param {Number} length 
- * @param {Object} sql 
+ * @param {Object} stations 
  * 
  * @returns {void}
  * 
@@ -62,9 +60,9 @@ async function requestData() {
  *   genre: [ '2000-х Музыка' ]
  * }
  */  
-async function processStream(entry, length, sql) {
+async function processStream(entry, length, stations) {
   progressCounter++;
-  log.debug(`Scrape progress: ${((progressCounter / length) * 100).toFixed(3)}%`);
+  logger.debug(`Scrape progress: ${((progressCounter / length) * 100).toFixed(3)}%`);
   
   try{
     const url = rmRef(entry.listen_url[0]);
@@ -72,7 +70,7 @@ async function processStream(entry, length, sql) {
     // early check for url in database
     // isLiveStream may change url protocol (http -> https)
     // addStation method checks again. this line keeps from doing extra work
-    if (await sql.exists(url)) return;
+    if (await stations.exists(url)) return;
     
     const stream = await isLiveStream(url);
   
@@ -82,7 +80,7 @@ async function processStream(entry, length, sql) {
     // check if stream is allowed content type
     if (!usedTypes.includes(stream.content)) return;
   
-    const result = await sql.addStation({
+    const result = await stations.addStation({
       name: stream.name || entry.server_name[0] || stream.description,
       url: stream.url,
       genre: stream.icyGenre || entry.genre[0] || 'Unknown',
@@ -96,10 +94,10 @@ async function processStream(entry, length, sql) {
     });
 
     if (result === 'Station exists') return;
-    log.debug(`Added station: ${result}`);
+    logger.debug(`Added station: ${result}`);
     changed++;
   } catch(e) {
-    log.error(`Error processing entry: ${e.message}`);
+    logger.error(`Error processing entry: ${e.message}`);
   }
 }
 
@@ -109,8 +107,6 @@ async function processStream(entry, length, sql) {
  * @returns {Promise<void>}
  */
 module.exports = async () => {
-  const sql = new Stations('data/customradio.db');
-
   const startTime = new Date().getTime();
   progressCounter = 0;
   changed = 0;
@@ -119,20 +115,19 @@ module.exports = async () => {
     if (!data) throw Error('Fetch failed');
     const length = data.length;
     
-    log.info(`Scraping Icecast Directory for new stations. ${length} stations pulled`);
+    logger.info(`Scraping Icecast Directory for new stations. ${length} stations pulled`);
     await Promise.all(
       data.map(entry => 
-        limit(() => processStream(entry, length, sql))
+        limit(() => processStream(entry, length, stations))
       )
     );
-    const {total, online} = await sql.dbStats();
+    const {total, online} = await stations.dbStats();
     const now = new Date().getTime();
-    log.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(now - startTime)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
+    logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(now - startTime)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
     await sleep(500); 
   } catch (err) {
-    log.critical(`Scrape failed: ${err.message}`);
+    logger.critical(`Scrape failed: ${err.message}`);
   } finally {
-    await sql.close();
     changed = 0;
     progressCounter = 0;
   }

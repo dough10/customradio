@@ -6,14 +6,10 @@ const pLimit = require('p-limit');
 
 const isLiveStream = require('./isLiveStream.js');
 const useableHomepage = require('./useableHomepage.js');
-const Logger = require('./logger.js');
-const Stations = require('../model/Stations.js');
+const {stations, logger} = require('./../services.js');
 const retry = require('./retry.js');
 
 const limit = pLimit(5);
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
 
 let counter = 0;
 let updatedCount = 0;
@@ -86,7 +82,7 @@ async function testHomepageConnection(url) {
       return homepage;
     }
   } catch(e) {
-    log.debug(`${url} failed homepage test connection: ${e.message}`);
+    logger.debug(`${url} failed homepage test connection: ${e.message}`);
     return;
   }
 }
@@ -94,21 +90,21 @@ async function testHomepageConnection(url) {
 /**
  * Update station data in the database.
  * 
- * @param {Object} sql - The Stations instance.
+ * @param {Object} stations - The Stations instance.
  * @param {Object} old - The original station object.
  * @param {Object} updated - The updated stream object.
  * @returns {Promise<void>}
  */
-async function updateStationData(sql, old, updated) {
+async function updateStationData(stations, old, updated) {
   const homepage = await retry(() => testHomepageConnection(updated.icyurl))
     .catch(e => {
-      log.debug(`Failed to resolve homepage for station ID ${old.id}: ${e.message}`);
+      logger.debug(`Failed to resolve homepage for station ID ${old.id}: ${e.message}`);
       return null;
     });
 
-  // log.debug(typeof updated.name);
-  // log.debug(updated.name);
-  // log.debug(old.name);
+  // logger.debug(typeof updated.name);
+  // logger.debug(updated.name);
+  // logger.debug(old.name);
 
   const updatedData = {
     id: old.id,
@@ -126,7 +122,7 @@ async function updateStationData(sql, old, updated) {
     inList: old.inList,
   };
 
-  await sql.updateStation(updatedData);
+  await stations.updateStation(updatedData);
 }
 
 /**
@@ -185,13 +181,13 @@ function percentage(small, big, places = 2) {
  * @param {Number} ndx batch index 
  * @param {Number} offset ndx * (desired pull count)
  * @param {Number} length  
- * @param {Object} sql sqlite database class instance
+ * @param {Object} stations sqlite database class instance
  * @param {Number} totalStationCount total count of stations in the database
  * @param {Number} parts number of batches (totalStationCount / (desired batch length))
  * 
  * @returns {void}
  */
-async function processStream(station, ndx, offset, length, sql, totalStationCount, parts) {
+async function processStream(station, ndx, offset, length, stations, totalStationCount, parts) {
   counter++; 
   
   const partCount = counter - offset;
@@ -200,24 +196,24 @@ async function processStream(station, ndx, offset, length, sql, totalStationCoun
   
   try {
     const startTime = Date.now()
-    log.debug(`[${station.id}] Testing url ${station.url}`);
-    log.debug(`[${station.id}] Station: ${partCount}/${length}, ${partPrecent}%`);
-    log.debug(`[${station.id}] Part: ${ndx + 1}/${parts}, Total progress: ${totalPrecent}%`);
+    logger.debug(`[${station.id}] Testing url ${station.url}`);
+    logger.debug(`[${station.id}] Station: ${partCount}/${length}, ${partPrecent}%`);
+    logger.debug(`[${station.id}] Part: ${ndx + 1}/${parts}, Total progress: ${totalPrecent}%`);
     
     const stream = await retry(() => isLiveStream(station.url));
 
     if (stationDataIsUnchanged(station, stream)) {
-      log.debug(`[${station.id}] No change.. ${Date.now() - startTime}ms`);
+      logger.debug(`[${station.id}] No change.. ${Date.now() - startTime}ms`);
       return;
     }
     
-    await updateStationData(sql, station, stream);
-    log.debug(`[${station.id}] Updated.. ${Date.now() - startTime}ms`);
+    await updateStationData(stations, station, stream);
+    logger.debug(`[${station.id}] Updated.. ${Date.now() - startTime}ms`);
     
     // count changes
     updatedCount++;
   } catch (e) {
-    log.debug(`[${station.id}] Error for (${station.name}): ${e.message}`);
+    logger.debug(`[${station.id}] Error for (${station.name}): ${e.message}`);
   } 
 }
 
@@ -238,19 +234,17 @@ async function processStream(station, ndx, offset, length, sql, totalStationCoun
  * 
  * testStreams()
  *   .then(() => {
- *     console.log.info('Streams tested and database updated successfully.');
+ *     console.logger.info('Streams tested and database updated successfully.');
  *   })
  *   .catch(err => {
  *     console.error('Failed to test streams and update database:', err);
  *   });
  */
 async function testStreams() {
-  const sql = new Stations('data/customradio.db');
-
   const startTime = Date.now();
-  log.info(`Starting database update at ${new Date(startTime).toISOString()}`);
+  logger.info(`Starting database update at ${new Date(startTime).toISOString()}`);
   try {
-    const totalStationCount = await sql.getTotalCount();
+    const totalStationCount = await stations.getTotalCount();
     const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
     
     counter = 0;
@@ -258,36 +252,34 @@ async function testStreams() {
     
     for (let ndx = 0; ndx < parts; ndx++) {
       const offset = ndx * UPDATE_PULL_COUNT;
-      const stationPull = await sql.getPaginatedStations(UPDATE_PULL_COUNT, offset);
+      const stationPull = await stations.getPaginatedStations(UPDATE_PULL_COUNT, offset);
       const length = stationPull.length;
 
       await Promise.all(
         stationPull.map(station => 
           limit(() => 
-            processStream(station, ndx, offset, length, sql, totalStationCount, parts)
+            processStream(station, ndx, offset, length, stations, totalStationCount, parts)
           )
         )
       );
 
       // track memory usage
       const used = process.memoryUsage();
-      log.info(`Memory usage: ${toMB(used.heapUsed)}`);
+      logger.info(`Memory usage: ${toMB(used.heapUsed)}`);
 
       // Forced garbage collection after batch processing to reduce memory pressure
       if (global.gc) {
         global.gc();
-        log.debug('Garbage collected');
+        logger.debug('Garbage collected');
       }
     }
     const duration = msToHhMmSs(Date.now() - startTime);
-    const stats = await sql.dbStats();
+    const stats = await stations.dbStats();
 
-    log.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
-    log.info(`Stats - Total: ${stats.total}, Online: ${stats.online}, Offline: ${stats.total - stats.online}`);
+    logger.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
+    logger.info(`Stats - Total: ${stats.total}, Online: ${stats.online}, Offline: ${stats.total - stats.online}`);
   } catch(e) {
-    log.error(`Database update failed: ${e.message}`);
-  } finally {
-    await sql.close();
+    logger.error(`Database update failed: ${e.message}`);
   }
 
 }
