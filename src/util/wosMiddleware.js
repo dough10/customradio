@@ -1,9 +1,7 @@
 const { WorkOS } = require('@workos-inc/node');
 
-const Logger = require('./logger.js');
+const {logger} = require('./../services.js');
 
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
@@ -37,7 +35,7 @@ module.exports = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    log.error(`WorkOS session error: ${error.message}`);
+    logger.error(`WorkOS session error: ${error.message}`);
     res.status(500).send('Internal Server Error');
     return;
   }
