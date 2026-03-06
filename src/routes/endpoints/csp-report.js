@@ -1,7 +1,6 @@
 require('dotenv').config();
 const {validationResult} = require('express-validator');
 
-const { t } = require('../../util/i18n.js');
 const { logger } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 
@@ -61,7 +60,5 @@ module.exports = asyncHandler(async (req, res) => {
     return; 
   }
 
-
-  // console.log(cspReport);
   res.status(204).send();
 });
