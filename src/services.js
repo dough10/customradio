@@ -11,5 +11,6 @@ const userData = new UserData('data/customradio.db');
 module.exports = {
   stations,
   userData,
-  logger
+  logger,
+  logLevel
 }
