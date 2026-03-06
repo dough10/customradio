@@ -1,4 +1,4 @@
-const {userData, logger} = require('../../services.js');
+const {userData} = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 
 function toTxt({name, url}) {
