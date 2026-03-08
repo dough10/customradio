@@ -19,7 +19,10 @@ module.exports = async function authenticate(req, res, next) {
     if (!token) {
       return unauthorized(res);
     }
-    const r = await fetch(`${process.env.AUTH_SERVER_URL}/token/verify`, postOptions({ token }));
+    const r = await fetch(
+      `${process.env.AUTH_SERVER_URL}/token/verify`, 
+      postOptions({ token })
+    );
     if (!r.ok) {
       return unauthorized(res);
     }
