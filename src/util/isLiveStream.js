@@ -1,14 +1,10 @@
 const axios = require("axios");
 const pack = require("../../package.json");
-const iconv = require("iconv-lite");
 
 const isValidURL = require("./isValidURL.js");
-const Logger = require("./logger.js");
 const retry = require("./retry.js");
 const fixEncoding = require("./fixEncoding.js");
-
-const logLevel = process.env.LOG_LEVEL || "info";
-const log = new Logger(logLevel);
+const {logger} = require('./../services.js');
 
 /**
  * An array of unhelpful stream names to ignore.
@@ -94,7 +90,7 @@ async function streamTest(url) {
 
     if (!isAudioStream) {
       const errorMessage = `Test error: ${url} - invalid content-type: ${content}`;
-      log.debug(errorMessage);
+      logger.debug(errorMessage);
       return {
         ok: false,
         error: errorMessage,
@@ -136,7 +132,7 @@ async function streamTest(url) {
       status: response.status,
     };
   } catch (error) {
-    log.debug(error.message);
+    logger.debug(error.message);
     return {
       ok: false,
       error: error.message,
@@ -173,9 +169,9 @@ async function streamTest(url) {
  * isLiveStream('http://example.com/stream')
  *   .then(data => {
  *     if (data) {
- *       console.log.info('Stream is live:', data);
+ *       console.logger.info('Stream is live:', data);
  *     } else {
- *       console.log.info('Stream is not live or an error occurred');
+ *       console.logger.info('Stream is not live or an error occurred');
  *     }
  *   })
  *   .catch(err => {
@@ -198,14 +194,14 @@ module.exports = async (url) => {
     try {
       return await retry(() => streamTest(httpsUrl));
     } catch (error) {
-      log.error(`HTTPS test failed for ${httpsUrl}: ${error.message}`);
-      log.debug(`Falling back to HTTP: ${url}`);
+      logger.error(`HTTPS test failed for ${httpsUrl}: ${error.message}`);
+      logger.debug(`Falling back to HTTP: ${url}`);
     }
   }
 
   try {
     return await retry(() => streamTest(url));
   } catch (e) {
-    log.error(`Failed testing http: ${e.message}`);
+    logger.error(`Failed testing http: ${e.message}`);
   }
 };
