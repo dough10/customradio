@@ -1,11 +1,7 @@
 // i18n.js
-const fs = require('fs');
 const path = require('path');
 
-const Logger = require('./logger.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-const log = new Logger(logLevel);
+const {logger} = require('./../services.js');
 
 /** @type {Object} an object of language file names & file paths locales[en] = 'path to app folder/locales/en.js' */
 const locales = {};
@@ -31,7 +27,7 @@ let currentLang = 'en';
  * @returns {String}
  */
 function setLanguage(lang) {
-  if (lang && !locales[lang]) log.warning(`language file does not exist: ${lang}`);
+  if (lang && !locales[lang]) logger.warning(`language file does not exist: ${lang}`);
   currentLang = locales[lang] ? lang : 'en';
   return currentLang;
 }
