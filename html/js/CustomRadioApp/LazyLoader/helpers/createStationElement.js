@@ -85,13 +85,13 @@ function toggleSelect(ev) {
   hapticFeedback();
 
   // get all selected elements
-  const all = Array.from(el.parentNode.querySelectorAll(selectors.selectedStation));
+  const selectedStations = Array.from(el.parentNode.querySelectorAll(selectors.selectedStation));
 
   // show / hide download button
   [
     document.querySelector(selectors.downloadButton),
     document.querySelector(selectors.toggleSelected)
-  ].filter(Boolean).forEach(el => toggleActiveState(el, all.length));
+  ].filter(Boolean).forEach(el => toggleActiveState(el, selectedStations.length));
 
   const selected = el.hasAttribute('selected');
   reportInList(el.id, selected);
@@ -215,20 +215,20 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
   li.dataset.icon = icon;
   li.dataset.homepage = homepage;
 
-  em.add(li, 'contextmenu', contextMenu);
+  em.add(li, em.types.contextmenu, contextMenu);
 
-  em.add(li, 'touchstart', ev => {
+  em.add(li,em.types.touchstart, ev => {
     isScrolling = false;
     pressTimer = setTimeout(_ => {
       if (!isScrolling) contextMenu(ev);
     }, LONG_PRESS_DURATION);
   }, passive);
 
-  em.add(li, 'touchend', _ => {
+  em.add(li, em.types.touchend, _ => {
     clearTimeout(pressTimer);
   }, passive);
   
-  em.add(li, 'touchmove', _ => {
+  em.add(li, em.types.touchmove, _ => {
     isScrolling = true;
   }, passive);
 
