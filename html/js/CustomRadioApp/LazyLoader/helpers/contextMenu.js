@@ -71,7 +71,7 @@ export default async function contextMenu(ev) {
 
   await sleep(20);
 
-  const ndx = em.add(popup, 'transitionend', _ => {
+  const ndx = em.add(popup, em.types.transitionend, _ => {
     addPopupListeners(popup, body, backdrop);
     em.remove(ndx);
   }, true);
@@ -98,7 +98,7 @@ function contextMenuItem({icon, text, title, func}) {
   const li = document.createElement('li');
   li.title = title;
   li.append(svgIcon(icon), txt);
-  em.add(li, 'click', _ => func(), true, 'clicks');
+  em.add(li, em.types.click, _ => func(), true, 'clicks');
   return li;
 }
 
@@ -133,7 +133,7 @@ function addPopupListeners(popup, body, backdrop) {
   const dismiss = ev => {
     ev.preventDefault();
     em.removeByNamespace('context-dismiss');
-    em.add(popup, 'transitionend', _ => {
+    em.add(popup, em.types.transitionend, _ => {
       em.removeAll();
       backdrop.remove();
       popup.remove();
@@ -141,8 +141,8 @@ function addPopupListeners(popup, body, backdrop) {
     popup.removeAttribute('open');
     backdrop.removeAttribute('visable');
   };
-  em.add(body, 'click', dismiss, true, 'context-dismiss');
-  em.add(body, 'contextmenu', dismiss, true, 'context-dismiss');
+  em.add(body, em.types.click, dismiss, true, 'context-dismiss');
+  em.add(body, em.types.contextmenu, dismiss, true, 'context-dismiss');
 }
 
 /**
