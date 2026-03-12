@@ -1,3 +1,35 @@
+export const types = Object.freeze({
+  click: 'click',
+  change: 'change',
+  scroll: 'scroll',
+  resize: 'resize',
+  input: 'input',
+  focus: 'focus',
+  blur: 'blur',
+  submit: 'submit',
+  keydown: 'keydown',
+  keyup: 'keyup',
+  keypress: 'keypress',
+  mouseover: 'mouseover',
+  mouseout: 'mouseout',
+  mouseenter: 'mouseenter',
+  mouseleave: 'mouseleave',
+  transitionend: 'transitionend',
+  animationend: 'animationend',
+  touchstart: 'touchstart',
+  touchmove: 'touchmove',
+  touchend: 'touchend',
+  touchcancel: 'touchcancel',
+  online: 'online',
+  offline: 'offline',
+  error: 'error',
+  beforeUnload: 'beforeunload',
+  focusin: 'focusin',
+  focusout: 'focusout',
+  contextmenu: 'contextmenu',
+  enterPressed: 'enter-pressed',
+});
+
 /**
  * EventManager class to manage event listeners.
  * It allows adding and removing event listeners easily.
@@ -10,37 +42,7 @@
  * eventManager.removeAll(); // Removes all listeners
  */
 export default class EventManager {
-  types = Object.freeze({
-    click: 'click',
-    change: 'change',
-    scroll: 'scroll',
-    resize: 'resize',
-    input: 'input',
-    focus: 'focus',
-    blur: 'blur',
-    submit: 'submit',
-    keydown: 'keydown',
-    keyup: 'keyup',
-    keypress: 'keypress',
-    mouseover: 'mouseover',
-    mouseout: 'mouseout',
-    mouseenter: 'mouseenter',
-    mouseleave: 'mouseleave',
-    transitionend: 'transitionend',
-    animationend: 'animationend',
-    touchstart: 'touchstart',
-    touchmove: 'touchmove',
-    touchend: 'touchend',
-    touchcancel: 'touchcancel',
-    online: 'online',
-    offline: 'offline',
-    error: 'error',
-    beforeUnload: 'beforeunload',
-    focusin: 'focusin',
-    focusout: 'focusout',
-    contextmenu: 'contextmenu',
-    enterPressed: 'enter-pressed',
-  });
+  types = types;
 
   constructor() {
     this.listeners = [];
