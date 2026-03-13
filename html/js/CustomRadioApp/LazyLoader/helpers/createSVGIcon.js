@@ -10,13 +10,13 @@
  * @returns {HTMLElement} SVG element with nested path
  */
 export default function svgIcon({ viewbox, d }) {
-  const path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-  path.setAttribute("d", d);
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
-  svg.setAttribute('fill', 'currentColor');
-  svg.setAttribute('viewBox', viewbox);
-  svg.append(path);
-  return svg;
+  const $path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+  $path.setAttribute("d", d);
+  const $svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+  $svg.setAttribute('fill', 'currentColor');
+  $svg.setAttribute('viewBox', viewbox);
+  $svg.append($path);
+  return $svg;
 }
 
 // Example usage:

@@ -18,7 +18,7 @@ const em = new EventManager();
  * 
  * @returns {Array} list of button objects
  */
-function getButtons(el) {
+function buttonData(el) {
   const buttons = [
     {
       icon: {
@@ -49,34 +49,37 @@ function getButtons(el) {
  * @returns {Promise<void>}
  */
 export default async function contextMenu(ev) {
-  const el = ev.target;
-  if (!el.dataset.name) return;
+  const $el = ev.target;
+  if (!$el.dataset.name) return;
   if (ev.type === "contextmenu") ev.preventDefault();
 
-  const body = document.querySelector('body');
-  const buttons = getButtons(el).map(contextMenuItem);
+  const $body = document.querySelector('body');
+  const $buttons = buttonData($el).map(contextMenuOption);
   
-  // positioning
-  const popupHeight = ELEMENT_HEIGHT * buttons.length;
+  const popupHeight = ELEMENT_HEIGHT * $buttons.length;
   const X = ev.pageX || ev.touches[0].pageX;
   const Y = ev.pageY || ev.touches[0].pageY;
-  const popup = document.createElement('ul');
-  const backdrop = document.createElement('div');
+
+  const $popup = document.createElement('ul');
+  const $backdrop = document.createElement('div');
   
-  backdrop.classList.add('backdrop');
-  popup.classList.add('context-menu');
-  popup.append(...buttons);
-  placeMenu(popup, X, Y, popupHeight);
-  body.append(popup, backdrop);
+  $backdrop.classList.add('backdrop');
+  $popup.classList.add('context-menu');
+ 
+  setLocation($popup, X, Y, popupHeight);
+
+  $popup.append(...$buttons);
+  $body.append($popup, $backdrop);
 
   await sleep(20);
 
-  const ndx = em.add(popup, em.types.transitionend, _ => {
-    addPopupListeners(popup, body, backdrop);
+  const ndx = em.add($popup, em.types.transitionend, _ => {
+    addClosingListeners($popup, $body, $backdrop);
     em.remove(ndx);
   }, true);
-  backdrop.toggleAttribute('visable');
-  popup.toggleAttribute('open');
+
+  $backdrop.toggleAttribute('visable');
+  $popup.toggleAttribute('open');
 }
 
 /**
@@ -92,14 +95,14 @@ export default async function contextMenu(ev) {
  * 
  * @returns {HTMLElement}
  */
-function contextMenuItem({icon, text, title, func}) {
-  const txt = document.createElement('span');
-  txt.textContent = text;
-  const li = document.createElement('li');
-  li.title = title;
-  li.append(svgIcon(icon), txt);
-  em.add(li, em.types.click, _ => func(), true, 'clicks');
-  return li;
+function contextMenuOption({icon, text, title, func}) {
+  const $txt = document.createElement('span');
+  $txt.textContent = text;
+  const $li = document.createElement('li');
+  $li.title = title;
+  $li.append(svgIcon(icon), $txt);
+  em.add($li, em.types.click, func, true, 'clicks');
+  return $li;
 }
 
 /**
@@ -126,38 +129,42 @@ function openStationHomepage(homepage) {
 /**
  * add event listeners to dismiss popup element
  * 
- * @param {HTMLElement} popup 
- * @param {HTMLElement} body 
+ * @param {HTMLElement} $popup 
+ * @param {HTMLElement} $body
+ * @param {HTMLElement} $backdrop 
  */
-function addPopupListeners(popup, body, backdrop) {
+function addClosingListeners($popup, $body, $backdrop) {
+  const namespace = 'context-dismiss';
   const dismiss = ev => {
     ev.preventDefault();
-    em.removeByNamespace('context-dismiss');
-    em.add(popup, em.types.transitionend, _ => {
+    em.removeByNamespace(namespace);
+    em.add($popup, em.types.transitionend, _ => {
       em.removeAll();
-      backdrop.remove();
-      popup.remove();
+      $backdrop.remove();
+      $popup.remove();
     }, true);
-    popup.removeAttribute('open');
-    backdrop.removeAttribute('visable');
+    $popup.removeAttribute('open');
+    $backdrop.removeAttribute('visable');
   };
-  em.add(body, em.types.click, dismiss, true, 'context-dismiss');
-  em.add(body, em.types.contextmenu, dismiss, true, 'context-dismiss');
+  [
+    em.types.click,
+    em.types.contextmenu
+  ].forEach(ev => em.add($body, ev, dismiss, true, namespace));
 }
 
 /**
  * sets absolute placement properties of context menu
  * 
- * @param {HTMLElement} menu 
+ * @param {HTMLElement} $menu 
  * @param {Number} X 
  * @param {Number} Y 
  * @param {Number} popupHeight 
  */
-function placeMenu(menu, X, Y, popupHeight) {
+function setLocation($menu, X, Y, popupHeight) {
   const wHeight = window.innerHeight / 2;
   const wWidth = window.innerWidth / 2;
-  menu.style.top = `${(Y > wHeight) ? Y - popupHeight : Y}px`;
-  menu.style.left = `${(X > wWidth) ? X - 250 : X + 10}px`;
+  $menu.style.top = `${(Y > wHeight) ? Y - popupHeight : Y}px`;
+  $menu.style.left = `${(X > wWidth) ? X - 250 : X + 10}px`;
 }
 
 /**
@@ -165,17 +172,14 @@ function placeMenu(menu, X, Y, popupHeight) {
  * 
  * @param {String} id - the station id
  */
-async function markDuplicate(id) {
+async function markDuplicate(id, attempts = 1) {
   try {
     const response = await fetch('/mark-duplicate', _OPTIONS({id}));
     const result = await response.json();
     new Toast(result.message, 1.5);
-    // invalid csrf
     if (![440,419,403].includes(result.status)) return;
-    // attempt to update
-    if (!await updateCsrf()) return;
-    // if updated send request again
-    markDuplicate(id);
+    if (!await updateCsrf() || attempts === 0) return;
+    markDuplicate(id, attempts - 1);
   } catch (err) {
     console.error('error reporting stream duplicate:', err);
   }

@@ -78,14 +78,14 @@ async function reportInList(id, state, attempts = 1) {
  */
 function toggleSelect(ev) {
   // toggle selected attribute
-  const el = ev.target.parentElement;
-  el.toggleAttribute('selected');
-  el.dataset.bitrate = Number(el.dataset.bitrate);
+  const $el = ev.target.parentElement;
+  $el.toggleAttribute('selected');
+  $el.dataset.bitrate = Number($el.dataset.bitrate);
   
   hapticFeedback();
 
   // get all selected elements
-  const selectedStations = Array.from(el.parentNode.querySelectorAll(selectors.selectedStation));
+  const selectedStations = Array.from($el.parentNode.querySelectorAll(selectors.selectedStation));
 
   // show / hide download button
   [
@@ -93,8 +93,8 @@ function toggleSelect(ev) {
     document.querySelector(selectors.toggleSelected)
   ].filter(Boolean).forEach(el => toggleActiveState(el, selectedStations.length));
 
-  const selected = el.hasAttribute('selected');
-  reportInList(el.id, selected);
+  const selected = $el.hasAttribute('selected');
+  reportInList($el.id, selected);
 }
 
 /**
@@ -116,12 +116,12 @@ async function playStream(ev, player) {
 
   hapticFeedback();
 
-  const el = ev.target.parentElement;
-  const id = el.id; 
-  const url = el.dataset.url;
-  const name = el.dataset.name;
-  const bitrate = Number(el.dataset.bitrate);
-  const homepage = el.dataset.homepage;
+  const $el = ev.target.parentElement;
+  const id = $el.id; 
+  const url = $el.dataset.url;
+  const name = $el.dataset.name;
+  const bitrate = Number($el.dataset.bitrate);
+  const homepage = $el.dataset.homepage;
   const stream = { id, url, name, bitrate };
 
   try {
@@ -189,49 +189,49 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
   let isScrolling = false;
   let pressTimer = 0;
 
-  const buttons = buttonData.map(createSmallButton);
+  const $buttons = buttonData.map(createSmallButton);
 
-  const span = document.createElement('span');
-  span.textContent = name;
+  const $span = document.createElement('span');
+  $span.textContent = name;
 
-  const div = document.createElement('div');
-  div.textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
-  div.title = div.textContent;
+  const $div = document.createElement('div');
+  $div.textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
+  $div.title = $div.textContent;
 
   const passive = { passive: true };
-  const li = document.createElement('li');
-  li.id = id;
-  li.title = `${name}: ${genre}`;
-  li.dataset.name = name;
+  const $li = document.createElement('li');
+  $li.id = id;
+  $li.title = `${name}: ${genre}`;
+  $li.dataset.name = name;
   try {
-    li.dataset.url = new URL(url).toString();
+    $li.dataset.url = new URL(url).toString();
   }
   catch (e) {
     console.error(`Invalid URL for station ${id}: ${url}`);
     return;
   }
-  li.dataset.bitrate = bitrate;
-  li.dataset.genre = genre;
-  li.dataset.icon = icon;
-  li.dataset.homepage = homepage;
+  $li.dataset.bitrate = bitrate;
+  $li.dataset.genre = genre;
+  $li.dataset.icon = icon;
+  $li.dataset.homepage = homepage;
 
-  em.add(li, em.types.contextmenu, contextMenu);
+  em.add($li, em.types.contextmenu, contextMenu);
 
-  em.add(li,em.types.touchstart, ev => {
+  em.add($li,em.types.touchstart, ev => {
     isScrolling = false;
     pressTimer = setTimeout(_ => {
       if (!isScrolling) contextMenu(ev);
     }, LONG_PRESS_DURATION);
   }, passive);
 
-  em.add(li, em.types.touchend, _ => {
+  em.add($li, em.types.touchend, _ => {
     clearTimeout(pressTimer);
   }, passive);
   
-  em.add(li, em.types.touchmove, _ => {
+  em.add($li, em.types.touchmove, _ => {
     isScrolling = true;
   }, passive);
 
-  li.append(span, div, ...buttons);
-  return li;
+  $li.append($span, $div, ...$buttons);
+  return $li;
 }

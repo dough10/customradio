@@ -17,11 +17,11 @@ import { types } from '../../EventManager/EventManager.js';
  * @returns {HTMLElement} button
  */
 export default function createSmallButton({ icon, cssClass, func, title }) {
-  const button = document.createElement('button');
-  button.title = title;
-  button.type = 'button';
-  button.classList.add('small-button', cssClass);
-  button.append(svgIcon(icon));
-  button.addEventListener(types.click, func);
-  return button;
+  const $button = document.createElement('button');
+  $button.title = title;
+  $button.type = 'button';
+  $button.classList.add('small-button', cssClass);
+  $button.append(svgIcon(icon));
+  $button.addEventListener(types.click, func);
+  return $button;
 }

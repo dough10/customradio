@@ -38,17 +38,21 @@ export default class LazyLoader {
 
   constructor(list, container, player, scrollFunc, createElFunc, loadingAnimation) {
     this._list = list;
-    this._container = container;
-    this._player = player;
+    
+    this.$container = container;
+    this.$parent = this.$container.parentElement;
+    
     this._scrollFunc = scrollFunc;
-    this._parent = this._container.parentElement;
+    
+    this._player = player;
+
     this._createStationElement = createElFunc || createStationElement;
     this._insertLoadingAnimation = loadingAnimation || insertLoadingAnimation;
 
     // bind this to the class instance
     this._debouncedLoad = debounce(_ => this.load(), 100);
 
-    if (!this._container || !this._container.parentElement) {
+    if (!this.$container || !this.$container.parentElement) {
       throw new Error('LazyLoader: container must exist and have a parent element.');
     }
     
@@ -59,7 +63,7 @@ export default class LazyLoader {
         type: this._em.types.scroll, 
         handler: _ => this._onScroll(),
         options: { passive: true },
-        target: this._parent,
+        target: this.$parent,
       }, { 
         type: this._em.types.resize,
         handler: _ => this._onResize(),
@@ -96,9 +100,9 @@ export default class LazyLoader {
    */
   _onScroll() {
     // pass the scroll event to the scroll function if it exists
-    this._scrollFunc?.(this._parent.scrollTop);
+    this._scrollFunc?.(this.$parent.scrollTop);
   
-    const remainingScroll = this._parent.scrollHeight - this._parent.scrollTop - this._parent.clientHeight;
+    const remainingScroll = this.$parent.scrollHeight - this.$parent.scrollTop - this.$parent.clientHeight;
   
     // if the user scrolled to the bottom of the container, load more elements
     const loadThreshold = (ELEMENT_HEIGHT * 4) + LI_BOTTOM_MARGIN;
@@ -132,13 +136,13 @@ export default class LazyLoader {
    */
   _populateContainer(stationList) {
     const localFragment = document.createDocumentFragment();
-    stationList.forEach(element => {
-      const stationElement = this._createStationElement(element, this._player);
-      if (!stationElement) return;
-      if (element.selected) stationElement.toggleAttribute('selected');
-      localFragment.append(stationElement);
+    stationList.forEach(stationsData => {
+      const $stationElement = this._createStationElement(stationsData, this._player);
+      if (!$stationElement) return;
+      if (stationsData.selected) $stationElement.toggleAttribute('selected');
+      localFragment.append($stationElement);
     });
-    this._container.append(localFragment);
+    this.$container.append(localFragment);
   }
 
   /**
@@ -155,7 +159,7 @@ export default class LazyLoader {
     if (state === this._loading) return; // no change, do nothing
     this._loading = Boolean(state);
     if (this._ndx == 0) return;
-    this._loading ? this._insertLoadingAnimation(this._container) : this._container.querySelector('.loading')?.remove();
+    this._loading ? this._insertLoadingAnimation(this.$container) : this.$container.querySelector('.loading')?.remove();
   }
 
   /**
@@ -212,8 +216,8 @@ export default class LazyLoader {
    */
   destroy() {
     this._em.removeAll();
-    this._parent = null;
-    this._container = null;
+    this.$parent = null;
+    this.$container = null;
     this._list = null;
     this._player = null;
     this._scrollFunc = null;
