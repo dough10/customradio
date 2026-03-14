@@ -14,11 +14,11 @@ const em = new EventManager();
 /**
  * generate button array
  * 
- * @param {HTMLElement} el element clicked
+ * @param {HTMLElement} $el HTMLElement to get data from
  * 
  * @returns {Array} list of button objects
  */
-function buttonData(el) {
+function buttonData($el) {
   const buttons = [
     {
       icon: {
@@ -27,19 +27,19 @@ function buttonData(el) {
       },
       text: t('markDup'),
       title: t('dupTitle'),
-      func:  _ => markDuplicate(el.id)
+      func:  _ => markDuplicate($el.id)
     }, {
       icon: {
         viewbox: '0 -960 960 960',
         d: 'M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z'
       },
       text : t('homepage'),
-      title: t('homepageTitle', el.dataset.homepage),
-      func: _ => openStationHomepage(el.dataset.homepage),
+      title: t('homepageTitle', $el.dataset.homepage),
+      func: _ => openStationHomepage($el.dataset.homepage),
       condition: el => el.dataset.homepage !== 'Unknown'
     }
   ];
-  return buttons.filter(btn => !btn.condition || btn.condition(el));
+  return buttons.filter(btn => !btn.condition || btn.condition($el));
 }
 
 /**
@@ -49,37 +49,39 @@ function buttonData(el) {
  * @returns {Promise<void>}
  */
 export default async function contextMenu(ev) {
-  const $el = ev.target;
-  if (!$el.dataset.name) return;
   if (ev.type === "contextmenu") ev.preventDefault();
 
+  const $el = ev.target;
+  if (!$el.dataset.name) return;
+
   const $body = document.querySelector('body');
+  const $popup = document.createElement('ul');
+  const $backdrop = document.createElement('div');
   const $buttons = buttonData($el).map(contextMenuOption);
   
   const popupHeight = ELEMENT_HEIGHT * $buttons.length;
   const X = ev.pageX || ev.touches[0].pageX;
   const Y = ev.pageY || ev.touches[0].pageY;
-
-  const $popup = document.createElement('ul');
-  const $backdrop = document.createElement('div');
   
   $backdrop.classList.add('backdrop');
   $popup.classList.add('context-menu');
  
-  setLocation($popup, X, Y, popupHeight);
+  setContextMenuLocation($popup, X, Y, popupHeight);
 
   $popup.append(...$buttons);
   $body.append($popup, $backdrop);
-
-  await sleep(20);
-
+  
   const ndx = em.add($popup, em.types.transitionend, _ => {
     addClosingListeners($popup, $body, $backdrop);
     em.remove(ndx);
   }, true);
 
-  $backdrop.toggleAttribute('visable');
-  $popup.toggleAttribute('open');
+  await sleep(20);
+
+  requestAnimationFrame(_ => {
+    $backdrop.toggleAttribute('visable');
+    $popup.toggleAttribute('open');
+  });
 }
 
 /**
@@ -108,7 +110,7 @@ function contextMenuOption({icon, text, title, func}) {
 /**
  * opens the stations homepage if present
  * 
- * @param {String} homepage 
+ * @param {String} homepage - homepage url
  * 
  * @returns {void}
  */
@@ -134,14 +136,14 @@ function openStationHomepage(homepage) {
  * @param {HTMLElement} $backdrop 
  */
 function addClosingListeners($popup, $body, $backdrop) {
-  const namespace = 'context-dismiss';
+  const namespace = `context-${Date.now()}`;
   const dismiss = ev => {
     ev.preventDefault();
     em.removeByNamespace(namespace);
-    em.add($popup, em.types.transitionend, _ => {
-      em.removeAll();
+    const ndx = em.add($popup, em.types.transitionend, _ => {
       $backdrop.remove();
       $popup.remove();
+      em.remove(ndx);
     }, true);
     $popup.removeAttribute('open');
     $backdrop.removeAttribute('visable');
@@ -160,7 +162,7 @@ function addClosingListeners($popup, $body, $backdrop) {
  * @param {Number} Y 
  * @param {Number} popupHeight 
  */
-function setLocation($menu, X, Y, popupHeight) {
+function setContextMenuLocation($menu, X, Y, popupHeight) {
   const wHeight = window.innerHeight / 2;
   const wWidth = window.innerWidth / 2;
   $menu.style.top = `${(Y > wHeight) ? Y - popupHeight : Y}px`;
