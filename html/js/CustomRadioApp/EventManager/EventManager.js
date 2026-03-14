@@ -76,6 +76,7 @@ export default class EventManager {
    * Removes a specific event listener by its index.
    * 
    * @param {number} index - The index of the listener to remove.
+   * 
    * @returns {boolean} - Returns true if the listener was successfully removed, false otherwise.
    */
   remove(index) {
