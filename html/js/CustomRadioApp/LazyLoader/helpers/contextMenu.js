@@ -36,10 +36,10 @@ function buttonData($el) {
       text : t('homepage'),
       title: t('homepageTitle', $el.dataset.homepage),
       func: _ => openStationHomepage($el.dataset.homepage),
-      condition: el => el.dataset.homepage !== 'Unknown'
+      condition: _ => $el.dataset.homepage !== 'Unknown'
     }
   ];
-  return buttons.filter(btn => !btn.condition || btn.condition($el));
+  return buttons.filter(btn => !btn.condition || btn.condition());
 }
 
 /**
