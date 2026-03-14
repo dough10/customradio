@@ -9,7 +9,7 @@
 
 #stations>li {
   margin: 8px auto;
-  max-width: 750px;
+  max-width: 1000px;
   padding: 0.5em;
   display: flex;
   justify-content: center;
