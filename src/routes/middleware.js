@@ -111,12 +111,15 @@ module.exports = (app, httpRequestCounter) => {
             "'self'"
           ],
           scriptSrc: [
-            "'self'",
             (req, res) => `'nonce-${res.locals.nonce}'`,
+            "'strict-dynamic'"
+          ],
+          scriptSrcElem: [
+            (req, res) => `'nonce-${res.locals.nonce}'`,
+            "'strict-dynamic'"
           ],
           styleSrc: [
             "'self'",
-            "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='",
           ],
           imgSrc: [
             "'self'", 
@@ -134,22 +137,6 @@ module.exports = (app, httpRequestCounter) => {
           ],
           mediaSrc: [
             "*"
-          ],
-          styleSrcElem: [
-            "'self'",
-            "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='",
-            "'sha256-p08VBe6m5i8+qtXWjnH/AN3klt1l4uoOLsjNn8BjdQo='",
-          ],
-          styleSrcAttr: [
-            "'self'",
-            "'sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='",
-            "'sha256-vikEcQTvq6CdeDjkjiw9V6JBRIAzZI2b0ZVRQumWr/U='",
-            "'sha256-GyzWImLbzJfST9/36b/h4HjE0nibbICDeXCh1mYLK68='",
-            "'unsafe-hashes'",
-          ],
-          scriptSrcAttr: [
-            "'self'", 
-            "'unsafe-inline'"
           ],
           reportUri: "/csp-report",
         },
