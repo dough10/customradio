@@ -27,12 +27,17 @@
   transform: translateY(0) translateX(-50%);
 }
 
+.alert>div>p>a {
+  font-weight: bold; 
+  font-size: 1.1em;
+}
+
 .alert>.yellow-text {
   padding: 16px;
   cursor: pointer;
   margin: auto;
   color: yellow;
-  min-width: 135px;
+  min-width: 100px;
 }
 
 @media screen and (max-width: 600px) {
