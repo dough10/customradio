@@ -10,7 +10,6 @@ import toggleActiveState from '../utils/toggleActiveState.js';
 import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
-import news from '../utils/news.js';
 import txtDownloadUrl from '../utils/txtDownloadUrl.js';
 
 
