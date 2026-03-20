@@ -7,6 +7,13 @@ const NAMESPACES = {
   close_animation: 'close-animation'
 };
 
+/**
+ * attempts to parse a given string for markdown style links
+ * 
+ * @param {String} str 
+ * 
+ * @returns {Object}
+ */
 function parseLink(str) {
   const pattern = /^\[(https?:\/\/[^\[\]]+)\[([^\[\]]+)\]\]$/;
   const match = str.match(pattern);
@@ -60,7 +67,7 @@ export default class Alert {
   /**
    * destroys the Alert instance
    * 
-   * @public
+   * @private
    * 
    * @returns {void}
    */
@@ -83,6 +90,8 @@ export default class Alert {
   /**
    * create a paragraph html element with either a link or string of text as contents
    * 
+   * @private
+   * 
    * @param {String} paragraph 
    * 
    * @returns {HTMLElement}
@@ -90,8 +99,8 @@ export default class Alert {
   #createParagraph(paragraph) {
     if (typeof paragraph !== 'string') return;
     const p = document.createElement('p');
-    const link = parseLink(paragraph);
     try {
+      const link = parseLink(paragraph);
       const { url, text } = link;
       const parsed = new URL(url);
       if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('invalid protocol');
@@ -109,6 +118,8 @@ export default class Alert {
 
   /**
    * create a button to dismiss the alert element.
+   * 
+   * @private
    * 
    * @returns {HTMLElement}
    */
@@ -144,6 +155,9 @@ export default class Alert {
   }
 
   /**
+   * creates the alert body
+   * 
+   * @private
    * 
    * @param {String} title 
    * @param {Array} paragraphs
