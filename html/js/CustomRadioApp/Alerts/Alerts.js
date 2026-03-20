@@ -35,7 +35,7 @@ export default class Alert {
     this.$alert = this.#createAlert(title, paragraphs);
     document.body.append(this.$alert);
     sleep(20).then(_ => 
-      requestAnimationFrame(() => this.$alert?.setAttribute('open', true))
+      requestAnimationFrame(_ => this.$alert?.setAttribute('open', true))
     );
   }
 
@@ -135,7 +135,7 @@ export default class Alert {
     this._em.add(
       $dismiss,
       this._em.types.click,
-      () => this.#destroy(),
+      _ => this.#destroy(),
       true,
       NAMESPACES.alert_click
     );
