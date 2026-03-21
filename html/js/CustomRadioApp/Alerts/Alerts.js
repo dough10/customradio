@@ -100,8 +100,7 @@ export default class Alert {
     if (typeof paragraph !== 'string') return;
     const p = document.createElement('p');
     try {
-      const link = parseLink(paragraph);
-      const { url, text } = link;
+      const { url, text } = parseLink(paragraph);
       const parsed = new URL(url);
       if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('invalid protocol');
       const a = document.createElement('a');
