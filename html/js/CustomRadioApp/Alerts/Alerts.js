@@ -196,3 +196,5 @@ export default class Alert {
     return $alert;
   }
 }
+
+window.CustomAlert = Alert;
