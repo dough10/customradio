@@ -121,6 +121,9 @@ module.exports = (app, httpRequestCounter) => {
           styleSrc: [
             "'self'",
           ],
+          styleSrcElem: [
+            'self'
+          ],
           imgSrc: [
             "'self'", 
             "data:",
