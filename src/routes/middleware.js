@@ -19,6 +19,15 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 };
 
+const cspProperties = {
+  SELF: "'self'",
+  NONCE: (req, res) => `'nonce-${res.locals.nonce}'`,
+  DYNAMIC: "'strict-dynamic'",
+  DATA: "data:", 
+  WORKOS: "https://workoscdn.com/",
+  HTTPS: "https:"
+};
+
 /**
  * Redis client setup and session configuration
  */
@@ -105,41 +114,43 @@ module.exports = (app, httpRequestCounter) => {
       contentSecurityPolicy: {
         directives: {
           manifestSrc: [
-            "'self'"
+            cspProperties.SELF
           ],
           defaultSrc: [
-            "'self'"
+            cspProperties.SELF
           ],
           scriptSrc: [
-            (req, res) => `'nonce-${res.locals.nonce}'`,
-            "'strict-dynamic'"
+            cspProperties.NONCE,
+            cspProperties.DYNAMIC
           ],
           scriptSrcElem: [
-            (req, res) => `'nonce-${res.locals.nonce}'`,
-            "'strict-dynamic'"
+            cspProperties.NONCE,
+            cspProperties.DYNAMIC
           ],
           styleSrc: [
-            "'self'",
+            cspProperties.SELF,
           ],
           styleSrcElem: [
-            "'self'"
+            cspProperties.SELF
           ],
           imgSrc: [
-            "'self'", 
-            "data:",
-            "https://workoscdn.com/"
+            cspProperties.SELF, 
+            cspProperties.DATA,
+            cspProperties.WORKOS
           ],
           connectSrc: [
-            "*"
+            cspProperties.SELF,
+            cspProperties.HTTPS
           ],
           fontSrc: [
-            "'self'"
+            cspProperties.SELF
           ],
           frameSrc: [
-            "'self'"
+            cspProperties.SELF
           ],
           mediaSrc: [
-            "*"
+            cspProperties.SELF,
+            cspProperties.HTTPS
           ],
           reportUri: "/csp-report",
         },
