@@ -122,7 +122,7 @@ module.exports = (app, httpRequestCounter) => {
             "'self'",
           ],
           styleSrcElem: [
-            'self'
+            "'self'"
           ],
           imgSrc: [
             "'self'", 
