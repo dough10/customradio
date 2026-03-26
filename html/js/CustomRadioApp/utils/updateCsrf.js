@@ -1,3 +1,5 @@
+let updated = false;
+
 /**
  * Updates CSRF token by fetching a new one from server
  * 
@@ -7,6 +9,8 @@
 export default async function updateCsrf() {
   let parser = null;
   let html = null;
+
+  if (updated) return false;
 
   try {
     const tokenMeta = document.querySelector('meta[name="csrf-token"]');
@@ -34,7 +38,7 @@ export default async function updateCsrf() {
     if (!newTokenMeta?.content) {
       throw new Error('New CSRF token not found in response');
     }
-
+    updated = true;
     tokenMeta.content = newTokenMeta.content;
     return true;
 
