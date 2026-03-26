@@ -13,7 +13,7 @@ module.exports = asyncHandler(async (req, res) => {
       picture: user.profilePictureUrl,
       firstName: user.firstName,
       lastName: user.lastName,
-      role: user.metadata.role
+      role: user.metadata?.role || null
     } : null,
     lang: req.loadedLang,
     csrf: req.session.csrfToken,
