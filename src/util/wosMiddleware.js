@@ -30,6 +30,8 @@ module.exports = async (req, res, next) => {
 
     req.user = user;
 
+    console.log(user);
+
     const { sealedSession } = await session.refresh();
 
     if (sealedSession) {
