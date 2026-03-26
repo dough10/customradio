@@ -175,16 +175,15 @@ class Alerts {
 
         await this._run(`DELETE FROM alert_paragraphs WHERE alert_id = ?`, [id]);
 
-        if (paragraphs.length > 0) {
-          const values = paragraphs.map((_, i) => '(?, ?, ?)').join(',');
-          const params = paragraphs.flatMap((p, i) => [id, p, i]);
+        const values = paragraphs.map((_, i) => '(?, ?, ?)').join(',');
+        const params = paragraphs.flatMap((p, i) => [id, p, i]);
 
-          await this._run(
-            `INSERT INTO alert_paragraphs (alert_id, content, position)
-            VALUES ${values}`,
-            params
-          );
-        }
+        await this._run(
+          `INSERT INTO alert_paragraphs (alert_id, content, position)
+          VALUES ${values}`,
+          params
+        );
+
         await this._run('COMMIT');
       } catch (err) {
         await this._run('ROLLBACK');
