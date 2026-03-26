@@ -4,16 +4,8 @@ const { t } = require('../../util/i18n.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 
 module.exports = asyncHandler(async (req, res) => {
-  const user = req.user;
-
   res.send(pug.renderFile('./templates/index.pug', {
-    user: user ? {
-      id: user.id,
-      email: user.email,
-      picture: user.profilePictureUrl,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    } : null,
+    user: req.user,
     lang: req.loadedLang,
     csrf: req.session.csrfToken,
     nonce: res.locals.nonce,
