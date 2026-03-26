@@ -2,9 +2,10 @@ const { validationResult } = require('express-validator');
 
 const {alerts, logger} = require('./../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
+const isAdmin = require('./../../util/isAdmin.js');
 
 module.exports = asyncHandler(async (req, res) => {
-  if (!req.user) {
+  if (!isAdmin(req)) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
