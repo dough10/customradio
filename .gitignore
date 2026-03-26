@@ -12,6 +12,7 @@ yp.xml
 .DS*
 public
 t.js
+t.sh
 */*-old.*
 */*/*-old.*
 t.html
