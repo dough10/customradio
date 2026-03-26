@@ -11,7 +11,7 @@ import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
 import txtDownloadUrl from '../utils/txtDownloadUrl.js';
-
+import Alert from '../Alerts/Alerts.js';
 
 const NAMESPACE = {
   backdropClick: 'backdrop-click'
@@ -54,14 +54,16 @@ export default class UIManager {
       this.$main,
       this.$sharelink,
       this.$toggleSelected
-    ]
+    ];
 
     if (required.some(el => !el)) {
       throw new Error("Initialization failed — missing DOM elements.");
     }
 
     this._loadUser(window.user);
-    // news();
+
+    this.#showActiveAlerts();
+    setInterval(_ => this.#showActiveAlerts(), 5 * 60 * 1000);
   }
   
   /**
@@ -129,6 +131,39 @@ export default class UIManager {
     document.querySelectorAll('.menu-button').forEach(btn => {
       this._em.add(btn, this._em.types.click, _ => this._userMenuClose());
     });
+  }
+
+  /**
+   * fetches active alerts
+   * 
+   * @returns {Object[]}
+   */
+  async #fetchAlerts() {
+    try {
+      const res = await fetch('/getAlerts');
+      if (!res.ok) throw new Error('Failed to fetch alerts');
+      const alerts = await res.json();
+      return alerts;
+    } catch (err) {
+      console.error('Error fetching alerts:', err);
+      return [];
+    }
+  }
+
+  /**
+   * displays active alerts fatched from api
+   * 
+   * @returns {void}
+   */
+  async #showActiveAlerts() {
+    const displaying = document.querySelector('.alert');
+    if (displaying) return;
+    const alerts = await this.#fetchAlerts();
+
+    for (const alert of alerts) {
+      const key = `alert_${alert.id}_${alert.version}`;
+      new Alert(key, alert.title, alert.paragraphs);
+    }
   }
 
   /**
