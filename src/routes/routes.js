@@ -23,6 +23,7 @@ const index = require('./endpoints/index.js');
 const downloadtxt = require('./endpoints/downloadtxt.js');
 const scrape = require('./endpoints/scrape.js');
 const getAlerts = require('./endpoints/getAlerts.js');
+const addAlert = require('./endpoints/addAlert.js');
 
 const cspValidator = require('../schema/cspValidaton.js');
 const addStationValidator = require('../schema/addStationValidator.js');
@@ -30,6 +31,7 @@ const streamIssueValidator = require('../schema/streamIssueValidator.js');
 const markDuplicateValidator = require('../schema/markDuplicateValidator.js');
 const stationsValidator = require('../schema/stationsValidator.js');
 const userStationValidatior = require('../schema/userStationValidatior.js');
+const alertValidator = require('../schema/alertValidator.js');
 
 const wosMiddleware = require('./../util/wosMiddleware.js');
 
@@ -214,7 +216,7 @@ module.exports = async (app, register) => {
    *   }
    * ]
    */
-  app.get('/stations', await wosMiddleware, stationsValidator, getStations);
+  app.get('/stations', stationsValidator, getStations);
 
   /**
    * Handles GET requests to the '/userStations' endpoint.
@@ -297,7 +299,7 @@ module.exports = async (app, register) => {
    *   "error": "Failed to add station"
    * }
    */
-  app.post('/add', addStationValidator, await wosMiddleware, addToDatabase);
+  app.post('/add', addStationValidator, addToDatabase);
 
   /**
    * @api {post} /csp-report Receive Content Security Policy Violation Reports
@@ -391,6 +393,11 @@ module.exports = async (app, register) => {
    * Endpoint to download user stations as a TXT file.
    */
   app.get('/txt/:uid', downloadtxt);
+
+  /**
+   * creates a alert  in the database
+   */
+  app.post('/addAlert', alertValidator, await wosMiddleware, addAlert);
 
   /**
    * gets all currently active alerts
