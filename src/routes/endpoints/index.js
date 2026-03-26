@@ -5,7 +5,7 @@ const asyncHandler = require('../../util/asyncHandler.js');
 
 module.exports = asyncHandler(async (req, res) => {
   const user = req.user;
-
+  console.log(user);
   res.send(pug.renderFile('./templates/index.pug', {
     user: user ? {
       id: user.id,
