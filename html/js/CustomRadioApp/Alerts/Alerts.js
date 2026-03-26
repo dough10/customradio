@@ -32,6 +32,13 @@ function parseLink(str) {
  * One-time per `localStorage` key.
  */
 export default class Alert {
+  /**
+   * 
+   * @param {String} key - localstorage key
+   * @param {String} title - message header
+   * @param {String[]} paragraphs - message strings
+   * @returns 
+   */
   constructor(key, title, paragraphs) {
     if (!key || typeof key !== 'string') throw new Error('localstorage key required');
     if (localStorage.getItem(key)) return;
