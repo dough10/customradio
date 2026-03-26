@@ -27,7 +27,6 @@ COPY --chown=node:node --from=build /usr/src/app/templates ./templates
 COPY --chown=node:node --from=build /usr/src/app/logs ./logs
 COPY --chown=node:node --from=build /usr/src/app/data ./data
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
-COPY --chown=node:node --from=build /usr/src/app/scripts ./scripts
 
 EXPOSE 3000/tcp
 
