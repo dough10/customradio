@@ -14,7 +14,7 @@ const alerts = `CREATE TABLE IF NOT EXISTS alerts (
   created_at INTEGER NOT NULL,
   expires_at INTEGER,
   priority INTEGER DEFAULT 0,
-  version INTEGER NOT NULL DEFAULT 1
+  version TEXT NOT NULL
 );`;
 
 const paragraphs = `CREATE TABLE IF NOT EXISTS alert_paragraphs (
@@ -28,7 +28,7 @@ const paragraphs = `CREATE TABLE IF NOT EXISTS alert_paragraphs (
 
 const state = `CREATE TABLE IF NOT EXISTS alert_state (
   alert_id TEXT,
-  version INTEGER,
+  version TEXT,
   dismissed INTEGER DEFAULT 0,
   dismissed_at INTEGER,
   PRIMARY KEY (alert_id, version),
