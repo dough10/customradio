@@ -23,6 +23,7 @@ module.exports = [
     .withMessage('each paragraph must be a non-empty string'),
 
   body('expiresAt')
+    .optional()
     .toInt()
     .isInt({ min: 0 })
     .withMessage('expiresAt must be a valid timestamp')
