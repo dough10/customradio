@@ -47,6 +47,11 @@ class Alerts {
     this.initializationPromise = this.#init();
   }
 
+  /**
+   * Initialize the database schema
+   * 
+   * @returns {Promise}
+   */
   #init() {
     const run = (query, errorMsg) => {
       return new Promise((resolve, reject) => {
