@@ -1,3 +1,5 @@
+const { validationResult } = require('express-validator');
+
 const {alerts, logger} = require('./../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 
