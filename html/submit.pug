@@ -1,0 +1,16 @@
+html(lang=lang)
+  head
+    meta(charset="UTF-8")
+    meta(name="author" content="dough10")
+    meta(name="csrf-token" content=csrf)
+    script(nonce=nonce, type="text/javascript") window.user = !{JSON.stringify(user)};
+
+  body
+    label(for="id")
+      input(id="id" name="id")
+
+    label(for="title")
+      input(id="title" name="title") 
+
+    label(id="p" for="paragraphs")
+      input(id="p1" name="paragraphs")

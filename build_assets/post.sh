@@ -27,6 +27,7 @@ js_path=bundle.min."$version".js
 template=templates/index.pug
 
 cp html/index.pug "$template"
+cp html/submit.pug templates/submit.pug
 
 replace_path styles.min.css "./$css_path" $template
 replace_path bundle.min.js "./$js_path" $template
