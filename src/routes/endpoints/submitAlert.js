@@ -6,6 +6,7 @@ const {alerts} = require('./../../services.js');
 
 module.exports = asyncHandler(async (req, res) => {
   if(!isAdmin(req)) return res.redirect('/');
+  const user = req.user;
   const allAlerts = await alerts.getActiveAlerts();
   req.count = allAlerts.length;
   res.send(pug.renderFile('./templates/submit.pug', {

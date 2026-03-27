@@ -143,7 +143,8 @@ module.exports = (app, httpRequestCounter) => {
             cspProperties.HTTPS
           ],
           fontSrc: [
-            cspProperties.SELF
+            cspProperties.SELF,
+            cspProperties.DATA
           ],
           frameSrc: [
             cspProperties.SELF
