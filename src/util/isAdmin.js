@@ -1,5 +1,5 @@
-module.exports = (req) => {
+module.exports = ({user}) => {
   const adminID = process.env.ADMIN_ID;
-  if (!adminID || !req.user) return false;
-  return adminID === req.user.id;
+  if (!adminID || !user) return false;
+  return adminID === user.id;
 };
