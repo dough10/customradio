@@ -24,6 +24,7 @@ const downloadtxt = require('./endpoints/downloadtxt.js');
 const scrape = require('./endpoints/scrape.js');
 const getAlerts = require('./endpoints/getAlerts.js');
 const addAlert = require('./endpoints/addAlert.js');
+const submitAlert = require('./endpoints/submitAlert.js');
 
 const cspValidator = require('../schema/cspValidaton.js');
 const addStationValidator = require('../schema/addStationValidator.js');
@@ -393,6 +394,11 @@ module.exports = async (app, register) => {
    * Endpoint to download user stations as a TXT file.
    */
   app.get('/txt/:uid', downloadtxt);
+
+  /**
+   * page to submit alerts
+   */
+  app.get('/submitAlert', await wosMiddleware, submitAlert);
 
   /**
    * creates a alert  in the database
