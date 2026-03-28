@@ -127,11 +127,13 @@ module.exports = (app, httpRequestCounter) => {
             cspProperties.NONCE,
             cspProperties.DYNAMIC
           ],
-          styleSrc: [
+          styleSrc: [ 
             cspProperties.SELF,
+            cspProperties.NONCE
           ],
           styleSrcElem: [
-            cspProperties.SELF
+            cspProperties.SELF,
+            cspProperties.NONCE
           ],
           imgSrc: [
             cspProperties.SELF, 

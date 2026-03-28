@@ -3,14 +3,83 @@ html(lang=lang)
     meta(charset="UTF-8")
     meta(name="author" content="dough10")
     meta(name="csrf-token" content=csrf)
-    script(nonce=nonce, type="text/javascript") window.user = !{JSON.stringify(user)};
+    meta(name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover")
+    link(nonce=nonce rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css")
 
   body
-    label(for="id") ID
-      input(id="id" name="id")
-    br
-    label(for="title") Title
-      input(id="title" name="title") 
-    br
-    label(id="p" for="p1") Paragraphs
-      input(id="p1" name="paragraphs")
+    h1 Welcome #{user.firstName} #{user.lastName}
+
+    form(method="POST")
+      div
+        label(for="id") ID
+        input#id(type="text" name="id")
+      
+      div
+        label(for="title") Title
+        input#title(type="text" name="title")
+
+      div
+        label Paragraphs
+
+        #paragraph-container
+          input(type="text" name="paragraphs[]" placeholder="Paragraph 1")
+
+        button#add-paragraph(type="button") Add Paragraph
+
+      br
+      button(type="submit") Submit
+
+    h4 Active Alerts
+    ul
+      each alert in alerts
+        li #{alert.id}: #{alert.title}
+
+  script(nonce=nonce).
+    let count = 1;
+
+    function opt(body = null) {
+      const options = {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+        }
+      };
+
+      if (body && body instanceof HTMLFormElement) {
+        options.body = new FormData(body);
+      } else if (body && typeof body === 'object') {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(body);
+      }
+
+      return options;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+
+      const form = document.querySelector('form');
+      const addP = document.getElementById('add-paragraph');
+      const container = document.getElementById('paragraph-container');
+
+      form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+
+        const res = await fetch('/addAlert', opt(form));
+
+        if (!res.ok) console.error('Submit Failed');
+      });
+
+      addP.addEventListener('click', () => {
+        count++;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'paragraphs[]';
+        input.placeholder = 'Paragraph ' + count;
+
+        container.append(document.createElement('br'), input);
+      });
+
+    });

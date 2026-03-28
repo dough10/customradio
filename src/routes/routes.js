@@ -398,7 +398,7 @@ module.exports = async (app, register) => {
   /**
    * page to submit alerts
    */
-  app.get('/submitAlert', await wosMiddleware, submitAlert);
+  app.get('/addAlert', await wosMiddleware, submitAlert);
 
   /**
    * creates a alert  in the database
