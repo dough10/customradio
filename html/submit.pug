@@ -76,14 +76,21 @@ html(lang=lang)
       form.addEventListener('submit', async (ev) => {
         ev.preventDefault();
 
-        const res = await fetch('/addAlert', opt({
+        const data = {
           id: form.id.value,
           title: form.title.value,
           paragraphs: [...document.querySelectorAll('[name="paragraphs[]"]')]
             .map(input => input.value)
-        }));
+        };
 
-        if (!res.ok) console.error('Submit Failed');
+        if (!data.id || !data.title || data.paragraphs.lenght < 1) {
+          return alert('id, title and 1 or more paragraphs are required');
+        }
+
+        const res = await fetch('/addAlert', opt(data));
+
+        if (!res.ok) return alert('Submit Failed');
+        alert(await res.json());
       });
 
       addP.addEventListener('click', () => {
