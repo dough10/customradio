@@ -2,6 +2,7 @@ const pug = require('pug');
 
 const { t } = require('../../util/i18n.js');
 const asyncHandler = require('../../util/asyncHandler.js');
+const isAdmin = require('./../../util/isAdmin.js');
 
 module.exports = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -15,6 +16,7 @@ module.exports = asyncHandler(async (req, res) => {
       lastName: user.lastName,
       role: user.metadata?.role
     } : null,
+    admin: isAdmin(req),
     lang: req.loadedLang,
     csrf: req.session.csrfToken,
     nonce: res.locals.nonce,
