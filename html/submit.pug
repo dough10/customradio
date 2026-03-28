@@ -76,14 +76,12 @@ html(lang=lang)
       form.addEventListener('submit', async (ev) => {
         ev.preventDefault();
 
-        const data = {
+        const res = await fetch('/addAlert', opt({
           id: form.id.value,
           title: form.title.value,
           paragraphs: [...document.querySelectorAll('[name="paragraphs[]"]')]
             .map(input => input.value)
-        }
-
-        const res = await fetch('/addAlert', opt(data));
+        }));
 
         if (!res.ok) console.error('Submit Failed');
       });
