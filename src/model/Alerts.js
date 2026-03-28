@@ -35,6 +35,9 @@ const state = `CREATE TABLE IF NOT EXISTS alert_state (
   FOREIGN KEY (alert_id) REFERENCES alerts(id) ON DELETE CASCADE
 );`;
 
+const DAY = 24 * 60 * 60 * 1000;
+const THIRTY_DAYS = 30 * DAY;
+
 class Alerts {
   constructor(filePath) {
     if (!filePath) throw new Error('Database file path is required');
@@ -154,7 +157,7 @@ class Alerts {
     title, 
     paragraphs, 
     version = hash(JSON.stringify({ title, paragraphs })),
-    expiresAt = null, 
+    expiresAt = Date.now() + THIRTY_DAYS, 
     priority = 0 
   }) {
     return this._ensureInit(async () => {
