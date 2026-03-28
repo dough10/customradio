@@ -6,7 +6,7 @@ const isAdmin = require('./../../util/isAdmin.js');
 
 module.exports = asyncHandler(async (req, res) => {
   if (!isAdmin(req)) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(403).json({ message: 'Forbidden' });
   }
 
   const errors = validationResult(req);
