@@ -13,8 +13,6 @@ import selectors from '../selectors.js';
 import txtDownloadUrl from '../utils/txtDownloadUrl.js';
 import Alert from '../Alerts/Alerts.js';
 
-import addAlretTest from './addAlertTest.js';
-
 const NAMESPACE = {
   backdropClick: 'backdrop-click'
 };
@@ -65,8 +63,7 @@ export default class UIManager {
     this._loadUser(window.user);
 
     this.#showActiveAlerts();
-    // setInterval(_ => this.#showActiveAlerts(), 5 * 60 * 1000);
-    window.addAlertTest = addAlretTest;
+    setInterval(_ => this.#showActiveAlerts(), 5 * 60 * 1000);
   }
   
   /**
