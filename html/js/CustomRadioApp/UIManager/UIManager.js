@@ -371,6 +371,12 @@ export default class UIManager {
 
     this.$loginButton.style.display = 'none';
     this.$logoutButton.style.display = 'flex';
+
+    const addAlertBtn = document.querySelector('button[title="alert"]');
+    if (!addAlertBtn) return;
+    this._em.add(addAlertBtn, this._em.types.click, _ => {
+      window.location.href = '/addAlert';
+    });
   }
   
   /**
