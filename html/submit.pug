@@ -97,4 +97,11 @@ html(lang=lang)
         container.append(document.createElement('br'), input);
       });
 
-    });
+      const activeAlerts = [...document.querySelectorAll('ul>li')];
+      activeAlerts.forEach(alert => {
+        alert.addEventListener('click', _ => {
+          const {version, id} = alert.data;
+          console.log(version, id);
+        });
+      });
+    }); 
