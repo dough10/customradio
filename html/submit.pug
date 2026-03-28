@@ -35,7 +35,7 @@ html(lang=lang)
     h4 Active Alerts
     ul
       each alert in alerts
-        li #{alert.id}: #{alert.title}
+        li(data-version=alert.version data-id=alert.id) #{alert.id}: #{alert.title}
       else
         li No active alerts
 
