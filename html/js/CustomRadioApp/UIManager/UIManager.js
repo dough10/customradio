@@ -375,7 +375,11 @@ export default class UIManager {
     const addAlertBtn = document.querySelector('button[title="alert"]');
     if (!addAlertBtn) return;
     this._em.add(addAlertBtn, this._em.types.click, _ => {
-      window.location.href = '/addAlert';
+      window.open(
+        `/addAlert`,
+        "_blank",
+        "noopener,noreferrer"
+      );
     });
   }
   
