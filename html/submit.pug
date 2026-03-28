@@ -100,7 +100,7 @@ html(lang=lang)
       const activeAlerts = [...document.querySelectorAll('ul>li')];
       activeAlerts.forEach(alert => {
         alert.addEventListener('click', _ => {
-          const {version, id} = alert.data;
+          const {version, id} = alert.dataset;
           console.log(version, id);
         });
       });
