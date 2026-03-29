@@ -74,7 +74,7 @@ html(lang=lang)
       return options;
     };
 
-    function addParagraph(ev, value = null) {
+    function addParagraph(ev, value = null, container) {
       if (ev) ev.preventDefault();
       count++;
 
@@ -114,7 +114,7 @@ html(lang=lang)
         window.location.href = window.location.href;
       });
 
-      add.addEventListener('click', addParagraph);
+      add.addEventListener('click', ev => addParagraph(ev, null, container));
 
       del.addEventListener('click', async _ => {
         const res = await fetch('/dismissAlert', opt({
@@ -132,12 +132,9 @@ html(lang=lang)
           form.id.value = alert.dataset.id;
           form.title.value = alert.dataset.title;
 
-          container.replaceChildren();
-          count = 0;
-
           const paragraphs = JSON.parse(alert.dataset.p);
           for (const p of paragraphs) {
-            addParagraph(null, p);
+            addParagraph(null, p, container);
           }
 
           del.disabled = false;
