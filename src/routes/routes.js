@@ -25,6 +25,7 @@ const scrape = require('./endpoints/scrape.js');
 const getAlerts = require('./endpoints/getAlerts.js');
 const addAlert = require('./endpoints/addAlert.js');
 const submitAlert = require('./endpoints/submitAlert.js');
+const dismissAlert = require('./endpoints/dismissAlert.js');
 
 const cspValidator = require('../schema/cspValidaton.js');
 const addStationValidator = require('../schema/addStationValidator.js');
@@ -33,6 +34,7 @@ const markDuplicateValidator = require('../schema/markDuplicateValidator.js');
 const stationsValidator = require('../schema/stationsValidator.js');
 const userStationValidatior = require('../schema/userStationValidatior.js');
 const alertValidator = require('../schema/alertValidator.js');
+const dismissValidator = require('./../schema/dismissValidator.js');
 
 const wosMiddleware = require('./../util/wosMiddleware.js');
 
@@ -404,6 +406,11 @@ module.exports = async (app, register) => {
    * creates a alert  in the database
    */
   app.post('/addAlert', alertValidator, await wosMiddleware, addAlert);
+
+  /**
+   * dismiss an alert using id and version
+   */
+  app.post('/dismissAlert', dismissValidator, await wosMiddleware, dismissAlert);
 
   /**
    * gets all currently active alerts
