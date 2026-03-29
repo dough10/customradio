@@ -35,7 +35,7 @@ html(lang=lang)
       br
       button(type="submit") Submit
 
-    button(type="button" disabled) delete
+    button(type="button" id="del" disabled) delete
 
     h4 Active Alerts
     ul
@@ -88,7 +88,7 @@ html(lang=lang)
       const form = document.querySelector('form');
       const add = document.getElementById('add-paragraph');
       const container = document.getElementById('paragraph-container');
-      const del = document.querySelector('button[type="button"]');
+      const del = document.querySelector('#del');
 
       form.addEventListener('submit', async (ev) => {
         ev.preventDefault();
