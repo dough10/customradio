@@ -108,7 +108,8 @@ html(lang=lang)
         alert.addEventListener('click', async _ => {
           const res = await fetch('/dismissAlert', opt(alert.dataset));
           if (!res.ok) return alert('Failed to dismiss alert');
-          alert(`${id}, deleted`);
+          const {message} = await res.json();
+          alert(message);
         });
       });
     }); 
