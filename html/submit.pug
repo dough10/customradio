@@ -52,6 +52,8 @@ html(lang=lang)
   script(nonce=nonce).
     let count = 1;
 
+    let selectedAlert = null;
+
     function opt(body = null) {
       const options = {
         method: 'POST',
@@ -72,11 +74,25 @@ html(lang=lang)
       return options;
     };
 
+    function addParagraph(ev, value = null) {
+      if (ev) ev.preventDefault();
+      count++;
+
+      const input = document.createElement('input');
+      if (value) input.value = value;
+      input.type = 'text';
+      input.name = 'paragraphs[]';
+      input.placeholder = 'Paragraph ' + count;
+
+      container.append(document.createElement('br'), input);
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
 
       const form = document.querySelector('form');
-      const addP = document.getElementById('add-paragraph');
+      const add = document.getElementById('add-paragraph');
       const container = document.getElementById('paragraph-container');
+      const del = document.querySelector('button[type="button"]');
 
       form.addEventListener('submit', async (ev) => {
         ev.preventDefault();
@@ -88,7 +104,7 @@ html(lang=lang)
             .map(input => input.value).filter(Boolean)
         };
 
-        if (!data.id || !data.title || data.paragraphs.lenght < 1) {
+        if (!data.id || !data.title || data.paragraphs.length < 1) {
           return alert('id, title and 1 or more paragraphs are required');
         }
 
@@ -98,28 +114,35 @@ html(lang=lang)
         window.location.href = window.location.href;
       });
 
-      addP.addEventListener('click', () => {
-        count++;
+      add.addEventListener('click', addParagraph);
 
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = 'paragraphs[]';
-        input.placeholder = 'Paragraph ' + count;
-
-        container.append(document.createElement('br'), input);
+      del.addEventListener('click', async _ => {
+        const res = await fetch('/dismissAlert', opt({
+          id: selectedAlert.dataset.id,
+          version: selectedAlert.dataset.version
+        }));
+        if (!res.ok) return alert('Failed to dismiss alert');
+        window.location.href = window.location.href;
       });
 
       [...document.querySelectorAll('ul>li')].forEach(alert => {
-        alert.addEventListener('click', async _ => {
+        alert.addEventListener('click', () => {
+          selectedAlert = alert;
+
           form.id.value = alert.dataset.id;
           form.title.value = alert.dataset.title;
+
+          container.replaceChildren();
+          count = 0;
+
           const paragraphs = JSON.parse(alert.dataset.p);
-          console.log(paragraphs)
+          for (const p of paragraphs) {
+            addParagraph(null, p);
+          }
+
+          del.disabled = false;
         });
       });
 
-    // const res = await fetch('/dismissAlert', opt(alert.dataset));
-    // if (!res.ok) return alert('Failed to dismiss alert');
-    // const {message} = await res.json();
-    // window.location.href = window.location.href;
+
     }); 
