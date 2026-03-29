@@ -50,8 +50,6 @@ html(lang=lang)
         li No active alerts
 
   script(nonce=nonce).
-    let selectedAlert = null;
-
     function opt(body = null) {
       const options = {
         method: 'POST',
@@ -72,9 +70,7 @@ html(lang=lang)
       return options;
     };
 
-    function addParagraph(ev, value = null, container) {
-      if (ev) ev.preventDefault();
-
+    function addParagraph(value, container) {
       const input = document.createElement('input');
       if (value) input.value = value;
       input.type = 'text';
@@ -84,6 +80,7 @@ html(lang=lang)
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      let selectedAlert = null;
 
       const form = document.querySelector('form');
       const add = document.getElementById('add-paragraph');
@@ -110,7 +107,7 @@ html(lang=lang)
         window.location.href = window.location.href;
       });
 
-      add.addEventListener('click', ev => addParagraph(ev, null, container));
+      add.addEventListener('click', _ => addParagraph(null, container));
 
       del.addEventListener('click', async _ => {
         const res = await fetch('/dismissAlert', opt({
@@ -132,7 +129,7 @@ html(lang=lang)
 
           const paragraphs = JSON.parse(alert.dataset.p);
           for (const p of paragraphs) {
-            addParagraph(null, p, container);
+            addParagraph(p, container);
           }
 
           del.disabled = false;
