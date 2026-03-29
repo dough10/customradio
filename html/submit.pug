@@ -109,7 +109,7 @@ html(lang=lang)
           const res = await fetch('/dismissAlert', opt(alert.dataset));
           if (!res.ok) return alert('Failed to dismiss alert');
           const {message} = await res.json();
-          alert(message);
+          window.location.href = window.location.href;
         });
       });
     }); 
