@@ -1,7 +1,7 @@
 const { validationResult } = require('express-validator');
 
 const asyncHandler = require("../../util/asyncHandler");
-const {alerts} = require('./../../services.js');
+const { alerts } = require('./../../services.js');
 const isAdmin = require('./../../util/isAdmin.js');
 
 module.exports = asyncHandler(async (req, res) => {
@@ -16,8 +16,10 @@ module.exports = asyncHandler(async (req, res) => {
     logger.error(message);
     return res.status(400).json({ message });
   }
-  
-  await alerts.dismissAlert(req.body);
+
+  const { version, id } = req.body;
+
+  await alerts.dismissAlert(id, version);
   res.json({
     message: 'alert dismissed'
   });
