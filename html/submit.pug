@@ -15,8 +15,6 @@ html(lang=lang)
   body
     h1 Welcome #{user.firstName} #{user.lastName}
 
-    a(href="/") back
-
     form(method="POST")
       div
         label(for="id") ID
@@ -37,10 +35,17 @@ html(lang=lang)
       br
       button(type="submit") Submit
 
+    button(type="button" disabled) delete
+
     h4 Active Alerts
     ul
       each alert in alerts
-        li(data-version=alert.version data-id=alert.id) #{alert.id}: #{alert.title}
+        li(
+          data-version=alert.version 
+          data-id=alert.id
+          data-title=alert.title
+          data-p=JSON.stringify(alert.paragraphs)
+        ) #{alert.id}: #{alert.title}
       else
         li No active alerts
 
@@ -106,10 +111,15 @@ html(lang=lang)
 
       [...document.querySelectorAll('ul>li')].forEach(alert => {
         alert.addEventListener('click', async _ => {
-          const res = await fetch('/dismissAlert', opt(alert.dataset));
-          if (!res.ok) return alert('Failed to dismiss alert');
-          const {message} = await res.json();
-          window.location.href = window.location.href;
+          form.id.value = alert.dataset.id;
+          form.title.value = alert.dataset.title;
+          const paragraphs = JSON.parse(alert.dataset.p);
+          console.log(paragraphs)
         });
       });
-    }); 
+
+      //- const res = await fetch('/dismissAlert', opt(alert.dataset));
+      //- if (!res.ok) return alert('Failed to dismiss alert');
+      //- const {message} = await res.json();
+      //- window.location.href = window.location.href;
+  }); 
