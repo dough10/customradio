@@ -28,7 +28,7 @@ html(lang=lang)
         label Paragraphs
 
         #paragraph-container
-          input(type="text" name="paragraphs[]" placeholder="Paragraph 1")
+          input(type="text" name="paragraphs[]")
 
         button#add-paragraph(type="button") Add Paragraph
 
@@ -50,8 +50,6 @@ html(lang=lang)
         li No active alerts
 
   script(nonce=nonce).
-    let count = 1;
-
     let selectedAlert = null;
 
     function opt(body = null) {
@@ -76,13 +74,11 @@ html(lang=lang)
 
     function addParagraph(ev, value = null, container) {
       if (ev) ev.preventDefault();
-      count++;
 
       const input = document.createElement('input');
       if (value) input.value = value;
       input.type = 'text';
       input.name = 'paragraphs[]';
-      input.placeholder = 'Paragraph ' + count;
 
       container.append(document.createElement('br'), input);
     }
@@ -131,6 +127,8 @@ html(lang=lang)
 
           form.id.value = alert.dataset.id;
           form.title.value = alert.dataset.title;
+
+          container.replaceChildren();
 
           const paragraphs = JSON.parse(alert.dataset.p);
           for (const p of paragraphs) {
