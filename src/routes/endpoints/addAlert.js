@@ -17,14 +17,7 @@ module.exports = asyncHandler(async (req, res) => {
     return res.status(400).json({ message });
   }
 
-  const { id, title, paragraphs, expiresAt } = req.body;
-
-  const alert = await alerts.createAlert({
-    id,
-    title,
-    paragraphs,
-    expiresAt
-  });
+  const alert = await alerts.createAlert(req.body);
 
   return res.status(201).json({
     message: 'Alert created successfully',
