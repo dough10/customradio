@@ -80,7 +80,7 @@ html(lang=lang)
           id: form.id.value,
           title: form.title.value,
           paragraphs: [...document.querySelectorAll('[name="paragraphs[]"]')]
-            .map(input => input.value).filter(Boolean);
+            .map(input => input.value).filter(Boolean)
         };
 
         if (!data.id || !data.title || data.paragraphs.lenght < 1) {
