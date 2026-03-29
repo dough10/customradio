@@ -80,7 +80,7 @@ html(lang=lang)
           id: form.id.value,
           title: form.title.value,
           paragraphs: [...document.querySelectorAll('[name="paragraphs[]"]')]
-            .map(input => input.value)
+            .map(input => input.value).filter(Boolean);
         };
 
         if (!data.id || !data.title || data.paragraphs.lenght < 1) {
@@ -90,7 +90,7 @@ html(lang=lang)
         const res = await fetch('/addAlert', opt(data));
 
         if (!res.ok) return alert('Submit Failed');
-        alert(await res.json());
+        alert(JSON.stringify(await res.json()));
       });
 
       addP.addEventListener('click', () => {
@@ -104,11 +104,11 @@ html(lang=lang)
         container.append(document.createElement('br'), input);
       });
 
-      const activeAlerts = [...document.querySelectorAll('ul>li')];
-      activeAlerts.forEach(alert => {
-        alert.addEventListener('click', _ => {
-          const {version, id} = alert.dataset;
-          console.log(version, id);
+      [...document.querySelectorAll('ul>li')].forEach(alert => {
+        alert.addEventListener('click', async _ => {
+          const res = await fetch('/dismissAlert', opt(alert.dataset));
+          if (!res.ok) return alert('Failed to dismiss alert');
+          alert(`${id}, deleted`);
         });
       });
     }); 
