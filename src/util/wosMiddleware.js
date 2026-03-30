@@ -21,24 +21,22 @@ module.exports = async (req, res, next) => {
       cookiePassword: process.env.COOKIE_SECRET,
     });
 
-    const { authenticated, user: sessionUser } = await session.authenticate();
+    const { authenticated, user } = await session.authenticate();
 
-    if (!authenticated || !sessionUser) {
+    if (!authenticated || !user) {
       res.clearCookie(COOKIE_NAME);
       return next();
     }
 
-    let user = sessionUser;
+    // try {
+    //   const freshUser = await workos.userManagement.getUser({
+    //     userId: sessionUser.id,
+    //   });
 
-    try {
-      const freshUser = await workos.userManagement.getUser({
-        userId: sessionUser.id,
-      });
-
-      user = freshUser;
-    } catch (apiErr) {
-      logger.warn('Failed to fetch fresh WorkOS user:', apiErr.message);
-    }
+    //   user = freshUser;
+    // } catch (apiErr) {
+    //   logger.warn('Failed to fetch fresh WorkOS user:', apiErr.message);
+    // }
 
     req.user = user;
 
