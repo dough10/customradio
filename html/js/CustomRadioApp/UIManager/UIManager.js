@@ -162,6 +162,7 @@ export default class UIManager {
     for (const alert of alerts) {
       const displaying = document.querySelector('.alert');
       while(displaying) {
+        console.log(`displaying: ${displaying}`);
         await sleep(1000);
       }
       const key = `alert_${alert.id}_${alert.version}`;
