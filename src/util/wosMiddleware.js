@@ -28,6 +28,8 @@ module.exports = async (req, res, next) => {
       return next();
     }
 
+    console.log(user);
+
     req.user = user;
 
     const { sealedSession } = await session.refresh();
