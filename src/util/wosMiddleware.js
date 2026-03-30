@@ -23,16 +23,24 @@ module.exports = async (req, res, next) => {
 
     const { authenticated, user: sessionUser } = await session.authenticate();
 
-    if (!authenticated) {
+    if (!authenticated || !sessionUser) {
       res.clearCookie(COOKIE_NAME);
       return next();
     }
-    
-    const freshUser = await workos.userManagement.getUser({
-      userId: sessionUser.id,
-    });
 
-    req.user = freshUser;
+    let user = sessionUser;
+
+    try {
+      const freshUser = await workos.userManagement.getUser({
+        userId: sessionUser.id,
+      });
+
+      user = freshUser;
+    } catch (apiErr) {
+      logger.warn('Failed to fetch fresh WorkOS user:', apiErr.message);
+    }
+
+    req.user = user;
 
     const { sealedSession } = await session.refresh();
 
@@ -47,7 +55,7 @@ module.exports = async (req, res, next) => {
     }
 
   } catch (err) {
-    logger.warn('WorkOS session validation failed: ', err);
+    logger.warn('WorkOS session validation failed:', err.message);
     res.clearCookie(COOKIE_NAME);
   }
 
