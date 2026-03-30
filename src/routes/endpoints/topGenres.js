@@ -1,7 +1,6 @@
 require('dotenv').config();
 
-const { t } = require('../../util/i18n.js');
-const {stations, logger} = require('../../services.js');
+const {stations} = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 
 /**

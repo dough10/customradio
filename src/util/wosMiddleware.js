@@ -1,9 +1,5 @@
-const { WorkOS } = require('@workos-inc/node');
-const { logger } = require('./../services.js');
-
-const workos = new WorkOS(process.env.WORKOS_API_KEY, {
-  clientId: process.env.WORKOS_CLIENT_ID,
-});
+const { logger, workos } = require('./../services.js');
+const getWorkOSUser = require('./getWorkosUser.js');
 
 const COOKIE_NAME = 'wos-session';
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
@@ -33,9 +29,13 @@ module.exports = async (req, res, next) => {
       return next();
     }
 
-    const user = await workos.userManagement.getUser(sessionUser.id);
+    if (!sessionUser.metadata?.role) {
+      const user = await getWorkOSUser(sessionUser.id);
+      req.user = user;
+    } else {
+      req.user = sessionUser;
+    }
 
-    req.user = user;
 
     const { sealedSession } = await session.refresh();
 

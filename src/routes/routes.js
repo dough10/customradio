@@ -370,12 +370,12 @@ module.exports = async (app, register) => {
   /** 
    * Endpoint to begin updating the database.
    */
-  app.get('/updatedb', await authenticate, updatedb);
+  app.get('/updatedb', await wosMiddleware, updatedb);
 
   /**
    * Endpoint to test icecastdb scrape
    */
-  app.get('/scrape', await authenticate, scrape);
+  app.get('/scrape', await wosMiddleware, scrape);
 
   /**
    * Endpoint for authentication using WorkOS SSO.

@@ -1,13 +1,8 @@
-const { WorkOS } = require('@workos-inc/node');
+const {workos} = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
-
-const clientId = process.env.WORKOS_CLIENT_ID;
 
 const COOKIE_NAME = 'wos-session';
 
-const workos = new WorkOS(process.env.WORKOS_API_KEY, {
-  clientId,
-});
 
 module.exports = asyncHandler(async (req, res) => {
   if (req.user) req.user = null;

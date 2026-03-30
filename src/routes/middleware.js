@@ -1,6 +1,5 @@
 const express = require("express");
 const session = require("express-session");
-const { createClient } = require("redis");
 const { RedisStore } = require("connect-redis");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -12,7 +11,7 @@ const cookieParser = require('cookie-parser');
 const { performance } = require('perf_hooks');
 
 const { setLanguage } = require("../util/i18n.js");
-const {logger} = require('../services.js');
+const { logger, redisClient } = require('../services.js');
 
 const corsOptions = {
   origin: '*',
@@ -23,7 +22,7 @@ const cspProperties = {
   SELF: "'self'",
   NONCE: (req, res) => `'nonce-${res.locals.nonce}'`,
   DYNAMIC: "'strict-dynamic'",
-  DATA: "data:", 
+  DATA: "data:",
   WORKOS: "https://workoscdn.com/",
   HTTPS: "https:"
 };
@@ -35,19 +34,6 @@ function initSessionStorage() {
   if (process.env.NODE_ENV !== "production") {
     return undefined;
   }
-  const redisClient = createClient({
-    url: process.env.REDIS_URL || "redis://localhost:6379",
-    password: process.env.REDIS_PASSWORD,
-    legacyMode: false,
-  });
-
-  redisClient.connect().catch((error) => {
-    logger.error("Redis connection error:", error);
-    process.exit(1);
-  });
-
-  redisClient.on("error", err => logger.error(`Redis Client ${err}`));
-  redisClient.on("connect", () => logger.debug("Redis Connected"));
 
   const redisStore = new RedisStore({
     client: redisClient,
@@ -78,7 +64,7 @@ module.exports = (app, httpRequestCounter) => {
   app.use(compression());
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
-  app.use(cookieParser()); 
+  app.use(cookieParser());
 
   /**
    * Middleware to generate nonce for CSP
@@ -100,8 +86,8 @@ module.exports = (app, httpRequestCounter) => {
    */
   app.use(
     helmet({
-      dnsPrefetchControl: { 
-        allow: true 
+      dnsPrefetchControl: {
+        allow: true
       },
       xFrameOptions: false,
       crossOriginResourcePolicy: false,
@@ -127,7 +113,7 @@ module.exports = (app, httpRequestCounter) => {
             cspProperties.NONCE,
             cspProperties.DYNAMIC
           ],
-          styleSrc: [ 
+          styleSrc: [
             cspProperties.SELF,
             cspProperties.NONCE
           ],
@@ -136,7 +122,7 @@ module.exports = (app, httpRequestCounter) => {
             cspProperties.NONCE
           ],
           imgSrc: [
-            cspProperties.SELF, 
+            cspProperties.SELF,
             cspProperties.DATA,
             cspProperties.WORKOS
           ],

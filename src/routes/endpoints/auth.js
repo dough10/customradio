@@ -1,6 +1,4 @@
-const { WorkOS } = require('@workos-inc/node');
-
-const workos = new WorkOS(process.env.WORKOS_API_KEY);
+const {workos} = require('../../services.js');
 
 module.exports = (req, res) => {
   res.redirect(workos.sso.getAuthorizationUrl({
