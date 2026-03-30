@@ -28,15 +28,14 @@ module.exports = async (req, res, next) => {
       return next();
     }
 
-    // try {
-    //   const freshUser = await workos.userManagement.getUser({
-    //     userId: sessionUser.id,
-    //   });
-
-    //   user = freshUser;
-    // } catch (apiErr) {
-    //   logger.warn('Failed to fetch fresh WorkOS user:', apiErr.message);
-    // }
+    try {
+      const freshUser = await workos.userManagement.getUser({
+        userId: user.id,
+      });
+      console.log(freshUser);
+    } catch (apiErr) {
+      logger.warn('Failed to fetch fresh WorkOS user:', apiErr.message);
+    }
 
     req.user = user;
 
