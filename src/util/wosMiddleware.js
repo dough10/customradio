@@ -9,7 +9,10 @@ const COOKIE_NAME = 'wos-session';
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
 
 module.exports = async (req, res, next) => {
-  if (req.user) return next();
+  if (req.user) {
+    console.log('user exists')
+    return next();
+  }
 
   const sealed = req.cookies[COOKIE_NAME];
 
