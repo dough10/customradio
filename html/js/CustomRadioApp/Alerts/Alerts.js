@@ -69,6 +69,7 @@ export default class Alert {
     this.timeout = null;
     this._em = null;
     this.localStorageKey = null;
+    document.dispatchEvent(new Event('alert-closed'));
   }
 
   /**

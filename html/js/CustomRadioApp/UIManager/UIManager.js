@@ -152,6 +152,15 @@ export default class UIManager {
   }
 
   /**
+   * async wait for an alert to be closed
+   */
+  #waitForAlertClose() {
+    return new Promise((resolve) => {
+      this._em.add(document, this._em.types.alertClosed, resolve, { once: true });
+    });
+  }
+
+  /**
    * displays active alerts fatched from api
    * 
    * @returns {void}
@@ -160,10 +169,8 @@ export default class UIManager {
     const alerts = await this.#fetchAlerts();
     
     for (const alert of alerts) {
-      const displaying = document.querySelector('.alert');
-      while(displaying) {
-        console.log(`displaying: ${displaying}`);
-        await sleep(1000);
+     if (document.querySelector('.alert')) {
+        await this.#waitForAlertClose();
       }
       const key = `alert_${alert.id}_${alert.version}`;
       new Alert(key, alert.title, alert.paragraphs);

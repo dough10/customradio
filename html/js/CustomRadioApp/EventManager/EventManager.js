@@ -28,6 +28,7 @@ export const types = Object.freeze({
   focusout: 'focusout',
   contextmenu: 'contextmenu',
   enterPressed: 'enter-pressed',
+  alertClosed: 'alert-closed',
 });
 
 /**
