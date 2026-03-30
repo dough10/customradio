@@ -140,7 +140,8 @@ export default class UIManager {
    */
   async #fetchAlerts() {
     try {
-      const res = await fetch('/getAlerts');
+      const url = new URL('/getAlerts', window.location.origin);
+      const res = await fetch(url.toString());
       if (!res.ok) throw new Error('Failed to fetch alerts');
       const alerts = await res.json();
       return alerts;
@@ -156,11 +157,13 @@ export default class UIManager {
    * @returns {void}
    */
   async #showActiveAlerts() {
-    const displaying = document.querySelector('.alert');
-    if (displaying) return;
     const alerts = await this.#fetchAlerts();
-
+    
     for (const alert of alerts) {
+      const displaying = document.querySelector('.alert');
+      while(displaying) {
+        await sleep(1000);
+      }
       const key = `alert_${alert.id}_${alert.version}`;
       new Alert(key, alert.title, alert.paragraphs);
     }
@@ -372,8 +375,9 @@ export default class UIManager {
     const addAlertBtn = document.querySelector('button[title="alert"]');
     if (!addAlertBtn) return;
     this._em.add(addAlertBtn, this._em.types.click, _ => {
+      const url = new URL('/addAlert', window.location.origin);
       window.open(
-        `/addAlert`,
+        url.toString(),
         "_blank",
         "noopener,noreferrer"
       );
