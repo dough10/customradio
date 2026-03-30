@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
       return next();
     }
 
-    console.log(user);
+    console.log(user.metadata);
 
     req.user = user;
 
