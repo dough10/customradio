@@ -27,16 +27,7 @@ module.exports = async (req, res, next) => {
       res.clearCookie(COOKIE_NAME);
       return next();
     }
-
-    try {
-      const freshUser = await workos.userManagement.getUser({
-        userId: user.id,
-      });
-      console.log(freshUser);
-    } catch (apiErr) {
-      logger.warn('Failed to fetch fresh WorkOS user:', apiErr.message);
-    }
-
+    
     req.user = user;
 
     const { sealedSession } = await session.refresh();
