@@ -21,13 +21,15 @@ module.exports = async (req, res, next) => {
       cookiePassword: process.env.COOKIE_SECRET,
     });
 
-    const { authenticated, user } = await session.authenticate();
+    const { authenticated, user: sessionUser } = await session.authenticate();
 
-    if (!authenticated || !user) {
+    if (!authenticated || !sessionUser) {
       res.clearCookie(COOKIE_NAME);
       return next();
     }
-    
+
+    const user = await workos.userManagement.getUser(sessionUser.id);
+
     req.user = user;
 
     const { sealedSession } = await session.refresh();
