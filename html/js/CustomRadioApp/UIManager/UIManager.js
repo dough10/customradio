@@ -2,7 +2,7 @@ import AudioPlayer from './AudioPlayer/AudioPlayer.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import EventManager from '../EventManager/EventManager.js';
 
-import {initDialogInteractions, destroyDialogInteractions} from './dialogs/dialog.js';
+import { initDialogInteractions, destroyDialogInteractions } from './dialogs/dialog.js';
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
 import downloadTextfile from './helpers/downloadTextfile.js';
 import sleep from '../utils/sleep.js';
@@ -65,7 +65,7 @@ export default class UIManager {
     this.#showActiveAlerts();
     setInterval(_ => this.#showActiveAlerts(), 5 * 60 * 1000);
   }
-  
+
   /**
    * attach UI listeners
    * 
@@ -83,51 +83,51 @@ export default class UIManager {
 
     const listeners = [
       {
-        el: this.$toggleSelected, 
-        event: this._em.types.click, 
-        handler: _ => this.toggleSelectedVisibility() 
+        el: this.$toggleSelected,
+        event: this._em.types.click,
+        handler: _ => this.toggleSelectedVisibility()
       }, {
-        el: this.$loginButton, 
-        event: this._em.types.click, 
-        handler: _ => this._loginRedirect() 
+        el: this.$loginButton,
+        event: this._em.types.click,
+        handler: _ => this._loginRedirect()
       }, {
-        el: this.$logoutButton, 
-        event: this._em.types.click, 
-        handler: _ => this._logoutRedirect() 
+        el: this.$logoutButton,
+        event: this._em.types.click,
+        handler: _ => this._logoutRedirect()
       }, {
-        el: this.$userMenuButton, 
-        event: this._em.types.click, 
-        handler: ev => this._userMenuOpen(ev) 
+        el: this.$userMenuButton,
+        event: this._em.types.click,
+        handler: ev => this._userMenuOpen(ev)
       }, {
-        el: this.$filter, 
-        event: this._em.types.change, 
-        handler: onFilterChange 
+        el: this.$filter,
+        event: this._em.types.change,
+        handler: onFilterChange
       }, {
-        el: this.$filter, 
-        event: this._em.types.focus, 
-        handler: ev => this._filterFocus(ev) 
+        el: this.$filter,
+        event: this._em.types.focus,
+        handler: ev => this._filterFocus(ev)
       }, {
-        el: this.$resetButton, 
-        event: this._em.types.click, 
+        el: this.$resetButton,
+        event: this._em.types.click,
         handler: ev => {
           this._filterFocus(ev);
           onReset();
-        } 
+        }
       }, {
-        el: this.$toTop, 
-        event: this._em.types.click, 
-        handler: _ => this._toTopHandler() 
+        el: this.$toTop,
+        event: this._em.types.click,
+        handler: _ => this._toTopHandler()
       }, {
-        el: this.$downloadButton, 
-        event: this._em.types.click, 
-        handler: _ => this._dl() 
+        el: this.$downloadButton,
+        event: this._em.types.click,
+        handler: _ => this._dl()
       }
     ];
 
-    for (const {el, event, handler} of listeners) {
+    for (const { el, event, handler } of listeners) {
       this._em.add(el, event, handler);
     }
-    
+
     document.querySelectorAll('.menu-button').forEach(btn => {
       this._em.add(btn, this._em.types.click, _ => this._userMenuClose());
     });
@@ -167,7 +167,7 @@ export default class UIManager {
    */
   async #showActiveAlerts() {
     const alerts = await this.#fetchAlerts();
-    
+
     for (const alert of alerts) {
       if (document.querySelector('.alert')) {
         await this.#waitForAlertClose();
@@ -271,7 +271,7 @@ export default class UIManager {
     backdrop.classList.add('backdrop');
     this._em.add(backdrop, this._em.types.click, _ => this._userMenuClose(), null, NAMESPACE.backdropClick);
     document.body.appendChild(backdrop);
-    
+
     const { top } = this.$userMenuButton.getBoundingClientRect();
     const left = 8;
     this.$userMenu.style.top = `${top + 8}px`;
@@ -289,7 +289,7 @@ export default class UIManager {
    * @returns {void}
    */
   _loginRedirect() {
-    if (window.user) return;    
+    if (window.user) return;
     try {
       window.location.href = new URL(
         '/auth',
@@ -330,7 +330,7 @@ export default class UIManager {
    * @param {Number} size
    * @returns {HTMLElement}
    */
-  _userImage({picture}, size) {
+  _userImage({ picture }, size) {
     const img = document.createElement('img');
     img.src = picture;
     img.alt = 'user profile picture';
@@ -353,7 +353,7 @@ export default class UIManager {
   _loadUser(user) {
     this.$logoutButton.style.display = 'none';
     this.$sharelink.style.display = 'none';
-    
+
     if (!user) return;
 
     if (!this.$userMenuButton) {
@@ -391,7 +391,7 @@ export default class UIManager {
       );
     });
   }
-  
+
   /**
    * displays the share button if user is logged in and has selected stations
    * 
@@ -445,7 +445,7 @@ export default class UIManager {
     const closeToTop = scrollTop < (window.innerHeight * 0.2);
     closeToTop ? this.$toTop.classList.add('hidden') : this.$toTop.classList.remove('hidden');
   }
-  
+
 
   /**
    * sets the station counts in the UI
