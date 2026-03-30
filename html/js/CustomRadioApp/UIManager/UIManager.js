@@ -169,7 +169,7 @@ export default class UIManager {
     const alerts = await this.#fetchAlerts();
     
     for (const alert of alerts) {
-     if (document.querySelector('.alert')) {
+      if (document.querySelector('.alert')) {
         await this.#waitForAlertClose();
       }
       const key = `alert_${alert.id}_${alert.version}`;
