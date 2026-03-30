@@ -30,12 +30,10 @@ module.exports = async (req, res, next) => {
     }
 
     if (!sessionUser.metadata?.role) {
-      const user = await getWorkOSUser(sessionUser.id);
-      req.user = user;
+      req.user = await getWorkOSUser(sessionUser.id);
     } else {
       req.user = sessionUser;
     }
-
 
     const { sealedSession } = await session.refresh();
 
