@@ -360,12 +360,12 @@ module.exports = async (app, register) => {
    * 
    * @throws {Error} If play count increment fails
    */
-  app.post('/reportPlay/:id', await wosMiddleware, reportPlay);
+  app.post('/reportPlay/:id', reportPlay);
 
   /**
    * report if station is in a users txt list
    */
-  app.post('/reportInList/:id', await wosMiddleware, userStationValidatior, saveStation);
+  app.post('/reportInList/:id', userStationValidatior, saveStation);
 
   /** 
    * Endpoint to begin updating the database.
