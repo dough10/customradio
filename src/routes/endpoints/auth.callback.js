@@ -1,11 +1,5 @@
-const { WorkOS } = require('@workos-inc/node');
+const {workos} = require('./../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
-
-const clientId = process.env.WORKOS_CLIENT_ID;
-
-const workos = new WorkOS(process.env.WORKOS_API_KEY, {
-  clientId,
-});
 
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
 
