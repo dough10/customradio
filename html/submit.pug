@@ -119,12 +119,11 @@ html(lang=lang)
       });
 
       [...document.querySelectorAll('ul>li')].forEach(alert => {
+        const {id, title} = alert.dataset;
+        if (!id || !title) return;
+
         alert.addEventListener('click', () => {
           selectedAlert = alert;
-
-          const {id, title} = alert.dataset;
-
-          if (!id || !title) return;
 
           form.id.value = id;
           form.title.value = title;
