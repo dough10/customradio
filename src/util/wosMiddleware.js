@@ -1,15 +1,10 @@
 const { logger, workos } = require('./../services.js');
-const getWorkOSUser = require('./getWorkosUser.js');
+// const getWorkOSUser = require('./getWorkosUser.js');
 
 const COOKIE_NAME = 'wos-session';
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
 
 module.exports = async (req, res, next) => {
-  if (req.user) {
-    console.log('user exists')
-    return next();
-  }
-
   const sealed = req.cookies[COOKIE_NAME];
 
   if (!sealed) {
@@ -22,18 +17,14 @@ module.exports = async (req, res, next) => {
       cookiePassword: process.env.COOKIE_SECRET,
     });
 
-    const { authenticated, user: sessionUser } = await session.authenticate();
+    const { authenticated, user } = await session.authenticate();
 
-    if (!authenticated || !sessionUser) {
+    if (!authenticated || !user) {
       res.clearCookie(COOKIE_NAME);
       return next();
     }
 
-    if (!sessionUser.metadata?.role) {
-      req.user = await getWorkOSUser(sessionUser.id);
-    } else {
-      req.user = sessionUser;
-    }
+    req.usr = user;
 
     const { sealedSession } = await session.refresh();
 
