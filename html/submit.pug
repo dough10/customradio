@@ -122,8 +122,12 @@ html(lang=lang)
         alert.addEventListener('click', () => {
           selectedAlert = alert;
 
-          form.id.value = alert.dataset.id;
-          form.title.value = alert.dataset.title;
+          const {id, title} = alert.dataset;
+
+          if (!id || !title) return;
+
+          form.id.value = id;
+          form.title.value = title;
 
           container.replaceChildren();
 
