@@ -50,36 +50,36 @@ html(lang=lang)
         li No active alerts
 
   script(nonce=nonce).
-    function opt(body = null) {
-      const options = {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
-        }
-      };
+    window.addEventListener('DOMContentLoaded', () => {
+      function opt(body = null) {
+        const options = {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+          }
+        };
 
-      if (body && body instanceof HTMLFormElement) {
-        options.body = new FormData(body);
-      } else if (body && typeof body === 'object') {
-        options.headers['Content-Type'] = 'application/json';
-        options.body = JSON.stringify(body);
+        if (body && body instanceof HTMLFormElement) {
+          options.body = new FormData(body);
+        } else if (body && typeof body === 'object') {
+          options.headers['Content-Type'] = 'application/json';
+          options.body = JSON.stringify(body);
+        }
+
+        return options;
       }
 
-      return options;
-    }
+      function addParagraph(value, container) {
+        const input = document.createElement('input');
+        if (value) input.value = value;
+        input.type = 'text';
+        input.name = 'paragraphs[]';
 
-    function addParagraph(value, container) {
-      const input = document.createElement('input');
-      if (value) input.value = value;
-      input.type = 'text';
-      input.name = 'paragraphs[]';
+        container.append(document.createElement('br'), input);
+      }
 
-      container.append(document.createElement('br'), input);
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
       let selectedAlert = null;
 
       const form = document.querySelector('form');
