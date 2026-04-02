@@ -1,5 +1,4 @@
 const { logger, workos } = require('./../services.js');
-// const getWorkOSUser = require('./getWorkosUser.js');
 
 const COOKIE_NAME = 'wos-session';
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
