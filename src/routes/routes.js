@@ -13,7 +13,6 @@ const topGenres = require('./endpoints/topGenres.js');
 const fourohfour = require('./endpoints/fourohfour.js');
 const info = require('./endpoints/info.js');
 const changelog = require('./endpoints/changeLog.js');
-const authenticate = require('../util/auth.js');
 const updatedb = require('./endpoints/updatedb.js');
 const auth = require('./endpoints/auth.js');
 const authCallback = require('./endpoints/auth.callback.js');
