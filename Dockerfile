@@ -1,4 +1,4 @@
-FROM node:lts-slim AS base
+FROM node:20-bookworm-slim AS base
 
 ENV TZ="America/Chicago"
 WORKDIR /usr/src/app
