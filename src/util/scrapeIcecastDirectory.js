@@ -96,6 +96,8 @@ async function processStream(entry, length, stations) {
   try{
     const url = rmRef(entry.listen_url[0]);
 
+    if (!url) return;
+
     // early check for url in database
     // isLiveStream may change url protocol (http -> https)
     // addStation method checks again. this line keeps from doing extra work
