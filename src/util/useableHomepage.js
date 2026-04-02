@@ -1,4 +1,3 @@
-const url = require('url');
 const isValidURL = require('./isValidURL.js');
 
 /**
@@ -90,32 +89,37 @@ function parseHostname(hostname) {
  * 
  * @returns {Object|null}
  */
-function urlDeconstruction(URL) {
-  if (typeof URL !== 'string') return null;
+function urlDeconstruction(input) {
+  if (typeof input !== 'string') return null;
 
-  URL = ensureProtocol(URL);
-
-  if (isNotValidURL(URL)) return null;
+  input = ensureProtocol(input);
+  if (isNotValidURL(input)) return null;
 
   try {
-    const parsedUrl = url.parse(URL, true);
-    const { subdomain, domain, ext } = parseHostname(parsedUrl.hostname);
-    const ip = isIPv4(parsedUrl.hostname) ? parsedUrl.hostname : null;
+    const u = new URL(input);
+
+    const { subdomain, domain, ext } = parseHostname(u.hostname);
+    const ip = isIPv4(u.hostname) ? u.hostname : null;
+
+    const queryEntries = [...u.searchParams.entries()];
+    const query = queryEntries.length
+      ? Object.fromEntries(queryEntries)
+      : null;
 
     return {
-      protocol: parsedUrl.protocol || 'http:',
-      slashes: parsedUrl.slashes || true,
+      protocol: u.protocol || 'http:',
+      slashes: true,
       ip,
       subdomain,
       domain,
       ext,
-      port: parsedUrl.port || null,
-      hash: parsedUrl.hash || null,
-      search: parsedUrl.search || null,
-      query: parsedUrl.query || null,
-      pathname: parsedUrl.pathname || '/'
+      port: u.port || null,
+      hash: u.hash || null,
+      search: u.search || null,
+      query,
+      pathname: u.pathname || '/'
     };
-  } catch (e) {
+  } catch {
     return null;
   }
 }
