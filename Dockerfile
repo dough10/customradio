@@ -17,11 +17,11 @@ RUN npm ci && npm run build
 
 FROM base
 ENV NODE_ENV=production
-
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+
+RUN npm ci --omit=dev --build-from-source
 
 COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/public ./public
