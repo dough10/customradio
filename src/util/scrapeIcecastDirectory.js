@@ -1,6 +1,5 @@
 require('dotenv').config();
 const xml2js = require('xml2js');
-const axios = require('axios');
 const pack = require('../../package.json');
 const pLimit = require('p-limit');
 
@@ -28,16 +27,46 @@ let changed = 0;
  * @returns {Array|Boolean}
  */
 async function requestData() {
-  const res = await axios.get('http://dir.xiph.org/yp.xml', {
-    headers: {
-      'User-Agent': `radiotxt.site/${pack.version}`
-    },
-    timeout: 20000
-  });
-  if (!res.data) return false;
-  const parser = new xml2js.Parser();
-  const result = await parser.parseStringPromise(res.data);
-  return result.directory.entry;
+  const controller = new AbortController();
+  const timeout = 20000;
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
+  try {
+    const res = await fetch('http://dir.xiph.org/yp.xml', {
+      headers: {
+        'User-Agent': `radiotxt.site/${pack.version}`
+      },
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      return false;
+    }
+
+    const text = await res.text();
+    if (!text) return false;
+
+    const parser = new xml2js.Parser();
+    const result = await parser.parseStringPromise(text);
+
+    return result?.directory?.entry || false;
+
+  } catch (err) {
+    clearTimeout(timeoutId);
+
+    if (err.name === 'AbortError') {
+      logger.warn('requestData timeout');
+    } else {
+      logger.warn('requestData failed:', err.message);
+    }
+
+    return false;
+  }
 }
 
 /**

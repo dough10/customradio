@@ -1,4 +1,3 @@
-const axios = require("axios");
 const pack = require("../../package.json");
 
 const isValidURL = require("./isValidURL.js");
@@ -72,20 +71,35 @@ function cleanURL(url) {
  * @throws {Error} Throws an error if the HTTP request fails or if there is an issue with the URL.
  */
 async function streamTest(url) {
+  const controller = new AbortController();
+  const timeout = 4500;
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
   try {
-    const response = await axios.head(url, {
+    const response = await fetch(url, {
+      method: 'HEAD',
       headers: {
         "User-Agent": `radiotxt.site/${pack.version}`,
       },
-      timeout: 4500,
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
+
     const isLive = response.status >= 200 && response.status < 300;
-    let name = response.headers["icy-name"];
-    const description = response.headers["icy-description"] || "";
-    const icyGenre = response.headers["icy-genre"] || "Unknown";
-    let bitrate = response.headers["icy-br"];
-    const content = response.headers["content-type"];
-    const icyurl = response.headers["icy-url"] || "";
+
+    const headers = response.headers;
+
+    let name = headers.get("icy-name");
+    const description = headers.get("icy-description") || "";
+    const icyGenre = headers.get("icy-genre") || "Unknown";
+    let bitrate = headers.get("icy-br");
+    const content = headers.get("content-type");
+    const icyurl = headers.get("icy-url") || "";
+
     const isAudioStream = content && content.startsWith("audio/");
 
     if (!isAudioStream) {
@@ -109,6 +123,7 @@ async function streamTest(url) {
       name = fixEncoding(name);
       const unhelpfulRegex = /^\d{1,2}$/;
       const cleanName = name.toLowerCase().trim();
+
       if (unhelpfulNames.includes(cleanName) || unhelpfulRegex.test(cleanName)) {
         name = null;
       }
@@ -127,16 +142,22 @@ async function streamTest(url) {
       isLive,
       icyGenre,
       content,
-      bitrate: bitrate,
+      bitrate,
       error: "",
       status: response.status,
     };
+
   } catch (error) {
+    clearTimeout(timeoutId);
+
+    const isAbort = error.name === 'AbortError';
+
     logger.debug(error.message);
+
     return {
       ok: false,
-      error: error.message,
-      status: error.response ? error.response.status : 500,
+      error: isAbort ? 'Request timeout' : error.message,
+      status: 500, // fetch doesn't give status on network errors
     };
   }
 }

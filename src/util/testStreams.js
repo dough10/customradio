@@ -1,6 +1,5 @@
 const UPDATE_PULL_COUNT = 100;
 
-const axios = require('axios');
 const pack = require('../../package.json');
 const pLimit = require('p-limit');
 
@@ -71,18 +70,45 @@ async function testHomepageConnection(url) {
   if (!homepage) {
     return;
   }
+
+  const controller = new AbortController();
+  const timeout = 1500;
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
   try {
-    const response = await axios.head(homepage, {
+    const response = await fetch(homepage, {
+      method: 'HEAD',
       headers: {
         'User-Agent': `customradio.dough10.me/${pack.version}`
       },
-      timeout: 1500
+      signal: controller.signal
     });
-    if (response.status >= 200 && response.status < 300 && response.headers['content-type'].includes('text/html')) {
+
+    clearTimeout(timeoutId);
+
+    const contentType = response.headers.get('content-type') || '';
+
+    if (
+      response.status >= 200 &&
+      response.status < 300 &&
+      contentType.includes('text/html')
+    ) {
       return homepage;
     }
-  } catch(e) {
-    logger.debug(`${url} failed homepage test connection: ${e.message}`);
+
+  } catch (e) {
+    clearTimeout(timeoutId);
+
+    const isAbort = e.name === 'AbortError';
+    logger.debug(
+      `${url} failed homepage test connection: ${
+        isAbort ? 'timeout' : e.message
+      }`
+    );
+
     return;
   }
 }
