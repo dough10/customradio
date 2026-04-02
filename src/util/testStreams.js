@@ -82,7 +82,7 @@ async function testHomepageConnection(url) {
     const response = await fetch(homepage, {
       method: 'HEAD',
       headers: {
-        'User-Agent': `customradio.dough10.me/${pack.version}`
+        'User-Agent': `radiotxt.site/${pack.version}`
       },
       signal: controller.signal
     });
