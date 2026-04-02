@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim AS base
+FROM node:20-bullseye-slim AS base
 
 ENV TZ="America/Chicago"
 WORKDIR /usr/src/app
@@ -7,27 +7,27 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         openssl \
         dumb-init \
-        sqlite3 && \
+        sqlite3 \
+        build-essential python3 && \
     rm -rf /var/lib/apt/lists/*
 
 FROM base AS build
-
-COPY --chown=node:node . .
-RUN npm install && npm run build
+COPY . .
+RUN npm ci && npm run build
 
 FROM base
-
 ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
 
-COPY --chown=node:node --from=build /usr/src/app/public ./public
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/templates ./templates
-COPY --chown=node:node --from=build /usr/src/app/logs ./logs
-COPY --chown=node:node --from=build /usr/src/app/data ./data
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-EXPOSE 3000/tcp
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/public ./public
+COPY --from=build /usr/src/app/templates ./templates
+COPY --from=build /usr/src/app/data ./data
+COPY --from=build /usr/src/app/logs ./logs
 
+EXPOSE 3000
 CMD ["dumb-init", "node", "--expose-gc", "dist/index.js"]
