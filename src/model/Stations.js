@@ -231,21 +231,40 @@ class Stations {
    */
   getStationsByGenre(genres) {
     const contentTypePlaceholders = mapPlaceholders(usedTypes);
-    
+
+    if (!genres.length) {
+      // If no genres are provided, just query by content_type
+      const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList, 
+        (inList * ${DB_CONFIG.POPULARITY_MULTIPLIER} + playMinutes) as popularity
+        FROM stations
+        WHERE content_type IN (${contentTypePlaceholders})
+          AND online = 1
+          AND duplicate = 0
+          AND bitrate IS NOT NULL
+        ORDER BY popularity DESC, name ASC;`;
+
+      return this._ensureInitialized(() => this._runQuery(query, usedTypes));
+    }
+
     const genrePatterns = genres.map(g => `%${g.toLowerCase()}%`);
-  
+
     const nameConditions = genrePatterns.map(() => 'LOWER(name) LIKE ?').join(' OR ');
     const urlConditions = genrePatterns.map(() => 'LOWER(url) LIKE ?').join(' OR ');
     const genreConditions = genrePatterns.map(() => "LOWER(REPLACE(REPLACE(genre, '&', 'and'), '-', '')) LIKE ?").join(' OR ');
-  
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList, (inList * ${DB_CONFIG.POPULARITY_MULTIPLIER} + playMinutes) as popularity
-    FROM stations
-    WHERE content_type IN (${contentTypePlaceholders})
-      AND online = 1
-      AND duplicate = 0
-      AND bitrate IS NOT NULL
-      AND (${nameConditions} OR ${genreConditions} OR ${urlConditions})
-    ORDER BY popularity DESC, name ASC;`;
+
+    // Combine conditions safely
+    const combinedConditions = [nameConditions, urlConditions, genreConditions].filter(Boolean).join(' OR ');
+
+    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList,
+        (inList * ${DB_CONFIG.POPULARITY_MULTIPLIER} + playMinutes) as popularity
+      FROM stations
+      WHERE content_type IN (${contentTypePlaceholders})
+        AND online = 1
+        AND duplicate = 0
+        AND bitrate IS NOT NULL
+        AND (${combinedConditions})
+      ORDER BY popularity DESC, name ASC;`;
+
     const params = [...usedTypes, ...genrePatterns, ...genrePatterns, ...genrePatterns];
 
     return this._ensureInitialized(() => this._runQuery(query, params));

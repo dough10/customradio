@@ -46,7 +46,7 @@ module.exports = asyncHandler(async (req, res) => {
   }  
 
   const decoded = decodeURIComponent(req.query.genres);
-  const genres = decoded.split(',').map(genre => genre.toLowerCase());
+  const genres = decoded !== 'undefined' ? decoded.split(',').map(genre => genre.toLowerCase()) : [];
   const stationData = await stations.getStationsByGenre(genres);
   
   const genreString = genres.join(',');

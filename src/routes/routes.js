@@ -433,5 +433,5 @@ module.exports = async (app, register) => {
    * 
    * @returns {void} Responds with a 404 status code and a JSON error message.
    */
-  app.get('*', fourohfour);
+  app.get(/.*/, fourohfour);
 };

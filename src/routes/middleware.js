@@ -14,7 +14,7 @@ const { setLanguage } = require("../util/i18n.js");
 const { logger, redisClient } = require('../services.js');
 
 const corsOptions = {
-  origin: '*',
+  origin: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 };
 
@@ -157,7 +157,6 @@ module.exports = (app, httpRequestCounter) => {
    * CORS
    */
   app.use(cors(corsOptions));
-  app.options("*", cors(corsOptions));
 
   app.use(
     session({
