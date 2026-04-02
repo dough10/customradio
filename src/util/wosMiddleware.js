@@ -23,7 +23,7 @@ module.exports = async (req, res, next) => {
       return next();
     }
 
-    req.usr = user;
+    req.user = user;
 
     const { sealedSession } = await session.refresh();
 
