@@ -28,8 +28,12 @@ const sensitivePaths = new Set([
  */
 module.exports = asyncHandler(async (req, res) => {
 
-  const requestedPath = decodeURIComponent(req.originalUrl);
-  
+  let requestedPath;
+  try {
+    requestedPath = decodeURIComponent(req.originalUrl);
+  } catch {
+    requestedPath = req.originalUrl;
+  }
   // Check if any sensitive path segment appears in the requested URL
   for (const sensitive of sensitivePaths) {
     if (requestedPath.includes(sensitive)) {
