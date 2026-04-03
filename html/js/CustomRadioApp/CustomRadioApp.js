@@ -31,8 +31,8 @@ export default class CustomRadioApp {
     this._loadServiceWorker();
 
     this._uiManager.attachListeners({
-      onFilterChange: this._filterChanged.bind(this),
-      onReset: this._resetFilter.bind(this)
+      onFilterChange: _ => this._filterChanged(),
+      onReset: _ => this._resetFilter()
     });
     
     // initial load of stations
