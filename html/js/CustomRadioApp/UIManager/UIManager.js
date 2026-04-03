@@ -63,7 +63,6 @@ export default class UIManager {
     this._loadUser(window.user);
 
     this.#showActiveAlerts();
-    setInterval(_ => this.#showActiveAlerts(), 5 * 60 * 1000);
   }
 
   /**
