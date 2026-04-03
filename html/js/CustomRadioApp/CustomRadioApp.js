@@ -31,7 +31,7 @@ export default class CustomRadioApp {
     this._loadServiceWorker();
 
     this._uiManager.attachListeners({
-      onFilterChange: _ => this._filterChanged(),
+      onFilterChange: ev => this._filterChanged(ev),
       onReset: _ => this._resetFilter()
     });
     
