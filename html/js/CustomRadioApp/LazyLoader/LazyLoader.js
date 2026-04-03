@@ -49,7 +49,6 @@ export default class LazyLoader {
     this._createStationElement = createElFunc || createStationElement;
     this._insertLoadingAnimation = loadingAnimation || insertLoadingAnimation;
 
-    // bind this to the class instance
     this._debouncedLoad = debounce(_ => this.load(), 100);
 
     if (!this.$container || !this.$container.parentElement) {
