@@ -157,7 +157,7 @@ async function streamTest(url) {
     return {
       ok: false,
       error: isAbort ? 'Request timeout' : error.message,
-      status: 500, // fetch doesn't give status on network errors
+      status: 500,
     };
   }
 }
