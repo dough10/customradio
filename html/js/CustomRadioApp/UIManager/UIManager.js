@@ -340,6 +340,26 @@ export default class UIManager {
   }
 
   /**
+   * opens the addAlert page in a sererate window
+   * 
+   * @private
+   * @function
+   */
+  _openAddAlert() {
+    try {
+      const url = new URL('/addAlert', window.location.origin);
+      window.open(
+        url.toString(),
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } catch(e) {
+      new Toast('Failed to open add alert page');
+      console.error(e);
+    }
+  }
+
+  /**
    * loads the user data to UI
    * 
    * @private
@@ -383,14 +403,7 @@ export default class UIManager {
 
     const addAlertBtn = document.querySelector('button[title="alert"]');
     if (!addAlertBtn) return;
-    this._em.add(addAlertBtn, this._em.types.click, _ => {
-      const url = new URL('/addAlert', window.location.origin);
-      window.open(
-        url.toString(),
-        "_blank",
-        "noopener,noreferrer"
-      );
-    });
+    this._em.add(addAlertBtn, this._em.types.click, _ => this._openAddAlert());
   }
 
   /**
