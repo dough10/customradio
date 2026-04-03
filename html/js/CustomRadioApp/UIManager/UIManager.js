@@ -242,13 +242,15 @@ export default class UIManager {
   _userMenuClose() {
     const bd = document.querySelector('.backdrop');
     if (!bd) return;
+    let timeoutID = null;
     const cleanup = () => {
+      if (timeoutID) clearTimeout(timeoutID);
       if (!bd) return;
       this._em.removeByNamespace(NAMESPACE.backdropClick);
       bd.remove();
     };
     this._em.add(bd, this._em.types.transitionend, _ => cleanup(), null, NAMESPACE.backdropClick);
-    setTimeout(() => cleanup(), 300);
+    timeoutID = setTimeout(() => cleanup(), 300);
     requestAnimationFrame(_ => {
       this.$userMenu.removeAttribute('open');
       bd.removeAttribute('visible');
