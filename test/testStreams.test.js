@@ -1,6 +1,5 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const axios = require('axios');
 
 const testModule = require('../src/util/testStreams.js');
 const isLiveStream = require('../src/util/isLiveStream.js');
@@ -30,29 +29,51 @@ describe('testStreams.js module', () => {
   });
 
   describe('testHomepageConnection()', () => {
-    let axiosHeadStub, homepageStub;
+    let fetchStub;
 
     beforeEach(() => {
-      axiosHeadStub = sinon.stub(axios, 'head');
-      sinon.stub(require.cache[require.resolve('../src/util/useableHomepage.js')], 'exports').value((value) => value);
+      fetchStub = sinon.stub(global, 'fetch');
+
+      sinon
+        .stub(require.cache[require.resolve('../src/util/useableHomepage.js')], 'exports')
+        .value((value) => value);
     });
 
     it('should return homepage on valid HEAD response', async () => {
-      axiosHeadStub.resolves({
+      fetchStub.resolves({
+        ok: true,
         status: 200,
-        headers: { 'content-type': 'text/html; charset=utf-8' }
+        headers: {
+          get: (key) =>
+            ({
+              'content-type': 'text/html; charset=utf-8'
+            }[key.toLowerCase()])
+        }
       });
 
-      const url = 'http://original-url.com/';
+      const url = 'http://example.com/';
 
       const result = await testModule.testHomepageConnection(url);
+
+      expect(fetchStub).to.have.been.calledWith(
+        url,
+        sinon.match({
+          method: 'HEAD',
+          headers: {
+            'User-Agent': `radiotxt.site/${require('../package.json').version}`
+          },
+          signal: sinon.match.any
+        })
+      );
+
       expect(result).to.equal(url);
     });
 
     it('should return undefined on failed HEAD request', async () => {
-      axiosHeadStub.rejects(new Error('Failed'));
+      fetchStub.rejects(new Error('Failed'));
 
       const result = await testModule.testHomepageConnection('http://bad-url.com');
+
       expect(result).to.be.undefined;
     });
 
@@ -64,8 +85,6 @@ describe('testStreams.js module', () => {
 
   describe('testStreams()', () => {
     let getAllStationsStub, updateStationStub, dbStatsStub, sqlCloseStub;
-    let liveStreamStub, homepageStub;
-    let retryStub;
 
     beforeEach(() => {
       // Fake DB setup
@@ -82,21 +101,25 @@ describe('testStreams.js module', () => {
       sinon.stub(Stations.prototype, 'dbStats').callsFake(dbStatsStub);
       sinon.stub(Stations.prototype, 'close').callsFake(sqlCloseStub);
 
-      // Mocks
-      sinon.stub(require.cache[require.resolve('../util/isLiveStream.js')], 'exports').callsFake(async url => ({
-        name: `Mocked ${url}`,
-        url,
-        isLive: true,
-        content: 'audio/mpeg',
-        bitrate: 128,
-        icyGenre: 'Mock Genre',
-        icyurl: 'http://mock.home/'
-      }));
+      // Mock isLiveStream
+      sinon
+        .stub(require.cache[require.resolve('../util/isLiveStream.js')], 'exports')
+        .callsFake(async url => ({
+          name: `Mocked ${url}`,
+          url,
+          isLive: true,
+          content: 'audio/mpeg',
+          bitrate: 128,
+          icyGenre: 'Mock Genre',
+          icyurl: 'http://mock.home/'
+        }));
 
-      homepageStub = sinon.stub(testModule, 'testHomepageConnection').resolves('http://mock.home/');
+      sinon.stub(testModule, 'testHomepageConnection').resolves('http://mock.home/');
 
-      // Prevent retry from retrying during tests
-      sinon.stub(require.cache[require.resolve('../util/retry.js')], 'exports').callsFake(fn => fn());
+      // Prevent retry from retrying
+      sinon
+        .stub(require.cache[require.resolve('../util/retry.js')], 'exports')
+        .callsFake(fn => fn());
     });
 
     // it('should run testStreams and update stations', async () => {
