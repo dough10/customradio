@@ -57,12 +57,40 @@ let currentLang = 'en';
  * 
  * @param {String} lang 
  */
-export function setLanguage(lang) {
-  if (languages[lang]) {
-    currentLang = lang;
-  } else {
-    currentLang = 'en';
+export function setLanguage(langHeader) {
+  const fallback = 'en';
+
+  if (typeof langHeader !== 'string' || !langHeader.trim()) {
+    currentLang = fallback;
+    return currentLang;
   }
+
+  const candidates = langHeader.split(',');
+
+  for (let candidate of candidates) {
+    let lang = candidate.split(';')[0].trim().toLowerCase();
+
+    if (!lang) continue;
+
+    if (locales[lang]) {
+      currentLang = lang;
+      return currentLang;
+    }
+
+    const baseLang = lang.split('-')[0];
+    if (locales[baseLang]) {
+      currentLang = baseLang;
+      return currentLang;
+    }
+  }
+
+  const firstLang = candidates[0]?.split(';')[0].trim().toLowerCase();
+  if (firstLang && !locales[firstLang]) {
+    logger.warning(`language file does not exist: ${firstLang}`);
+  }
+
+  currentLang = fallback;
+  return currentLang;
 }
 
 /**
