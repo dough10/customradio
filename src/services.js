@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const { WorkOS } = require('@workos-inc/node');
 const { createClient } = require("redis");
 
