@@ -72,20 +72,20 @@ export function setLanguage(langHeader) {
 
     if (!lang) continue;
 
-    if (locales[lang]) {
+    if (languages[lang]) {
       currentLang = lang;
       return currentLang;
     }
 
     const baseLang = lang.split('-')[0];
-    if (locales[baseLang]) {
+    if (languages[baseLang]) {
       currentLang = baseLang;
       return currentLang;
     }
   }
 
   const firstLang = candidates[0]?.split(';')[0].trim().toLowerCase();
-  if (firstLang && !locales[firstLang]) {
+  if (firstLang && !languages[firstLang]) {
     logger.warning(`language file does not exist: ${firstLang}`);
   }
 
