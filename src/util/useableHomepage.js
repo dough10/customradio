@@ -91,7 +91,7 @@ function parseHostname(hostname) {
  */
 function urlDeconstruction(input) {
   if (typeof input !== 'string') return null;
-
+  
   input = ensureProtocol(input);
   if (isNotValidURL(input)) return null;
 
@@ -132,24 +132,26 @@ function urlDeconstruction(input) {
  * @returns {String}
  */
 function objectToUrl(obj) {
-  if (!obj) {
-    return '';
-  }
+  if (!obj) return '';
 
   if (!obj.domain && !obj.ip) return null;
 
-  const hostname = obj.ip || (obj.subdomain ? `${obj.subdomain}.` : '') + (obj.domain || '') + (obj.ext ? `.${obj.ext}` : '');
+  const hostname =
+    obj.ip ||
+    (obj.subdomain ? `${obj.subdomain}.` : '') +
+      (obj.domain || '') +
+      (obj.ext ? `.${obj.ext}` : '');
 
-  const formattedUrl = url.format({
-    protocol: obj.protocol,
-    hostname: hostname,
-    port: obj.port,
-    pathname: obj.pathname,
-    search: obj.search,
-    hash: obj.hash
-  });
+  const protocol = obj.protocol || 'http:';
 
-  return formattedUrl;
+  const url = new URL(`${protocol}//${hostname}`);
+
+  if (obj.port) url.port = obj.port;
+  if (obj.pathname) url.pathname = obj.pathname;
+  if (obj.search) url.search = obj.search;
+  if (obj.hash) url.hash = obj.hash;
+
+  return url.toString();
 }
 
 /**

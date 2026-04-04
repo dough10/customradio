@@ -34,13 +34,13 @@
     });
 
     it('should return a usable URL for a homepage with IPv4 address', function() {
-      const homepage = 'http://192.168.0.1/path';
+      const homepage = 'http://135.65.34.5/path';
       const result = useableHomepage(homepage);
       expect(result).to.equal(homepage);
     });
 
     it('should return a usable URL for a homepage with IPv4 address and port', function() {
-      const homepage = 'http://192.168.0.1:3000/';
+      const homepage = 'http://135.65.34.5:3000/';
       const result = useableHomepage(homepage);
       expect(result).to.equal(homepage);
     });
