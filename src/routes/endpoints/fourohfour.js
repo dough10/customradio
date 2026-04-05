@@ -1,4 +1,4 @@
-const {logger} = require('../../services.js');
+// const {logger} = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 const {badActor} = require('../../util/badActors.js');
 
@@ -30,15 +30,14 @@ module.exports = asyncHandler(async (req, res) => {
 
   let requestedPath;
   try {
-    requestedPath = decodeURIComponent(req.originalUrl);
+    requestedPath = decodeURIComponent(req.originalUrl).toLowerCase();
   } catch {
-    requestedPath = req.originalUrl;
+    requestedPath = req.originalUrl.toLowerCase();
   }
-  // Check if any sensitive path segment appears in the requested URL
+
   for (const sensitive of sensitivePaths) {
     if (requestedPath.includes(sensitive)) {
-      badActor(req.ip);
-      // logger.warning(`Sensitive path accessed: ${requestedPath} | IP: ${req.ip} | User-Agent: ${req.get('User-Agent')}`);
+      await badActor(req.ip);
       break;
     }
   }

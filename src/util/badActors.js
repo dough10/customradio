@@ -2,7 +2,7 @@ const {redisClient} = require('../services.js');
 
 const WINDOW = 60 * 5;        // 5 minutes (seconds)
 const BAN_DURATION = 60 * 60 * 24; // 24 hours
-const MAX_ATTEMPTS = 1;
+const MAX_ATTEMPTS = 3;
 
 async function badActor(ip) {
   const key = `rate:attempts:${ip}`;
