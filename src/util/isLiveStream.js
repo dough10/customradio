@@ -4,6 +4,7 @@ const isValidURL = require("./isValidURL.js");
 const retry = require("./retry.js");
 const fixEncoding = require("./fixEncoding.js");
 const {logger} = require('./../services.js');
+const usedTypes = require("./usedTypes.js");
 
 /**
  * An array of unhelpful stream names to ignore.
@@ -80,7 +81,7 @@ async function streamTest(url) {
 
   try {
     const response = await fetch(url, {
-      method: 'HEAD',
+      method: 'GET',
       headers: {
         "User-Agent": `radiotxt.site/${pack.version}`,
       },
@@ -100,7 +101,7 @@ async function streamTest(url) {
     const content = headers.get("content-type");
     const icyurl = headers.get("icy-url") || "";
 
-    const isAudioStream = content && content.startsWith("audio/");
+    const isAudioStream = content && usedTypes.includes(content);
 
     if (!isAudioStream) {
       const errorMessage = `Test error: ${url} - invalid content-type: ${content}`;
