@@ -1,6 +1,7 @@
 {
   "Current": [
-    "Alert system updated (alert database)"
+    "Alert system updated (alert database)",
+    "Attempt to imporve station add functionality (change request method that was preventing some stations from returning data)"
   ], 
   "1.13.0": [
     "Added option to hide selected stations",
