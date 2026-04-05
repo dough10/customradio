@@ -18,4 +18,10 @@ describe('lang parse test', () => {
     const lang = setLanguage(input);
     expect(lang).to.equal('en');
   });
+
+  it('should parse simple lang strings ie. en US', () => {
+    const input = 'en US';
+    const lang = setLanguage(input);
+    expect(lang).to.equal('en');
+  });
 });
