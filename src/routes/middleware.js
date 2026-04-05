@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const { performance } = require('perf_hooks');
 
 const { setLanguage } = require("../util/i18n.js");
+const {isBadActor} = require('../util/badActors.js');
 const { logger, redisClient } = require('../services.js');
 
 const corsOptions = {
@@ -57,6 +58,16 @@ module.exports = (app, httpRequestCounter) => {
       logger.info(`${req.ip} -> [${req.method}] ${req.originalUrl},${req.user ? ` user: ${req.user.id.replace('user_', '')},` : ''}${req.count !== undefined ? ` count: ${req.count}, ` : ' '}lang: ${req.loadedLang},${hasBody ? ` body: ${JSON.stringify(req.body)}, ` : ' '}status: ${res.statusCode},${res.getHeader('Content-Type') ? ` type: ${res.getHeader('Content-Type')}, ` : ' '}${res.getHeader('Content-Length') ? ` bytes: ${res.getHeader('Content-Length')}, ` : ' '}ms: ${(performance.now() - start).toFixed(2)}`);
     });
     next();
+  });
+
+  app.use(async (req, res, next) => {
+    try {
+      if (!(await isBadActor(req.ip))) return next();
+      res.status(403).send('forbidden');
+    } catch (err) {
+      logger.error('Rate limiter error:', err);
+      next();
+    }
   });
 
   app.set("trust proxy", true);
