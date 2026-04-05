@@ -8,12 +8,11 @@ const {badActor} = require('../../util/badActors.js');
  */
 const sensitivePaths = new Set([
   '.env',
-  'wp-admin',
   '.git',
   '.ssh',
-  '.json',
-  '.yml',
-  '.sql'
+  'wp-admin',
+  'wp-login',
+  'phpmyadmin',
 ]);
 
 /**

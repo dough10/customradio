@@ -65,7 +65,6 @@ module.exports = (app, httpRequestCounter) => {
       if (!(await isBadActor(req.ip))) return next();
       res.status(403).send('forbidden');
     } catch (err) {
-      console.error(err);
       logger.error('Rate limiter error:', err);
       next();
     }
