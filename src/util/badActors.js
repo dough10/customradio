@@ -1,3 +1,5 @@
+const {redisClient} = require('../services.js');
+
 const WINDOW = 60 * 5;        // 5 minutes (seconds)
 const BAN_DURATION = 60 * 60 * 24; // 24 hours
 const MAX_ATTEMPTS = 5;
