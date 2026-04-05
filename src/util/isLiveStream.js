@@ -81,7 +81,7 @@ async function streamTest(url) {
 
   try {
     const response = await fetch(url, {
-      method: 'GET',
+      method: 'HEAD',
       headers: {
         "User-Agent": `radiotxt.site/${pack.version}`,
       },
