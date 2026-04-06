@@ -66,7 +66,7 @@ module.exports = (app, httpRequestCounter) => {
       res.status(403).send('forbidden');
     } catch (err) {
       logger.error('Rate limiter error:', err);
-      next();
+      res.status(500).send('rate limiter error');
     }
   });
 
@@ -337,7 +337,7 @@ module.exports = (app, httpRequestCounter) => {
 
     res.status(err.status || 500).json({
       success: false,
-      message: err.message || 'Internal Server Error'
+      message: 'Internal Server Error'
     });
   });
 
