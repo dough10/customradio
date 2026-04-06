@@ -364,7 +364,7 @@ module.exports = async (app, register) => {
   /**
    * report if station is in a users txt list
    */
-  app.post('/reportInList/:id', userStationValidatior, saveStation);
+  app.post('/reportInList/:id', await wosMiddleware, userStationValidatior, saveStation);
 
   /** 
    * Endpoint to begin updating the database.
