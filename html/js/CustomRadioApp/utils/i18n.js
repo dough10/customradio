@@ -1,4 +1,5 @@
 // i18n.js
+import { bg } from './lang/bg.js';
 import { cs } from './lang/cs.js';
 import { de } from './lang/de.js';
 import { en } from './lang/en.js';
@@ -17,6 +18,7 @@ import { pt } from './lang/pt.js';
 import { ro } from './lang/ro.js';
 import { ru } from './lang/ru.js';
 import { sk } from './lang/sk.js';
+import { sr } from './lang/sr.js';
 import { sv } from './lang/sv.js';
 import { tr } from './lang/tr.js';
 import { uk } from './lang/uk.js';
@@ -25,6 +27,7 @@ import { zh } from './lang/zh.js';
 
 
 const languages = {
+  bg,
   en,
   cs,
   de,
@@ -39,6 +42,7 @@ const languages = {
   pt,
   ru,
   sk,
+  sr,
   sv,
   tr,
   uk,
