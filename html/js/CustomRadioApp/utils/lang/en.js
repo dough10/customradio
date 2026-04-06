@@ -22,6 +22,5 @@ export const en = {
   clipboard_success: 'Copied to clipboard',
   clipboard_failure: 'Copy to clipboard failed',
   lastPlayedStation: stationName => `Last Played: ${stationName}`,
-  resume: 'Resume',
-  news: ``
+  resume: 'Resume'
 };
