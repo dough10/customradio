@@ -1,5 +1,6 @@
 {
-  "Current": [
+  "Current": [],
+  "1.13.1": [
     "Alert system updated (alert database)",
     "Attempt to imporve station add functionality (change request method that was preventing some stations from returning data)"
   ], 
