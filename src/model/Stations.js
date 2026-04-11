@@ -37,18 +37,24 @@ const schema = [
     playMinutes INTEGER DEFAULT 0,
     inList INTEGER DEFAULT 0
   )`,
+
   `CREATE TABLE IF NOT EXISTS genres (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     genres TEXT,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`,
+
   `CREATE INDEX IF NOT EXISTS idx_stations_url ON stations(url)`,
+
   `CREATE INDEX IF NOT EXISTS idx_stations_id ON stations(id)`,
+
   `CREATE INDEX IF NOT EXISTS idx_genres_genres ON genres(genres)`,
+
   `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`,
+
   `CREATE INDEX IF NOT EXISTS idx_stations_playMinutes ON stations(playMinutes)`,
-  `CREATE INDEX IF NOT EXISTS idx_stations_compound 
-    ON stations(online, duplicate, content_type)`
+
+  `CREATE INDEX IF NOT EXISTS idx_stations_compound ON stations(online, duplicate, content_type)`
 ];
 
 /**
@@ -311,6 +317,19 @@ class Stations extends DbCon {
    */
   markDuplicate(id) {
     return this.run(`UPDATE stations SET duplicate = 1 WHERE id = ?`, [id]);
+  }
+
+  /**
+   * returns a count of all station entries
+   * 
+   * @returns {Number|Error} count or error
+   */
+  async getTotalCount() {
+    const query = 'SELECT COUNT(*) AS count FROM stations';
+
+    const row = await this.get(query);
+
+    return row.count;
   }
 
   /**
