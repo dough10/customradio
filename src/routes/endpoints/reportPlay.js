@@ -15,18 +15,18 @@ const blacklist = process.env.BLACKLIST?.split(',') || [];
  * @throws {Error} If play count increment fails
  */
 module.exports = asyncHandler(async (req, res) => {
-  const id = req.params.id;
   const ip = req.ip;
-
+  if (blacklist.includes(ip)) {
+    res.json({ message: 'ip in blacklist' });
+    return;
+  }
+  
+  const id = req.params.id;
   if (!id || isNaN(id)) {
     res.status(400).json({ error: 'Invalid station ID' });
     return;
   }
 
-  if (blacklist.includes(ip)) {
-    res.json({ message: 'ip in blacklist' });
-    return;
-  }
 
   await stations.incrementPlayMinutes(id);
   res.status(204).send();
