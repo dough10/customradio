@@ -35,7 +35,6 @@ class Posts extends DbCon {
       SELECT 
         p.id,
         p.title,
-        p.markdown,
         p.user_id,
         COUNT(c.id) AS comment_count
       FROM posts p
@@ -48,7 +47,6 @@ class Posts extends DbCon {
     return rows.map(row => ({
       id: row.id,
       title: row.title,
-      markdown: row.markdown,
       user_id: row.user_id,
       comment_count: Number(row.comment_count)
     }));
