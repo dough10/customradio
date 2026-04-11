@@ -2,48 +2,13 @@ const CACHE_VERSION = '1.13.2';
 const urlsToCache = [];
 
 /**
- * Handles fetch requests for /stations.
- * Checks if the cache is older than 24 hours and updates it if necessary.
- * 
- * @param {FetchEvent} event - The fetch event.
- * @returns {Promise<Response>} The response from cache or network.
- */
-async function handleStationsRequest(event) {
-  const cache = await caches.open(CACHE_VERSION);
-  const cachedResponse = await cache.match(event.request);
-  const now = Date.now();
-
-  if (cachedResponse) {
-    const cachedDate = new Date(cachedResponse.headers.get('sw-cache-date'));
-
-    if ((now - cachedDate.getTime()) < 24 * 60 * 60 * 1000) {
-      return cachedResponse;
-    }
-  }
-
-  const networkResponse = await fetch(event.request);
-  const clonedResponse = networkResponse.clone();
-  const headers = new Headers(clonedResponse.headers);
-  headers.set('sw-cache-date', new Date(now).toISOString());
-
-  const responseToCache = new Response(clonedResponse.body, {
-    status: clonedResponse.status,
-    statusText: clonedResponse.statusText,
-    headers: headers,
-  });
-
-  await cache.put(event.request, responseToCache);
-  return networkResponse;
-}
-
-/**
- * Handles fetch requests for /topGenres.
+ * Handles fetch requests
  * Returns cached response if offline.
  * 
  * @param {FetchEvent} event - The fetch event.
  * @returns {Promise<Response>} The response from cache or network.
  */
-async function handleTopGenresRequest(event) {
+async function handleRequest(event) {
   const cache = await caches.open(CACHE_VERSION);
   try {
     const networkResponse = await fetch(event.request);
@@ -52,28 +17,6 @@ async function handleTopGenresRequest(event) {
     return networkResponse;
   } catch (error) {
     const cachedResponse = await cache.match(event.request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    throw error;
-  }
-}
-
-/**
- * Handles HTML requests and injects fresh CSRF tokens
- * 
- * @param {FetchEvent} event - The fetch event
- * @returns {Promise<Response>} Response with fresh CSRF token
- */
-async function handleHtmlRequest(event) {
-  const cache = await caches.open(CACHE_VERSION);
-  const cachedResponse = await cache.match(event.request);
-  try {
-    const networkResponse = await fetch(event.request);
-    const clonedResponse = networkResponse.clone();
-    await cache.put(event.request, clonedResponse);
-    return networkResponse;
-  } catch(e) {
     if (cachedResponse) {
       return cachedResponse;
     }
@@ -104,12 +47,8 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(event.request));
     return;
   }
-  if (event.request.headers.get('Accept')?.includes('text/html')) {
-    event.respondWith(handleHtmlRequest(event));
-  } else if (event.request.url.includes('/stations')) {
-    event.respondWith(handleStationsRequest(event));
-  } else if (event.request.url.includes('/topGenres')) {
-    event.respondWith(handleTopGenresRequest(event));
+  if (event.request.headers.get('Accept')?.includes('text/html') || event.request.url.includes('/stations') || event.request.url.includes('/topGenres')) {
+    event.respondWith(handleRequest(event));
   } else {
     event.respondWith(
       caches.match(event.request)
