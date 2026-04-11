@@ -1,4 +1,4 @@
-const DbCon = require("./DbCon");
+const DbCon = require("./DbCon.js");
 
 class Posts extends DbCon {
   get schema() {
