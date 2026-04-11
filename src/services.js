@@ -6,6 +6,7 @@ const { createClient } = require("redis");
 const Stations = require('./model/Stations.js');
 const UserData = require('./model/UserData.js');
 const Alerts = require('./model/Alerts.js');
+
 const Logger = require('./util/logger.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
