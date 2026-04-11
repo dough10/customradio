@@ -37,8 +37,8 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   const url = event.request.url;
   if (
-    url.includes('/info') || 
-    url.includes('/reportPlay/') || 
+    url.includes('/info') ||
+    url.includes('/reportPlay/') ||
     url.includes('/reportInList/') ||
     url.includes('/auth') ||
     url.includes('/auth/callback') ||
@@ -47,7 +47,12 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(event.request));
     return;
   }
-  if (event.request.headers.get('Accept')?.includes('text/html') || event.request.url.includes('/stations') || event.request.url.includes('/topGenres') || event.request.url.includes('/userStations')) {
+  if (
+    event.request.headers.get('Accept')?.includes('text/html') || 
+    event.request.url.includes('/stations') || 
+    event.request.url.includes('/topGenres') || 
+    event.request.url.includes('/userStations')
+  ) {
     event.respondWith(handleRequest(event));
   } else {
     event.respondWith(
@@ -84,7 +89,7 @@ self.addEventListener('message', event => {
   }
 });
 
-self.addEventListener('push', function(event) {
+self.addEventListener('push', function (event) {
   const data = event.data.json();
 
   event.waitUntil(
@@ -99,7 +104,7 @@ self.addEventListener('push', function(event) {
   );
 });
 
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', function (event) {
   event.notification.close();
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(windowClients => {
