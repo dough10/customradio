@@ -1,3 +1,5 @@
+const util = require("util");
+
 const pack = require("../../package.json");
 
 const isValidURL = require("./isValidURL.js");
@@ -160,7 +162,7 @@ async function streamTest(url) {
       detailedMessage += ` | cause: ${error.cause.code || ''} ${error.cause.message || ''}`;
     }
 
-    logger.debug(detailedMessage);
+    logger.debug(util.inspect(error, { depth: 5 }));
 
     return {
       ok: false,
