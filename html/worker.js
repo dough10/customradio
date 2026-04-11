@@ -47,7 +47,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(event.request));
     return;
   }
-  if (event.request.headers.get('Accept')?.includes('text/html') || event.request.url.includes('/stations') || event.request.url.includes('/topGenres')) {
+  if (event.request.headers.get('Accept')?.includes('text/html') || event.request.url.includes('/stations') || event.request.url.includes('/topGenres') || event.request.url.includes('/userStations')) {
     event.respondWith(handleRequest(event));
   } else {
     event.respondWith(
