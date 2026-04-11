@@ -6,6 +6,7 @@ const { createClient } = require("redis");
 const Stations = require('./model/Stations.js');
 const UserData = require('./model/UserData.js');
 const Alerts = require('./model/Alerts.js');
+const Posts = require('./model/Posts.js');
 
 const Logger = require('./util/logger.js');
 
@@ -17,6 +18,7 @@ const DB_PATH = 'data/customradio.db';
 const stations = new Stations(DB_PATH);
 const userData = new UserData(DB_PATH);
 const alerts = new Alerts(DB_PATH);
+const posts = new Posts(DB_PATH);
 
 const redisClient = createClient({
   url: process.env.REDIS_URL || "redis://localhost:6379",
@@ -40,6 +42,7 @@ module.exports = {
   stations,
   userData,
   alerts,
+  posts,
   logger,
   redisClient,
   logLevel,
