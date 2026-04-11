@@ -154,11 +154,17 @@ async function streamTest(url) {
 
     const isAbort = error.name === 'AbortError';
 
-    logger.debug(error.message);
+    let detailedMessage = error.message;
+
+    if (error.cause) {
+      detailedMessage += ` | cause: ${error.cause.code || ''} ${error.cause.message || ''}`;
+    }
+
+    logger.debug(detailedMessage);
 
     return {
       ok: false,
-      error: isAbort ? 'Request timeout' : error.message,
+      error: isAbort ? 'Request timeout' : detailedMessage,
       status: 500,
     };
   }
