@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
+const DbCon = require('./DbCon.js');
 const usedTypes = require("../util/usedTypes.js");
 
 const DB_CONFIG = {
@@ -21,132 +21,47 @@ function mapPlaceholders(arr) {
   return arr.map(() => '?').join(',');
 }
 
-/**
- * Callback function for when the database connection is established.
- * 
- * This function is bound to the `Stations` class instance to ensure
- * that the `this` context refers to the class instance.
- */
-function connectionEstablished() {
-  const run = (query, errorMsg) => {
-    return new Promise((resolve, reject) => {
-      this.db.run(query, err => {
-        if (err) {
-          reject(new Error(`${errorMsg}: ${err.message}`));
-        } else {
-          resolve();
-        }
-      });
-    });
-  };
-
-  const pragmas = [
-    {
-      query: "PRAGMA journal_mode = WAL;",
-      errorMsg: "Failed to enable WAL mode"
-    },
-    {
-      query: "PRAGMA synchronous = NORMAL;",
-      errorMsg: "Failed to set synchronous mode"
-    },
-    {
-      query: "PRAGMA foreign_keys = ON;",
-      errorMsg: "Failed to enable foreign keys"
-    }
-  ];
-
-  const schema = [
-    {
-      query: `CREATE TABLE IF NOT EXISTS stations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        url TEXT,
-        genre TEXT,
-        online BOOLEAN,
-        content_type TEXT,
-        bitrate INTEGER,
-        icon TEXT,
-        homepage TEXT,
-        error TEXT,
-        duplicate BOOLEAN,
-        playMinutes INTEGER DEFAULT 0,
-        inList INTEGER DEFAULT 0
-      )`,
-      errorMsg: "Failed to create stations table"
-    },
-    {
-      query: `CREATE TABLE IF NOT EXISTS genres (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        genres TEXT,
-        time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )`,
-      errorMsg: "Failed to create genres table"
-    },
-    {
-      query: `CREATE INDEX IF NOT EXISTS idx_stations_url ON stations(url)`,
-      errorMsg: "Failed to create idx_stations_url"
-    },
-    {
-      query: `CREATE INDEX IF NOT EXISTS idx_stations_id ON stations(id)`,
-      errorMsg: "Failed to create idx_stations_id"
-    },
-    {
-      query: `CREATE INDEX IF NOT EXISTS idx_genres_genres ON genres(genres)`,
-      errorMsg: "Failed to create idx_genres_genres"
-    },
-    {
-      query: `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`,
-      errorMsg: "Failed to create idx_genres_time"
-    },
-    {
-      query: `CREATE INDEX IF NOT EXISTS idx_stations_playMinutes ON stations(playMinutes)`,
-      errorMsg: "Failed to create idx_stations_playMinutes"
-    },
-    {
-      query: `CREATE INDEX IF NOT EXISTS idx_stations_compound 
-        ON stations(online, duplicate, content_type)`,
-      errorMsg: "Failed to create idx_stations_compound"
-    }
-  ];
-
-  // Execute PRAGMAs first, then schema setup
-  return [...pragmas, ...schema].reduce((promise, { query, errorMsg }) => {
-    return promise.then(() => run(query, errorMsg));
-  }, Promise.resolve());
-}
+const schema = [
+  `CREATE TABLE IF NOT EXISTS stations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    url TEXT,
+    genre TEXT,
+    online BOOLEAN,
+    content_type TEXT,
+    bitrate INTEGER,
+    icon TEXT,
+    homepage TEXT,
+    error TEXT,
+    duplicate BOOLEAN,
+    playMinutes INTEGER DEFAULT 0,
+    inList INTEGER DEFAULT 0
+  )`,
+  `CREATE TABLE IF NOT EXISTS genres (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    genres TEXT,
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_stations_url ON stations(url)`,
+  `CREATE INDEX IF NOT EXISTS idx_stations_id ON stations(id)`,
+  `CREATE INDEX IF NOT EXISTS idx_genres_genres ON genres(genres)`,
+  `CREATE INDEX IF NOT EXISTS idx_genres_time ON genres(time)`,
+  `CREATE INDEX IF NOT EXISTS idx_stations_playMinutes ON stations(playMinutes)`,
+  `CREATE INDEX IF NOT EXISTS idx_stations_compound 
+    ON stations(online, duplicate, content_type)`
+];
 
 /**
  * Class representing a SQLite database for radio stations
  * Handles CRUD operations, station filtering, and play tracking
  */
-class Stations {
-  /**
-   * Create a Stations instance
-   * 
-   * @param {string} filePath - Path to SQLite database file
-   * @throws {Error} If filePath is not provided
-   * @throws {Error} If database connection fails
-   */
-  constructor(filePath) {
-    if (!filePath) throw new Error('Database file path is required');
-    this.db = new sqlite3.Database(filePath, (err) => {
-      if (err) {
-        throw new Error(`Failed to connect to database: ${err.message}`);
-      }
-    });
-    this.initializationPromise = connectionEstablished.call(this);
-  }
+class Stations extends DbCon {
 
   /**
-   * Ensure the database is initialized before running a query.
-   * 
-   * @param {Function} fn - The function to run after initialization.
-   * 
-   * @returns {Promise} A promise that resolves when the function completes.
+   * Get database schema definitions
    */
-  async _ensureInitialized(fn) {
-    await this.initializationPromise;
-    return fn();
+  get schema() {
+    return [...super.schema, ...schema];
   }
 
   /**
@@ -157,10 +72,9 @@ class Stations {
    * @throws {Error} If the query fails.
    */
   getAllStations() {
-    const getQuery = 'SELECT * FROM stations';
-    return this._ensureInitialized(() => this._runQuery(getQuery));
+    return this.all('SELECT * FROM stations');
   }
-  
+
   /**
    * get paginated results
    * 
@@ -172,8 +86,10 @@ class Stations {
    * @throws {Error} If the query fails.
    */
   getPaginatedStations(limit, offset) {
-    const query = 'SELECT * FROM stations ORDER BY iD LIMIT ? OFFSET ?';
-    return this._ensureInitialized(() => this._runQuery(query, [limit, offset]));
+    return this.all(
+      'SELECT * FROM stations ORDER BY id LIMIT ? OFFSET ?',
+      [limit, offset]
+    );
   }
 
   /**
@@ -203,9 +119,9 @@ class Stations {
         AND online = 1
         AND duplicate = 0
         AND bitrate IS NOT NULL
-      ORDER BY popularity DESC, name ASC;`;
+      ORDER BY popularity DESC, name ASC`;
 
-    return this._ensureInitialized(() => this._runQuery(query, usedTypes));
+    return this.all(query, usedTypes);
   }
 
   /**
@@ -233,27 +149,27 @@ class Stations {
     const contentTypePlaceholders = mapPlaceholders(usedTypes);
 
     if (!genres.length) {
-      // If no genres are provided, just query by content_type
-      const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList, 
+      const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList,
         (inList * ${DB_CONFIG.POPULARITY_MULTIPLIER} + playMinutes) as popularity
         FROM stations
         WHERE content_type IN (${contentTypePlaceholders})
           AND online = 1
           AND duplicate = 0
           AND bitrate IS NOT NULL
-        ORDER BY popularity DESC, name ASC;`;
+        ORDER BY popularity DESC, name ASC`;
 
-      return this._ensureInitialized(() => this._runQuery(query, usedTypes));
+      return this.all(query, usedTypes);
     }
 
     const genrePatterns = genres.map(g => `%${g.toLowerCase()}%`);
 
     const nameConditions = genrePatterns.map(() => 'LOWER(name) LIKE ?').join(' OR ');
     const urlConditions = genrePatterns.map(() => 'LOWER(url) LIKE ?').join(' OR ');
-    const genreConditions = genrePatterns.map(() => "LOWER(REPLACE(REPLACE(genre, '&', 'and'), '-', '')) LIKE ?").join(' OR ');
+    const genreConditions = genrePatterns.map(() =>
+      "LOWER(REPLACE(REPLACE(genre, '&', 'and'), '-', '')) LIKE ?"
+    ).join(' OR ');
 
-    // Combine conditions safely
-    const combinedConditions = [nameConditions, urlConditions, genreConditions].filter(Boolean).join(' OR ');
+    const combinedConditions = [nameConditions, urlConditions, genreConditions].join(' OR ');
 
     const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes, inList,
         (inList * ${DB_CONFIG.POPULARITY_MULTIPLIER} + playMinutes) as popularity
@@ -263,13 +179,12 @@ class Stations {
         AND duplicate = 0
         AND bitrate IS NOT NULL
         AND (${combinedConditions})
-      ORDER BY popularity DESC, name ASC;`;
+      ORDER BY popularity DESC, name ASC`;
 
     const params = [...usedTypes, ...genrePatterns, ...genrePatterns, ...genrePatterns];
 
-    return this._ensureInitialized(() => this._runQuery(query, params));
+    return this.all(query, params);
   }
-
 
   /**
    * Check if a station exists.
@@ -279,10 +194,12 @@ class Stations {
    * @returns {Promise<Boolean>} A promise that resolves to true if the station exists, false otherwise.
    */
   async exists(url) {
-    const query = `SELECT COUNT(*) AS count FROM stations WHERE url = ?`;
-    const rows = await this._ensureInitialized(() => this._runQuery(query, [url]));
-    return rows[0].count > 0;
-  }  
+    const row = await this.get(
+      `SELECT COUNT(*) AS count FROM stations WHERE url = ?`,
+      [url]
+    );
+    return row.count > 0;
+  }
 
   /**
    * Add new station to database
@@ -308,51 +225,31 @@ class Stations {
   async addStation(obj) {
     validateStation(obj);
 
-    const existQuery = `SELECT * FROM stations WHERE url = ?`;
-    const rows = await this._ensureInitialized(() => this._runQuery(existQuery, [obj.url]));
+    const exists = await this.exists(obj.url);
+    if (exists) return 'Station exists';
 
-    if (rows.length > 0) {
-      return 'Station exists';
-    }
+    const result = await this.run(
+      `INSERT INTO stations (
+        name, url, genre, online, content_type, bitrate,
+        icon, homepage, error, duplicate, playMinutes, inList
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        obj.name,
+        obj.url,
+        obj.genre,
+        obj.online,
+        obj['content-type'],
+        obj.bitrate,
+        obj.icon,
+        obj.homepage,
+        obj.error,
+        obj.duplicate,
+        obj.playMinutes || 0,
+        obj.inList || 0
+      ]
+    );
 
-    const addQuery = `INSERT INTO stations (
-      name, 
-      url, 
-      genre, 
-      online, 
-      content_type, 
-      bitrate, 
-      icon, 
-      homepage, 
-      error, 
-      duplicate,
-      playMinutes,
-      inList
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const values = [
-      String(obj.name),
-      String(obj.url),
-      String(obj.genre),
-      Boolean(obj.online),
-      String(obj['content-type']),
-      Number(obj.bitrate),
-      String(obj.icon),
-      String(obj.homepage),
-      String(obj.error),
-      Boolean(obj.duplicate),
-      Number(obj.playMinutes) || 0,
-      Number(obj.inList) || 0
-    ];
-
-    return new Promise((resolve, reject) => {
-      this.db.run(addQuery, values, function (err) {
-        if (err) {
-          reject(new Error(`Failed to add station: ${err.message}`));
-        } else {
-          resolve(this.lastID);
-        }
-      });
-    });
+    return result.lastID;
   }
 
   /**
@@ -380,45 +277,27 @@ class Stations {
   updateStation(obj) {
     validateStation(obj);
 
-    const updateQuery = `UPDATE stations SET 
-      name = ?, 
-      url = ?, 
-      genre = ?, 
-      online = ?, 
-      content_type = ?, 
-      bitrate = ?, 
-      icon = ?, 
-      homepage = ?, 
-      error = ?, 
-      duplicate = ?,
-      playMinutes = ?,
-      inList = ?
-      WHERE id = ?`;
-    const values = [
-      String(obj.name),
-      String(obj.url),
-      String(obj.genre),
-      Boolean(obj.online),
-      String(obj['content-type']),
-      Number(obj.bitrate) || 0,
-      String(obj.icon),
-      String(obj.homepage),
-      String(obj.error),
-      Boolean(obj.duplicate),
-      Number(obj.playMinutes) || 0,
-      Number(obj.inList) || 0,
-      obj.id
-    ];
-
-    return this._ensureInitialized(() => new Promise((resolve, reject) => {
-      this.db.run(updateQuery, values, function (err) {
-        if (err) {
-          reject(new Error(`Failed to update station: ${err.message}`));
-        } else {
-          resolve('Station updated successfully.');
-        }
-      });
-    }));
+    return this.run(
+      `UPDATE stations SET 
+        name=?, url=?, genre=?, online=?, content_type=?, bitrate=?,
+        icon=?, homepage=?, error=?, duplicate=?, playMinutes=?, inList=?
+      WHERE id=?`,
+      [
+        obj.name,
+        obj.url,
+        obj.genre,
+        obj.online,
+        obj['content-type'],
+        obj.bitrate || 0,
+        obj.icon,
+        obj.homepage,
+        obj.error,
+        obj.duplicate,
+        obj.playMinutes || 0,
+        obj.inList || 0,
+        obj.id
+      ]
+    );
   }
 
   /**
@@ -431,8 +310,7 @@ class Stations {
    * @throws {Error} If the query fails.
    */
   markDuplicate(id) {
-    const query = `UPDATE stations SET duplicate = 1 WHERE id = ?`;
-    return this._runQuery(query, [id]);
+    return this.run(`UPDATE stations SET duplicate = 1 WHERE id = ?`, [id]);
   }
 
   /**
@@ -443,13 +321,12 @@ class Stations {
    * @returns {Promise<void>}
    * 
    * @throws {Error} If query fails
-   * 
-   * @example
-   * await stations.incrementPlayMinutes(123);
    */
   incrementPlayMinutes(id) {
-    const query = `UPDATE stations SET playMinutes = playMinutes + 1 WHERE id = ?`;
-    return this._ensureInitialized(() => this._runQuery(query, [id]));
+    return this.run(
+      `UPDATE stations SET playMinutes = playMinutes + 1 WHERE id = ?`,
+      [id]
+    );
   }
 
   /**
@@ -462,9 +339,11 @@ class Stations {
    * @throws {Error} If the query fails
    */
   async getPlayMinutes(id) {
-    const query = `SELECT playMinutes FROM stations WHERE id = ?`;
-    const rows = await this._ensureInitialized(() => this._runQuery(query, [id]));
-    return rows[0].playMinutes || 0;
+    const row = await this.get(
+      `SELECT playMinutes FROM stations WHERE id = ?`,
+      [id]
+    );
+    return row?.playMinutes || 0;
   }
 
   /**
@@ -477,14 +356,16 @@ class Stations {
    * @throws {Error} If the query fails
    */
   getMostPlayed(limit = 10) {
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes
-      FROM stations
-      WHERE online = 1 
-      AND duplicate = 0 
-      AND playMinutes > 0
-      ORDER BY playMinutes DESC
-      LIMIT ?`;
-    return this._ensureInitialized(() => this._runQuery(query, [limit]));
+    return this.all(
+      `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes
+       FROM stations
+       WHERE online = 1 
+       AND duplicate = 0 
+       AND playMinutes > 0
+       ORDER BY playMinutes DESC
+       LIMIT ?`,
+      [limit]
+    );
   }
 
   /**
@@ -497,8 +378,10 @@ class Stations {
    * @throws {Error} If the query fails
    */
   addToList(id) {
-    const query = `UPDATE stations SET inList = inList + 1 WHERE id = ?`;
-    return this._ensureInitialized(() => this._runQuery(query, [id]));
+    return this.run(
+      `UPDATE stations SET inList = inList + 1 WHERE id = ?`,
+      [id]
+    );
   }
 
   /**
@@ -512,13 +395,15 @@ class Stations {
    * @throws {Error} If the query fails
    */
   removeFromList(id) {
-    const query = `UPDATE stations 
-      SET inList = CASE 
-        WHEN inList > 0 THEN inList - 1 
-        ELSE 0 
-      END 
-      WHERE id = ?`;
-    return this._ensureInitialized(() => this._runQuery(query, [id]));
+    return this.run(
+      `UPDATE stations 
+       SET inList = CASE 
+         WHEN inList > 0 THEN inList - 1 
+         ELSE 0 
+       END 
+       WHERE id = ?`,
+      [id]
+    );
   }
 
   /**
@@ -529,54 +414,14 @@ class Stations {
    * @throws {Error} If the query fails
    */
   getListedStations() {
-    const query = `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes
-      FROM stations
-      WHERE inList > 0
-      AND online = 1
-      AND duplicate = 0
-      ORDER BY name ASC`;
-    return this._ensureInitialized(() => this._runQuery(query));
-  }
-
-  /**
-   * counts stations the meet the input condition
-   * 
-   * @param {String} condition
-   * 
-   * @returns {Number|Error} count or error
-   */
-  _getUsableCount(condition) {
-    const typesPlaceholder = mapPlaceholders(usedTypes);
-    return new Promise((resolve, reject) => {
-      this.db.get(`SELECT COUNT(*) AS count 
-        FROM stations 
-        WHERE ${condition} AND content_type IN (${typesPlaceholder})`, 
-        usedTypes, (err, row) => {
-        if (err) {
-          reject(new Error(`Failed counting stations: ${err.message}`));
-        } else {
-          resolve(row.count);
-        }
-      });
-    });
-  }
-
-  /**
-   * returns a count of all station entries
-   * 
-   * @returns {Number|Error} count or error
-   */
-  getTotalCount() {
-    return new Promise((resolve, reject) => {
-      const query = 'SELECT COUNT(*) AS count FROM stations';
-      this.db.get(query, (err, row) => {
-        if (err) {
-          reject(new Error(`Failed counting stations: ${err.message}`));
-        } else {
-          resolve(row.count);
-        }
-      });
-    });  
+    return this.all(
+      `SELECT id, name, url, bitrate, genre, icon, homepage, playMinutes
+       FROM stations
+       WHERE inList > 0
+       AND online = 1
+       AND duplicate = 0
+       ORDER BY name ASC`
+    );
   }
 
   /**
@@ -591,17 +436,19 @@ class Stations {
    * @throws {Error} If queries fail
    */
   async dbStats() {
-    try {  
-      const online = await this._ensureInitialized(() => this._getUsableCount('online = 1'));
-      const total = await this._ensureInitialized(() => this.getTotalCount());
-  
-      return { online, total };
-  
-    } catch (err) {
-      throw new Error(`Error fetching stats: ${err.message}`);
-    }
+    const online = await this.get(
+      `SELECT COUNT(*) as count FROM stations 
+       WHERE online = 1 AND content_type IN (${mapPlaceholders(usedTypes)})`,
+      usedTypes
+    );
+
+    const total = await this.get(`SELECT COUNT(*) as count FROM stations`);
+
+    return {
+      online: online.count,
+      total: total.count
+    };
   }
-  
 
   /**
    * Get most popular genres from recent searches
@@ -612,14 +459,16 @@ class Stations {
    * @throws {Error} If query fails
    */
   async topGenres() {
-    const query = `SELECT genres, COUNT(*) as count
-      FROM genres
-      WHERE time > datetime('now', '-${DB_CONFIG.RECENT_DAYS} days')
-      GROUP BY genres
-      ORDER BY count DESC
-      LIMIT ${DB_CONFIG.TOP_GENRES_LIMIT};`;
-    const response = await this._ensureInitialized(() => this._runQuery(query));
-    return response.map(obj => obj.genres).sort((a, b) => a.localeCompare(b));
+    const rows = await this.all(
+      `SELECT genres, COUNT(*) as count
+       FROM genres
+       WHERE time > datetime('now', '-${DB_CONFIG.RECENT_DAYS} days')
+       GROUP BY genres
+       ORDER BY count DESC
+       LIMIT ${DB_CONFIG.TOP_GENRES_LIMIT}`
+    );
+
+    return rows.map(obj => obj.genres).sort((a, b) => a.localeCompare(b));
   }
 
   /**
@@ -633,16 +482,10 @@ class Stations {
    * @throws {Error} If the query fails.
    */
   logGenres(genre, time = new Date()) {
-    const query = `INSERT INTO genres (genres, time) VALUES (?, ?)`;
-    return this._ensureInitialized(() => new Promise((resolve, reject) => {
-      this.db.run(query, [genre, time.toISOString()], function (err) {
-        if (err) {
-          reject(new Error(`Failed to log genre: ${err.message}`));
-        } else {
-          resolve(this.lastID);
-        }
-      });
-    }));
+    return this.run(
+      `INSERT INTO genres (genres, time) VALUES (?, ?)`,
+      [genre, time.toISOString()]
+    );
   }
 
   /**
@@ -662,16 +505,8 @@ class Stations {
    * 
    * @throws {Error} If the database connection cannot be closed.
    */
-  close() {
-    return this._ensureInitialized(() => new Promise((resolve, reject) => {
-      this.db.close(err => {
-        if (err) {
-          reject(new Error(`Failed to close the database: ${err.message}`));
-        } else {
-          resolve('Database connection closed successfully.');
-        }
-      });
-    }));
+  async close() {
+    return this.run('PRAGMA optimize').then(() => this.close());
   }
 
   /**
@@ -690,30 +525,6 @@ class Stations {
       console.error('Error during cleanup:', error);
       throw error;
     }
-  }
-
-  /**
-   * Run a database query.
-   * 
-   * @param {string} query - The SQL query to run.
-   * @param {Array} [params=[]] - The parameters for the SQL query.
-   * 
-   * @returns {Promise<Array>} A promise that resolves to the result of the query.
-   * 
-   * @throws {Error} If the query fails.
-   * 
-   * @private
-   */
-  _runQuery(query, params = []) {
-    return new Promise((resolve, reject) => {
-      this.db.all(query, params, (err, rows) => {
-        if (err) {
-          reject(new Error(`Failed running query: ${err.message}`));
-        } else {
-          resolve(rows);
-        }
-      });
-    });
   }
 }
 
@@ -735,23 +546,12 @@ function validateStation(obj) {
   if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
   if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
   if (typeof obj.duplicate !== 'boolean') throw new Error('Invalid type for property "duplicate". Expected boolean.');
-  if (obj.inList !== undefined && typeof obj.inList !== 'number') {
-    throw new Error('Invalid type for property "inList". Expected number.');
-  }
 }
 
-/**
- * Check if a URL is valid.
- * Uses the standard URL API for robust validation.
- * 
- * @param {String} url 
- * 
- * @returns {Boolean}
- */
 function isValidURL(url) {
   try {
     new URL(url);
-    return true
+    return true;
   } catch (e) {
     return false;
   }
