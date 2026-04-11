@@ -1,5 +1,7 @@
 {
-  "Current": [],
+  "Current": [
+    "Changed frontend caching stratagy (fix bug where stations marked as offline in the database where showing in station list but not in a users saved list ie. main list was cached and user list was not)"
+  ],
   "1.13.1": [
     "Alert system updated (alert database)",
     "Attempt to imporve station add functionality (change request method that was preventing some stations from returning data)"
