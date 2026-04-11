@@ -22,6 +22,8 @@ class Posts extends DbCon {
         FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
       )`,
 
+      'CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC);',
+
       `CREATE INDEX IF NOT EXISTS idx_comments_post_id 
         ON comments(post_id);`,
 
