@@ -14,6 +14,9 @@ class DbCon {
     this.initializationPromise = this.connectionPromise.then(() => this.#init());
   }
 
+  /**
+   * pragams
+   */
   get pragmas() {
     return [
       "PRAGMA journal_mode = WAL;",
@@ -22,8 +25,16 @@ class DbCon {
     ];
   }
 
+  /**
+   * schema
+   */
   get schema() { return []; }
 
+  /**
+   * intialize the database connection
+   * 
+   * @returns {Promise}
+   */
   #init() {
     const queries = [...this.pragmas, ...this.schema];
 
@@ -33,6 +44,15 @@ class DbCon {
     );
   }
 
+  /**
+   * run a database query without the init function
+   * 
+   * @param {String} query 
+   * @param {Array} params 
+   * @param {String} errorMsg 
+   * 
+   * @returns {Promise}
+   */
   _runRaw(query, params = [], errorMsg) {
     return new Promise((resolve, reject) => {
       this.db.run(query, params, function (err) {
@@ -45,11 +65,28 @@ class DbCon {
     });
   }
 
+  /**
+   * run a database query
+   * 
+   * @param {String} query 
+   * @param {Array} params 
+   * @param {String} errorMsg 
+   * 
+   * @returns {Promise}
+   */
   async run(query, params = [], errorMsg) {
     await this.initializationPromise;
     return this._runRaw(query, params, errorMsg);
   }
 
+  /**
+   * run a get query
+   * 
+   * @param {String} query 
+   * @param {Array} params 
+   * 
+   * @returns {Promise}
+   */
   async get(query, params = []) {
     await this.initializationPromise;
     return new Promise((resolve, reject) => {
@@ -60,6 +97,14 @@ class DbCon {
     });
   }
 
+  /**
+   * run an all query
+   * 
+   * @param {String} query 
+   * @param {Array} params
+   *  
+   * @returns {Promise}
+   */
   async all(query, params = []) {
     await this.initializationPromise;
     return new Promise((resolve, reject) => {
@@ -70,6 +115,13 @@ class DbCon {
     });
   }
 
+  /**
+   * init database transaction
+   * 
+   * @param {Function} fn 
+   * 
+   * @returns {Object}
+   */
   async transaction(fn) {
     await this.initializationPromise;
 
@@ -88,6 +140,11 @@ class DbCon {
     }
   }
 
+  /**
+   * close database
+   * 
+   * @returns {Promise}
+   */
   close() {
     return new Promise((resolve, reject) => {
       this.db.close(err => {
