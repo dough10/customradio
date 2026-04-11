@@ -30,7 +30,7 @@ class Posts extends DbCon {
     ];
   }
 
-  async allPosts(limit = 20, offset = 0) {
+  async getPostList(limit = 20, offset = 0) {
     const rows = await this.all(`
       SELECT 
         p.id,

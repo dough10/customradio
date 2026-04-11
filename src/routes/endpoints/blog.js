@@ -18,6 +18,6 @@ module.exports = asyncHandler(async (req, res) => {
     lang: req.loadedLang,
     csrf: req.session.csrfToken,
     nonce: res.locals.nonce,
-    posts: await posts.allPosts()
+    posts: await posts.getPostList()
   }));
 });
