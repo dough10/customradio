@@ -50,6 +50,42 @@ function cleanURL(url) {
 }
 
 /**
+ * 
+ * @param {Buffer} buf 
+ * @returns {Boolean}
+ */
+function looksLikeHTML(buf) {
+  if (!buf || buf.length < 16) return false;
+  const str = new TextDecoder().decode(buf.slice(0, 128)).toLowerCase();
+  return str.includes("<html") || str.includes("<!doctype");
+}
+
+/**
+ * 
+ * @param {Buffer} buf 
+ * @returns {Boolean}
+ */
+function looksLikeMP3(buf) {
+  if (!buf || buf.length < 4) return false;
+
+  for (let i = 0; i < buf.length - 1; i++) {
+    if (
+      buf[i] === 0x49 &&
+      buf[i + 1] === 0x44 &&
+      buf[i + 2] === 0x33
+    ) {
+      return true;
+    }
+
+    if (buf[i] === 0xff && (buf[i + 1] & 0xe0) === 0xe0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Tests if the provided URL is an audio stream and retrieves related information.
  *
  * This function sends a HEAD request to the given URL to check if it is a live audio stream
@@ -73,7 +109,7 @@ function cleanURL(url) {
  */
 async function streamTest(url) {
   const controller = new AbortController();
-  const timeout = 4500;
+  const timeout = 10000;
 
   const timeoutId = setTimeout(() => {
     controller.abort();
@@ -81,28 +117,35 @@ async function streamTest(url) {
 
   try {
     const response = await fetch(url, {
+      redirect: "follow",
       method: 'GET',
       headers: {
         "User-Agent": `radiotxt.site/${pack.version}`,
-        "Accept": "*/*"
+        "Accept": "audio/*, */*;q=0.9",
+        "Icy-MetaData": "1",
+        "Range": "bytes=0-"
       },
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
-    const isLive = response.status >= 200 && response.status < 300;
+    const isReachable = response.ok;
 
     const headers = response.headers;
 
-    let name = headers.get("icy-name");
+    let name = headers.get("icy-name") || headers.get("x-audiocast-name");
     const description = headers.get("icy-description") || "";
-    const icyGenre = headers.get("icy-genre") || "Unknown";
+    const icyGenre = headers.get("icy-genre") || headers.get("x-audiocast-genre") || "Unknown";
     let bitrate = headers.get("icy-br");
     const content = headers.get("content-type");
     const icyurl = headers.get("icy-url") || "";
 
-    const isAudioStream = content && usedTypes.includes(content);
+    const normalizedContent = content?.split(";")[0].trim().toLowerCase();
+
+    const isAudioStream = normalizedContent && usedTypes.includes(normalizedContent);
+
+    if (url !== response.url) url = response.url;
 
     if (!isAudioStream) {
       const errorMessage = `Test error: ${url} - invalid content-type: ${content}`;
@@ -114,12 +157,49 @@ async function streamTest(url) {
       };
     }
 
-    if (bitrate) {
-      bitrate = bitrate.includes(',') ? bitrate.split(',')[0] : bitrate;
-      bitrate = Number(bitrate) || 0;
+    const reader = response.body?.getReader();
+    let firstChunk;
+
+    if (reader) {
+      const { value } = await reader.read();
+      firstChunk = value;
+      reader.cancel();
     }
 
-    if (isNaN(bitrate)) bitrate = 0;
+    if (!firstChunk || firstChunk.length === 0) {
+      return {
+        ok: false,
+        error: "No audio data received",
+        status: response.status,
+      };
+    }
+
+    if (looksLikeHTML(firstChunk)) {
+      const errorMessage = "HTML response instead of audio stream";
+      logger.debug(errorMessage);
+      return {
+        ok: false,
+        error: errorMessage,
+        status: response.status,
+      };
+    }
+
+    if (!looksLikeMP3(firstChunk)) {
+      return {
+        ok: false,
+        error: "Invalid MP3 stream",
+        status: response.status,
+      };
+    }
+
+    if (bitrate) {
+      bitrate = bitrate.includes(',') ? bitrate.split(',')[0] : bitrate;
+      bitrate = parseInt(bitrate, 10);
+      if (!Number.isFinite(bitrate)) bitrate = 0;
+      if (bitrate > 0 && (bitrate < 8 || bitrate > 512)) {
+        bitrate = 0;
+      }
+    }
 
     if (name) {
       name = fixEncoding(name);
@@ -132,7 +212,7 @@ async function streamTest(url) {
     }
 
     if (!name) {
-      name = url;
+      name = new URL(url).hostname;
     }
 
     return {
@@ -141,7 +221,7 @@ async function streamTest(url) {
       name,
       description,
       icyurl,
-      isLive,
+      isLive: isReachable,
       icyGenre,
       content,
       bitrate,
@@ -154,15 +234,16 @@ async function streamTest(url) {
 
     const isAbort = error.name === 'AbortError';
 
-    let detailedMessage = error.message;
+    let errorMessage;
 
-    if (error.cause) {
-      detailedMessage += ` | cause: ${error.cause.code || ''} ${error.cause.message || ''}`;
-    }
+    if (isAbort) errorMessage = "timeout";
+    else if (error.cause?.code === "ENOTFOUND") errorMessage = "dns_failure";
+    else if (error.cause?.code === "ECONNREFUSED") errorMessage = "connection_refused";
+    else errorMessage = error.message;
 
     return {
       ok: false,
-      error: isAbort ? 'Request timeout' : detailedMessage,
+      error: errorMessage,
       status: 500,
     };
   }
