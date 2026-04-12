@@ -5,6 +5,7 @@ html(lang=lang)
     meta(name="csrf-token" content=csrf)
     meta(name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover")
     link(nonce=nonce rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css")
+    script(nonce=nonce, type="text/javascript") window.user = !{JSON.stringify(user)};
     style(nonce=nonce).
       body {
         padding: 16px;
