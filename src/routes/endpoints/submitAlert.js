@@ -15,8 +15,7 @@ module.exports = asyncHandler(async (req, res) => {
       email: user.email,
       picture: user.profilePictureUrl,
       firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.metadata?.role
+      lastName: user.lastName
     } : null,
     csrf: req.session.csrfToken,
     nonce: res.locals.nonce,
