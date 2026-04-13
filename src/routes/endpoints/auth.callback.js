@@ -16,12 +16,13 @@ module.exports = asyncHandler(async (req, res) => {
       cookiePassword: process.env.COOKIE_SECRET,
     },
   });
+  if (!user.emailVerified) return res.send('user must verify email');
   req.user = user;
   console.log(user)
   try {
     await userData.createUser(user);
   } catch (err) {
-    logger.error(`Failed to persist user ${user.id}`, err.message);
+    logger.error(`Failed to persist ${user.id}: ${err}`);
     throw new Error('User persistence failed');
   }
   res.cookie('wos-session', sealedSession, {
