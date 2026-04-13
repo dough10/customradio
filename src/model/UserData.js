@@ -9,6 +9,7 @@ module.exports = class UserData extends DbCon {
         picture_url TEXT,
         first_name TEXT,
         last_name TEXT,
+        locale TEXT,
         email TEXT NOT NULL UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -31,16 +32,17 @@ module.exports = class UserData extends DbCon {
    * 
    * @returns {Promise<void>}
    */
-  async createUser({ id, firstName, lastName, email, profilePictureUrl }) {
+  async createUser({ id, firstName, lastName, email, profilePictureUrl, locale }) {
     await this.run(`
-      INSERT INTO users (workos_id, first_name, last_name, picture_url, email)
+      INSERT INTO users (workos_id, first_name, last_name, picture_url, email, locale)
       VALUES (?, ?, ?, ?, ?)
       ON CONFLICT(workos_id) DO UPDATE SET
-        first_name = excluded.first_name,
-        last_name = excluded.last_name,
-        picture_url = excluded.picture_url,
-        email = excluded.email
-    `, [id, firstName, lastName, profilePictureUrl, email]);
+        first_name = COALESCE(excluded.first_name, users.first_name),
+        last_name = COALESCE(excluded.last_name, users.last_name),
+        picture_url = COALESCE(excluded.picture_url, users.picture_url),
+        email = COALESCE(excluded.email, users.email)
+        locale = COALESCE(excluded.locale, users.locale)
+    `, [id, firstName, lastName, profilePictureUrl, email, locale]);
   }
 
   /**
