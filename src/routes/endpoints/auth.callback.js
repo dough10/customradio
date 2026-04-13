@@ -17,7 +17,6 @@ module.exports = asyncHandler(async (req, res) => {
     },
   });
   req.user = user;
-  console.log(user);
   try {
     await userData.createUser(user);
   } catch (err) {
