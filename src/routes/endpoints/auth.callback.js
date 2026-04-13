@@ -21,7 +21,7 @@ module.exports = asyncHandler(async (req, res) => {
   try {
     await userData.createUser(user);
   } catch (err) {
-    logger.error(`Failed to persist user ${user.id}`, err);
+    logger.error(`Failed to persist user ${user.id}`, err.message);
     throw new Error('User persistence failed');
   }
   res.cookie('wos-session', sealedSession, {
