@@ -32,6 +32,7 @@ module.exports = class UserData extends DbCon {
    * @returns {Promise<void>}
    */
   async createUser({ id, first_name, last_name, email, profile_picture_url }) {
+    console.log(id, first_name, last_name, email, profile_picture_url)
     await this.run(`
       INSERT INTO users (workos_id, first_name, last_name, picture_url, email)
       VALUES (?, ?, ?, ?, ?)
