@@ -55,7 +55,7 @@ function cleanURL(url) {
  * @returns {Boolean}
  */
 function looksLikeHTML(buf) {
-  if (!buf || buf.length < 16) return false;
+  if (!buf || buf.length === 0) return false;
   const str = new TextDecoder().decode(buf.slice(0, 128)).toLowerCase();
   return str.includes("<html") || str.includes("<!doctype");
 }
@@ -83,6 +83,23 @@ function looksLikeMP3(buf) {
   }
 
   return false;
+}
+
+/**
+ * 
+ * @param {String} message 
+ * @param {Boolean} ok 
+ * @param {Number} status 
+ * 
+ * @returns {Object}
+ */
+function returnError(message, status) {
+  logger.debug(message);
+  return {
+    ok: false,
+    error: message,
+    status,
+  };
 }
 
 /**
@@ -130,75 +147,72 @@ async function streamTest(url) {
 
     clearTimeout(timeoutId);
 
-    const isReachable = response.ok;
+    if (!response.ok) {
+      return returnError(`http_${response.status}`, response.status);
+    }
 
     const headers = response.headers;
 
     let name = headers.get("icy-name") || headers.get("x-audiocast-name");
     const description = headers.get("icy-description") || "";
     const icyGenre = headers.get("icy-genre") || headers.get("x-audiocast-genre") || "Unknown";
-    let bitrate = headers.get("icy-br");
     const content = headers.get("content-type");
     const icyurl = headers.get("icy-url") || "";
+    const finalUrl = response.url;
+    let bitrate = parseInt(headers.get("icy-br"), 10);
+
+    if (!Number.isFinite(bitrate)) bitrate = 0;
+    if (bitrate > 0 && (bitrate < 8 || bitrate > 512)) bitrate = 0;
 
     const normalizedContent = content?.split(";")[0].trim().toLowerCase();
 
-    const isAudioStream = normalizedContent && usedTypes.includes(normalizedContent);
-
-    if (url !== response.url) url = response.url;
-
-    if (!isAudioStream) {
-      const errorMessage = `Test error: ${url} - invalid content-type: ${content}`;
-      logger.debug(errorMessage);
-      return {
-        ok: false,
-        error: errorMessage,
-        status: response.status,
-      };
+    if (!normalizedContent) {
+      return returnError("missing_content_type", response.status);
     }
 
-    const reader = response.body?.getReader();
+    if (!usedTypes.includes(normalizedContent)) {
+      return returnError(`invalid content-type: ${content}`, response.status);
+    }
+
+    if (!response.body) {
+      return returnError("no_response_body", response.status);
+    }
+
+    const reader = response.body.getReader();
     let firstChunk;
 
     if (reader) {
       const { value } = await reader.read();
       firstChunk = value;
-      reader.cancel();
+
+      if (!firstChunk) {
+        await reader.cancel();
+        return returnError("No audio data received", response.status);
+      }
+
+      if (!looksLikeMP3(firstChunk)) {
+        const { value: secondChunk } = await reader.read();
+        if (secondChunk) {
+          const combined = new Uint8Array(firstChunk.length + secondChunk.length);
+          combined.set(firstChunk);
+          combined.set(secondChunk, firstChunk.length);
+          firstChunk = combined;
+        }
+      }
+
+      await reader.cancel();
     }
 
     if (!firstChunk || firstChunk.length === 0) {
-      return {
-        ok: false,
-        error: "No audio data received",
-        status: response.status,
-      };
+      return returnError("No audio data received", response.status);
     }
 
     if (looksLikeHTML(firstChunk)) {
-      const errorMessage = "HTML response instead of audio stream";
-      logger.debug(errorMessage);
-      return {
-        ok: false,
-        error: errorMessage,
-        status: response.status,
-      };
+      return returnError("HTML response instead of audio stream", response.status);
     }
 
     if (!looksLikeMP3(firstChunk)) {
-      return {
-        ok: false,
-        error: "Invalid MP3 stream",
-        status: response.status,
-      };
-    }
-
-    if (bitrate) {
-      bitrate = bitrate.includes(',') ? bitrate.split(',')[0] : bitrate;
-      bitrate = parseInt(bitrate, 10);
-      if (!Number.isFinite(bitrate)) bitrate = 0;
-      if (bitrate > 0 && (bitrate < 8 || bitrate > 512)) {
-        bitrate = 0;
-      }
+      return returnError("Invalid MP3 stream", response.status);
     }
 
     if (name) {
@@ -212,16 +226,20 @@ async function streamTest(url) {
     }
 
     if (!name) {
-      name = new URL(url).hostname;
+      try {
+        name = new URL(finalUrl).hostname;
+      } catch {
+        name = finalUrl;
+      }
     }
 
     return {
       ok: true,
-      url,
+      url: finalUrl,
       name,
       description,
       icyurl,
-      isLive: isReachable,
+      isLive: true,
       icyGenre,
       content,
       bitrate,
@@ -241,11 +259,7 @@ async function streamTest(url) {
     else if (error.cause?.code === "ECONNREFUSED") errorMessage = "connection_refused";
     else errorMessage = error.message;
 
-    return {
-      ok: false,
-      error: errorMessage,
-      status: 500,
-    };
+    return returnError(errorMessage, 500);
   }
 }
 
