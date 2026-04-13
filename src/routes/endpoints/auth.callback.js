@@ -23,7 +23,7 @@ module.exports = asyncHandler(async (req, res) => {
     await userData.createUser(user);
   } catch (err) {
     logger.error(`Failed to persist ${user.id}: ${err}`);
-    throw new Error('User persistence failed');
+    throw new Error(err);
   }
   res.cookie('wos-session', sealedSession, {
     path: '/',
