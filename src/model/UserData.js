@@ -3,6 +3,17 @@ const DbCon = require('./DbCon.js');
 module.exports = class UserData extends DbCon {
   get schema() {
     return [
+      `CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        workos_id TEXT NOT NULL UNIQUE,
+        picture_url TEXT,
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
+
       `CREATE TABLE IF NOT EXISTS user_stations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user TEXT NOT NULL,
@@ -11,6 +22,25 @@ module.exports = class UserData extends DbCon {
         UNIQUE(user, station_id)
       );`
     ];
+  }
+
+  /**
+   * inserts or updates user info
+   * 
+   * @param {Object} user
+   * 
+   * @returns {Promise<void>}
+   */
+  async createUser({ id, first_name, last_name, email, profile_picture_url }) {
+    await this.run(`
+      INSERT INTO users (workos_id, first_name, last_name, picture_url, email)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(workos_id) DO UPDATE SET
+        first_name = COALESCE(excluded.first_name, users.first_name),
+        last_name = COALESCE(excluded.last_name, users.last_name),
+        picture_url = COALESCE(excluded.picture_url, users.picture_url),
+        email = COALESCE(excluded.email, users.email)
+    `, [id, first_name, last_name, profile_picture_url, email]);
   }
 
   /**
