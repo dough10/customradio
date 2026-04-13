@@ -31,17 +31,16 @@ module.exports = class UserData extends DbCon {
    * 
    * @returns {Promise<void>}
    */
-  async createUser({ id, first_name, last_name, email, profile_picture_url }) {
-    console.log(id, first_name, last_name, email, profile_picture_url)
+  async createUser({ id, firstName, lastName, email, profilePictureUrl }) {
     await this.run(`
       INSERT INTO users (workos_id, first_name, last_name, picture_url, email)
       VALUES (?, ?, ?, ?, ?)
       ON CONFLICT(workos_id) DO UPDATE SET
-        first_name = COALESCE(excluded.first_name, users.first_name),
-        last_name = COALESCE(excluded.last_name, users.last_name),
-        picture_url = COALESCE(excluded.picture_url, users.picture_url),
-        email = COALESCE(excluded.email, users.email)
-    `, [id, first_name, last_name, profile_picture_url, email]);
+        first_name = excluded.first_name,
+        last_name = excluded.last_name,
+        picture_url = excluded.picture_url,
+        email = excluded.email
+    `, [id, firstName, lastName, profilePictureUrl, email]);
   }
 
   /**
