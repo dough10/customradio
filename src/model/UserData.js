@@ -7,8 +7,8 @@ module.exports = class UserData extends DbCon {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         workos_id TEXT NOT NULL UNIQUE,
         picture_url TEXT,
-        first_name TEXT NOT NULL,
-        last_name TEXT NOT NULL,
+        first_name TEXT,
+        last_name TEXT,
         email TEXT NOT NULL UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
