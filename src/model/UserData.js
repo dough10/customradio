@@ -35,7 +35,7 @@ module.exports = class UserData extends DbCon {
   async createUser({ id, firstName, lastName, email, profilePictureUrl, locale }) {
     await this.run(`
       INSERT INTO users (workos_id, first_name, last_name, picture_url, email, locale)
-      VALUES (?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?)
       ON CONFLICT(workos_id) DO UPDATE SET
         first_name = COALESCE(excluded.first_name, users.first_name),
         last_name = COALESCE(excluded.last_name, users.last_name),
