@@ -40,7 +40,7 @@ module.exports = class UserData extends DbCon {
         first_name = COALESCE(excluded.first_name, users.first_name),
         last_name = COALESCE(excluded.last_name, users.last_name),
         picture_url = COALESCE(excluded.picture_url, users.picture_url),
-        email = COALESCE(excluded.email, users.email)
+        email = COALESCE(excluded.email, users.email),
         locale = COALESCE(excluded.locale, users.locale)
     `, [id, firstName, lastName, profilePictureUrl, email, locale]);
   }
