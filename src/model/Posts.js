@@ -3,8 +3,6 @@ const DbCon = require("./DbCon.js");
 class Posts extends DbCon {
   get schema() {
     return [
-      ...super.schema,
-
       `CREATE TABLE IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id TEXT NOT NULL,

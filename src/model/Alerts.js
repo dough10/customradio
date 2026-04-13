@@ -41,7 +41,6 @@ const THIRTY_DAYS = 30 * DAY;
 class Alerts extends DbCon {
   get schema() {
     return [
-      ...super.schema,
       alerts,
       paragraphsTable, 
       state,

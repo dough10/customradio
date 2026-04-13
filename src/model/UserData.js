@@ -3,7 +3,6 @@ const DbCon = require('./DbCon.js');
 module.exports = class UserData extends DbCon {
   get schema() {
     return [
-      ...super.schema,
       `CREATE TABLE IF NOT EXISTS user_stations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user TEXT NOT NULL,

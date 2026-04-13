@@ -67,7 +67,7 @@ class Stations extends DbCon {
    * Get database schema definitions
    */
   get schema() {
-    return [...super.schema, ...schema];
+    return schema;
   }
 
   /**
