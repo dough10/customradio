@@ -39,7 +39,6 @@ class DbCon {
    */
   #init() {
     const queries = [...this.pragmas, ...this.schema];
-
     return queries.reduce(
       (p, query) => p.then(() => this._runRaw(query)),
       Promise.resolve()
