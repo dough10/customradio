@@ -46,6 +46,17 @@ module.exports = class UserData extends DbCon {
   }
 
   /**
+   * get a user by their workos id
+   * 
+   * @param {String``} workosID 
+   * 
+   * @return {Object}
+   */
+  async getUser(workosID) {
+    return this.get(`SELECT * FROM users WHERE workos_id = ?`, [workosID]);
+  }
+
+  /**
    * Get all stations for a user (with full station details)
    * @param {string} user
    * @returns {Promise<Array>}

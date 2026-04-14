@@ -21,6 +21,7 @@ module.exports = asyncHandler(async (req, res) => {
   }
   try {
     await userData.createUser(user);
+    console.log(userData.getUser(user.id));
   } catch (err) {
     logger.error(`Failed to persist ${user.id}: ${err}`);
     throw err;
