@@ -211,20 +211,20 @@ class Stations extends DbCon {
    * Add new station to database
    * 
    * @param {Object} obj - Station object
-   * @param {string} obj.name - Station name
-   * @param {string} obj.url - Station stream URL
-   * @param {string} obj.genre - Station genre(s)
-   * @param {boolean} obj.online - Online status
-   * @param {string} obj['content-type'] - Audio content type
-   * @param {number} obj.bitrate - Stream bitrate
-   * @param {string} obj.icon - Station icon URL
-   * @param {string} obj.homepage - Station website URL
-   * @param {string} obj.error - Error message if any
-   * @param {boolean} obj.duplicate - Duplicate status
-   * @param {number} [obj.playMinutes=0] - Total minutes played
-   * @param {number} [obj.inList=0] - Whether station is in user's list (0 or 1)
+   * @param {String} obj.name - Station name
+   * @param {String} obj.url - Station stream URL
+   * @param {String} obj.genre - Station genre(s)
+   * @param {Boolean} obj.online - Online status
+   * @param {String} obj['content-type'] - Audio content type
+   * @param {Number} obj.bitrate - Stream bitrate
+   * @param {String} obj.icon - Station icon URL
+   * @param {String} obj.homepage - Station website URL
+   * @param {String} obj.error - Error message if any
+   * @param {Boolean} obj.duplicate - Duplicate status
+   * @param {Number} [obj.playMinutes=0] - Total minutes played
+   * @param {Number} [obj.inList=0] - Whether station is in user's list (0 or 1)
    * 
-   * @returns {Promise<number|string>} New station ID or "Station exists" message
+   * @returns {Promise<Number|String>} New station ID or "Station exists" message
    * 
    * @throws {Error} If validation fails or query errors
    */
