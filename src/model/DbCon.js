@@ -126,7 +126,6 @@ class DbCon {
    */
   async transaction(fn) {
     await this.initializationPromise;
-
     await this._runRaw('BEGIN IMMEDIATE');
     try {
       const result = await fn();
