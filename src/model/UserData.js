@@ -48,7 +48,7 @@ module.exports = class UserData extends DbCon {
   /**
    * get a user by their workos id
    * 
-   * @param {String``} workosID 
+   * @param {String} workosID 
    * 
    * @return {Object}
    */
