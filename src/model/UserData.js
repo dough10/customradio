@@ -13,7 +13,7 @@ module.exports = class UserData extends DbCon {
         email TEXT NOT NULL UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )`,
+      );`,
 
       `CREATE TABLE IF NOT EXISTS user_stations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
