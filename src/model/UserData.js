@@ -62,15 +62,13 @@ module.exports = class UserData extends DbCon {
    * @returns {Promise<Array>}
    */
   async userStations(user) {
-    const query = `
-        SELECT s.id, s.name, s.url, s.bitrate, s.genre, s.homepage, s.icon
-        FROM user_stations us
-        JOIN stations s ON us.station_id = s.id
-        WHERE us.user = ?
-        ORDER BY s.name COLLATE NOCASE ASC
-      `;
-
-    return this.all(query, [user]);
+    return this.all(`
+      SELECT s.id, s.name, s.url, s.bitrate, s.genre, s.homepage, s.icon
+      FROM user_stations us
+      JOIN stations s ON us.station_id = s.id
+      WHERE us.user = ?
+      ORDER BY s.name COLLATE NOCASE ASC
+    `, [user]);
   }
 
   /**
@@ -80,12 +78,10 @@ module.exports = class UserData extends DbCon {
    * @returns {Promise<void>}
    */
   async addStation(user, stationId) {
-    const query = `
-        INSERT OR IGNORE INTO user_stations (user, station_id)
-        VALUES (?, ?)
-      `;
-
-    await this.run(query, [user, stationId]);
+    await this.run(`
+      INSERT OR IGNORE INTO user_stations (user, station_id)
+      VALUES (?, ?)
+    `, [user, stationId]);
   }
 
   /**
@@ -95,9 +91,7 @@ module.exports = class UserData extends DbCon {
    * @returns {Promise<void>}
    */
   async removeStation(user, stationId) {
-    const query = 'DELETE FROM user_stations WHERE user = ? AND station_id = ?';
-
-    await this.run(query, [user, stationId]);
+    await this.run('DELETE FROM user_stations WHERE user = ? AND station_id = ?', [user, stationId]);
   }
 
   /**
@@ -108,7 +102,6 @@ module.exports = class UserData extends DbCon {
    */
   async hasStation(user, stationId) {
     const query = 'SELECT 1 FROM user_stations WHERE user = ? AND station_id = ? LIMIT 1';
-
     const row = await this.get(query, [user, stationId]);
     return !!row;
   }
