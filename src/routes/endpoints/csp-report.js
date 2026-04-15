@@ -48,9 +48,6 @@ const asyncHandler = require('../../util/asyncHandler.js');
  * HTTP/1.1 204 No Content
  */
 module.exports = asyncHandler(async (req, res) => {
-  const cspReport = req.body['csp-report'];
-  cspReport.time = new Date().toLocaleString();
-
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -59,6 +56,12 @@ module.exports = asyncHandler(async (req, res) => {
     res.status(400).json({error});
     return; 
   }
+
+  const cspReport = req.body['csp-report'];
+  if (!cspReport) {
+    res.status(204).send();
+  }
+  cspReport.time = new Date().toLocaleString();
 
   res.status(204).send();
 });
