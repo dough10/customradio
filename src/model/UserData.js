@@ -50,7 +50,7 @@ module.exports = class UserData extends DbCon {
    * 
    * @param {String} workosID 
    * 
-   * @return {Object}
+   * @return {Promise<Object>}
    */
   async getUser(workosID) {
     return this.get(`SELECT * FROM users WHERE workos_id = ?`, [workosID]);
