@@ -20,6 +20,10 @@ const userData = new UserData(DB_PATH);
 const alerts = new Alerts(DB_PATH);
 const posts = new Posts(DB_PATH);
 
+const workos = new WorkOS(process.env.WORKOS_API_KEY, {
+  clientId: process.env.WORKOS_CLIENT_ID,
+});
+
 const redisClient = createClient({
   url: process.env.REDIS_URL || "redis://localhost:6379",
   password: process.env.REDIS_PASSWORD,
@@ -34,16 +38,12 @@ redisClient.connect().catch((error) => {
 redisClient.on("error", err => logger.error(`Redis Client ${err}`));
 redisClient.on("connect", () => logger.debug("Redis Connected"));
 
-const workos = new WorkOS(process.env.WORKOS_API_KEY, {
-  clientId: process.env.WORKOS_CLIENT_ID,
-});
-
 async function closeRedis() {
   await redisClient.quit();
   logger.debug("Redis connection closed");
 }
 
-const shutdown = async () => {
+function shutdown() {
   try {
     logger.debug("Shutting down...");
     if (redisClient.isOpen) closeRedis();
