@@ -39,7 +39,7 @@ function initSessionStorage() {
 
   const redisStore = new RedisStore({
     client: redisClient,
-    prefix: "customradio:",
+    prefix: "customradio:session:",
   });
   return redisStore;
 }
