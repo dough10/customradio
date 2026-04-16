@@ -38,6 +38,25 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
 });
 
+async function closeRedis() {
+  await redisClient.quit();
+  logger.debug("Redis connection closed");
+}
+
+const shutdown = async () => {
+  try {
+    logger.debug("Shutting down...");
+    if (redisClient.isOpen) closeRedis();
+    process.exit(0);
+  } catch (err) {
+    logger.error("Error during shutdown:", err);
+    process.exit(1);
+  }
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+
 module.exports = {
   stations,
   userData,
@@ -45,6 +64,7 @@ module.exports = {
   posts,
   logger,
   redisClient,
+  closeRedis,
   logLevel,
   workos
 }
