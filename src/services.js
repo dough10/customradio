@@ -31,7 +31,7 @@ const redisClient = createClient({
 });
 
 redisClient.connect().catch((error) => {
-  logger.error("Redis connection error:", error);
+  logger.error(`Redis connection error: ${error}`);
   process.exit(1);
 });
 
@@ -49,7 +49,7 @@ function shutdown() {
     if (redisClient.isOpen) closeRedis();
     process.exit(0);
   } catch (err) {
-    logger.error("Error during shutdown:", err);
+    logger.error(`Error during shutdown: ${err}`);
     process.exit(1);
   }
 };
