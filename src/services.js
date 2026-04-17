@@ -29,12 +29,21 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
  * 
  * @returns {Object}
  */
-function redisClientFactory(url, pass) {
+function getClient() {
   const client = createClient({
-    url: url || process.env.REDIS_URL || "redis://localhost:6379",
-    password: pass || process.env.REDIS_PASSWORD || '',
+    url: process.env.REDIS_URL || "redis://localhost:6379",
+    password: process.env.REDIS_PASSWORD,
     legacyMode: false,
   });
+
+  client.on("error", err => logger.error(`Redis Client ${err}`));
+  client.on("connect", () => logger.debug("Redis Connected"));
+  client.on("end", () => logger.warning("Redis connection closed"));
+  
+  client.close = async _ => {
+    if (client.isOpen) return await client.quit();
+    client.disconnect();
+  };
   
   client.connect()
   .then(() => logger.debug("Redis ready"))
@@ -42,20 +51,11 @@ function redisClientFactory(url, pass) {
     logger.error(`Redis connection error: ${error}`);
     process.exit(1);
   });
-  
-  client.on("error", err => logger.error(`Redis Client ${err}`));
-  client.on("connect", () => logger.debug("Redis Connected"));
-  client.on("end", () => logger.warning("Redis connection closed"));
-
-  client.close = async _ => {
-    if (client.isOpen) return await client.quit();
-    client.disconnect();
-  };
 
   return client;
 }
 
-const redisClient = redisClientFactory();
+const redisClient = getClient();
 
 /**
  * application shutdown callback
@@ -65,7 +65,7 @@ const redisClient = redisClientFactory();
 async function shutdown() {
   try {
     logger.debug("Shutting down...");
-    if (redisClient.isOpen) await redisClient.close();
+    await redisClient.close();
   } catch (err) {
     logger.error(`Error during shutdown: ${err}`);
   }
