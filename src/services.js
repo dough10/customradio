@@ -37,10 +37,10 @@ redisClient.connect().catch((error) => {
 
 redisClient.on("error", err => logger.error(`Redis Client ${err}`));
 redisClient.on("connect", () => logger.debug("Redis Connected"));
+redisClient.on("end", () => logger.warning("Redis connection closed"));
 
 async function closeRedis() {
   await redisClient.quit();
-  logger.debug("Redis connection closed");
 }
 
 function shutdown() {
