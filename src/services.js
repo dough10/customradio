@@ -41,7 +41,10 @@ function getClient() {
   client.on("end", () => logger.warning("Redis connection closed"));
   
   client.close = async _ => {
-    if (client.isOpen) return await client.quit();
+    if (client.isOpen) {
+      await client.quit();
+      return; 
+    }
     client.disconnect();
   };
   
