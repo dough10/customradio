@@ -1,4 +1,4 @@
-// const {logger} = require('../../services.js');
+const {logger} = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 const {badActor} = require('../../util/badActors.js');
 
@@ -7,12 +7,17 @@ const {badActor} = require('../../util/badActors.js');
  * @type {Set<string>}
  */
 const sensitivePaths = new Set([
-  '.env',
-  '.git',
+  '/.env',
+  '/.git',
   '.ssh',
+  '.json',
   'wp-admin',
   'wp-login',
   'phpmyadmin',
+  '.aws',
+  '.old',
+  '.save',
+  '.php'
 ]);
 
 /**
@@ -37,6 +42,7 @@ module.exports = asyncHandler(async (req, res) => {
 
   for (const sensitive of sensitivePaths) {
     if (requestedPath.includes(sensitive)) {
+      logger.warning(`${req.ip} -> [${req.method}] ${req.originalUrl}, is being shady!`)
       await badActor(req.ip);
       break;
     }
