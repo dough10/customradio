@@ -10,7 +10,7 @@
     "postbuild": "bash build_assets/post.sh",
     "test": "web-test-runner \"html/js/CustomRadioApp/**/*.test.js\" --node-resolve && mocha",
     "version++": "node build_assets/incriment-version.js && node assets/make-docs.js",
-    "build-docker": "sh build_assets/build-container.sh \"registry.dough10.me/customradio\"",
+    "build-docker": "bash build_assets/build-container.sh \"registry.dough10.me/customradio\"",
     "docs": "node make-docs.js",
     "run container": "bash build_assets/run.sh",
     "translate-front": "node scripts/translate-js.js front bg cs de es fr fi it nl he hu ja kk ko pl pt ro ru sk sr sv tr uk vi zh",
