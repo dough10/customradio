@@ -26,6 +26,14 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js'],
+    fallback: {
+      kerberos: false,
+      "@mongodb-js/zstd": false,
+      "@aws-sdk/credential-providers": false,
+      "gcp-metadata": false,
+      snappy: false,
+      "mongodb-client-encryption": false
+    }
   },
   externals: nodeModules
 };
