@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eu pipefail
 
 VERSION=$(jq -r '.version' package.json)
 
@@ -14,4 +14,4 @@ if [ -z "$1" ]; then
   exit 1
 fi
 docker build --no-cache -t "$1:$VERSION" -t "$1:latest" .
-# docker push "$1:$VERSION" && docker push "$1:latest"
+docker push "$1:$VERSION" && docker push "$1:latest"
