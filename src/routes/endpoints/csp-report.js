@@ -1,7 +1,7 @@
 require('dotenv').config();
-const {validationResult} = require('express-validator');
+const { validationResult } = require('express-validator');
 
-const { logger } = require('../../services.js');
+const { logger, getMongo } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 
 /**
@@ -53,8 +53,8 @@ module.exports = asyncHandler(async (req, res) => {
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
     logger.error(`${req.ip} -> ${error}`);
-    res.status(400).json({error});
-    return; 
+    res.status(400).json({ error });
+    return;
   }
 
   const cspReport = req.body['csp-report'];
@@ -62,6 +62,6 @@ module.exports = asyncHandler(async (req, res) => {
     res.status(204).send();
   }
   cspReport.time = new Date().toLocaleString();
-
+  await getMongo().insertOne(cspReport);
   res.status(204).send();
 });
