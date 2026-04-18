@@ -37,7 +37,7 @@ const userStationValidatior = require('../schema/userStationValidatior.js');
 const alertValidator = require('../schema/alertValidator.js');
 const dismissValidator = require('./../schema/dismissValidator.js');
 
-const wosMiddleware = require('./../util/wosMiddleware.js');
+const wosMiddleware = require('../middleware/workos/wosMiddleware.js');
 
 
 module.exports = async (app, register) => {
