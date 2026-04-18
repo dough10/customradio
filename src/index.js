@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const { testStreams } = require('./util/testStreams.js');
 const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
-const middleware = require('./routes/middleware.js');
+const middleware = require('./middleware/middleware.js');
 const routes = require('./routes/routes.js');
 const { httpRequestCounter, register } = require('./util/promClient.js');
 const {logger, logLevel, alerts} = require('./services.js');

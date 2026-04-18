@@ -13,7 +13,7 @@ const { performance } = require('perf_hooks');
 const { setLanguage } = require("../util/i18n.js");
 const {isBadActor} = require('../util/badActors.js');
 const { logger, redisClient } = require('../services.js');
-const isAdmin = require('./../util/isAdmin.js');
+const isAdmin = require('../util/isAdmin.js');
 
 const corsOptions = {
   origin: true,
