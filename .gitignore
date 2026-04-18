@@ -22,3 +22,4 @@ src/logs
 /translated
 /og-translations
 git.sh
+/.vscode
