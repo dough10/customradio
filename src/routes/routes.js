@@ -421,12 +421,12 @@ module.exports = async (app, register) => {
   /**
    * gets a list of all posts
    */
-  app.get('/blog', await wosMiddleware, blog);
+  // app.get('/blog', await wosMiddleware, blog);
 
   /**
    * gets an individual post
    */
-  app.get('/blog/:postID', await wosMiddleware, blogPost);
+  // app.get('/blog/:postID', await wosMiddleware, blogPost);
 
   /**
    * Catch-all route for handling 404 errors.
