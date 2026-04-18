@@ -25,8 +25,8 @@ const getAlerts = require('./endpoints/getAlerts.js');
 const addAlert = require('./endpoints/addAlert.js');
 const submitAlert = require('./endpoints/submitAlert.js');
 const dismissAlert = require('./endpoints/dismissAlert.js');
-const blog = require('./endpoints/blog.js');
-const blogPost = require('./endpoints/blog.post.js');
+// const blog = require('./endpoints/blog.js');
+// const blogPost = require('./endpoints/blog.post.js');
 
 const cspValidator = require('../schema/cspValidaton.js');
 const addStationValidator = require('../schema/addStationValidator.js');
