@@ -30,13 +30,13 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
  * 
  * @returns {Object}
  */
-async function initMongo() {
+async function initMongo(col) {
   try {
     const client = new MongoClient(process.env.MONGODB_URL || 'mongodb://127.0.0.1:27017');
     await client.connect();
     logger.debug("MongoDB Connected");
     const db = client.db("radiotxt");
-    const collection = db.collection("csp");
+    const collection = db.collection(col);
     return {collection, client};
   } catch(err) {
     throw err;
@@ -46,7 +46,7 @@ async function initMongo() {
 let mongoDB;
 let mongoClient;
 
-initMongo().then(({collection, client}) => {
+initMongo("csp").then(({collection, client}) => {
   mongoDB = collection;
   mongoClient = client;
   logger.debug("MongoDB ready");
@@ -139,5 +139,6 @@ module.exports = {
   redisClient,
   logLevel,
   workos,
-  getMongo
+  getMongo,
+  initMongo
 }
