@@ -79,7 +79,7 @@ async function closeMongo() {
  * 
  * @returns {Object}
  */
-function getClient() {
+function getRedisClient() {
   const client = createClient({
     url: process.env.REDIS_URL || "redis://localhost:6379",
     password: process.env.REDIS_PASSWORD,
@@ -108,7 +108,7 @@ function getClient() {
   return client;
 }
 
-const redisClient = getClient();
+const redisClient = getRedisClient();
 
 /**
  * application shutdown callback
