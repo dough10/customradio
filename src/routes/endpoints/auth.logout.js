@@ -5,21 +5,25 @@ const COOKIE_NAME = 'wos-session';
 
 
 module.exports = asyncHandler(async (req, res) => {
-  if (req.user) req.user = null;
-
   const sessionCookie = req.cookies[COOKIE_NAME];
+
+  if (req.session) {
+    await new Promise((resolve) => req.session.destroy(resolve));
+  }
+
+  res.clearCookie(COOKIE_NAME);
+  res.clearCookie('connect.sid');
 
   if (!sessionCookie) {
     return res.redirect('/');
   }
 
-  const session = workos.userManagement.loadSealedSession({
+  const session = await workos.userManagement.loadSealedSession({
     sessionData: sessionCookie,
     cookiePassword: process.env.COOKIE_SECRET,
   });
 
   const url = await session.getLogoutUrl();
 
-  res.clearCookie('wos-session');
-  res.redirect(url);
+  return res.redirect(url);
 });
