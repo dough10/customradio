@@ -48,7 +48,6 @@ module.exports = asyncHandler(async (req, res) => {
   const exists = await stations.exists(url);
 
   if (exists) {
-    logger.warning(`Station already exists`);
     return res.status(409).json({ message: t('stationExists') });
   }
 
@@ -66,7 +65,7 @@ module.exports = asyncHandler(async (req, res) => {
   } = await isLiveStream(url);
 
   if (!ok) {
-    logger.warning(`Test failed: ${error}`);
+    // logger.warning(`Test failed: ${error}`);
     return res.status(status).json({ message: t('conTestFailed', error) });
   }
 
