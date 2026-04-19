@@ -4,11 +4,13 @@ const COOKIE_NAME = 'wos-session';
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
 
 module.exports = async (req, res, next) => {
-  const sealed = req.cookies[COOKIE_NAME];
-
-  if (!sealed) {
+  if (req.session?.user) {
+    req.user = req.session.user;
     return next();
   }
+
+  const sealed = req.cookies[COOKIE_NAME];
+  if (!sealed) return next();
 
   try {
     const session = await workos.userManagement.loadSealedSession({
@@ -22,7 +24,7 @@ module.exports = async (req, res, next) => {
       res.clearCookie(COOKIE_NAME);
       return next();
     }
-
+    req.session.user = user;
     req.user = user;
 
     const { sealedSession } = await session.refresh();

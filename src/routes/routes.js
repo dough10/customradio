@@ -37,8 +37,6 @@ const userStationValidatior = require('../schema/userStationValidatior.js');
 const alertValidator = require('../schema/alertValidator.js');
 const dismissValidator = require('./../schema/dismissValidator.js');
 
-const wosMiddleware = require('../middleware/workos/wosMiddleware.js');
-
 
 module.exports = async (app, register) => {
   /** 
@@ -86,7 +84,7 @@ module.exports = async (app, register) => {
   /**
    * Index
    */
-  app.get('/', await wosMiddleware, index);
+  app.get('/', index);
 
   /**
    * index.htnml redirect to /
@@ -257,7 +255,7 @@ module.exports = async (app, register) => {
    *   }
    * ]
    */
-  app.get('/userStations', await wosMiddleware, userStations);
+  app.get('/userStations', userStations);
 
   /**
    * Handles POST requests to the '/add' endpoint.
@@ -366,17 +364,17 @@ module.exports = async (app, register) => {
   /**
    * report if station is in a users txt list
    */
-  app.post('/reportInList/:id', await wosMiddleware, userStationValidatior, saveStation);
+  app.post('/reportInList/:id', userStationValidatior, saveStation);
 
   /** 
    * Endpoint to begin updating the database.
    */
-  app.get('/updatedb', await wosMiddleware, updatedb);
+  app.get('/updatedb', updatedb);
 
   /**
    * Endpoint to test icecastdb scrape
    */
-  app.get('/scrape', await wosMiddleware, scrape);
+  app.get('/scrape', scrape);
 
   /**
    * Endpoint for authentication using WorkOS SSO.
@@ -401,17 +399,17 @@ module.exports = async (app, register) => {
   /**
    * page to submit alerts
    */
-  app.get('/addAlert', await wosMiddleware, submitAlert);
+  app.get('/addAlert', submitAlert);
 
   /**
    * creates a alert  in the database
    */
-  app.post('/addAlert', alertValidator, await wosMiddleware, addAlert);
+  app.post('/addAlert', alertValidator, addAlert);
 
   /**
    * dismiss an alert using id and version
    */
-  app.post('/dismissAlert', dismissValidator, await wosMiddleware, dismissAlert);
+  app.post('/dismissAlert', dismissValidator, dismissAlert);
 
   /**
    * gets all currently active alerts
@@ -421,12 +419,12 @@ module.exports = async (app, register) => {
   /**
    * gets a list of all posts
    */
-  // app.get('/blog', await wosMiddleware, blog);
+  // app.get('/blog', blog);
 
   /**
    * gets an individual post
    */
-  // app.get('/blog/:postID', await wosMiddleware, blogPost);
+  // app.get('/blog/:postID', blogPost);
 
   /**
    * Catch-all route for handling 404 errors.

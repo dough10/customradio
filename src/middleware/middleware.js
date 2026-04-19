@@ -15,6 +15,8 @@ const {isBadActor} = require('../util/badActors.js');
 const { logger, redisClient } = require('../services.js');
 const isAdmin = require('../util/isAdmin.js');
 
+const wosMiddleware = require('./workos/wosMiddleware.js');
+
 const corsOptions = {
   origin: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
@@ -175,15 +177,20 @@ module.exports = (app, httpRequestCounter) => {
       store: initSessionStorage(),
       secret: process.env.SESSION_SECRET,
       resave: false,
-      saveUninitialized: true,
+      saveUninitialized: false,
       cookie: {
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
         sameSite: "strict",
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: 10 * 60 * 1000,
       },
     })
   );
+
+  /**
+   * workos
+   */
+  app.use(wosMiddleware); 
 
   /**
    * CSRF token generation middleware
