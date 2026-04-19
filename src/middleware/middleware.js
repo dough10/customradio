@@ -182,7 +182,7 @@ module.exports = (app, httpRequestCounter) => {
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
         sameSite: "strict",
-        maxAge: 10 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000,
       },
     })
   );
