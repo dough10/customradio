@@ -69,10 +69,9 @@ function getMongo() {
  * clsoes the mongoDB connection
  */
 async function closeMongo() {
-  if (mongoClient) {
-    await mongoClient.close();
-    logger.warning("MongoDB connection closed")
-  }
+  if (!mongoClient) return;
+  await mongoClient.close();
+  logger.warning("MongoDB connection closed");
 }
 
 /**
