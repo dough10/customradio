@@ -1,6 +1,7 @@
 {
   "Current": [
-    "Changed frontend caching stratagy (fix bug where stations marked as offline in the database where showing in station list but not in a users saved list ie. main list was cached and user list was not)"
+    "Changed frontend caching stratagy (fix bug where stations marked as offline in the database where showing in station list but not in a users saved list ie. main list was cached and user list was not)",
+    "save csp reports to a mongodb collection"
   ],
   "1.13.1": [
     "Alert system updated (alert database)",
