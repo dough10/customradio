@@ -52,7 +52,6 @@ initMongo("csp").then(({collection, client}) => {
   logger.debug("MongoDB ready");
 }).catch(err => {
   logger.error(`MongoDB failed to connect: ${err}`);
-  process.exit(1);
 });
 
 /**
