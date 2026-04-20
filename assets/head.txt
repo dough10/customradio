@@ -10,3 +10,21 @@ Hosts a database of [Icecast](https://icecast.org/) stations so users can listen
 - **LOG_LEVEL** = *console and file log level: Defaults to INFO*
 
 - **BLACKLIST** = *IP addresses blocked from reporting playmin or inList and genre searches*
+
+- **SESSION_SECRET** = *Session key*
+
+- **COOKIE_SECRET** = *Cookie key*
+
+- **REDIS_URL** = *url for connectiong to redis instance*
+
+- **REDIS_PASSWORD** = *password for redis instance*
+
+- **MONGODB_URL** = *mongodb instance url*
+
+- **WORKOS_API_KEY** = *workod api key*
+
+- **WORKOS_CLIENT_ID** = *workos client id*
+
+- **OPENAI_API_KEY** = *openai api key (used for creating translation files, not needed or used in finished container)*
+
+- **ADMIN_ID** = *workos userid of site administrator*
