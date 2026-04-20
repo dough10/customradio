@@ -59,7 +59,7 @@ module.exports = asyncHandler(async (req, res) => {
 
   const cspReport = req.body['csp-report'];
   if (!cspReport) {
-    res.status(204).send();
+    return res.status(204).send();
   }
   cspReport.time = new Date().toLocaleString();
   await getMongo().insertOne(cspReport);
