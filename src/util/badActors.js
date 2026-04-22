@@ -5,8 +5,8 @@ const BAN_DURATION = 60 * 60 * 24; // 24 hours
 const MAX_ATTEMPTS = 1;
 
 async function badActor(ip) {
-  const key = `rate:attempts:${ip}`;
-  const banKey = `rate:ban:${ip}`;
+  const key = `customradio:rate:attempts:${ip}`;
+  const banKey = `customradio:rate:ban:${ip}`;
   const now = Date.now();
   const windowStart = now - WINDOW * 1000;
 
