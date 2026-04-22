@@ -61,6 +61,7 @@ module.exports = asyncHandler(async (req, res) => {
   if (!cspReport) {
     return res.status(204).send();
   }
+  cspReport.ip = req.ip;
   cspReport.time = new Date().toLocaleString();
   await getMongo().insertOne(cspReport);
   res.status(204).send();
