@@ -14,6 +14,11 @@ const { setLanguage } = require("../util/i18n.js");
 const {isBadActor} = require('../util/badActors.js');
 const { logger, redisClient } = require('../services.js');
 const isAdmin = require('../util/isAdmin.js');
+const { injectSecrets } = require('../config/secrets.js');
+
+injectSecrets([
+  'SESSION_SECRET'
+]);
 
 const wosMiddleware = require('./workos/wosMiddleware.js');
 

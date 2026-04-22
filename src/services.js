@@ -1,5 +1,14 @@
 require('dotenv').config();
 
+const { injectSecrets } = require('./config/secrets.js');
+
+injectSecrets([
+  'WORKOS_API_KEY',
+  'WORKOS_CLIENT_ID',
+  'REDIS_PASSWORD',
+  'MONGODB_URL'
+]);
+
 const { WorkOS } = require('@workos-inc/node');
 const { createClient } = require("redis");
 const { MongoClient } = require("mongodb");

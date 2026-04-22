@@ -1,5 +1,11 @@
 const { logger, workos } = require('../../services.js');
 
+const { injectSecrets } = require('../../config/secrets.js');
+
+injectSecrets([
+  'COOKIE_SECRET'
+]);
+
 const COOKIE_NAME = 'wos-session';
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
 
