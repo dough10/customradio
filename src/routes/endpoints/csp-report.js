@@ -1,8 +1,38 @@
-require('dotenv').config();
+const crypto = require('crypto');
 const { validationResult } = require('express-validator');
+
+require('dotenv').config();
 
 const { getMongo, initMongo } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
+const UAParser = require('ua-parser-js');
+
+/**
+ * saves data about failed csp reports
+ * 
+ * @param {Object} req 
+ * @param {String} error 
+ * @param {Object} ua 
+ * @param {Object} extraHeaders 
+ * @param {String} requestId 
+ * @param {Object} body 
+ * 
+ * @returns {void}
+ */
+async function saveFailed(req, error, ua, extraHeaders, requestId, body) {
+  const {collection, client} = await initMongo('csp-fails');
+  await collection.insertOne({
+    requestId,
+    ip: req.ip,
+    browser: ua.browser,
+    os: ua.os,
+    device: ua.device,
+    request: extraHeaders,
+    error,
+    body
+  });
+  await client.close();
+}
 
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports
@@ -48,27 +78,41 @@ const asyncHandler = require('../../util/asyncHandler.js');
  * HTTP/1.1 204 No Content
  */
 module.exports = asyncHandler(async (req, res) => {
+  const requestId = req.headers['x-request-id'] || crypto.randomUUID();
+  const parser = new UAParser(req.headers['user-agent']);
+  const ua = parser.getResult();
+  const extraHeaders = {
+    referer: req.headers['referer'],
+    origin: req.headers['origin'],
+    host: req.headers['host'],
+    method: req.method,
+    path: req.originalUrl
+  };
+  
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
-    const {collection, client} = await initMongo('csp-fails');
-    collection.insertOne({
-      ip: req.ip,
-      'user-agent': req.headers['user-agent'],
-      error
-    });
-    await client.close();
+    await saveFailed(req, error, ua, extraHeaders, requestId, req.body);
     res.status(400).json({ error });
     return;
   }
 
   const cspReport = req.body['csp-report'];
   if (!cspReport) {
+    await saveFailed(req, 'csp-report missing from body', ua, extraHeaders, requestId, req.body);
     return res.status(204).send();
   }
+
   cspReport.ip = req.ip;
-  cspReport.time = new Date().toLocaleString();
+  cspReport.ua = {
+    browser: ua.browser,
+    os: ua.os,
+    device: ua.device
+  };
+  cspReport.requestId = requestId;
+  cspReport.effectiveDirective = cspReport['effective-directive'] || cspReport['violated-directive'];
+  cspReport.time = new Date();
+  cspReport.request = extraHeaders;
   await getMongo().insertOne(cspReport);
   res.status(204).send();
 });
