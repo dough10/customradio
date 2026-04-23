@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { validationResult } = require('express-validator');
 
-const { logger, getMongo, initMongo } = require('../../services.js');
+const { getMongo, initMongo } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 
 /**
@@ -52,7 +52,6 @@ module.exports = asyncHandler(async (req, res) => {
 
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
-    logger.error(error);
     const {collection, client} = await initMongo('csp-fails');
     collection.insertOne({
       ip: req.ip,
