@@ -1,4 +1,3 @@
-const {logger} = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 const {badActor} = require('../../util/badActors.js');
 
@@ -42,7 +41,6 @@ module.exports = asyncHandler(async (req, res) => {
 
   for (const sensitive of sensitivePaths) {
     if (requestedPath.includes(sensitive)) {
-      logger.warning(`${req.ip} -> [${req.method}] ${req.originalUrl}, is being shady!`)
       await badActor(req.ip);
       break;
     }
