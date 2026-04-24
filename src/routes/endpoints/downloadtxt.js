@@ -1,16 +1,7 @@
 const {userData} = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
-
-function toTxt({name, url}) {
-  return `${name.replace(/,/g, '')}, ${url}`;
-}
-
-function timestamp(req) {
-  const now = new Date();
-  const formattedDate = now.toISOString().split('T')[0];
-  const host = (req.hostname || '').replace(/[\r\n]/g, '');
-  return `# created by ${req.protocol}://${host} [${formattedDate}]\n`;
-}
+const mapToTxt = require('../../util/mapToTxt.js');
+const txtTimeStamp = require('../../util/txtTimeStamp.js');
 
 module.exports = asyncHandler(async (req, res) => {
   const uid = String(req.params.uid || '').trim();
@@ -26,5 +17,5 @@ module.exports = asyncHandler(async (req, res) => {
   }
   res.setHeader('Content-Disposition', 'attachment; filename="radio.txt"');
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.send(`${timestamp(req)}\n${stations.map(toTxt).join('\n')}`);
+  res.send(`${txtTimeStamp(req)}\n${stations.map(mapToTxt).join('\n')}`);
 });
