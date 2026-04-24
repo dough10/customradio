@@ -218,42 +218,6 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
-   * CSRF token verification middleware
-   * Verifies CSRF token in headers matches session token
-   * Skips verification for GET requests
-   *
-   * @param {express.Request} req - Express request object
-   * @param {express.Response} res - Express response object
-   * @param {express.NextFunction} next - Express next middleware function
-   * @returns {void|Response} Returns 403 if CSRF validation fails
-   */
-  app.use((req, res, next) => {
-    if (["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path === "/csp-report") {
-      return next();
-    }
-
-    const token = req.headers["x-csrf-token"];
-    const sessionToken = req.session?.csrfToken;
-
-    if (!req.session) {
-      // logger.warning(`${req.ip} -> [${req.method}] ${req.originalUrl}, Missing session`);
-      return res.status(440).json({ error: "Session expired or not established" });
-    }
-
-    if (!sessionToken) {
-      // logger.warning(`${req.ip} -> [${req.method}] ${req.originalUrl}, CSRF token missing from session`);
-      return res.status(419).json({ error: "CSRF token missing in session" });
-    }
-
-    if (!token || token !== sessionToken) {
-      // logger.warning(`${req.ip} -> [${req.method}] ${req.originalUrl}, Invalid CSRF token`);
-      return res.status(403).json({ error: "Invalid CSRF token" });
-    }
-
-    next();
-  });
-
-  /**
    * Set response language
    */
   app.use((req, res, next) => {
@@ -333,7 +297,7 @@ module.exports = (app, httpRequestCounter) => {
       : [];
 
     if (forwardedIps.length && !forwardedIps.includes(clientInfo.ip)) {
-      logger.warning(`IP not in x-forwarded-for: req.ip=${clientInfo.ip}, x-forwarded-for=${clientInfo.forwardedFor}`);
+      // logger.warning(`IP not in x-forwarded-for: req.ip=${clientInfo.ip}, x-forwarded-for=${clientInfo.forwardedFor}`);
       return res.status(403).json({
         error: "Invalid request origin",
       });
@@ -352,6 +316,43 @@ module.exports = (app, httpRequestCounter) => {
       success: false,
       message: 'Internal Server Error'
     });
+  });
+
+
+  /**
+   * CSRF token verification middleware
+   * Verifies CSRF token in headers matches session token
+   * Skips verification for GET requests
+   *
+   * @param {express.Request} req - Express request object
+   * @param {express.Response} res - Express response object
+   * @param {express.NextFunction} next - Express next middleware function
+   * @returns {void|Response} Returns 403 if CSRF validation fails
+   */
+  app.use((req, res, next) => {
+    if (["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path === "/csp-report") {
+      return next();
+    }
+
+    const token = req.headers["x-csrf-token"];
+    const sessionToken = req.session?.csrfToken;
+
+    if (!req.session) {
+      // logger.warning(`${req.ip} -> [${req.method}] ${req.originalUrl}, Missing session`);
+      return res.status(440).json({ error: "Session expired or not established" });
+    }
+
+    if (!sessionToken) {
+      // logger.warning(`${req.ip} -> [${req.method}] ${req.originalUrl}, CSRF token missing from session`);
+      return res.status(419).json({ error: "CSRF token missing in session" });
+    }
+
+    if (!token || token !== sessionToken) {
+      // logger.warning(`${req.ip} -> [${req.method}] ${req.originalUrl}, Invalid CSRF token`);
+      return res.status(403).json({ error: "Invalid CSRF token" });
+    }
+
+    next();
   });
 
   /**
