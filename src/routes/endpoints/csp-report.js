@@ -34,6 +34,7 @@ async function saveFailed(req, error, ua, extraHeaders, requestId, body) {
   await client.close();
 }
 
+
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports
  * @apiName PostCspReport
@@ -103,6 +104,17 @@ module.exports = asyncHandler(async (req, res) => {
     return res.status(204).send();
   }
 
+  const fingerprint = crypto
+    .createHash('sha1')
+    .update(
+      [
+        cspReport.effectiveDirective,
+        cspReport['blocked-uri'],
+        cspReport['document-uri']
+      ].join('|')
+    )
+    .digest('hex');
+
   cspReport.ip = req.ip;
   cspReport.ua = {
     browser: ua.browser,
@@ -113,6 +125,7 @@ module.exports = asyncHandler(async (req, res) => {
   cspReport.effectiveDirective = cspReport['effective-directive'] || cspReport['violated-directive'];
   cspReport.time = new Date();
   cspReport.request = extraHeaders;
+  cspReport.fingerprint = fingerprint;
   await getMongo().insertOne(cspReport);
   res.status(204).send();
 });
