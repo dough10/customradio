@@ -15,6 +15,21 @@ context.keys().forEach(file => {
   locales[lang] = context(file);
 });
 
+/**
+ * standardize output of language string
+ * 
+ * @param {String} tag 
+ * 
+ * @returns {String}
+ */
+function normalizeLangTag(tag) {
+  return tag
+    .toLowerCase()
+    .replace(/_/g, '-')     // en_US → en-US
+    .replace(/\s+/g, '-')   // en us → en-US
+    .trim();
+}
+
 
 /** @type {String} current language */
 let currentLang = 'en';
@@ -37,7 +52,8 @@ function setLanguage(langHeader) {
   const candidates = langHeader.split(',');
 
   for (let candidate of candidates) {
-    let lang = candidate.split(';')[0].trim().toLowerCase();
+    let raw = candidate.split(';')[0];
+    let lang = normalizeLangTag(raw);
 
     if (!lang) continue;
 
@@ -53,7 +69,9 @@ function setLanguage(langHeader) {
     }
   }
 
-  const firstLang = candidates[0]?.split(';')[0].trim().toLowerCase();
+  const firstLangRaw = candidates[0]?.split(';')[0];
+  const firstLang = normalizeLangTag(firstLangRaw || '');
+
   if (firstLang && !locales[firstLang]) {
     logger.warning(`language file does not exist: ${firstLang}`);
   }
