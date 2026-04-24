@@ -1,7 +1,8 @@
 {
   "Current": [
     "normalize language string parser for better translation loading",
-    "better csp violation tracking"
+    "better csp violation tracking",
+    "some user data is now stored in database for access control"
   ],
   "1.13.2":[
     "Changed frontend caching stratagy (fix bug where stations marked as offline in the database where showing in station list but not in a users saved list ie. main list was cached and user list was not)",
@@ -28,7 +29,7 @@
   "1.12.7": [
     "Attempt to improve database searchability",
     "More translations added (CS, NL, KK, TR, and PT. also added script to generate translations using chatGPT)",
-    "Authentication system for station list memory (uses WorkOS, no data other then station are stored in this database, also resets inList stat for stations allowing for more accurate popularity tracking)"
+    "Authentication system for station list memory (uses WorkOS, some user data is stored for access control, the update also resets inList stat for stations allowing for more accurate popularity tracking)"
   ],
   "1.12.6": [
     "Fix bug in build process that caused DB update to fail"
