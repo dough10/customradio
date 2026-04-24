@@ -88,7 +88,6 @@ module.exports = asyncHandler(async (req, res) => {
     referer: req.headers['referer'],
     origin: req.headers['origin'],
     host: req.headers['host'],
-    'user-agent': req.headers['user-agent'],
     'sec-fetch-site': req.headers['sec-fetch-site'],
     'sec-fetch-mode': req.headers['sec-fetch-mode'],
     method: req.method,
@@ -104,18 +103,18 @@ module.exports = asyncHandler(async (req, res) => {
   }
 
   const rawReport = req.body['csp-report'];
-  const cspReport = { ...rawReport };
-  if (!cspReport) {
+  if (!rawReport) {
     await saveFailed(req, 'csp-report missing from body', ua, extraHeaders, requestId, req.body, version);
     return res.status(204).send();
   }
 
-  cspReport.effectiveDirective = cspReport['effective-directive'] || cspReport['violated-directive'];
+  const cspReport = { ...rawReport };
+  cspReport['effective-directive'] = cspReport['effective-directive'] || cspReport['violated-directive'];
   const fingerprint = crypto
     .createHash('sha1')
     .update(
       [
-        cspReport.effectiveDirective,
+        cspReport['effective-directive'],
         cspReport['blocked-uri'],
         cspReport['document-uri']
       ].join('|')
@@ -123,12 +122,12 @@ module.exports = asyncHandler(async (req, res) => {
     .digest('hex');
 
   cspReport.ip = req.ip;
-  cspReport.ua = {
+  cspReport['user-agent'] = {
     browser: ua.browser,
     os: ua.os,
     device: ua.device
   };
-  cspReport.requestId = requestId;
+  cspReport['request-id'] = requestId;
   cspReport.time = new Date();
   cspReport.request = extraHeaders;
   cspReport.fingerprint = fingerprint;
