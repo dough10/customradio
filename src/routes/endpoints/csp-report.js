@@ -4,38 +4,9 @@ const version = require('../../../package.json').version;
 
 require('dotenv').config();
 
-const { getMongo, initMongo } = require('../../services.js');
+const { getCollection } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 const UAParser = require('ua-parser-js');
-
-/**
- * saves data about failed csp reports
- * 
- * @param {Object} req 
- * @param {String} error 
- * @param {Object} ua 
- * @param {Object} extraHeaders 
- * @param {String} requestId 
- * @param {String} version 
- * 
- * @returns {void}
- */
-async function saveFailed(req, error, ua, extraHeaders, requestId, version) {
-  const {collection, client} = await initMongo('csp-fails');
-  await collection.insertOne({
-    'request-id': requestId,
-    ip: req.ip,
-    browser: ua.browser,
-    os: ua.os,
-    device: ua.device,
-    headers: extraHeaders,
-    timestamp:new Date(),
-    error,
-    body: req,body, 
-    version
-  });
-  await client.close();
-}
 
 
 /**
@@ -82,42 +53,49 @@ async function saveFailed(req, error, ua, extraHeaders, requestId, version) {
  * HTTP/1.1 204 No Content
  */
 module.exports = asyncHandler(async (req, res) => {
-  const requestId = req.headers['x-request-id'] || crypto.randomUUID();
   const parser = new UAParser(req.headers['user-agent']);
   const ua = parser.getResult();
-  const extraHeaders = {
-    referer: req.headers['referer'],
-    origin: req.headers['origin'],
-    host: req.headers['host'],
-    'sec-fetch-site': req.headers['sec-fetch-site'],
-    'sec-fetch-mode': req.headers['sec-fetch-mode'],
-    method: req.method,
-    path: req.originalUrl
+
+  const baseObj = {
+    'request-id': req.headers['x-request-id'] || crypto.randomUUID(),
+    ip: req.ip,
+    browser: ua.browser,
+    os: ua.os,
+    device: ua.device,
+    headers: {
+      referer: req.headers['referer'],
+      origin: req.headers['origin'],
+      host: req.headers['host'],
+      'sec-fetch-site': req.headers['sec-fetch-site'],
+      'sec-fetch-mode': req.headers['sec-fetch-mode']
+    },
+    timestamp: new Date(),
+    version
   };
-  
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
-    await saveFailed(req, error, ua, extraHeaders, requestId, version);
+    await getCollection('csp-fails').insertOne({
+      ...baseObj,
+      error,
+      body: req.body
+    });
     res.status(400).json({ error });
     return;
   }
 
   const rawReport = req.body['csp-report'];
   if (!rawReport) {
-    await saveFailed(req, 'csp-report missing from body', ua, extraHeaders, requestId, version);
+    await getCollection('csp-fails').insertOne({
+      ...baseObj,
+      error: 'csp-report missing from body',
+      body: req.body
+    });
     return res.status(204).send();
   }
 
-  const cspReport = { ...rawReport };
-  cspReport.ip = req.ip;
-  cspReport.browser = ua.browser;
-  cspReport.os = ua.os;
-  cspReport.device = ua.device;
-  cspReport['request-id'] = requestId;
-  cspReport.timestamp = new Date();
-  cspReport.headers = extraHeaders;
-  cspReport.version = version;
+  const cspReport = { ...baseObj, ...rawReport };
   cspReport['effective-directive'] = cspReport['effective-directive'] || cspReport['violated-directive'];
   cspReport.fingerprint = crypto
     .createHash('sha1')
@@ -130,6 +108,6 @@ module.exports = asyncHandler(async (req, res) => {
     )
     .digest('hex');
 
-  await getMongo().insertOne(cspReport);
+  await getCollection('csp').insertOne(cspReport);
   res.status(204).send();
 });

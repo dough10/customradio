@@ -34,53 +34,71 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
 });
 
+let mongoClient;
+let db;
+const mongo = {};
+
 /**
  * Initalize mongodb
  * 
  * @returns {Object}
  */
-async function initMongo(col) {
+async function initMongo() {
   try {
-    const client = new MongoClient(process.env.MONGODB_URL || 'mongodb://127.0.0.1:27017');
-    await client.connect();
-    logger.debug("MongoDB Connected");
-    const db = client.db("radiotxt");
-    const collection = db.collection(col);
-    return {collection, client};
-  } catch(err) {
+    mongoClient = new MongoClient(process.env.MONGODB_URL || 'mongodb://127.0.0.1:27017', {
+      maxPoolSize: 10,
+      minPoolSize: 1,
+    });
+    mongoClient.on('close', _ => logger.warning('MongoDB connection closed'));
+    mongoClient.on('error', err => logger.error(`MongoDB error: ${err}`));
+    await mongoClient.connect();
+    logger.debug("MongoDB connected");
+    db = mongoClient.db("radiotxt");
+    for (const name of ['csp', 'csp-fails']) {
+      mongo[name] = db.collection(name);
+      logger.debug(`MongoDB ${name} collection ready`);
+    }
+
+  } catch (err) {
+    logger.error(`MongoDB connection failed: ${err}`);
     throw err;
   }
 }
 
-let mongoDB;
-let mongoClient;
-
-initMongo("csp").then(({collection, client}) => {
-  mongoDB = collection;
-  mongoClient = client;
-  logger.debug("MongoDB ready");
-}).catch(err => {
-  logger.error(`MongoDB failed to connect: ${err}`);
-});
+/**
+ * gets a mongo collection
+ * 
+ * @param {String} name 
+ * 
+ * @returns {Object} mongodb collection
+ */
+function getCollection(name) {
+  if (!mongo[name]) {
+    throw new Error(`Mongo collection "${name}" not initialized`);
+  }
+  return mongo[name];
+}
 
 /**
- * returns the mongodb collection
- * 
- * @returns {Object}
+ * mongo startup
  */
-function getMongo() {
-  if (!mongoDB) throw new Error("MongoDB not initialized");
-  return mongoDB;
+async function bootstrap() {
+  await initMongo();
 }
 
 /**
  * clsoes the mongoDB connection
- */
+*/
 async function closeMongo() {
   if (!mongoClient) return;
   await mongoClient.close();
   logger.warning("MongoDB connection closed");
 }
+
+bootstrap().catch(err => {
+  logger.error(`Startup failed: ${err}`);
+  process.exit(1);
+});
 
 /**
  * creates redis client object
@@ -147,6 +165,5 @@ module.exports = {
   redisClient,
   logLevel,
   workos,
-  getMongo,
-  initMongo
+  getCollection
 }
