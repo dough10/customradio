@@ -23,12 +23,13 @@ const UAParser = require('ua-parser-js');
 async function saveFailed(req, error, ua, extraHeaders, requestId, body, version) {
   const {collection, client} = await initMongo('csp-fails');
   await collection.insertOne({
-    requestId,
+    'request-id': requestId,
     ip: req.ip,
     browser: ua.browser,
     os: ua.os,
     device: ua.device,
-    request: extraHeaders,
+    headers: extraHeaders,
+    timestamp:new Date(),
     error,
     body, 
     version
@@ -109,29 +110,26 @@ module.exports = asyncHandler(async (req, res) => {
   }
 
   const cspReport = { ...rawReport };
+  cspReport.ip = req.ip;
+  cspReport.browser = ua.browser;
+  cspReport.os = ua.os;
+  cspReport.device = ua.device;
+  cspReport['request-id'] = requestId;
+  cspReport.timestamp = new Date();
+  cspReport.headers = extraHeaders;
+  cspReport.version = version;
   cspReport['effective-directive'] = cspReport['effective-directive'] || cspReport['violated-directive'];
-  const fingerprint = crypto
+  cspReport.fingerprint = crypto
     .createHash('sha1')
     .update(
       [
-        cspReport['effective-directive'],
-        cspReport['blocked-uri'],
-        cspReport['document-uri']
+        cspReport['effective-directive'] || '',
+        cspReport['blocked-uri'] || '',
+        cspReport['document-uri'] || ''
       ].join('|')
     )
     .digest('hex');
 
-  cspReport.ip = req.ip;
-  cspReport['user-agent'] = {
-    browser: ua.browser,
-    os: ua.os,
-    device: ua.device
-  };
-  cspReport['request-id'] = requestId;
-  cspReport.time = new Date();
-  cspReport.request = extraHeaders;
-  cspReport.fingerprint = fingerprint;
-  cspReport.version = version;
   await getMongo().insertOne(cspReport);
   res.status(204).send();
 });
