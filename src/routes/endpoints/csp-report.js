@@ -86,6 +86,9 @@ module.exports = asyncHandler(async (req, res) => {
     referer: req.headers['referer'],
     origin: req.headers['origin'],
     host: req.headers['host'],
+    'user-agent': req.headers['user-agent'],
+    'sec-fetch-site': req.headers['sec-fetch-site'],
+    'sec-fetch-mode': req.headers['sec-fetch-mode'],
     method: req.method,
     path: req.originalUrl
   };
