@@ -16,11 +16,11 @@ const UAParser = require('ua-parser-js');
  * @param {Object} ua 
  * @param {Object} extraHeaders 
  * @param {String} requestId 
- * @param {Object} body 
+ * @param {String} version 
  * 
  * @returns {void}
  */
-async function saveFailed(req, error, ua, extraHeaders, requestId, body, version) {
+async function saveFailed(req, error, ua, extraHeaders, requestId, version) {
   const {collection, client} = await initMongo('csp-fails');
   await collection.insertOne({
     'request-id': requestId,
@@ -31,7 +31,7 @@ async function saveFailed(req, error, ua, extraHeaders, requestId, body, version
     headers: extraHeaders,
     timestamp:new Date(),
     error,
-    body, 
+    body: req,body, 
     version
   });
   await client.close();
@@ -98,14 +98,14 @@ module.exports = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
-    await saveFailed(req, error, ua, extraHeaders, requestId, req.body, version);
+    await saveFailed(req, error, ua, extraHeaders, requestId, version);
     res.status(400).json({ error });
     return;
   }
 
   const rawReport = req.body['csp-report'];
   if (!rawReport) {
-    await saveFailed(req, 'csp-report missing from body', ua, extraHeaders, requestId, req.body, version);
+    await saveFailed(req, 'csp-report missing from body', ua, extraHeaders, requestId, version);
     return res.status(204).send();
   }
 
