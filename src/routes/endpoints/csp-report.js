@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
+const version = require('../../../package.json').version;
 
 require('dotenv').config();
 
@@ -19,7 +20,7 @@ const UAParser = require('ua-parser-js');
  * 
  * @returns {void}
  */
-async function saveFailed(req, error, ua, extraHeaders, requestId, body) {
+async function saveFailed(req, error, ua, extraHeaders, requestId, body, version) {
   const {collection, client} = await initMongo('csp-fails');
   await collection.insertOne({
     requestId,
@@ -29,7 +30,8 @@ async function saveFailed(req, error, ua, extraHeaders, requestId, body) {
     device: ua.device,
     request: extraHeaders,
     error,
-    body
+    body, 
+    version
   });
   await client.close();
 }
@@ -96,17 +98,19 @@ module.exports = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
-    await saveFailed(req, error, ua, extraHeaders, requestId, req.body);
+    await saveFailed(req, error, ua, extraHeaders, requestId, req.body, version);
     res.status(400).json({ error });
     return;
   }
 
-  const cspReport = req.body['csp-report'];
+  const rawReport = req.body['csp-report'];
+  const cspReport = { ...rawReport };
   if (!cspReport) {
-    await saveFailed(req, 'csp-report missing from body', ua, extraHeaders, requestId, req.body);
+    await saveFailed(req, 'csp-report missing from body', ua, extraHeaders, requestId, req.body, version);
     return res.status(204).send();
   }
 
+  cspReport.effectiveDirective = cspReport['effective-directive'] || cspReport['violated-directive'];
   const fingerprint = crypto
     .createHash('sha1')
     .update(
@@ -125,10 +129,10 @@ module.exports = asyncHandler(async (req, res) => {
     device: ua.device
   };
   cspReport.requestId = requestId;
-  cspReport.effectiveDirective = cspReport['effective-directive'] || cspReport['violated-directive'];
   cspReport.time = new Date();
   cspReport.request = extraHeaders;
   cspReport.fingerprint = fingerprint;
+  cspReport.version = version;
   await getMongo().insertOne(cspReport);
   res.status(204).send();
 });
