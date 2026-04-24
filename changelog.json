@@ -2,7 +2,8 @@
   "Current": [
     "normalize language string parser for better translation loading",
     "better csp violation tracking",
-    "some user data is now stored in database for access control"
+    "some user data is now stored in database for access control",
+    "added endpoint that will get all stations listed as online and generate a txt file /allStations"
   ],
   "1.13.2":[
     "Changed frontend caching stratagy (fix bug where stations marked as offline in the database where showing in station list but not in a users saved list ie. main list was cached and user list was not)",
