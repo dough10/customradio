@@ -25,6 +25,7 @@ const getAlerts = require('./endpoints/getAlerts.js');
 const addAlert = require('./endpoints/addAlert.js');
 const submitAlert = require('./endpoints/submitAlert.js');
 const dismissAlert = require('./endpoints/dismissAlert.js');
+const allStationsTxt = require('./endpoints/allStationsTxt.js');
 // const blog = require('./endpoints/blog.js');
 // const blogPost = require('./endpoints/blog.post.js');
 
@@ -415,6 +416,11 @@ module.exports = async (app, register) => {
    * gets all currently active alerts
    */
   app.get('/getAlerts', getAlerts);
+
+  /**
+   * get all online statiosn and generates a txt file download
+   */
+  app.get('/allStations', allStationsTxt);
 
   /**
    * gets a list of all posts
