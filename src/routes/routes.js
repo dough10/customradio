@@ -393,15 +393,15 @@ module.exports = async (app, register) => {
   app.get('/auth/logout', authLogout);
 
   /**
+   * get all online statiosn and generates a txt file download
+   */
+  app.get('/txt/all', allStationsTxt);
+
+  /**
    * Endpoint to download user stations as a TXT file.
    */
   app.get('/txt/:uid', downloadtxt);
 
-  /**
-   * get all online statiosn and generates a txt file download
-   */
-  app.get('/txt/all', allStationsTxt);
-  
   /**
    * page to submit alerts
    */
