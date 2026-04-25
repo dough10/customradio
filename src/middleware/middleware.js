@@ -10,12 +10,13 @@ const crypto = require("crypto");
 const cookieParser = require("cookie-parser");
 const { performance } = require("perf_hooks");
 
+const { logger, redisClient } = require("../services.js");
+const { injectSecrets } = require("../config/secrets.js");
 const { setLanguage } = require("../util/i18n.js");
 const { isBadActor } = require("../util/badActors.js");
-const { logger, redisClient } = require("../services.js");
+const { badActor } = require("../util/badActors.js");
 const isAdmin = require("../util/isAdmin.js");
-const { injectSecrets } = require("../config/secrets.js");
-const { badActor } = require("./../util/badActors.js");
+const maskIP = require('../util/maskIP.js');
 
 injectSecrets(["SESSION_SECRET"]);
 
@@ -64,18 +65,37 @@ function initSessionStorage() {
 }
 
 function logString(req, res, start) {
-  const hasBody = req.body && Object.keys(req.body).length > 0;
-  let string = '';
-  string += `${req.ip} -> [${req.method}] ${req.originalUrl}, `;
-  req.user ? string += `user: ${req.user.id.replace('user_', '')}, admin: ${isAdmin(req)}, ` : null;
-  req.count !== undefined ? string += `count: ${req.count}, ` : null;
-  string += `lang: ${req.loadedLang}, `;
-  hasBody ? string += `body: ${JSON.stringify(req.body)}, ` : null;
-  string += `status: ${res.statusCode}, `;
-  res.getHeader('Content-Type') ? string += `type: ${res.getHeader('Content-Type')}, ` : null;
-  res.getHeader('Content-Length') ? string += `bytes: ${res.getHeader('Content-Length')}, ` : null;
-  string += `id: ${req.requestId}, ms: ${(performance.now() - start).toFixed(2)}`;
-  return string;
+  const parts = [];
+
+  parts.push(`${maskIP(req.ip)} -> [${req.method}] ${req.originalUrl}`);
+
+  if (req.user) {
+    parts.push(`user: ${req.user.id.replace('user_', '')}, admin: ${isAdmin(req)}`);
+  }
+
+  if (req.count !== undefined) {
+    parts.push(`count: ${req.count}`);
+  }
+
+  parts.push(`lang: ${req.loadedLang}`);
+
+  if (req.body && Object.keys(req.body).length > 0) {
+    parts.push(`body: ${JSON.stringify(req.body)}`);
+  }
+
+  parts.push(`status: ${res.statusCode}`);
+
+  const contentType = res.getHeader('Content-Type');
+  if (contentType) parts.push(`type: ${contentType}`);
+
+  const contentLength = res.getHeader('Content-Length');
+  if (contentLength) parts.push(`bytes: ${contentLength}`);
+
+  parts.push(
+    `id: ${req.requestId}, ms: ${(performance.now() - start).toFixed(2)}`
+  );
+
+  return parts.join(', ');
 }
 
 module.exports = (app, httpRequestCounter) => {
