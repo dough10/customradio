@@ -3,14 +3,16 @@
 ## Nice to have
 
 - [ ] Better station adding — allow changing of station name when adding a station (would need to change database update to not overwrite the database entry with station name header)
-- [ ] Option to "minimize" a user's list to prevent users from having to scroll past it to get to search results (need to figure out "how" and "where" to place the toggle)
-- [ ] Save playing station to localstorage. when playing stops remove that entry. if an entry exists on page load. use it to start a new play session.
+- [ ] Improve database search. it still is not great
+- [ ] Maybe start a blog about streaming radio and javascript
 
 ## Before next release
 
 
 ## Done
 
+- [X] Save playing station to localstorage. when playing stops remove that entry. if an entry exists on page load. use it to start a new play session.
+- [X] Option to "minimize" a user's list to prevent users from having to scroll past it to get to search results (need to figure out "how" and "where" to place the toggle)
 - [x] Test WorkOS session timeout "feels" correct. once logged in user should be logged in (30 day session max) unless new docker instance or user logs out.
 - [x] Script that generates translation files
 - [x] User menu — login button when logged out, logout button when logged in
