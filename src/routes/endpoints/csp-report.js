@@ -8,6 +8,49 @@ const { getCollection, collections } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 const UAParser = require('ua-parser-js');
 
+const allowedFields = [
+  "document-uri",
+  "referrer",
+  "violated-directive",
+  "effective-directive",
+  "original-policy",
+  "disposition",
+  "blocked-uri",
+  "line-number",
+  "column-number",
+  "source-file",
+  "status-code",
+  "script-sample"
+];
+
+function maskIP(ip) {
+  if (!ip) return ip;
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(ip)) {
+    return ip.replace(/\.\d+$/, '.0');
+  }
+  if (ip.includes('::ffff:')) {
+    const v4 = ip.split('::ffff:')[1];
+    return '::ffff:' + v4.replace(/\.\d+$/, '.0');
+  }
+  if (ip.includes(':')) {
+    return ip.split(':').slice(0, 4).join(':') + '::';
+  }
+  return ip;
+}
+
+function stripQuery(url) {
+  return typeof url === 'string' ? url.split('?')[0] : url;
+}
+
+function normalizeUrl(url) {
+  if (!url) return '';
+  try {
+    const u = new URL(url);
+    return `${u.origin}${u.pathname}`;
+  } catch {
+    return url;
+  }
+}
 
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports
@@ -57,13 +100,14 @@ module.exports = asyncHandler(async (req, res) => {
   const ua = parser.getResult();
 
   const baseObj = {
-    'request-id': req.headers['x-request-id'] || crypto.randomUUID(),
-    ip: req.ip,
+    'request-id': req.requestId,
+    ip: maskIP(req.ip),
+    'ip-hash': crypto.createHash('sha256').update(req.ip).digest('hex'),
     browser: ua.browser,
     os: ua.os,
     device: ua.device,
     headers: {
-      referer: req.headers['referer'],
+      referer: stripQuery(req.headers['referer']),
       origin: req.headers['origin'],
       host: req.headers['host'],
       'sec-fetch-site': req.headers['sec-fetch-site'],
@@ -79,7 +123,7 @@ module.exports = asyncHandler(async (req, res) => {
     await getCollection(collections.CSP_FAILS).insertOne({
       ...baseObj,
       error,
-      body: req.body
+      body: JSON.stringify(req.body).slice(0, 2000)
     });
     res.status(400).json({ error });
     return;
@@ -90,24 +134,47 @@ module.exports = asyncHandler(async (req, res) => {
     await getCollection(collections.CSP_FAILS).insertOne({
       ...baseObj,
       error: 'csp-report missing from body',
-      body: req.body
+      body: JSON.stringify(req.body).slice(0, 2000)
     });
-    return res.status(204).send();
+    return res.status(400).json({ error: 'csp-report missing' });
   }
 
-  const cspReport = { ...baseObj, ...rawReport };
+  const sanitizedReport = {};
+
+  for (const key of allowedFields) {
+    if (rawReport[key] === undefined) continue;
+
+    if (key === 'document-uri' || key === 'referrer' || key === 'source-file') {
+      sanitizedReport[key] = stripQuery(rawReport[key]);
+    } else if (key === 'script-sample') {
+      const sample = rawReport[key];
+      sanitizedReport[key] = typeof sample === 'string' ? sample.slice(0, 200) : '';
+    } else {
+      sanitizedReport[key] = rawReport[key];
+    }
+  }
+
+  const cspReport = { ...baseObj, ...sanitizedReport };
   cspReport['effective-directive'] = cspReport['effective-directive'] || cspReport['violated-directive'];
   cspReport.fingerprint = crypto
-    .createHash('sha1')
+    .createHash('sha256')
     .update(
       [
         cspReport['effective-directive'] || '',
-        cspReport['blocked-uri'] || '',
-        cspReport['document-uri'] || ''
+        normalizeUrl(cspReport['blocked-uri']) || '',
+        normalizeUrl(cspReport['document-uri']) || ''
       ].join('|')
     )
     .digest('hex');
 
-  await getCollection(collections.CSP).insertOne(cspReport);
+  await getCollection(collections.CSP).updateOne(
+    { fingerprint: cspReport.fingerprint },
+    {
+      $setOnInsert: cspReport,
+      $inc: { count: 1 },
+      $set: { lastSeen: new Date() }
+    },
+    { upsert: true }
+  );
   res.status(204).send();
 });

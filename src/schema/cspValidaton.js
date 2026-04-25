@@ -1,30 +1,72 @@
 const { body } = require('express-validator');
 
-/**
- * enviroment options for csp report. 
- * allows localhost as url when not in production.
- * 
- * @returns {undefined|String}
- */
-const envOptions = (_ => {
-  const option = {
-    require_tld: false,
-    require_protocol: true,
-    require_port: true
-  };
-  return process.env.NODE_ENV === 'production' ? undefined : option; 
-})();
+const generalError = 'Invalid CSP report field';
 
 module.exports = [
   body('csp-report')
+    .exists()
+    .withMessage('csp-report is required')
     .isObject()
     .withMessage('csp-report must be an object'),
+
+  body('csp-report.document-uri')
+    .optional()
+    .isString()
+    .withMessage(generalError),
+
+  body('csp-report.referrer')
+    .optional()
+    .isString()
+    .withMessage(generalError),
+
   body('csp-report.violated-directive')
-    .escape()
+    .optional()
     .isString()
-    .withMessage('violated-directive must be a string'),
+    .withMessage(generalError),
+
+  body('csp-report.effective-directive')
+    .optional()
+    .isString()
+    .withMessage(generalError),
+
   body('csp-report.original-policy')
-    .escape()
+    .optional()
     .isString()
-    .withMessage('original-policy must be a string'),
+    .withMessage(generalError),
+
+  body('csp-report.disposition')
+    .optional()
+    .isString()
+    .withMessage(generalError),
+
+  body('csp-report.blocked-uri')
+    .optional()
+    .isString()
+    .withMessage(generalError),
+
+  body('csp-report.source-file')
+    .optional()
+    .isString()
+    .withMessage(generalError),
+
+  body('csp-report.script-sample')
+    .optional()
+    .isString()
+    .isLength({ max: 1000 })
+    .withMessage(generalError),
+
+  body('csp-report.status-code')
+    .optional()
+    .isInt()
+    .withMessage(generalError),
+
+  body('csp-report.line-number')
+    .optional()
+    .isInt()
+    .withMessage(generalError),
+
+  body('csp-report.column-number')
+    .optional()
+    .isInt()
+    .withMessage(generalError),
 ];
