@@ -64,6 +64,15 @@ function initSessionStorage() {
   });
 }
 
+/**
+ * generates a HTTP request string for system logger
+ * 
+ * @param {Object} req 
+ * @param {Object} res 
+ * @param {Number} start 
+ * 
+ * @returns {String}
+ */
 function logString(req, res, start) {
   const parts = [];
 
