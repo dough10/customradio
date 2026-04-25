@@ -41,7 +41,7 @@ module.exports = asyncHandler(async (req, res) => {
 
   for (const sensitive of sensitivePaths) {
     if (requestedPath.includes(sensitive)) {
-      await badActor(req.ip);
+      await badActor(req.ip, 1);
       break;
     }
   }

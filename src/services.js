@@ -80,13 +80,6 @@ function getCollection(name) {
 }
 
 /**
- * mongo startup
- */
-async function bootstrap() {
-  await initMongo();
-}
-
-/**
  * clsoes the mongoDB connection
 */
 async function closeMongo() {
@@ -95,7 +88,7 @@ async function closeMongo() {
   logger.warning("MongoDB connection closed");
 }
 
-bootstrap().catch(err => {
+initMongo().catch(err => {
   logger.error(`Startup failed: ${err}`);
   process.exit(1);
 });
