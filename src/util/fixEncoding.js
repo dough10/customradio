@@ -10,14 +10,12 @@ function fixEncoding(input) {
 
   let current = input;
 
-  // Try multiple passes (handles double-encoding)
   for (let i = 0; i < 3; i++) {
     const next = tryLatin1ToUtf8(current);
     if (next === current || !looksBetter(current, next)) break;
     current = next;
   }
 
-  // Final light cleanup (non-destructive)
   return cleanup(current);
 }
 
