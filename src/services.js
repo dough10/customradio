@@ -38,6 +38,11 @@ let mongoClient;
 let db;
 const mongo = {};
 
+const collections = {
+  CSP: 'csp',
+  CSP_FAILS: 'csp-fails'
+};
+
 /**
  * Initalize mongodb
  * 
@@ -54,7 +59,7 @@ async function initMongo() {
     await mongoClient.connect();
     logger.debug("MongoDB connected");
     db = mongoClient.db("radiotxt");
-    for (const name of ['csp', 'csp-fails']) {
+    for (const name of Object.values(collections)) {
       mongo[name] = db.collection(name);
       logger.debug(`MongoDB ${name} collection ready`);
     }
@@ -158,5 +163,6 @@ module.exports = {
   redisClient,
   logLevel,
   workos,
-  getCollection
+  getCollection,
+  collections
 }

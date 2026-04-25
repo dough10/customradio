@@ -4,12 +4,12 @@ const schedule = require('node-schedule');
 const app = express();
 require('dotenv').config();
 
+const {logger, logLevel, alerts} = require('./services.js');
 const { testStreams } = require('./util/testStreams.js');
 const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./middleware/middleware.js');
 const routes = require('./routes/routes.js');
 const { httpRequestCounter, register } = require('./util/promClient.js');
-const {logger, logLevel, alerts} = require('./services.js');
 
 /**
  * Starts the Express server and sets up necessary initializations.

@@ -4,7 +4,7 @@ const version = require('../../../package.json').version;
 
 require('dotenv').config();
 
-const { getCollection } = require('../../services.js');
+const { getCollection, collections } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 const UAParser = require('ua-parser-js');
 
@@ -76,7 +76,7 @@ module.exports = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
-    await getCollection('csp-fails').insertOne({
+    await getCollection(collections.CSP_FAILS).insertOne({
       ...baseObj,
       error,
       body: req.body
@@ -87,7 +87,7 @@ module.exports = asyncHandler(async (req, res) => {
 
   const rawReport = req.body['csp-report'];
   if (!rawReport) {
-    await getCollection('csp-fails').insertOne({
+    await getCollection(collections.CSP_FAILS).insertOne({
       ...baseObj,
       error: 'csp-report missing from body',
       body: req.body
@@ -108,6 +108,6 @@ module.exports = asyncHandler(async (req, res) => {
     )
     .digest('hex');
 
-  await getCollection('csp').insertOne(cspReport);
+  await getCollection(collections.CSP).insertOne(cspReport);
   res.status(204).send();
 });
