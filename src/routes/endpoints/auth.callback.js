@@ -20,7 +20,7 @@ module.exports = asyncHandler(async (req, res) => {
     return res.status(401).send('User must verify email');
   }
   try {
-    await userData.createUser(user);
+    // await userData.createUser(user);
     req.session.user = user;
   } catch (err) {
     logger.error(`Failed to persist ${user.id}: ${err}`);
