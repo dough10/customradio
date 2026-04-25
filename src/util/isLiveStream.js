@@ -237,7 +237,7 @@ async function streamTest(url) {
       ok: true,
       url: finalUrl,
       name,
-      description,
+      description: fixEncoding(description),
       icyurl,
       isLive: true,
       icyGenre,
