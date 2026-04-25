@@ -1,12 +1,13 @@
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
-const version = require('../../../package.json').version;
+const UAParser = require('ua-parser-js');
 
 require('dotenv').config();
 
+const version = require('../../../package.json').version;
 const { getCollection, collections } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
-const UAParser = require('ua-parser-js');
+const maskIP = require('../../util/maskIP.js');
 
 const allowedFields = [
   "document-uri",
@@ -22,21 +23,6 @@ const allowedFields = [
   "status-code",
   "script-sample"
 ];
-
-function maskIP(ip) {
-  if (!ip) return ip;
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(ip)) {
-    return ip.replace(/\.\d+$/, '.0');
-  }
-  if (ip.includes('::ffff:')) {
-    const v4 = ip.split('::ffff:')[1];
-    return '::ffff:' + v4.replace(/\.\d+$/, '.0');
-  }
-  if (ip.includes(':')) {
-    return ip.split(':').slice(0, 4).join(':') + '::';
-  }
-  return ip;
-}
 
 function stripQuery(url) {
   return typeof url === 'string' ? url.split('?')[0] : url;
