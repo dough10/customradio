@@ -63,6 +63,21 @@ function initSessionStorage() {
   });
 }
 
+function logString(req, res, start) {
+  const hasBody = req.body && Object.keys(req.body).length > 0;
+  let string = '';
+  string += `${req.ip} -> [${req.method}] ${req.originalUrl}, `;
+  req.user ? string += `user: ${req.user.id.replace('user_', '')}, admin: ${isAdmin(req)}, ` : null;
+  req.count !== undefined ? string += `count: ${req.count}, ` : null;
+  string += `lang: ${req.loadedLang}, `;
+  hasBody ? string += `body: ${JSON.stringify(req.body)}, ` : null;
+  string += `status: ${res.statusCode}, `;
+  res.getHeader('Content-Type') ? string += `type: ${res.getHeader('Content-Type')}, ` : null;
+  res.getHeader('Content-Length') ? string += `bytes: ${res.getHeader('Content-Length')}, ` : null;
+  string += `id: ${req.requestId}, ms: ${(performance.now() - start).toFixed(2)}`;
+  return string;
+}
+
 module.exports = (app, httpRequestCounter) => {
 
   /**
@@ -103,10 +118,7 @@ module.exports = (app, httpRequestCounter) => {
    */
   app.use((req, res, next) => {
     const start = performance.now();
-    res.on("finish", () => {
-      const hasBody = req.body && Object.keys(req.body).length > 0;
-      logger.info(`${req.ip} -> [${req.method}] ${req.originalUrl},${req.user ? ` user: ${req.user.id.replace('user_', '')}, admin: ${isAdmin(req)},` : ''}${req.count !== undefined ? ` count: ${req.count}, ` : ' '}lang: ${req.loadedLang},${hasBody ? ` body: ${JSON.stringify(req.body)}, ` : ' '}status: ${res.statusCode},${res.getHeader('Content-Type') ? ` type: ${res.getHeader('Content-Type')}, ` : ''}${res.getHeader('Content-Length') ? ` bytes: ${res.getHeader('Content-Length')}, ` : ' '}id: ${req.requestId} ms: ${(performance.now() - start).toFixed(2)}`);
-    });
+    res.on("finish", () => logger.info(logString(req, res, start)));
     next();
   });
 
