@@ -398,6 +398,11 @@ module.exports = async (app, register) => {
   app.get('/txt/:uid', downloadtxt);
 
   /**
+   * get all online statiosn and generates a txt file download
+   */
+  app.get('/txt/all', allStationsTxt);
+  
+  /**
    * page to submit alerts
    */
   app.get('/addAlert', submitAlert);
@@ -416,11 +421,6 @@ module.exports = async (app, register) => {
    * gets all currently active alerts
    */
   app.get('/getAlerts', getAlerts);
-
-  /**
-   * get all online statiosn and generates a txt file download
-   */
-  app.get('/allStations', allStationsTxt);
 
   /**
    * gets a list of all posts
