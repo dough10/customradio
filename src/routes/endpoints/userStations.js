@@ -12,7 +12,7 @@ const asyncHandler = require('../../util/asyncHandler.js');
  * @returns {Promise<void>} A promise that resolves when the response has been sent.
  */
 module.exports = asyncHandler(async (req, res) => {
-  if (!req.user) {
+  if (!req.user || !req.user.id) {
     req.count = 0;
     res.send([]);
     return;
