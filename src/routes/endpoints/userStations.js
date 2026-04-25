@@ -20,12 +20,12 @@ module.exports = asyncHandler(async (req, res) => {
   
   const userID = req.user.id;
   const stations = await userData.userStations(userID);
-  req.count = stations.length;
-
-  if (!stations || req.count === 0) {
+  
+  if (!stations || stations.length === 0) {
     res.send([]);
     return;
   }
-
+  
+  req.count = stations.length;
   res.json(stations);
 });
