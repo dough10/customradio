@@ -63,7 +63,6 @@ async function initMongo() {
       mongo[name] = db.collection(name);
       logger.debug(`MongoDB ${name} collection ready`);
     }
-
   } catch (err) {
     logger.error(`MongoDB connection failed: ${err}`);
     throw err;
@@ -92,11 +91,6 @@ async function closeMongo() {
   await mongoClient.close();
   logger.warning("MongoDB connection closed");
 }
-
-initMongo().catch(err => {
-  logger.error(`Startup failed: ${err}`);
-  process.exit(1);
-});
 
 /**
  * creates redis client object
@@ -163,6 +157,7 @@ module.exports = {
   redisClient,
   logLevel,
   workos,
+  initMongo,
   getCollection,
   collections
 }

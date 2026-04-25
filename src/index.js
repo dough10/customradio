@@ -4,12 +4,13 @@ const schedule = require('node-schedule');
 const app = express();
 require('dotenv').config();
 
-const {logger, logLevel, alerts} = require('./services.js');
+const { logger, logLevel, alerts, initMongo } = require('./services.js');
 const { testStreams } = require('./util/testStreams.js');
 const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./middleware/middleware.js');
 const routes = require('./routes/routes.js');
 const { httpRequestCounter, register } = require('./util/promClient.js');
+
 
 /**
  * Starts the Express server and sets up necessary initializations.
@@ -30,16 +31,28 @@ const { httpRequestCounter, register } = require('./util/promClient.js');
  *   console.log('Online. o( ❛ᴗ❛ )o');
  * });
  */
-app.listen(3000, _ => {
+function launch() {
   middleware(app, httpRequestCounter);
   routes(app, register);
-  
+
   schedule.scheduleJob('0 0 * * 0', testStreams);
   schedule.scheduleJob('0 12 1 * *', scrapeIceDir);
   schedule.scheduleJob('0 0 1 * *', async _ => {
     await alerts.cleanupExpired();
     await alerts.cleanupOldVersions();
   });
-  
-  logger.critical(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
-});
+
+  app.listen(3000, _ => {
+    logger.critical(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
+  });
+}
+
+(async () => {
+  try {
+    await initMongo();
+    await launch();
+  } catch (err) {
+    logger.critical(err);
+    process.exit(1);
+  }
+})();
