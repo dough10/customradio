@@ -39,7 +39,7 @@ module.exports = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const message = errors.array().map(e => e.msg).join(', ');
-    logger.error(message);
+    // logger.error(message);
     return res.status(400).json({ message });
   }
 
