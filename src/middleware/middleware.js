@@ -101,7 +101,7 @@ function logString(req, res, start) {
   if (contentLength) parts.push(`bytes: ${contentLength}`);
 
   parts.push(
-    `id: ${req.requestId}, ms: ${(performance.now() - start).toFixed(2)}`
+    `request-id: ${req.requestId}, ms: ${(performance.now() - start).toFixed(2)}`
   );
 
   return parts.join(', ');
