@@ -129,6 +129,29 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
+   * Client information validation middleware
+   * Extracts and validates client IP addresses across headers
+   * Prevents IP spoofing attempts
+   */
+  app.use((req, res, next) => {
+    const clientInfo = {
+      ip: req.ip,
+      forwardedFor: req.headers["x-forwarded-for"],
+      realIp: req.headers["x-real-ip"],
+    };
+
+    const forwardedIps = clientInfo.forwardedFor
+      ? clientInfo.forwardedFor.split(",").map(ip => ip.trim())
+      : [];
+
+    if (forwardedIps.length && !forwardedIps.includes(clientInfo.ip)) {
+      return res.status(403).json({error: "Invalid request origin"});
+    }
+
+    next();
+  });
+
+  /**
    * GLOBAL RATE LIMIT
    */
   app.use(generalLimiter);
@@ -283,20 +306,38 @@ module.exports = (app, httpRequestCounter) => {
    */
   app.use(
     helmet({
+      dnsPrefetchControl: {
+        allow: true
+      },
+      xFrameOptions: false,
+      crossOriginResourcePolicy: false,
+      originAgentCluster: false,
+      xssFilter: true,
+      expectCt: {
+        enforce: true,
+        maxAge: 30 * 24 * 60 * 60,
+      },
       contentSecurityPolicy: {
         directives: {
-          defaultSrc: [cspProperties.SELF],
+          manifestSrc: [
+            cspProperties.SELF
+          ],
+          defaultSrc: [
+            cspProperties.SELF
+          ],
           scriptSrc: [
-            cspProperties.SELF,
             cspProperties.NONCE,
             cspProperties.DYNAMIC
           ],
           scriptSrcElem: [
-            cspProperties.SELF,
             cspProperties.NONCE,
             cspProperties.DYNAMIC
           ],
           styleSrc: [
+            cspProperties.SELF,
+            cspProperties.NONCE
+          ],
+          styleSrcElem: [
             cspProperties.SELF,
             cspProperties.NONCE
           ],
@@ -313,9 +354,15 @@ module.exports = (app, httpRequestCounter) => {
             cspProperties.SELF,
             cspProperties.DATA
           ],
-          frameSrc: [cspProperties.SELF],
-          mediaSrc: [cspProperties.SELF, cspProperties.HTTPS],
-          reportUri: "/csp-report"
+          frameSrc: [
+            cspProperties.SELF
+          ],
+          mediaSrc: [
+            cspProperties.SELF,
+            cspProperties.HTTPS
+          ],
+          trustedTypes: ["default"],
+          reportUri: "/csp-report",
         },
       },
       hsts: {
