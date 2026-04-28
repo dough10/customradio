@@ -27,6 +27,7 @@ const submitAlert = require('./endpoints/submitAlert.js');
 const dismissAlert = require('./endpoints/dismissAlert.js');
 const allStationsTxt = require('./endpoints/allStationsTxt.js');
 const trafficAdvice = require('./endpoints/trafficadvice.js');
+const metrics = require('./endpoints/metrics.js');
 // const blog = require('./endpoints/blog.js');
 // const blogPost = require('./endpoints/blog.post.js');
 
@@ -59,7 +60,7 @@ module.exports = async (app, register) => {
   /**
    * assetLinks
    */
-  app.get('/.well-known/assetLinks.json', (req,res) => res.json([]));
+  app.get('/.well-known/assetLinks.json', (req, res) => res.json([]));
 
   /**
    * security.txt
@@ -122,10 +123,7 @@ module.exports = async (app, register) => {
    * // process_cpu_user_seconds_total 0.12
    * // ...
    */
-  app.get('/metrics', async (req, res) => {
-    res.set('Content-Type', register.contentType);
-    res.end(await register.metrics());
-  });
+  app.get('/metrics', async (req, res) => metrics(req, res, register));
 
   /**
    * endpoint for marking a station as a duplicate
