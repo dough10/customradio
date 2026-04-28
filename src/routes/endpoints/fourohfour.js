@@ -16,7 +16,10 @@ const sensitivePaths = new Set([
   '.aws',
   '.old',
   '.save',
-  '.php'
+  '.php',
+  'settings',
+  'api',
+  '.db'
 ]);
 
 /**
