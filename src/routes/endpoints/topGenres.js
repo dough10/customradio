@@ -29,6 +29,6 @@ const asyncHandler = require('../../util/asyncHandler.js');
  */
 module.exports = asyncHandler(async (req, res) => {
   const topGenres = await stations.topGenres();
-  res.count = topGenres.length;
+  req.count = topGenres.length;
   res.json(topGenres);
 });
