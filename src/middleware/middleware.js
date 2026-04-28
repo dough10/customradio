@@ -14,7 +14,6 @@ const { logger, redisClient } = require("../services.js");
 const { injectSecrets } = require("../config/secrets.js");
 const { setLanguage } = require("../util/i18n.js");
 const { isBadActor } = require("../util/badActors.js");
-const { badActor } = require("../util/badActors.js");
 const isAdmin = require("../util/isAdmin.js");
 const maskIP = require('../util/maskIP.js');
 
@@ -195,6 +194,50 @@ module.exports = (app, httpRequestCounter) => {
   app.use((req, res, next) => {
     const lang = req.headers["accept-language"]?.split(",")[0]?.split("-")[0];
     req.loadedLang = setLanguage(lang);
+    next();
+  });
+
+  /**
+   * CSRF token generation middleware
+   * Generates and stores CSRF token in session if not present
+   * Makes token available to templates via res.locals
+   */
+  app.use((req, res, next) => {
+    if (!req.session.csrfToken) {
+      const csrfToken = crypto.randomBytes(32).toString("hex");
+      req.session.csrfToken = csrfToken;
+      res.locals.csrfToken = csrfToken;
+    } else {
+      res.locals.csrfToken = req.session.csrfToken;
+    }
+    next();
+  });
+
+  /**
+   * CSRF token verification middleware
+   * Verifies CSRF token in headers matches session token
+   * Skips verification for GET requests
+   */
+  app.use(async (req, res, next) => {
+    if (["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path === "/csp-report") {
+      return next();
+    }
+
+    const token = req.headers["x-csrf-token"];
+    const sessionToken = req.session?.csrfToken;
+
+    if (!req.session) {
+      return res.status(440).send("Session expired or not established");
+    }
+
+    if (!sessionToken) {
+      return res.status(419).send("CSRF token missing in session");
+    }
+
+    if (!token || token !== sessionToken) {
+      return res.status(403).send("Invalid CSRF token");
+    }
+
     next();
   });
 
