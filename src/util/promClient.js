@@ -7,7 +7,7 @@ const httpRequestCounter = new promClient.Counter({
 });
 const register = new promClient.Registry();
 register.setDefaultLabels({
-  app: 'customradio-api'
+  app: 'radiotxt.site'
 });
 promClient.collectDefaultMetrics({
   register
