@@ -123,7 +123,7 @@ module.exports = async (app, register) => {
    * // process_cpu_user_seconds_total 0.12
    * // ...
    */
-  app.get('/metrics', async (req, res) => metrics(req, res, register));
+  app.get('/metrics', (req, res) => metrics(req, res, register));
 
   /**
    * endpoint for marking a station as a duplicate
