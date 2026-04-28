@@ -26,6 +26,7 @@ const addAlert = require('./endpoints/addAlert.js');
 const submitAlert = require('./endpoints/submitAlert.js');
 const dismissAlert = require('./endpoints/dismissAlert.js');
 const allStationsTxt = require('./endpoints/allStationsTxt.js');
+const trafficAdvice = require('./endpoints/trafficadvice.js');
 // const blog = require('./endpoints/blog.js');
 // const blogPost = require('./endpoints/blog.post.js');
 
@@ -64,6 +65,11 @@ module.exports = async (app, register) => {
    * security.txt
    */
   app.get('/.well-known/security.txt', securitytxt);
+
+  /**
+   * google bot chrome pre-load endpoint
+   */
+  app.get('/.well-known/traffic-advice', trafficAdvice);
 
   /**
    * info!
