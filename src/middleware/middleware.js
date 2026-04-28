@@ -100,9 +100,9 @@ function logString(req, res, start) {
   const contentLength = res.getHeader('Content-Length');
   if (contentLength) parts.push(`bytes: ${contentLength}`);
 
-  parts.push(
-    `request-id: ${req.requestId}, ms: ${(performance.now() - start).toFixed(2)}`
-  );
+  // parts.push(`request-id: ${req.requestId}`);
+
+  parts.push(`ms: ${(performance.now() - start).toFixed(2)}`);
 
   return parts.join(', ');
 }
