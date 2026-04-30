@@ -316,7 +316,7 @@ module.exports = (app, httpRequestCounter) => {
       xFrameOptions: false,
       crossOriginResourcePolicy: false,
       originAgentCluster: false,
-      xssFilter: true,
+      xssFilter: false,
       expectCt: {
         enforce: true,
         maxAge: 30 * 24 * 60 * 60,
@@ -365,7 +365,8 @@ module.exports = (app, httpRequestCounter) => {
             cspProperties.SELF,
             cspProperties.HTTPS
           ],
-          trustedTypes: ["default"],
+          trustedTypes: [],
+          requireTrustedTypesFor: ["script"],
           reportUri: "/csp-report",
         },
       },
