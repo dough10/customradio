@@ -13,7 +13,7 @@ const { performance } = require("perf_hooks");
 const { logger, redisClient } = require("../services.js");
 const { injectSecrets } = require("../config/secrets.js");
 const { setLanguage } = require("../util/i18n.js");
-const { isBadActor } = require("../util/badActors.js");
+const { isBadActor, badActor } = require("../util/badActors.js");
 const isAdmin = require("../util/isAdmin.js");
 const maskIP = require('../util/maskIP.js');
 
@@ -133,7 +133,7 @@ module.exports = (app, httpRequestCounter) => {
    * Extracts and validates client IP addresses across headers
    * Prevents IP spoofing attempts
    */
-  app.use((req, res, next) => {
+  app.use(async (req, res, next) => {
     const clientInfo = {
       ip: req.ip,
       forwardedFor: req.headers["x-forwarded-for"],
@@ -145,6 +145,7 @@ module.exports = (app, httpRequestCounter) => {
       : [];
 
     if (forwardedIps.length && !forwardedIps.includes(clientInfo.ip)) {
+      await badActor(req.ip, 5);
       return res.status(403).json({error: "Invalid request origin"});
     }
 
@@ -250,14 +251,17 @@ module.exports = (app, httpRequestCounter) => {
     const sessionToken = req.session?.csrfToken;
 
     if (!req.session) {
+      await badActor(req.ip, 5);
       return res.status(440).send("Session expired or not established");
     }
 
     if (!sessionToken) {
+      await badActor(req.ip, 5);
       return res.status(419).send("CSRF token missing in session");
     }
 
     if (!token || token !== sessionToken) {
+      await badActor(req.ip, 5);
       return res.status(403).send("Invalid CSRF token");
     }
 
