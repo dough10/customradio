@@ -267,8 +267,8 @@ async function processStream(station, ndx, offset, length, stations, totalStatio
  *   });
  */
 async function testStreams() {
-  const startTime = Date.now();
-  logger.info(`Starting database update at ${new Date(startTime).toISOString()}`);
+  const start = Date.now();
+  logger.info(`Starting database update at ${new Date(start).toISOString()}`);
   try {
     const totalStationCount = await stations.getTotalCount();
     const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
@@ -300,13 +300,14 @@ async function testStreams() {
       }
     }
     const end = Date.now()
-    const duration = msToHhMmSs(end - startTime);
+    const duration = msToHhMmSs(end - start);
     const stats = await stations.dbStats();
     await getCollection(collections.DB_UPDATES).insertOne({
       changed: updatedCount,
       start,
       end,
-      ...stats
+      ...stats,
+      version: require('../../package.json').version
     });
 
     logger.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
