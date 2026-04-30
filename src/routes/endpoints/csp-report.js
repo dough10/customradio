@@ -146,6 +146,7 @@ module.exports = asyncHandler(async (req, res) => {
     .createHash('sha256')
     .update(
       [
+        req.ip, 
         cspReport['effective-directive'] || '',
         normalizeUrl(cspReport['blocked-uri']) || '',
         normalizeUrl(cspReport['document-uri']) || ''
