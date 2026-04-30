@@ -8,7 +8,7 @@ const rmRef = require('./rmRef.js');
 const isLiveStream = require('./isLiveStream.js');
 const usedTypes = require("./usedTypes.js");
 const retry = require('./retry.js');
-const {stations, logger} = require('./../services.js');
+const {stations, logger, getCollection, collections} = require('./../services.js');
 
 const limit = pLimit(5);
 
@@ -138,7 +138,7 @@ async function processStream(entry, length, stations) {
  * @returns {Promise<void>}
  */
 module.exports = async () => {
-  const startTime = new Date().getTime();
+  const start = Date.now();
   progressCounter = 0;
   changed = 0;
   try {
@@ -153,8 +153,15 @@ module.exports = async () => {
       )
     );
     const {total, online} = await stations.dbStats();
-    const now = new Date().getTime();
-    logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(now - startTime)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
+    const end = Date.now();
+    await getCollection(collections.DB_UPDATES).insertOne({
+      changed,
+      start,
+      end,
+      total,
+      online
+    });
+    logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(end - start)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
   } catch (err) {
     logger.critical(`Scrape failed: ${err.message}`);
   } finally {

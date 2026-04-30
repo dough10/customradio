@@ -40,7 +40,8 @@ const mongo = {};
 
 const collections = {
   CSP: 'csp',
-  CSP_FAILS: 'csp-fails'
+  CSP_FAILS: 'csp-fails',
+  DB_UPDATES: 'db-updates'
 };
 
 /**

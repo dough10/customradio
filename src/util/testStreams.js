@@ -5,7 +5,7 @@ const pLimit = require('p-limit');
 
 const isLiveStream = require('./isLiveStream.js');
 const useableHomepage = require('./useableHomepage.js');
-const {stations, logger} = require('./../services.js');
+const {stations, logger, getCollection, collections} = require('./../services.js');
 const retry = require('./retry.js');
 
 const limit = pLimit(5);
@@ -299,8 +299,15 @@ async function testStreams() {
         logger.debug('Garbage collected');
       }
     }
-    const duration = msToHhMmSs(Date.now() - startTime);
+    const end = Date.now()
+    const duration = msToHhMmSs(end - startTime);
     const stats = await stations.dbStats();
+    await getCollection(collections.DB_UPDATES).insertOne({
+      changed: updatedCount,
+      start,
+      end,
+      ...stats
+    });
 
     logger.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
     logger.info(`Stats - Total: ${stats.total}, Online: ${stats.online}, Offline: ${stats.total - stats.online}`);
