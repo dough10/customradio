@@ -307,6 +307,7 @@ async function testStreams() {
       start,
       end,
       ...stats,
+      type: 'update',
       version: require('../../package.json').version
     });
 

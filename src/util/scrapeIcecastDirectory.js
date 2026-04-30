@@ -160,6 +160,7 @@ module.exports = async () => {
       end,
       total,
       online,
+      type: 'scrape',
       version: require('../../package.json').version
     });
     logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(end - start)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
