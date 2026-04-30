@@ -169,6 +169,7 @@ module.exports = (app, httpRequestCounter) => {
    * LOGGING
    */
   app.use((req, res, next) => {
+    if (req.originalUrl === '/metrics') return next();
     const start = performance.now();
     res.on("finish", () => logger.info(logString(req, res, start)));
     next();
