@@ -366,8 +366,6 @@ module.exports = (app, httpRequestCounter) => {
             cspProperties.SELF,
             cspProperties.HTTPS
           ],
-          trustedTypes: [],
-          requireTrustedTypesFor: ["script"],
           reportUri: "/csp-report",
         },
       },
