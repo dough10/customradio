@@ -273,6 +273,7 @@ module.exports = (app, httpRequestCounter) => {
    * REQUEST COUNTER
    */
   app.use((req, res, next) => {
+    if (req.originalUrl === '/metrics') return next();
     res.on("finish", () => {
       httpRequestCounter.inc({
         method: req.method,
