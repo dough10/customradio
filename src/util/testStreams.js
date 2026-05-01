@@ -302,17 +302,21 @@ async function testStreams() {
     const end = Date.now()
     const duration = msToHhMmSs(end - start);
     const stats = await stations.dbStats();
-    await getCollection(collections.DB_UPDATES).insertOne({
-      changed: updatedCount,
-      start,
-      end,
-      ...stats,
-      type: 'update',
-      version: require('../../package.json').version
-    });
-
+    
     logger.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
     logger.info(`Stats - Total: ${stats.total}, Online: ${stats.online}, Offline: ${stats.total - stats.online}`);
+    try{
+      await getCollection(collections.DB_UPDATES).insertOne({
+        changed: updatedCount,
+        start,
+        end,
+        ...stats,
+        type: 'update',
+        version: require('../../package.json').version
+      });
+    }catch(e) {
+      logger.error(`Failed to save update details: ${e}`)
+    }
   } catch(e) {
     logger.error(`Database update failed: ${e.message}`);
   }

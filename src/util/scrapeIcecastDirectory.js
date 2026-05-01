@@ -154,16 +154,20 @@ module.exports = async () => {
     );
     const {total, online} = await stations.dbStats();
     const end = Date.now();
-    await getCollection(collections.DB_UPDATES).insertOne({
-      changed,
-      start,
-      end,
-      total,
-      online,
-      type: 'scrape',
-      version: require('../../package.json').version
-    });
     logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(end - start)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
+    try {
+      await getCollection(collections.DB_UPDATES).insertOne({
+        changed,
+        start,
+        end,
+        total,
+        online,
+        type: 'scrape',
+        version: require('../../package.json').version
+      });
+    } catch (e) {
+      logger.error(`Failed saving update details: ${e}`);
+    }
   } catch (err) {
     logger.critical(`Scrape failed: ${err.message}`);
   } finally {
