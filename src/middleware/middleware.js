@@ -196,8 +196,9 @@ module.exports = (app, httpRequestCounter) => {
   /**
    * SESSION
    */
-  app.use(
-    session({
+  app.use((req, res, next) => {
+    if (req.path === "/metrics") return next();
+    return session({
       store: initSessionStorage(),
       secret: process.env.SESSION_SECRET,
       resave: false,
@@ -208,8 +209,8 @@ module.exports = (app, httpRequestCounter) => {
         sameSite: "strict",
         maxAge: 24 * 60 * 60 * 1000,
       },
-    })
-  );
+    })(req, res, next);
+  });
 
   app.use(wosMiddleware);
 
@@ -228,6 +229,7 @@ module.exports = (app, httpRequestCounter) => {
    * Makes token available to templates via res.locals
    */
   app.use((req, res, next) => {
+    if (req.path === "/metrics") return next();
     if (!req.session.csrfToken) {
       const csrfToken = crypto.randomBytes(32).toString("hex");
       req.session.csrfToken = csrfToken;
@@ -273,19 +275,15 @@ module.exports = (app, httpRequestCounter) => {
    * REQUEST COUNTER
    */
   app.use((req, res, next) => {
-    if (req.path === "/metrics") return next();
-    return session({
-      store: initSessionStorage(),
-      secret: process.env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: process.env.NODE_ENV === "production",
-        httpOnly: true,
-        sameSite: "strict",
-        maxAge: 24 * 60 * 60 * 1000,
-      },
-    })(req, res, next);
+    if (req.originalUrl === '/metrics') return next();
+    res.on("finish", () => {
+      httpRequestCounter.inc({
+        method: req.method,
+        route: req.path,
+        status_code: res.statusCode,
+      });
+    });
+    next();
   });
 
   /**
