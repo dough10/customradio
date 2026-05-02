@@ -85,7 +85,7 @@ function logString(req, res, start) {
     parts.push(`count: ${req.count}`);
   }
 
-  parts.push(`lang: ${req.loadedLang}`);
+  if (req.loadedLang) parts.push(`lang: ${req.loadedLang}`);
 
   if (req.body && Object.keys(req.body).length > 0) {
     parts.push(`body: ${JSON.stringify(req.body)}`);
