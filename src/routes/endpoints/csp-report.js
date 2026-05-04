@@ -103,13 +103,21 @@ module.exports = asyncHandler(async (req, res) => {
     version
   };
 
+  let bodyStr = '';
+  try {
+    bodyStr = JSON.stringify(req.body) || '';
+  } catch {
+    bodyStr = '[unserializable body]';
+  }
+  bodyStr = bodyStr.slice(0, 2000);
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
     await getCollection(collections.CSP_FAILS).insertOne({
       ...baseObj,
       error,
-      body: JSON.stringify(req.body).slice(0, 2000)
+      body: bodyStr
     });
     res.status(400).json({ error });
     return;
@@ -120,7 +128,7 @@ module.exports = asyncHandler(async (req, res) => {
     await getCollection(collections.CSP_FAILS).insertOne({
       ...baseObj,
       error: 'csp-report missing from body',
-      body: JSON.stringify(req.body).slice(0, 2000)
+      body: bodyStr
     });
     return res.status(400).json({ error: 'csp-report missing' });
   }
@@ -134,6 +142,7 @@ module.exports = asyncHandler(async (req, res) => {
       sanitizedReport[key] = stripQuery(rawReport[key]);
     } else if (key === 'script-sample') {
       const sample = rawReport[key];
+      if (!sample) continue;
       sanitizedReport[key] = typeof sample === 'string' ? sample.slice(0, 200) : '';
     } else {
       sanitizedReport[key] = rawReport[key];
