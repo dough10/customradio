@@ -1,4 +1,4 @@
-const {redisClient} = require('../services.js');
+const { redisClient } = require('../services.js');
 
 const WINDOW = 60 * 5;        // 5 minutes (seconds)
 const BAN_DURATION = 60 * 60 * 24; // 24 hours
@@ -16,7 +16,12 @@ async function badActor(ip, attempts = MAX_ATTEMPTS) {
     return;
   }
 
-  await redisClient.zAdd(key, [{ score: now, value: now.toString() }]);
+  await redisClient.zAdd(key, [
+    {
+      score: now,
+      value: now.toString()
+    }
+  ]);
 
   await redisClient.zRemRangeByScore(key, 0, windowStart);
 
@@ -26,7 +31,7 @@ async function badActor(ip, attempts = MAX_ATTEMPTS) {
 
   if (count > attempts) {
     await redisClient.set(banKey, "1", { EX: BAN_DURATION });
-    await redisClient.del(key); 
+    await redisClient.del(key);
   }
 }
 
