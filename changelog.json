@@ -1,6 +1,7 @@
 {
   "Current": [
-    "Update admin tools"
+    "Update admin tools",
+    "Added confirmation dialog to mark duplicate option"
   ],
   "1.13.3": [
     "normalize language string parser for better translation loading",
