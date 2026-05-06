@@ -22,5 +22,8 @@ export const en = {
   clipboard_success: 'Copied to clipboard',
   clipboard_failure: 'Copy to clipboard failed',
   lastPlayedStation: stationName => `Last Played: ${stationName}`,
-  resume: 'Resume'
+  resume: 'Resume',
+  markConfirmation: stationName => `Mark ${stationName} as a duplicate?`,
+  yes: 'yes',
+  no: 'no'
 };
