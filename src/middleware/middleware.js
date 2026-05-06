@@ -370,7 +370,6 @@ module.exports = (app, httpRequestCounter) => {
             cspProperties.HTTPS
           ],
           trustedTypes: [],
-          // requireTrustedTypesFor: ["'script'"],
           reportUri: "/csp-report",
         },
       },
