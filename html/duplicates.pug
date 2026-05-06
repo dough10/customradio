@@ -11,8 +11,8 @@ html(lang=lang)
     ul
       each dup in duplicates
         li(
-          data-id=dup.id
           data-name=dup.name
-        ) #{dup.id}: #{dup.name}
+          data-url=dup.url
+        ) #{dup.name}: #{dup.url}
       else
         li No Duplicates
