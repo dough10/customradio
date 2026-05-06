@@ -49,7 +49,11 @@ function launch() {
 
 (async () => {
   try {
-    await initMongo();
+    try{
+      await initMongo();
+    } catch(e) {
+      logger.error(e);
+    }
     await launch();
   } catch (err) {
     logger.critical(err);
