@@ -10,6 +10,8 @@ module.exports = (urlString) => {
     const u = new URL(urlString);
 
     u.searchParams.delete('ref');
+    u.searchParams.delete('uuid');
+    u.searchParams.delete('t');
 
     return u.toString();
   } catch {

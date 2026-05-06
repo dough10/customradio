@@ -4,7 +4,6 @@ const pack = require('../../package.json');
 const pLimit = require('p-limit');
 
 const { testHomepageConnection, plural, msToHhMmSs } = require('./testStreams.js');
-const rmRef = require('./rmRef.js');
 const isLiveStream = require('./isLiveStream.js');
 const usedTypes = require("./usedTypes.js");
 const retry = require('./retry.js');
@@ -94,7 +93,7 @@ async function processStream(entry, length, stations) {
   logger.debug(`Scrape progress: ${((progressCounter / length) * 100).toFixed(3)}%`);
   
   try{
-    const url = rmRef(entry.listen_url[0]);
+    const url = entry.listen_url[0];
 
     if (!url) return;
 

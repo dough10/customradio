@@ -5,6 +5,7 @@ const retry = require("./retry.js");
 const fixEncoding = require("./fixEncoding.js");
 const {logger} = require('./../services.js');
 const usedTypes = require("./usedTypes.js");
+const rmRef = require('./rmRef.js');
 
 /**
  * An array of unhelpful stream names to ignore.
@@ -46,7 +47,7 @@ function cleanURL(url) {
   defaultPorts.forEach((port) => {
     url = url.replace(port, "/");
   });
-  return url;
+  return rmRef(url);
 }
 
 /**
