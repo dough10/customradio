@@ -1,5 +1,8 @@
 {
   "Current": [
+    "Update admin tools"
+  ],
+  "1.13.3": [
     "normalize language string parser for better translation loading",
     "better csp violation tracking",
     "added endpoint that will get all stations listed as online and generate a txt file /txt/all"
