@@ -320,6 +320,24 @@ class Stations extends DbCon {
   }
 
   /**
+   * unmark stations as duplicate
+   * @param {Number} id 
+   * @returns {Promise<void>}
+   */
+  unmarkDuplicate(id) {
+    return this.run(`UPDATE stations SET duplicate = 0 WHERE id = ?`, [id]);
+  }
+
+  /**
+   * get all duplicate stations
+   * 
+   * @returns {Promise<Array>}
+   */
+  getDuplicates() {
+    return this.run('SELECT * FROM stations WHERE duplicate = 1');
+  }
+
+  /**
    * returns a count of all station entries
    * 
    * @returns {Number|Error} count or error
