@@ -11,7 +11,7 @@ module.exports = (urlString) => {
 
     u.searchParams.delete('ref');
     u.searchParams.delete('uuid');
-    u.searchParams.delete('t');
+    u.searchParams.delete('t302');
 
     return u.toString();
   } catch {
