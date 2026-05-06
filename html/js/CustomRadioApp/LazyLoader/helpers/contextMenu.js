@@ -4,6 +4,7 @@ import Toast from '../../Toast/Toast.js';
 import { t } from '../../utils/i18n.js';
 import _OPTIONS from '../../utils/post_options.js';
 import updateCsrf from '../../utils/updateCsrf.js';
+import ConfirmationDialog from '../../UIManager/dialogs/ConfirmationDialog.js';
 
 import EventManager from '../../EventManager/EventManager.js';
 
@@ -27,7 +28,7 @@ function buttonData($el) {
       },
       text: t('markDup'),
       title: t('dupTitle'),
-      func:  _ => markDuplicate($el.id)
+      func: _ => new ConfirmationDialog(t('markConfirmation', $el.dataset.name), _ => markDuplicate($el.id))
     }, {
       icon: {
         viewbox: '0 -960 960 960',
