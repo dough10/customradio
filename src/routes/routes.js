@@ -143,6 +143,12 @@ module.exports = async (app, register) => {
    */
   app.post('/mark-duplicate', markDuplicateValidator, markDuplicate);
 
+
+  /**
+   * view duplicates
+   */
+  app.get('/duplicates', viewDuplicates);
+
   /**
    * An endpoint for audio stream playback error callback
    * 
@@ -426,11 +432,6 @@ module.exports = async (app, register) => {
    * gets all currently active alerts
    */
   app.get('/getAlerts', getAlerts);
-
-  /**
-   * view duplicates
-   */
-  app.get('/duplicates', viewDuplicates);
 
   /**
    * gets a list of all posts
