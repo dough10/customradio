@@ -360,6 +360,23 @@ export default class UIManager {
   }
 
   /**
+   * 
+   */
+  _openDuplicates() {
+    try {
+      const url = new URL('/duplicates', window.location.origin);
+      window.open(
+        url.toString(),
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } catch(e) {
+      new Toast('Failed to open duplicates page');
+      console.error(e);
+    }
+  }
+
+  /**
    * loads the user data to UI
    * 
    * @private
@@ -401,9 +418,13 @@ export default class UIManager {
     this.$loginButton.style.display = 'none';
     this.$logoutButton.style.display = 'flex';
 
+    const {click} = this._em.types;
+
     const addAlertBtn = document.querySelector('button[title="alert"]');
-    if (!addAlertBtn) return;
-    this._em.add(addAlertBtn, this._em.types.click, _ => this._openAddAlert());
+    if (addAlertBtn) this._em.add(addAlertBtn, click, _ => this._openAddAlert());
+
+    const dupButton = document.querySelector('button[title="duplicates"]');
+    if (dupButton) this._em.add(dupButton, click, _ => this._openDuplicates());
   }
 
   /**
