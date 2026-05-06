@@ -28,6 +28,7 @@ const dismissAlert = require('./endpoints/dismissAlert.js');
 const allStationsTxt = require('./endpoints/allStationsTxt.js');
 const trafficAdvice = require('./endpoints/trafficadvice.js');
 const metrics = require('./endpoints/metrics.js');
+const viewDuplicates = require('./endpoints/viewDuplicates.js');
 // const blog = require('./endpoints/blog.js');
 // const blogPost = require('./endpoints/blog.post.js');
 
@@ -425,6 +426,11 @@ module.exports = async (app, register) => {
    * gets all currently active alerts
    */
   app.get('/getAlerts', getAlerts);
+
+  /**
+   * view duplicates
+   */
+  app.get('/duplicates', viewDuplicates);
 
   /**
    * gets a list of all posts
