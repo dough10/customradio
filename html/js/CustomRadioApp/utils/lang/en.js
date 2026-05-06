@@ -23,7 +23,7 @@ export const en = {
   clipboard_failure: 'Copy to clipboard failed',
   lastPlayedStation: stationName => `Last Played: ${stationName}`,
   resume: 'Resume',
-  markConfirmation: stationName => `Mark ${stationName} as a duplicate?`,
+  markConfirmation: stationName => `Mark "${stationName}" as a duplicate?`,
   yes: 'yes',
   no: 'no'
 };
