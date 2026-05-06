@@ -8,6 +8,7 @@ function createDialog(textBody) {
 
   const body = document.createElement('div');
   body.textContent = textBody;
+  body.classList.add('margin-bottom-24');
 
   const yes = document.createElement('button');
   yes.classList.add('button');
