@@ -65,7 +65,6 @@ async function initMongo() {
       logger.debug(`MongoDB ${name} collection ready`);
     }
   } catch (err) {
-    logger.error(`MongoDB connection failed: ${err}`);
     throw err;
   }
 }

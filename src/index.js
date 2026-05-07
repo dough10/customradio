@@ -51,8 +51,8 @@ function launch() {
   try {
     try{
       await initMongo();
-    } catch(e) {
-      logger.error(e);
+    } catch(er) {
+      logger.error(`MongoDB connection failed: ${er}`);
     }
     await launch();
   } catch (err) {
