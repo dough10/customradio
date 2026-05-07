@@ -1,5 +1,6 @@
 {
-  "Current": [
+  "Current": [],
+  "1.13.4": [
     "Update admin tools",
     "Added confirmation dialog to mark duplicate option"
   ],
