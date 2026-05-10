@@ -44,6 +44,7 @@ class ConfirmationDialog extends DialogBase {
         if (called) return;
         called = true;
         this.destroy();
+        this.em.removeAll();
         dialog.remove();
       };
 
