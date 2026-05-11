@@ -3,6 +3,7 @@ const getStations = require('./endpoints/stations.js');
 const streamIssue = require('./endpoints/stream-issue.js');
 const cspReport = require('./endpoints/csp-report.js');
 const markDuplicate = require('./endpoints/markDuplicate.js');
+const unmarkDuplicate = require('./endpoints/unmarkDuplicate.js');
 const sitemap = require('./endpoints/sitemap.js');
 const robots = require('./endpoints/robots.js');
 const reportPlay = require('./endpoints/reportPlay.js');
@@ -143,6 +144,7 @@ module.exports = async (app, register) => {
    */
   app.post('/mark-duplicate', markDuplicateValidator, markDuplicate);
 
+  app.post('/unmark-duplicate', markDuplicateValidator, unmarkDuplicate);
 
   /**
    * view duplicates
