@@ -3,6 +3,11 @@ import hapticFeedback from '../../utils/hapticFeedback.js';
 import EventManager from '../../EventManager/EventManager.js';
 import selectors from '../../selectors.js';
 
+const NAMESPACES = {
+  close: 'close',
+  wobble: 'wobble'
+};
+
 /**
  * Base class for dialogs. Handles common functionality like open/close,
  * close button, and outside click wobble animation.
@@ -92,7 +97,38 @@ export default class DialogBase {
   _attachCloseButton() {
     const btn = this.$(selectors.dialogClose);
     if (!btn) return;
-    this.em.add(btn, this.em.types.click, () => this.close());
+    this.em.add(btn, this.em.types.click, () => this.close(), null, NAMESPACES.close);
+  }
+
+  /**
+   * Plays the dialog animation
+   * 
+   * @param {Event} ev 
+   * @returns {Void}
+   */
+  _wobble(ev) {
+    const ns = `wobble${Date.now()}`;
+    const closeButton = this.$(selectors.smallDialogCloseButton);
+    const bigCloseButton = this.$(selectors.dialogCloseButton);
+    const { left, right, top, bottom } = this.$dialog.getBoundingClientRect();
+    const { clientX: x, clientY: y } = ev;
+
+    const inside = x >= left && x <= right && y >= top && y <= bottom;
+
+    if (inside) return;
+
+    const callback = () => {
+      this.$dialog.classList.remove("dialog-attention");
+      if (closeButton) closeButton.classList.remove('attention');
+      if (bigCloseButton) bigCloseButton.classList.remove('button-attention');
+      this.em.removeByNamespace(ns);
+    };
+
+    this.em.add(this.$dialog, this.em.types.animationend, callback, null, ns);
+    // play wobble animation
+    this.$dialog.classList.add("dialog-attention");
+    if (closeButton) closeButton.classList.add('attention');
+    if (bigCloseButton) bigCloseButton.classList.add('button-attention');
   }
 
   /**
@@ -102,36 +138,7 @@ export default class DialogBase {
    * @returns {void}
    */
   _attachWobbleOnOutsideClick() {
-    const closeButton = this.$(selectors.smallDialogCloseButton);
-    const bigCloseButton = this.$(selectors.dialogCloseButton);
-    
-    this.em.add(this.$dialog, this.em.types.click, ev => {
-      const ns = `wobble${Date.now()}`;
-      const { left, right, top, bottom } = this.$dialog.getBoundingClientRect();
-      const { clientX: x, clientY: y } = ev;
-
-      const inside = x >= left && x <= right && y >= top && y <= bottom;
-
-      if (inside) return;
-
-      // play wobble animation
-      this.$dialog.classList.add("dialog-attention");
-      if (closeButton) closeButton.classList.add('attention');
-      if (bigCloseButton) bigCloseButton.classList.add('button-attention');
-
-      this.em.add(
-        this.$dialog,
-        this.em.types.animationend,
-        () => {
-          this.$dialog.classList.remove("dialog-attention");
-          if (closeButton) closeButton.classList.remove('attention');
-          if (bigCloseButton) bigCloseButton.classList.remove('button-attention');
-          this.em.removeByNamespace(ns);
-        },
-        true,
-        ns
-      );
-    });
+    this.em.add(this.$dialog, this.em.types.click, ev => this._wobble(ev), null, NAMESPACES.wobble);
   }
 
   /**
@@ -153,6 +160,7 @@ export default class DialogBase {
    * @returns {void}
    */
   destroy() {
+    Object.values(NAMESPACES).forEach(ns => this.em.removeByNamespace(ns));
     this.em.removeAll();
   }
 }
