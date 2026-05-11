@@ -1,5 +1,7 @@
 {
-  "Current": [],
+  "Current": [
+    "Fix some browser memory (issue with dangling HTML elements after removal from UI)"
+  ],
   "1.13.4": [
     "Update admin tools",
     "Added confirmation dialog to mark duplicate option"
