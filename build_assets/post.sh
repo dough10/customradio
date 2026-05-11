@@ -24,14 +24,18 @@ version=$(generate_random_string 8)
 
 css_path=styles.min."$version".css
 js_path=bundle.min."$version".js
-template=templates/index.pug
+submit_path=submit.min."$version".js
+
+index_template=templates/index.pug
 
 cp html/*.pug templates/
 
-replace_path styles.min.css "./$css_path" $template
-replace_path bundle.min.js "./$js_path" $template
+replace_path styles.min.css "./$css_path" $index_template
+replace_path bundle.min.js "./$js_path" $index_template
+replace_path submit.min.js "./$submit_path" templates/submit.pug
 
 mv public/styles.min.css public/"$css_path"
 mv public/bundle.min.js public/"$js_path"
+mv public/submit.min.js public/"$submit_path"
 
 node build_assets/update-sw-urls
