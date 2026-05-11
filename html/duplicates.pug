@@ -6,13 +6,55 @@ html(lang=lang)
     meta(name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover")
     link(nonce=nonce rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css")
     script(nonce=nonce, type="text/javascript") window.user = !{JSON.stringify(user)};
+    style(nonce=nonce).
+      svg {
+        height: 24px;
+        width: 24px;
+      }
   body
     h1 Station Duplicates
     ul
       each dup in duplicates
         li(
-          data-name=dup.name
-          data-url=dup.url
-        ) #{dup.name}: #{dup.url}
+          data-id=dup.id
+        ) #{dup.name}: #{dup.url} 
+          button.button
+            svg(viewBox="0 0 24 24" alt='close')
+              path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
       else
         li No Duplicates
+
+  script(nonce=nonce).
+    function opt(body = null) {
+      const options = {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+        }
+      };
+
+      if (body && body instanceof HTMLFormElement) {
+        options.body = new FormData(body);
+      } else if (body && typeof body === 'object') {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(body);
+      }
+
+      return options;
+    }
+
+    async function go(button) {
+      const id = button.parentElement.dataset;
+      const res = await fetch('/unmark-duplicate', opt(id));
+      if (!res.ok) return alert('failed to unmark as duplicate');
+      window.location.href = window.location.href;
+    }
+
+    function onLoad() {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => button.addEventListener('click', _ => go(button)));
+    }
+
+    window.addEventListener('DOMContentLoaded', onLoad);
