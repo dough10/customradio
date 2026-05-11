@@ -146,6 +146,7 @@ function addClosingListeners($popup, $body, $backdrop) {
     em.add($popup, em.types.transitionend, _ => {
       $backdrop.remove();
       $popup.remove();
+      em.removeByNamespace('clicks');
       em.removeByNamespace(ns);
     }, true, ns);
     $popup.removeAttribute('open');
