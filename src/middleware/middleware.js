@@ -295,7 +295,7 @@ module.exports = (app, httpRequestCounter) => {
    * CSP BODY PARSER
    */
   app.use((req, res, next) => {
-    if (!req.is("application/csp-report")) return next();
+    if (!req.is("application/csp-report") || !req.is("application/reports+json")) return next();
 
     let body = "";
     req.on("data", (chunk) => (body += chunk));
