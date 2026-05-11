@@ -2,6 +2,8 @@
 import DialogBase from './DialogBase.js';
 import selectors from '../../selectors.js';
 
+const key = 'greeted';
+
 /**
  * Greeting Dialog
  * Displays a greeting message to first-time users with instrctions for how to use the site.
@@ -15,10 +17,8 @@ export default class GreetingDialog extends DialogBase {
 
     if (!this.$dialog) return;
 
-    const greeted = Number(localStorage.getItem("greeted"));
-    if (greeted) {
-      super.destroy();
-      this.$dialog.remove();
+    if (Number(localStorage.getItem(key))) {
+      this.destroy();
       return;
     }
 
@@ -34,8 +34,13 @@ export default class GreetingDialog extends DialogBase {
   _afterTransition() {
     if (!this.$dialog.hasAttribute('open')) {
       this.destroy();
-      localStorage.setItem("greeted", "1");
-      this.$dialog.remove();
+      localStorage.setItem(key, "1");
     }
+  }
+
+  destroy() {
+    super.destroy();
+    this.em.removeAll();
+    this.$dialog.remove();
   }
 }
