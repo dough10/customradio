@@ -72,10 +72,11 @@ export default async function contextMenu(ev) {
   $popup.append(...$buttons);
   $body.append($popup, $backdrop);
   
-  const ndx = em.add($popup, em.types.transitionend, _ => {
+  const ns = `open-${Date.now()}`;
+  em.add($popup, em.types.transitionend, _ => {
     addClosingListeners($popup, $body, $backdrop);
-    em.remove(ndx);
-  }, true);
+    em.removeByNamespace(ns);
+  }, true, ns);
 
   await sleep(20);
 
@@ -141,14 +142,16 @@ function addClosingListeners($popup, $body, $backdrop) {
   const dismiss = ev => {
     ev.preventDefault();
     em.removeByNamespace(namespace);
-    const ndx = em.add($popup, em.types.transitionend, _ => {
+    const ns = `dismiss-${Date.now()}`;
+    em.add($popup, em.types.transitionend, _ => {
       $backdrop.remove();
       $popup.remove();
-      em.remove(ndx);
-    }, true);
+      em.removeByNamespace(ns);
+    }, true, ns);
     $popup.removeAttribute('open');
     $backdrop.removeAttribute('visable');
   };
+
   [
     em.types.click,
     em.types.contextmenu
