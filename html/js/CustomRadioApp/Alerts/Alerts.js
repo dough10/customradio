@@ -62,8 +62,8 @@ export default class Alert {
    */
   #cleanUp() {
     if (this.timeout) clearTimeout(this.timeout);
-    this._em.removeByNamespace(NAMESPACES.alert_click);
-    this._em.removeByNamespace(NAMESPACES.close_animation);
+    Object.values(NAMESPACES).forEach(ns => this._em.removeByNamespace(ns));
+    this._em.removeAll();
     this.$alert?.remove();
     this.$alert = null;
     this.timeout = null;
