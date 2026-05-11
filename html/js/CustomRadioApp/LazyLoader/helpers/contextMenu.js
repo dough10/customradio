@@ -12,6 +12,13 @@ const ELEMENT_HEIGHT = 40;
 
 const em = new EventManager();
 
+const NAMESPACES = {
+  clicks: 'clicks',
+  openTransition: 'open-transition',
+  dismiss: 'dismiss',
+  dismissTransition: 'dismiss-transition'
+};
+
 /**
  * generate button array
  * 
@@ -72,11 +79,10 @@ export default async function contextMenu(ev) {
   $popup.append(...$buttons);
   $body.append($popup, $backdrop);
   
-  const ns = `open-${Date.now()}`;
   em.add($popup, em.types.transitionend, _ => {
     addClosingListeners($popup, $body, $backdrop);
-    em.removeByNamespace(ns);
-  }, true, ns);
+    em.removeByNamespace(NAMESPACES.openTransition);
+  }, true, NAMESPACES.openTransition);
 
   await sleep(20);
 
@@ -105,7 +111,7 @@ function contextMenuOption({icon, text, title, func}) {
   const $li = document.createElement('li');
   $li.title = title;
   $li.append(svgIcon(icon), $txt);
-  em.add($li, em.types.click, func, true, 'clicks');
+  em.add($li, em.types.click, func, true, NAMESPACES.clicks);
   return $li;
 }
 
@@ -138,17 +144,17 @@ function openStationHomepage(homepage) {
  * @param {HTMLElement} $backdrop 
  */
 function addClosingListeners($popup, $body, $backdrop) {
-  const namespace = `context-${Date.now()}`;
   const dismiss = ev => {
     ev.preventDefault();
-    em.removeByNamespace(namespace);
-    const ns = `dismiss-${Date.now()}`;
+    em.removeByNamespace(NAMESPACES.dismiss);
     em.add($popup, em.types.transitionend, _ => {
+      em.removeByNamespace(NAMESPACES.clicks);
+      em.removeByNamespace(NAMESPACES.dismissTransition);
+      //ensure cleanup
+      em.removeAll()
       $backdrop.remove();
       $popup.remove();
-      em.removeByNamespace('clicks');
-      em.removeByNamespace(ns);
-    }, true, ns);
+    }, true, NAMESPACES.dismissTransition);
     $popup.removeAttribute('open');
     $backdrop.removeAttribute('visable');
   };
@@ -156,7 +162,7 @@ function addClosingListeners($popup, $body, $backdrop) {
   [
     em.types.click,
     em.types.contextmenu
-  ].forEach(ev => em.add($body, ev, dismiss, true, namespace));
+  ].forEach(ev => em.add($body, ev, dismiss, true, NAMESPACES.dismiss));
 }
 
 /**
