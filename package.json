@@ -6,7 +6,7 @@
   "scripts": {
     "start:prod": "node --expose-gc dist/index.js",
     "prebuild": "bash build_assets/pre.sh",
-    "build": "npx webpack --config config/runtime.config.js && npx webpack --config config/webpack.config.js",
+    "build": "bash build_assets/build-app.sh",
     "postbuild": "bash build_assets/post.sh",
     "test": "web-test-runner \"html/js/CustomRadioApp/**/*.test.js\" --node-resolve && mocha",
     "version++": "node build_assets/incriment-version.js && node assets/make-docs.js",
