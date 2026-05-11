@@ -17,7 +17,7 @@ function initDialogInteractions() {
   shareDialog = new ShareDialog();
   infoDialog = new InfoDialog();
   addStreamDialog = new AddStreamDialog();
-  greetingDialog = new GreetingDialog();
+  new GreetingDialog();
 }
 
 /**
