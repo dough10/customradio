@@ -107,7 +107,7 @@ export default class DialogBase {
    * @returns {Void}
    */
   _wobble(ev) {
-    const ns = `wobble${Date.now()}`;
+    const ns = `${NAMESPACES.wobble}-${Date.now()}`;
     const closeButton = this.$(selectors.smallDialogCloseButton);
     const bigCloseButton = this.$(selectors.dialogCloseButton);
     const { left, right, top, bottom } = this.$dialog.getBoundingClientRect();
