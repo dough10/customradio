@@ -100,7 +100,7 @@ function logString(req, res, start) {
   const contentLength = res.getHeader('Content-Length');
   if (contentLength) parts.push(`bytes: ${contentLength}`);
 
-  if (req.requestId) parts.push(`request-id: ${req.requestId}`);
+  // if (req.requestId) parts.push(`request-id: ${req.requestId}`);
 
   parts.push(`ms: ${(performance.now() - start).toFixed(2)}`);
 
