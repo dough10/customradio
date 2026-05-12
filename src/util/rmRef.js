@@ -1,3 +1,10 @@
+const trashParams = [
+  'ref',
+  'uuid',
+  't302',
+  'fromyp'
+];
+
 /**
  * remove "ref" query parameter
  * 
@@ -8,11 +15,9 @@
 module.exports = (urlString) => {
   try {
     const u = new URL(urlString);
-
-    u.searchParams.delete('ref');
-    u.searchParams.delete('uuid');
-    u.searchParams.delete('t302');
-
+    for (const trash of trashParams) {
+      u.searchParams.delete(trash);
+    }
     return u.toString();
   } catch {
     return urlString;
