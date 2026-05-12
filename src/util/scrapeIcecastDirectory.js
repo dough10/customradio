@@ -153,17 +153,14 @@ module.exports = async () => {
         limit(() => processStream(entry, length, stations))
       )
     );
-    const {total, online} = await stations.dbStats();
+    const stats = await stations.dbStats();
     const end = Date.now();
     logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(end - start)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
     try {
       await getCollection(collections.DB_UPDATES).insertOne({
         changed,
-        start,
-        end,
-        startStats,
-        total,
-        online,
+        start: {...startStats, time: start},
+        end: {...stats, time: end},
         type: 'scrape',
         version: require('../../package.json').version
       });

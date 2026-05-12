@@ -310,10 +310,8 @@ async function testStreams() {
     try{
       await getCollection(collections.DB_UPDATES).insertOne({
         changed: updatedCount,
-        start,
-        end,
-        startStats,
-        ...stats,
+        start: {...startStats, time: start},
+        end: {...stats, time: end},
         type: 'update',
         version: require('../../package.json').version
       });
