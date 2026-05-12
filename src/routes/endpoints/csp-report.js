@@ -117,18 +117,32 @@ module.exports = asyncHandler(async (req, res) => {
     await getCollection(collections.CSP_FAILS).insertOne({
       ...baseObj,
       error,
-      body: bodyStr
+      body: bodyStr,
+      contentType: req.headers['content-type'],
+      bodyType: typeof req.body
     });
     res.status(400).json({ error });
     return;
   }
 
-  const rawReport = req.body['csp-report'];
+  let rawReport = null;
+
+  if (req.body?.['csp-report']) {
+    rawReport = req.body['csp-report'];
+  } else if (
+    Array.isArray(req.body) &&
+    req.body[0]?.type === 'csp-violation'
+  ) {
+    rawReport = req.body[0].body;
+  }
+
   if (!rawReport) {
     await getCollection(collections.CSP_FAILS).insertOne({
       ...baseObj,
       error: 'csp-report missing from body',
-      body: bodyStr
+      body: bodyStr,
+      contentType: req.headers['content-type'],
+      bodyType: typeof req.body
     });
     return res.status(400).json({ error: 'csp-report missing' });
   }
@@ -163,7 +177,9 @@ module.exports = asyncHandler(async (req, res) => {
     )
     .digest('hex');
 
-  await getCollection(collections.CSP).updateOne(
+  res.status(204).send();
+
+  void getCollection(collections.CSP).updateOne(
     { fingerprint: cspReport.fingerprint },
     {
       $setOnInsert: cspReport,
@@ -172,5 +188,4 @@ module.exports = asyncHandler(async (req, res) => {
     },
     { upsert: true }
   );
-  res.status(204).send();
 });
