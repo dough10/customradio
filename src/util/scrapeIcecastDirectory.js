@@ -138,8 +138,9 @@ async function processStream(entry, length, stations) {
  * @returns {Promise<void>}
  */
 module.exports = async () => {
-  const start = Date.now();
-  const startStats = await stations.dbStats();
+  const start = await stations.dbStats();
+  start.time = Date.now();
+
   progressCounter = 0;
   changed = 0;
   try {
@@ -153,14 +154,14 @@ module.exports = async () => {
         limit(() => processStream(entry, length, stations))
       )
     );
-    const stats = await stations.dbStats();
-    const end = Date.now();
-    logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(end - start)}. usable entries: ${total}, online: ${online}, offline: ${total - online}`);
+    const end = await stations.dbStats();
+    end.time = Date.now();
+    logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(end.time - start.time)}. Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
     try {
       await getCollection(collections.DB_UPDATES).insertOne({
         changed,
-        start: {...startStats, time: start},
-        end: {...stats, time: end},
+        start,
+        end,
         type: 'scrape',
         version: require('../../package.json').version
       });

@@ -268,11 +268,12 @@ async function processStream(station, ndx, offset, length, stations, totalStatio
  *   });
  */
 async function testStreams() {
-  const start = Date.now();
-  logger.info(`Starting database update at ${new Date(start).toISOString()}`);
+  const start = await stations.dbStats();
+  start.time = Date.now();
+  
+  logger.info(`Starting database update at ${new Date(start.time).toISOString()}`);
   try {
-    const startStats = await stations.dbStats();
-    const totalStationCount = startStats.total;
+    const totalStationCount = start.total;
     const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
     
     counter = 0;
@@ -301,17 +302,18 @@ async function testStreams() {
         logger.debug('Garbage collected');
       }
     }
-    const end = Date.now()
-    const duration = msToHhMmSs(end - start);
-    const stats = await stations.dbStats();
+
+    const end = await stations.dbStats();
+    end.time = Date.now();
+    const duration = msToHhMmSs(end.time - start.time);
     
     logger.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
-    logger.info(`Stats - Total: ${stats.total}, Online: ${stats.online}, Offline: ${stats.total - stats.online}`);
+    logger.info(`Stats - Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
     try{
       await getCollection(collections.DB_UPDATES).insertOne({
         changed: updatedCount,
-        start: {...startStats, time: start},
-        end: {...stats, time: end},
+        start,
+        end,
         type: 'update',
         version: require('../../package.json').version
       });
