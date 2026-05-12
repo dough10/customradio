@@ -3,7 +3,7 @@ set -e
 
 configs=(
   "config/runtime.config.js"
-  "config/webpack.config.js"
+  "config/index.config.js"
   "config/submit.config.js"
 )
 
