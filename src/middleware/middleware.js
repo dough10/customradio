@@ -76,7 +76,7 @@ function initSessionStorage() {
 function logString(req, res, start) {
   const parts = [];
 
-  parts.push(`${maskIP(req.ip)} -> [${req.method}] ${req.originalUrl}`);
+  parts.push(`${maskIP(req.ip)} -> [${req.method}] ${req.path}`);
 
   if (req.user) {
     parts.push(`user: ${req.user.id.replace('user_', '')}, admin: ${isAdmin(req)}`);
@@ -100,7 +100,7 @@ function logString(req, res, start) {
   const contentLength = res.getHeader('Content-Length');
   if (contentLength) parts.push(`bytes: ${contentLength}`);
 
-  // parts.push(`request-id: ${req.requestId}`);
+  if (req.requestId) parts.push(`request-id: ${req.requestId}`);
 
   parts.push(`ms: ${(performance.now() - start).toFixed(2)}`);
 
@@ -108,6 +108,15 @@ function logString(req, res, start) {
 }
 
 module.exports = (app, httpRequestCounter) => {
+  /**
+   * LOGGING
+   */
+  app.use((req, res, next) => {
+    if (req.path === '/metrics') return next();
+    const start = performance.now();
+    res.on("finish", () => logger.info(logString(req, res, start)));
+    next();
+  });
 
   /**
    * TRUST PROXY
@@ -169,16 +178,6 @@ module.exports = (app, httpRequestCounter) => {
    */
   app.use((req, res, next) => {
     req.requestId = crypto.randomUUID();
-    next();
-  });
-
-  /**
-   * LOGGING
-   */
-  app.use((req, res, next) => {
-    if (req.originalUrl === '/metrics') return next();
-    const start = performance.now();
-    res.on("finish", () => logger.info(logString(req, res, start)));
     next();
   });
 
@@ -289,7 +288,7 @@ module.exports = (app, httpRequestCounter) => {
    * REQUEST COUNTER
    */
   app.use((req, res, next) => {
-    if (req.originalUrl === '/metrics') return next();
+    if (req.path === '/metrics') return next();
     res.on("finish", () => {
       httpRequestCounter.inc({
         method: req.method,
