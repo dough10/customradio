@@ -293,7 +293,7 @@ async function testStreams() {
 
       // track memory usage
       const used = process.memoryUsage();
-      logger.info(`Memory usage: ${toMB(used.heapUsed)}`);
+      logger.debug(`Memory usage: ${toMB(used.heapUsed)}`);
 
       // Forced garbage collection after batch processing to reduce memory pressure
       if (global.gc) {
