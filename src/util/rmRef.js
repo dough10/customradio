@@ -2,7 +2,9 @@ const trashParams = [
   'ref',
   'uuid',
   't302',
-  'fromyp'
+  'fromyp',
+  'listening-from-radio-garden',
+  'time'
 ];
 
 /**
