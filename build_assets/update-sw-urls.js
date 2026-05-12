@@ -13,6 +13,7 @@ const files = fs.readdirSync(dest)
     'worker.js', 
     'screenshots'
   ].includes(file))
+  .filter(file => !file.startsWith('submit.min'))
   .map(file => `/${file}`);
 
 [
