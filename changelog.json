@@ -1,6 +1,7 @@
 {
   "Current": [
-    "Fix browser memory bug (issue with dangling HTML elements after removal from UI)"
+    "Fix browser memory bug (better event namespacing for programaticaly created elements)",
+    "More admin tool updates"
   ],
   "1.13.4": [
     "Update admin tools",
