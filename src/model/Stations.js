@@ -334,7 +334,7 @@ class Stations extends DbCon {
    * @returns {Promise<Array>}
    */
   getDuplicates() {
-    return this.all('SELECT * FROM stations WHERE duplicate = 1 AND online = 1');
+    return this.all('SELECT * FROM stations WHERE duplicate = 1 AND online = 1 ORDER BY name ASC');
   }
 
   /**
