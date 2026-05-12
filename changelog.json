@@ -1,7 +1,8 @@
 {
   "Current": [
     "Fix browser memory bug (better event namespacing for programaticaly created elements)",
-    "More admin tool updates"
+    "More admin tool updates",
+    "Added copy URL to right click context menu in the station list"
   ],
   "1.13.4": [
     "Update admin tools",
