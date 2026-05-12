@@ -35,13 +35,13 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
 });
 
 let mongoClient;
-let db;
 const mongo = {};
 
 const collections = {
   CSP: 'csp',
   CSP_FAILS: 'csp-fails',
-  DB_UPDATES: 'db-updates'
+  DB_UPDATES: 'db-updates',
+  ERRORS: 'errors'
 };
 
 /**
@@ -59,7 +59,7 @@ async function initMongo() {
     mongoClient.on('error', err => logger.error(`MongoDB error: ${err}`));
     await mongoClient.connect();
     logger.debug("MongoDB connected");
-    db = mongoClient.db("radiotxt");
+    const db = mongoClient.db("radiotxt");
     for (const name of Object.values(collections)) {
       mongo[name] = db.collection(name);
       logger.debug(`MongoDB ${name} collection ready`);

@@ -7,6 +7,7 @@ const { testHomepageConnection, plural, msToHhMmSs } = require('./testStreams.js
 const isLiveStream = require('./isLiveStream.js');
 const usedTypes = require("./usedTypes.js");
 const retry = require('./retry.js');
+const logError = require('./logError.js');
 const {stations, logger, getCollection, collections} = require('./../services.js');
 
 const limit = pLimit(5);
@@ -138,6 +139,7 @@ async function processStream(entry, length, stations) {
  */
 module.exports = async () => {
   const start = Date.now();
+  const startStats = await stations.dbStats();
   progressCounter = 0;
   changed = 0;
   try {
@@ -159,15 +161,18 @@ module.exports = async () => {
         changed,
         start,
         end,
+        startStats,
         total,
         online,
         type: 'scrape',
         version: require('../../package.json').version
       });
     } catch (e) {
+      logError(e);
       logger.error(`Failed saving update details: ${e}`);
     }
   } catch (err) {
+    logError(err);
     logger.critical(`Scrape failed: ${err.message}`);
   } finally {
     changed = 0;

@@ -7,6 +7,7 @@ const isLiveStream = require('./isLiveStream.js');
 const useableHomepage = require('./useableHomepage.js');
 const {stations, logger, getCollection, collections} = require('./../services.js');
 const retry = require('./retry.js');
+const logError = require('./logError.js');
 
 const limit = pLimit(5);
 
@@ -270,7 +271,8 @@ async function testStreams() {
   const start = Date.now();
   logger.info(`Starting database update at ${new Date(start).toISOString()}`);
   try {
-    const totalStationCount = await stations.getTotalCount();
+    const startStats = await stations.dbStats();
+    const totalStationCount = startStats.total;
     const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
     
     counter = 0;
@@ -310,14 +312,17 @@ async function testStreams() {
         changed: updatedCount,
         start,
         end,
+        startStats,
         ...stats,
         type: 'update',
         version: require('../../package.json').version
       });
     }catch(e) {
+      logError(e);
       logger.error(`Failed to save update details: ${e}`)
     }
   } catch(e) {
+    logError(e);
     logger.error(`Database update failed: ${e.message}`);
   }
 

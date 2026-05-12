@@ -10,12 +10,13 @@ const crypto = require("crypto");
 const cookieParser = require("cookie-parser");
 const { performance } = require("perf_hooks");
 
-const { logger, redisClient } = require("../services.js");
+const { logger, redisClient, getCollection, collections } = require("../services.js");
 const { injectSecrets } = require("../config/secrets.js");
 const { setLanguage } = require("../util/i18n.js");
 const { isBadActor, badActor } = require("../util/badActors.js");
 const isAdmin = require("../util/isAdmin.js");
 const maskIP = require('../util/maskIP.js');
+const logError = require('../util/logError.js');
 
 injectSecrets(["SESSION_SECRET"]);
 
@@ -124,6 +125,7 @@ module.exports = (app, httpRequestCounter) => {
       next();
     } catch (err) {
       logger.error(`badActor check error: ${err}`);
+      await logError(err);
       next();
     }
   });
@@ -158,6 +160,11 @@ module.exports = (app, httpRequestCounter) => {
   app.use(generalLimiter);
 
   /**
+   * CSP LIMITER
+   */
+  app.use("/csp-report", cspLimiter);
+
+  /**
    * REQUEST ID
    */
   app.use((req, res, next) => {
@@ -183,7 +190,14 @@ module.exports = (app, httpRequestCounter) => {
   app.use(cookieParser());
   app.use(cors(corsOptions));
   app.use(express.urlencoded({ extended: true }));
-  app.use(express.json({ limit: "10kb" }));
+  app.use(express.json({
+    type: [
+      'application/json',
+      'application/csp-report',
+      'application/reports+json'
+    ],
+    limit: '50kb'
+  }));
 
   /**
    * NONCE
@@ -287,29 +301,6 @@ module.exports = (app, httpRequestCounter) => {
   });
 
   /**
-   * CSP LIMITER
-   */
-  app.use("/csp-report", cspLimiter);
-
-  /**
-   * CSP BODY PARSER
-   */
-  app.use((req, res, next) => {
-    if (!req.is("application/csp-report") || !req.is("application/reports+json")) return next();
-
-    let body = "";
-    req.on("data", (chunk) => (body += chunk));
-    req.on("end", () => {
-      try {
-        req.body = JSON.parse(body);
-        next();
-      } catch {
-        res.status(400).json({ error: "Invalid JSON" });
-      }
-    });
-  });
-
-  /**
    * HELMET
    */
   app.use(
@@ -391,6 +382,7 @@ module.exports = (app, httpRequestCounter) => {
    */
   app.use((err, req, res, next) => {
     logger.error(err.stack);
+    logError(err);
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
