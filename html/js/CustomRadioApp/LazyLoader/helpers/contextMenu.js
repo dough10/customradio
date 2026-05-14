@@ -9,6 +9,7 @@ import ConfirmationDialog from '../../UIManager/dialogs/ConfirmationDialog.js';
 import EventManager from '../../EventManager/EventManager.js';
 
 const ELEMENT_HEIGHT = 40;
+const STRING_LIMIT = 40;
 
 const em = new EventManager();
 
@@ -27,19 +28,21 @@ const NAMESPACES = {
  * @returns {Array} list of button objects
  */
 function buttonData($el) {
+  const { name, homepage, url } = $el.dataset;
+  const shortName = name.length > STRING_LIMIT ? `${name.slice(0, STRING_LIMIT)}...` : name;
   const buttons = [
     {
       icon: {
-        viewbox:"0 -960 960 960",
+        viewbox: "0 -960 960 960",
         d: "M120-220v-80h80v80h-80Zm0-140v-80h80v80h-80Zm0-140v-80h80v80h-80ZM260-80v-80h80v80h-80Zm100-160q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480Zm40 240v-80h80v80h-80Zm-200 0q-33 0-56.5-23.5T120-160h80v80Zm340 0v-80h80q0 33-23.5 56.5T540-80ZM120-640q0-33 23.5-56.5T200-720v80h-80Zm420 80Z"
       },
       text: t('copy_url'),
       title: t('copy_url'),
       func: async _ => {
-        try{
-          await navigator.clipboard.writeText($el.dataset.url);
+        try {
+          await navigator.clipboard.writeText(url);
           new Toast(t('clipboard_success'));
-        } catch(e) {
+        } catch (e) {
           new Toast(t('clipboard_failure'));
           console.error(e);
         }
@@ -51,16 +54,16 @@ function buttonData($el) {
       },
       text: t('markDup'),
       title: t('dupTitle'),
-      func: _ => new ConfirmationDialog(t('markConfirmation', $el.dataset.name), _ => markDuplicate($el.id))
+      func: _ => new ConfirmationDialog(t('markConfirmation', shortName), _ => markDuplicate($el.id))
     }, {
       icon: {
         viewbox: '0 -960 960 960',
         d: 'M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z'
       },
-      text : t('homepage'),
-      title: t('homepageTitle', $el.dataset.homepage),
-      func: _ => openStationHomepage($el.dataset.homepage),
-      condition: _ => $el.dataset.homepage !== 'Unknown'
+      text: t('homepage'),
+      title: t('homepageTitle', homepage),
+      func: _ => openStationHomepage(homepage),
+      condition: _ => homepage !== 'Unknown'
     }
   ];
   return buttons.filter(btn => !btn.condition || btn.condition());
@@ -82,19 +85,19 @@ export default async function contextMenu(ev) {
   const $popup = document.createElement('ul');
   const $backdrop = document.createElement('div');
   const $buttons = buttonData($el).map(contextMenuOption);
-  
+
   const popupHeight = ELEMENT_HEIGHT * $buttons.length;
   const X = ev.pageX || ev.touches[0].pageX;
   const Y = ev.pageY || ev.touches[0].pageY;
-  
+
   $backdrop.classList.add('backdrop');
   $popup.classList.add('context-menu');
- 
+
   setContextMenuLocation($popup, X, Y, popupHeight);
 
   $popup.append(...$buttons);
   $body.append($popup, $backdrop);
-  
+
   em.add($popup, em.types.transitionend, _ => {
     addClosingListeners($popup, $body, $backdrop);
     em.removeByNamespace(NAMESPACES.openTransition);
@@ -121,7 +124,7 @@ export default async function contextMenu(ev) {
  * 
  * @returns {HTMLElement}
  */
-function contextMenuOption({icon, text, title, func}) {
+function contextMenuOption({ icon, text, title, func }) {
   const $txt = document.createElement('span');
   $txt.textContent = text;
   const $li = document.createElement('li');
@@ -145,7 +148,7 @@ function openStationHomepage(homepage) {
       throw new Error('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
     }
     window.open(url.toString());
-  } catch(error) {
+  } catch (error) {
     new Toast(t('errorHome', error.message));
     console.log(homepage);
     console.error('error validating url:', error);
@@ -203,12 +206,12 @@ function setContextMenuLocation($menu, X, Y, popupHeight) {
  */
 async function markDuplicate(id, attempts = 1) {
   try {
-    const response = await fetch('/mark-duplicate', _OPTIONS({id}));
+    const response = await fetch('/mark-duplicate', _OPTIONS({ id }));
     if (response.ok) {
       const result = await response.json();
       new Toast(t('dupLogged'), 1.5);
     }
-    if (![440,419,403].includes(result.status)) return;
+    if (![440, 419, 403].includes(result.status)) return;
     if (!await updateCsrf() || attempts === 0) return;
     markDuplicate(id, attempts - 1);
   } catch (err) {
