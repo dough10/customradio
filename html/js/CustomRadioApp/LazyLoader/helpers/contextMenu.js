@@ -171,8 +171,10 @@ function addClosingListeners($popup, $body, $backdrop) {
       em.removeByNamespace(NAMESPACES.dismissTransition);
       //ensure cleanup
       em.removeAll()
-      $backdrop.remove();
-      $popup.remove();
+      requestAnimationFrame(_ => {
+        $backdrop.remove();
+        $popup.remove();
+      });
     }, true, NAMESPACES.dismissTransition);
     $popup.removeAttribute('open');
     $backdrop.removeAttribute('visable');

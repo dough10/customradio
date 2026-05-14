@@ -45,7 +45,7 @@ class ConfirmationDialog extends DialogBase {
         called = true;
         this.destroy();
         this.em.removeAll();
-        dialog.remove();
+        requestAnimationFrame(_ => dialog.remove());
       };
 
       this.em.add(
