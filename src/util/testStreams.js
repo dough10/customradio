@@ -13,6 +13,7 @@ const limit = pLimit(5);
 
 let counter = 0;
 let updatedCount = 0;
+let updateing = false;
 
 // function sleep(ms) {
 //   return new Promise(resolve => setTimeout(resolve, ms));
@@ -268,8 +269,10 @@ async function processStream(station, ndx, offset, length, stations, totalStatio
  *   });
  */
 async function testStreams() {
+  if (updateing) return;
+  updating = true;
+
   const start = await stations.dbStats();
-  start.time = Date.now();
   
   logger.info(`Starting database update at ${new Date(start.time).toISOString()}`);
   try {
@@ -304,7 +307,6 @@ async function testStreams() {
     }
 
     const end = await stations.dbStats();
-    end.time = Date.now();
     const duration = msToHhMmSs(end.time - start.time);
     
     logger.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
@@ -324,6 +326,8 @@ async function testStreams() {
   } catch(e) {
     logError(e);
     logger.error(`Database update failed: ${e.message}`);
+  } finally {
+    updateing = false;
   }
 
 }

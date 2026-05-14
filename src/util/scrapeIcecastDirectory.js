@@ -13,7 +13,7 @@ const {stations, logger, getCollection, collections} = require('./../services.js
 const limit = pLimit(5);
 
 
-
+let scraping = false;
 let progressCounter = 0;
 let changed = 0;
 
@@ -138,8 +138,9 @@ async function processStream(entry, length, stations) {
  * @returns {Promise<void>}
  */
 module.exports = async () => {
+  if (scraping) return;
+  scraping = true;
   const start = await stations.dbStats();
-  start.time = Date.now();
 
   progressCounter = 0;
   changed = 0;
@@ -155,7 +156,6 @@ module.exports = async () => {
       )
     );
     const end = await stations.dbStats();
-    end.time = Date.now();
     logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(end.time - start.time)}. Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
     try {
       await getCollection(collections.DB_UPDATES).insertOne({
@@ -175,5 +175,6 @@ module.exports = async () => {
   } finally {
     changed = 0;
     progressCounter = 0;
+    scraping = false;
   }
 };
