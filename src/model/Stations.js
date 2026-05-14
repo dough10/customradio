@@ -483,7 +483,8 @@ class Stations extends DbCon {
 
     return {
       online: online.count,
-      total: total.count
+      total: total.count,
+      time: Date.now()
     };
   }
 
