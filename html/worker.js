@@ -42,7 +42,8 @@ self.addEventListener('fetch', event => {
     url.includes('/reportInList/') ||
     url.includes('/auth') ||
     url.includes('/auth/callback') ||
-    url.includes('/getAlerts')
+    url.includes('/getAlerts') ||
+    url.includes('/updatedb')
   ) {
     event.respondWith(fetch(event.request));
     return;
