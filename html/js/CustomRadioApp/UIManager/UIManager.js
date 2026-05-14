@@ -12,6 +12,7 @@ import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
 import txtDownloadUrl from '../utils/txtDownloadUrl.js';
 import Alert from '../Alerts/Alerts.js';
+import Toast from '../Toast/Toast.js';
 
 const NAMESPACE = {
   backdropClick: 'backdrop-click'
@@ -377,6 +378,23 @@ export default class UIManager {
   }
 
   /**
+   * starts database udpate in background
+   */
+  async _startUpdate() {
+    try {
+      const url = new URL('/updatedb', window.location.origin);
+      const res = await fetch(url.toString());
+      if (!res.ok) {
+        throw new Error('Failed to start update');
+      }
+      const {message} = await res.json();
+      new Toast(message);
+    } catch(e) {
+      new Toast(e);
+    }
+  }
+
+  /**
    * loads the user data to UI
    * 
    * @private
@@ -425,6 +443,9 @@ export default class UIManager {
 
     const dupButton = document.querySelector('button[title="duplicates"]');
     if (dupButton) this._em.add(dupButton, click, _ => this._openDuplicates());
+
+    const updateButton = document.querySelector('button[title="update"]');
+    if (updateButton) this._em.add(updateButton, click, _ => this._startUpdate())
   }
 
   /**
