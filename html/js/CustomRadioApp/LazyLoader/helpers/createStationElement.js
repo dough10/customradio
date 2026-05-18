@@ -117,12 +117,9 @@ async function playStream(ev, player) {
   hapticFeedback();
 
   const $el = ev.target.parentElement;
-  const id = $el.id; 
-  const url = $el.dataset.url;
-  const name = $el.dataset.name;
-  const bitrate = Number($el.dataset.bitrate);
-  const homepage = $el.dataset.homepage;
-  const stream = { id, url, name, bitrate };
+  const id = $el.id;
+  const { url, name, bitrate, homepage } = $el.dataset;
+  const stream = { id, url, name, bitrate: Number(bitrate) };
 
   try {
     player.playStream(stream);
