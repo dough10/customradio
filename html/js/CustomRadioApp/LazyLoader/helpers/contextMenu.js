@@ -5,6 +5,7 @@ import { t } from '../../utils/i18n.js';
 import _OPTIONS from '../../utils/post_options.js';
 import updateCsrf from '../../utils/updateCsrf.js';
 import ConfirmationDialog from '../../UIManager/dialogs/ConfirmationDialog.js';
+import isValidURL from '../../utils/URL.js';
 
 import EventManager from '../../EventManager/EventManager.js';
 
@@ -46,7 +47,8 @@ function buttonData($el) {
           new Toast(t('clipboard_failure'));
           console.error(e);
         }
-      }
+      },
+      condition: _ => isValidURL(url)
     }, {
       icon: {
         viewbox: '0 -960 960 960',
@@ -54,7 +56,7 @@ function buttonData($el) {
       },
       text: t('markDup'),
       title: t('dupTitle'),
-      func: _ => new ConfirmationDialog(t('markConfirmation', shortName), _ => markDuplicate($el.id))
+      func: _ => new ConfirmationDialog(t('markConfirmation', shortName), _ => markDuplicate($el))
     }, {
       icon: {
         viewbox: '0 -960 960 960',
@@ -63,7 +65,7 @@ function buttonData($el) {
       text: t('homepage'),
       title: t('homepageTitle', homepage),
       func: _ => openStationHomepage(homepage),
-      condition: _ => homepage !== 'Unknown'
+      condition: _ => homepage !== 'Unknown' && isValidURL(homepage)
     }
   ];
   return buttons.filter(btn => !btn.condition || btn.condition());
@@ -150,8 +152,8 @@ function openStationHomepage(homepage) {
     window.open(url.toString());
   } catch (error) {
     new Toast(t('errorHome', error.message));
-    console.log(homepage);
-    console.error('error validating url:', error);
+
+    console.error('error validating url:', error, homepage);
   }
 }
 
@@ -163,19 +165,21 @@ function openStationHomepage(homepage) {
  * @param {HTMLElement} $backdrop 
  */
 function addClosingListeners($popup, $body, $backdrop) {
+  const transitionEnd = _ => {
+    em.removeByNamespace(NAMESPACES.clicks);
+    em.removeByNamespace(NAMESPACES.dismissTransition);
+    //ensure cleanup
+    em.removeAll()
+    requestAnimationFrame(_ => {
+      $backdrop.remove();
+      $popup.remove();
+    });
+  };
+
   const dismiss = ev => {
     ev.preventDefault();
     em.removeByNamespace(NAMESPACES.dismiss);
-    em.add($popup, em.types.transitionend, _ => {
-      em.removeByNamespace(NAMESPACES.clicks);
-      em.removeByNamespace(NAMESPACES.dismissTransition);
-      //ensure cleanup
-      em.removeAll()
-      requestAnimationFrame(_ => {
-        $backdrop.remove();
-        $popup.remove();
-      });
-    }, true, NAMESPACES.dismissTransition);
+    em.add($popup, em.types.transitionend, transitionEnd, true, NAMESPACES.dismissTransition);
     $popup.removeAttribute('open');
     $backdrop.removeAttribute('visable');
   };
@@ -206,14 +210,16 @@ function setContextMenuLocation($menu, X, Y, popupHeight) {
  * 
  * @param {String} id - the station id
  */
-async function markDuplicate(id, attempts = 1) {
+async function markDuplicate($el, attempts = 1) {
+  const id = $el.id;
   try {
     const response = await fetch('/mark-duplicate', _OPTIONS({ id }));
     if (response.ok) {
       const result = await response.json();
       new Toast(t('dupLogged'), 1.5);
+      requestAnimationFrame(_ => $el.remove());
     }
-    if (![440, 419, 403].includes(result.status)) return;
+    if (![440, 419, 403].includes(response.status)) return;
     if (!await updateCsrf() || attempts === 0) return;
     markDuplicate(id, attempts - 1);
   } catch (err) {
