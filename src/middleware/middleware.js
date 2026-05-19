@@ -38,7 +38,7 @@ const cspProperties = {
 
 const generalLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 80,
+  max: 120,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) =>
