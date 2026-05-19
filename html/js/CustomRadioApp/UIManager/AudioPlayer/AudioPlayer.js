@@ -8,6 +8,7 @@ import debounce from '../../utils/debounce.js';
 import { t } from '../../utils/i18n.js';
 import hapticFeedback from '../../utils/hapticFeedback.js';
 import selectors from '../../selectors.js';
+import isValidURL from '../../utils/URL.js';
 
 const PAUSE_TIMER_DURATION = 10000;
 const VOLUME_DEBOUNCE_DURATION = 1000;
@@ -76,16 +77,16 @@ export default class AudioPlayer {
    */
   _offerResume() {
     const lastPlayed = localStorage.getItem('lastStation');
-    if (!lastPlayed) return;
+    if (!lastPlayed || !isValidURL(lastPlayed)) return;
 
-    const station = document.querySelector(selectors.lastPlayedURL(lastPlayed));
-    if (!station) return;
+    const stationPlayButton = document.querySelector(selectors.lastPlayedURL(lastPlayed));
+    if (!stationPlayButton) return;
     
-    const stationName = station.parentElement.dataset.name;
+    const stationName = stationPlayButton.parentElement.dataset.name;
     new Toast(
       t('lastPlayedStation', stationName),
       5, 
-      _ => station.click(), 
+      _ => stationPlayButton.click(), 
       t('resume')
     );
   }
