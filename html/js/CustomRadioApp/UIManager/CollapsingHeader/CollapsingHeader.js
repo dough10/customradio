@@ -128,6 +128,35 @@ export default class CollapsingHeader {
   }
 
   /**
+   * apply transform and opacity to animatable elements
+   * 
+   * @param {Number} transform 
+   * @param {Number} opacity
+   */
+  _animate(transform, opacity) {
+    if (this.$input) this.$input.style.opacity = (1 - opacity).toFixed(2);
+    if (this.$header) this.$header.style.transform = `translateY(-${transform}px)`;
+    if (this.$main) this.$main.style.transform = `translateY(-${transform}px)`;
+    
+    [
+      this.loginButton,
+      this.infoButton
+    ].filter(button => button !== null).forEach(button => {
+      button.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
+    });
+
+    if (this._isMobile) {
+      const infoOpacity = this._mobileOpacity(transform);
+
+      this.infoButton.style.opacity = infoOpacity.toFixed(2);
+      this.infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
+    } else {
+      this.infoButton.style.opacity = '1';
+      this.infoButton.style.display = 'flex';
+    }
+  }
+
+  /**
    * Handles visual updates based on scroll position.
    * Applies transform and opacity to header, input, info button, and wrapper.
    * Adjusts behavior based on screen width for mobile responsiveness.
@@ -140,28 +169,6 @@ export default class CollapsingHeader {
   scroll(scrollTop) {
     if (!this.$main) return;
     const { transform, opacity } = this._calculateAnimation(scrollTop);
-
-    requestAnimationFrame(() => {
-      if (this.$input) this.$input.style.opacity = (1 - opacity).toFixed(2);
-      if (this.$header) this.$header.style.transform = `translateY(-${transform}px)`;
-      if (this.$main) this.$main.style.transform = `translateY(-${transform}px)`;
-      
-      [
-        this.loginButton,
-        this.infoButton
-      ].filter(button => button !== null).forEach(button => {
-        button.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
-      });
-
-      if (this._isMobile) {
-        const infoOpacity = this._mobileOpacity(transform);
-
-        this.infoButton.style.opacity = infoOpacity.toFixed(2);
-        this.infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
-      } else {
-        this.infoButton.style.opacity = '1';
-        this.infoButton.style.display = 'flex';
-      }
-    });
+    requestAnimationFrame(_ => this._animate(transform, opacity));
   }
 }
