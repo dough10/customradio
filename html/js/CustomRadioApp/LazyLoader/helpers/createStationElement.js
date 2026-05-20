@@ -195,7 +195,6 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
   $div.textContent = `${bitrate === 0 ? '???' : bitrate}kbps`;
   $div.title = $div.textContent;
 
-  const passive = { passive: true };
   const $li = document.createElement('li');
   $li.id = id;
   $li.title = `${name}: ${genre}`;
@@ -212,22 +211,36 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
   $li.dataset.icon = icon;
   $li.dataset.homepage = homepage;
 
-  em.add($li, em.types.contextmenu, contextMenu);
+  const ns = `${name}-${Date.now()}`;
+
+  em.add($li, em.types.contextmenu, contextMenu, {
+    passive: true
+  }, ns);
 
   em.add($li,em.types.touchstart, ev => {
     isScrolling = false;
     pressTimer = setTimeout(_ => {
       if (!isScrolling) contextMenu(ev);
     }, LONG_PRESS_DURATION);
-  }, passive);
+  }, {
+    passive: true
+  }, ns);
 
   em.add($li, em.types.touchend, _ => {
     clearTimeout(pressTimer);
-  }, passive);
+  }, {
+    passive: true
+  }, ns);
   
   em.add($li, em.types.touchmove, _ => {
     isScrolling = true;
-  }, passive);
+  }, {
+    passive: true
+  }, ns);
+
+  $li.removeListeners = _ => {
+    em.removeByNamespace(ns);
+  }
 
   $li.append($span, $div, ...$buttons);
   return $li;
