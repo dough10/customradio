@@ -6,6 +6,7 @@ import _OPTIONS from '../../utils/post_options.js';
 import updateCsrf from '../../utils/updateCsrf.js';
 import ConfirmationDialog from '../../UIManager/dialogs/ConfirmationDialog.js';
 import isValidURL from '../../utils/URL.js';
+import raf from '../../utils/raf.js';
 
 import EventManager from '../../EventManager/EventManager.js';
 
@@ -105,12 +106,9 @@ export default async function contextMenu(ev) {
     em.removeByNamespace(NAMESPACES.openTransition);
   }, true, NAMESPACES.openTransition);
 
-  await sleep(20);
-
-  requestAnimationFrame(_ => {
-    $backdrop.toggleAttribute('visable');
-    $popup.toggleAttribute('open');
-  });
+  await raf();
+  $backdrop.toggleAttribute('visable');
+  $popup.toggleAttribute('open');
 }
 
 /**
@@ -165,15 +163,14 @@ function openStationHomepage(homepage) {
  * @param {HTMLElement} $backdrop 
  */
 function addClosingListeners($popup, $body, $backdrop) {
-  const transitionEnd = _ => {
+  const transitionEnd = async _ => {
     em.removeByNamespace(NAMESPACES.clicks);
     em.removeByNamespace(NAMESPACES.dismissTransition);
     //ensure cleanup
     em.removeAll()
-    requestAnimationFrame(_ => {
-      $backdrop.remove();
-      $popup.remove();
-    });
+    await raf();
+    $backdrop.remove();
+    $popup.remove();
   };
 
   const dismiss = ev => {
@@ -217,7 +214,8 @@ async function markDuplicate($el, attempts = 1) {
     if (response.ok) {
       const result = await response.json();
       new Toast(t('dupLogged'), 1.5);
-      requestAnimationFrame(_ => $el.remove());
+      await raf();
+      $el.remove();
     }
     if (![440, 419, 403].includes(response.status)) return;
     if (!await updateCsrf() || attempts === 0) return;
