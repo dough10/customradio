@@ -213,9 +213,7 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
 
   const ns = `${name}-${Date.now()}`;
 
-  em.add($li, em.types.contextmenu, contextMenu, {
-    passive: true
-  }, ns);
+  em.add($li, em.types.contextmenu, contextMenu, null, ns);
 
   em.add($li,em.types.touchstart, ev => {
     isScrolling = false;
@@ -238,9 +236,7 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
     passive: true
   }, ns);
 
-  $li.removeListeners = _ => {
-    em.removeByNamespace(ns);
-  }
+  $li.removeListeners = _ => em.removeByNamespace(ns);
 
   $li.append($span, $div, ...$buttons);
   return $li;
