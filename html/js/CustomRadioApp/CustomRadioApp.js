@@ -8,7 +8,7 @@ import { setLanguage, t } from './utils/i18n.js';
 import normalizeMemo from './utils/normalizeMemo.js';
 import hapticFeedback from './utils/hapticFeedback.js';
 import selectors from './selectors.js';
-import sleep from './utils/sleep.js';
+import raf from './utils/raf.js';
 
 /**
  * customradio.dough10.me
@@ -105,7 +105,7 @@ export default class CustomRadioApp {
     for (const $li of document.querySelectorAll(selectors.stations)) {
       $li.removeListeners();
     }
-    await sleep(20);
+    await raf();
     this._uiManager.setCounts(selected, list);
     container.replaceChildren(document.querySelector(selectors.loading));
     this._lzldr ? this._lzldr.reset(stations) : this._lzldr = new LazyLoader(
