@@ -8,6 +8,7 @@ import { setLanguage, t } from './utils/i18n.js';
 import normalizeMemo from './utils/normalizeMemo.js';
 import hapticFeedback from './utils/hapticFeedback.js';
 import selectors from './selectors.js';
+import sleep from './utils/sleep.js';
 
 /**
  * customradio.dough10.me
@@ -100,14 +101,18 @@ export default class CustomRadioApp {
    * @param {Number} stationList.list 
    * @param {HTMLElement} container
    */
-  _updateUIStationsList({stations, selected, list}, container) {
+  async _updateUIStationsList({stations, selected, list}, container) {
+    for (const $li of document.querySelectorAll(selectors.stations)) {
+      $li.removeListeners();
+    }
+    await sleep(20);
     this._uiManager.setCounts(selected, list);
     container.replaceChildren(document.querySelector(selectors.loading));
     this._lzldr ? this._lzldr.reset(stations) : this._lzldr = new LazyLoader(
-      stations,                                            // list of audio streams
+      stations,                                            // list / array of audio streams
       container,                                           // page "main" element
-      this._uiManager.audioPlayer,                         // audio player instance
-      scrollTop => this._uiManager.onScroll(scrollTop)     // scroll handler
+      this._uiManager.audioPlayer,                         // audio player instance (each li element needs a referance to player in order to call audioPlayer.playStream())
+      scrollTop => this._uiManager.onScroll(scrollTop)     // scroll callback handler
     );
     this._uiManager.lzldr = this._lzldr;
   }
@@ -173,7 +178,7 @@ export default class CustomRadioApp {
     this._uiManager.loadingStart(container);
     try {
       const stationList = await this._createStationList(userInput, ev.loadLocal, container);
-      this._updateUIStationsList(stationList, container);
+      await this._updateUIStationsList(stationList, container);
       await this._updateGenresDatalist(userInput, ev.loadLocal);
     } catch (error) {
       this._filterFailed(error);
