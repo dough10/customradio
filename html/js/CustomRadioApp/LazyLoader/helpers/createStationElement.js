@@ -153,6 +153,7 @@ async function playStream(ev, player) {
  * @returns {HTMLElement} li element
  */
 export default function createStationElement({ id, name, url, bitrate, genre, icon, homepage }, player) {
+  const ns = `${name}-${Date.now()}`;
   const buttonData = [
     {
       icon: {
@@ -161,7 +162,9 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
       },
       cssClass: 'play',
       func: ev => playStream(ev, player),
-      title: t('playTitle')
+      title: t('playTitle'),
+      ns,
+      em
     }, {
       icon: {
         viewbox: '0 0 24 24',
@@ -169,7 +172,9 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
       },
       cssClass: 'add',
       func: toggleSelect,
-      title: t('addTitle')
+      title: t('addTitle'),
+      ns,
+      em
     }, {
       icon: {
         viewbox: '0 -960 960 960',
@@ -177,7 +182,9 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
       },
       cssClass: 'remove',
       func: toggleSelect,
-      title: t('removeTitle')
+      title: t('removeTitle'),
+      ns,
+      em
     }
   ];
 
@@ -185,8 +192,6 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
 
   let isScrolling = false;
   let pressTimer = 0;
-
-  const $buttons = buttonData.map(createSmallButton);
 
   const $span = document.createElement('span');
   $span.textContent = name;
@@ -211,8 +216,6 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
   $li.dataset.icon = icon;
   $li.dataset.homepage = homepage;
 
-  const ns = `${name}-${Date.now()}`;
-
   em.add($li, em.types.contextmenu, contextMenu, null, ns);
 
   em.add($li,em.types.touchstart, ev => {
@@ -224,20 +227,16 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
     passive: true
   }, ns);
 
-  em.add($li, em.types.touchend, _ => {
-    clearTimeout(pressTimer);
-  }, {
+  em.add($li, em.types.touchend, _ => clearTimeout(pressTimer), {
     passive: true
   }, ns);
   
-  em.add($li, em.types.touchmove, _ => {
-    isScrolling = true;
-  }, {
+  em.add($li, em.types.touchmove, _ => isScrolling = true, {
     passive: true
   }, ns);
 
   $li.removeListeners = _ => em.removeByNamespace(ns);
 
-  $li.append($span, $div, ...$buttons);
+  $li.append($span, $div, ...buttonData.map(createSmallButton));
   return $li;
 }

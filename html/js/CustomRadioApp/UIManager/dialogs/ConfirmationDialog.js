@@ -1,6 +1,8 @@
 import DialogBase from './DialogBase.js';
 import EventManager from '../../EventManager/EventManager.js';
 import { t } from '../../utils/i18n.js';
+import raf from '../../utils/raf.js';
+import sleep from '../../utils/sleep.js';
 
 function createDialog(textBody) {
   const dialog = document.createElement('dialog');
@@ -40,12 +42,14 @@ class ConfirmationDialog extends DialogBase {
     const cleanup = () => {
       let called = false;
 
-      const done = () => {
+      const done = async _ => {
         if (called) return;
         called = true;
         this.destroy();
         this.em.removeAll();
-        requestAnimationFrame(_ => dialog.remove());
+        await sleep(100);
+        await raf();
+        dialog.remove();
       };
 
       this.em.add(
@@ -70,7 +74,7 @@ class ConfirmationDialog extends DialogBase {
 
     this.em.add(no, this.em.types.click, cleanup);
 
-    requestAnimationFrame(_ => this.open());
+    raf().then(_ => this.open());
   }
 }
 
