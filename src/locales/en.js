@@ -36,4 +36,5 @@ module.exports = {
   shareTXT: 'Share radio.txt',
   login: 'login',
   logout: 'logout',
+  signup: 'signup'
 };

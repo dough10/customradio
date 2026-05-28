@@ -36,6 +36,7 @@ export default class UIManager {
     this.$resetButton = document.querySelector(this._selectors.resetButton);
     this.$loginButton = document.querySelector(this._selectors.login);
     this.$logoutButton = document.querySelector(this._selectors.logout);
+    this.$signupButton = document.querySelector(this._selectors.signup);
     this.$userMenu = document.querySelector(this._selectors.userMenu);
     this.$userMenuButton = document.querySelector(this._selectors.userMenuButton);
     this.$main = document.querySelector(this._selectors.main);
@@ -54,7 +55,8 @@ export default class UIManager {
       this.$userMenuButton,
       this.$main,
       this.$sharelink,
-      this.$toggleSelected
+      this.$toggleSelected,
+      this.$signupButton
     ];
 
     if (required.some(el => !el)) {
@@ -121,6 +123,10 @@ export default class UIManager {
         el: this.$downloadButton,
         event: this._em.types.click,
         handler: _ => this._dl()
+      }, {
+        el: this.$signupButton,
+        event: this._em.types.click,
+        handler: _ => this._signupRedirect()
       }
     ];
 
@@ -286,6 +292,27 @@ export default class UIManager {
   }
 
   /**
+   * redirects to signup UI
+   * 
+   * @private
+   * @function
+   * 
+   * @returns {void}
+   */
+  _signupRedirect() {
+    if (window.user) return;
+    try {
+      window.location.href = new URL(
+        '/signup',
+        window.location.origin
+      ).toString();
+    } catch (e) {
+      console.error('UIManager: signup redirect failed', e);
+      return;
+    }
+  }
+
+  /**
    * Redirects to the login page if the user is not authenticated
    *
    * @returns {void}
@@ -434,6 +461,7 @@ export default class UIManager {
     input.value = txtDownloadUrl();
 
     this.$loginButton.style.display = 'none';
+    this.$signupButton.style.display = 'none';
     this.$logoutButton.style.display = 'flex';
 
     const {click} = this._em.types;

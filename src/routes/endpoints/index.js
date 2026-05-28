@@ -45,5 +45,6 @@ module.exports = asyncHandler(async (req, res) => {
     login: t('login'),
     logout: t('logout'),
     shareTXT: t('shareTXT'),
+    signup: t('signup')
   }));
 });

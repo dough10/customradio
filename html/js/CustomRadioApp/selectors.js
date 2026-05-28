@@ -221,6 +221,9 @@ const selectors = {
 
   /** @type {String} selected visibility toggle */
   toggleSelected: '#toggle-selected',
+
+  /** @type {String} signup button */
+  signup: 'nav>button[title="signup"]'
 };
 
 export default selectors;

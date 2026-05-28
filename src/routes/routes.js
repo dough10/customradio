@@ -16,6 +16,7 @@ const info = require('./endpoints/info.js');
 const changelog = require('./endpoints/changeLog.js');
 const updatedb = require('./endpoints/updatedb.js');
 const auth = require('./endpoints/auth.js');
+const signup = require('./endpoints/signup.js');
 const authCallback = require('./endpoints/auth.callback.js');
 const authLogout = require('./endpoints/auth.logout.js');
 const userStations = require('./endpoints/userStations.js');
@@ -394,6 +395,11 @@ module.exports = async (app, register) => {
    * Endpoint for authentication using WorkOS SSO.
    */
   app.get('/auth', auth);
+
+  /**
+   * signup
+   */
+  app.get('/signup', signup);
 
   /**
    * Endpoint for handling the authentication callback from WorkOS.
