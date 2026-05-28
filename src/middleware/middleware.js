@@ -27,15 +27,6 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 };
 
-const cspProperties = {
-  SELF: "'self'",
-  NONCE: (req, res) => `'nonce-${res.locals.nonce}'`,
-  DYNAMIC: "'strict-dynamic'",
-  DATA: "data:",
-  WORKOS: "https://workoscdn.com/",
-  HTTPS: "https:"
-};
-
 const generalLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 120,
@@ -63,6 +54,84 @@ function initSessionStorage() {
     prefix: "customradio:session:",
   });
 }
+
+const cspProperties = {
+  SELF: "'self'",
+  NONCE: (req, res) => `'nonce-${res.locals.nonce}'`,
+  DYNAMIC: "'strict-dynamic'",
+  DATA: "data:",
+  WORKOS: "https://workoscdn.com/",
+  HTTPS: "https:"
+};
+
+const noCspExtensions = [".xml", ".txt"];
+
+const cspConfig = helmet({
+  dnsPrefetchControl: {
+    allow: true
+  },
+  xFrameOptions: false,
+  crossOriginResourcePolicy: false,
+  originAgentCluster: false,
+  xssFilter: false,
+  expectCt: {
+    enforce: true,
+    maxAge: 30 * 24 * 60 * 60,
+  },
+  contentSecurityPolicy: {
+    directives: {
+      manifestSrc: [
+        cspProperties.SELF
+      ],
+      defaultSrc: [
+        cspProperties.SELF
+      ],
+      scriptSrc: [
+        cspProperties.NONCE,
+        cspProperties.DYNAMIC
+      ],
+      scriptSrcElem: [
+        cspProperties.NONCE,
+        cspProperties.DYNAMIC
+      ],
+      styleSrc: [
+        cspProperties.SELF,
+        cspProperties.NONCE
+      ],
+      styleSrcElem: [
+        cspProperties.SELF,
+        cspProperties.NONCE
+      ],
+      imgSrc: [
+        cspProperties.SELF,
+        cspProperties.DATA,
+        cspProperties.WORKOS
+      ],
+      connectSrc: [
+        cspProperties.SELF,
+        cspProperties.HTTPS
+      ],
+      fontSrc: [
+        cspProperties.SELF,
+        cspProperties.DATA
+      ],
+      frameSrc: [
+        cspProperties.SELF
+      ],
+      mediaSrc: [
+        cspProperties.SELF,
+        cspProperties.HTTPS
+      ],
+      trustedTypes: [],
+      reportUri: "/csp-report",
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+})
 
 /**
  * generates a HTTP request string for system logger
@@ -156,7 +225,7 @@ module.exports = (app, httpRequestCounter) => {
       : [];
 
     if (forwardedIps.length && !forwardedIps.includes(clientInfo.ip)) {
-      await badActor(req.ip, 5);
+      await badActor(clientInfo.ip, 5);
       return res.status(403).json({error: "Invalid request origin"});
     }
 
@@ -302,74 +371,10 @@ module.exports = (app, httpRequestCounter) => {
   /**
    * HELMET
    */
-  app.use(
-    helmet({
-      dnsPrefetchControl: {
-        allow: true
-      },
-      xFrameOptions: false,
-      crossOriginResourcePolicy: false,
-      originAgentCluster: false,
-      xssFilter: false,
-      expectCt: {
-        enforce: true,
-        maxAge: 30 * 24 * 60 * 60,
-      },
-      contentSecurityPolicy: {
-        directives: {
-          manifestSrc: [
-            cspProperties.SELF
-          ],
-          defaultSrc: [
-            cspProperties.SELF
-          ],
-          scriptSrc: [
-            cspProperties.NONCE,
-            cspProperties.DYNAMIC
-          ],
-          scriptSrcElem: [
-            cspProperties.NONCE,
-            cspProperties.DYNAMIC
-          ],
-          styleSrc: [
-            cspProperties.SELF,
-            cspProperties.NONCE
-          ],
-          styleSrcElem: [
-            cspProperties.SELF,
-            cspProperties.NONCE
-          ],
-          imgSrc: [
-            cspProperties.SELF,
-            cspProperties.DATA,
-            cspProperties.WORKOS
-          ],
-          connectSrc: [
-            cspProperties.SELF,
-            cspProperties.HTTPS
-          ],
-          fontSrc: [
-            cspProperties.SELF,
-            cspProperties.DATA
-          ],
-          frameSrc: [
-            cspProperties.SELF
-          ],
-          mediaSrc: [
-            cspProperties.SELF,
-            cspProperties.HTTPS
-          ],
-          trustedTypes: [],
-          reportUri: "/csp-report",
-        },
-      },
-      hsts: {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true,
-      },
-    })
-  );
+  app.use((req, res, next) => {
+    if (noCspExtensions.some(ext => req.path.endsWith(ext))) return next();
+    return cspConfig(req, res, next)
+  });
 
   /**
    * STATIC FILES
