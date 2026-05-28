@@ -168,6 +168,7 @@ function addClosingListeners($popup, $body, $backdrop) {
     em.removeByNamespace(NAMESPACES.dismissTransition);
     //ensure cleanup
     em.removeAll()
+    await sleep(100);
     await raf();
     $backdrop.remove();
     $popup.remove();
@@ -203,6 +204,18 @@ function setContextMenuLocation($menu, X, Y, popupHeight) {
 }
 
 /**
+ * remove element after marking as duplicate
+ * 
+ * @param {HTMLElement} $el 
+ */
+async function cleanUpElement($el) {
+  if ($el.removeListeners && typeof $el.removeListeners === 'function') $el.removeListeners();
+  await sleep(100);
+  await raf();
+  $el.remove();
+}
+
+/**
  * marks a station as a duplicate in database for manual review
  * 
  * @param {String} id - the station id
@@ -214,8 +227,7 @@ async function markDuplicate($el, attempts = 1) {
     if (response.ok) {
       const result = await response.json();
       new Toast(t('dupLogged'), 1.5);
-      await raf();
-      $el.remove();
+      await cleanUpElement($el);
     }
     if (![440, 419, 403].includes(response.status)) return;
     if (!await updateCsrf() || attempts === 0) return;
