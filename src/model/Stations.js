@@ -1,5 +1,6 @@
 const DbCon = require('./DbCon.js');
 const usedTypes = require("../util/usedTypes.js");
+const isValidURL = require('../util/isValidURL.js');
 
 const DB_CONFIG = {
   RECENT_DAYS: 15,
@@ -584,15 +585,6 @@ function validateStation(obj) {
   if (typeof obj.homepage !== 'string') throw new Error('Invalid type for property "homepage". Expected string.');
   if (typeof obj.error !== 'string') throw new Error('Invalid type for property "error". Expected string.');
   if (typeof obj.duplicate !== 'boolean') throw new Error('Invalid type for property "duplicate". Expected boolean.');
-}
-
-function isValidURL(url) {
-  try {
-    new URL(url);
-    return true;
-  } catch (e) {
-    return false;
-  }
 }
 
 module.exports = Stations;
