@@ -130,10 +130,6 @@ async function updateStationData(stations, old, updated) {
       return null;
     });
 
-  // logger.debug(typeof updated.name);
-  // logger.debug(updated.name);
-  // logger.debug(old.name);
-
   const updatedData = {
     id: old.id,
     name: updated.name || old.name,
