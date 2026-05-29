@@ -145,7 +145,7 @@ const cspConfig = helmet({
 function logString(req, res, start) {
   const parts = [];
 
-  parts.push(`${maskIP(req.ip)} -> [${req.method}] ${req.path}`);
+  parts.push(`${maskIP(req.ip)} -> [${req.method}] ${req.originalUrl}`);
 
   if (req.user) {
     parts.push(`user: ${req.user.id.replace('user_', '')}, admin: ${isAdmin(req)}`);
