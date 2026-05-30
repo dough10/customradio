@@ -316,7 +316,6 @@ async function testStreams() {
         version: require('../../package.json').version
       });
     }catch(e) {
-      logError(e);
       logger.error(`Failed to save update details: ${e}`)
     }
   } catch(e) {
