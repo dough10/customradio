@@ -5,7 +5,7 @@ const pLimit = require('p-limit');
 
 const isLiveStream = require('./isLiveStream.js');
 const useableHomepage = require('./useableHomepage.js');
-const {stations, logger, getCollection, collections} = require('./../services.js');
+const { stations, logger, getCollection, collections } = require('./../services.js');
 const retry = require('./retry.js');
 const logError = require('./logError.js');
 
@@ -106,8 +106,7 @@ async function testHomepageConnection(url) {
 
     const isAbort = e.name === 'AbortError';
     logger.debug(
-      `${url} failed homepage test connection: ${
-        isAbort ? 'timeout' : e.message
+      `${url} failed homepage test connection: ${isAbort ? 'timeout' : e.message
       }`
     );
 
@@ -181,8 +180,8 @@ function stationDataIsUnchanged(old, updated) {
  * @returns {String}
  */
 function toMB(heap) {
- if (typeof heap !== 'number' || isNaN(heap)) return '0.00 MB';
- return `${(heap / 1024 / 1024).toFixed(2)} MB`;
+  if (typeof heap !== 'number' || isNaN(heap)) return '0.00 MB';
+  return `${(heap / 1024 / 1024).toFixed(2)} MB`;
 }
 
 /**
@@ -212,33 +211,33 @@ function percentage(small, big, places = 2) {
  * @returns {void}
  */
 async function processStream(station, ndx, offset, length, stations, totalStationCount, parts) {
-  counter++; 
-  
+  counter++;
+
   const partCount = counter - offset;
   const partPrecent = length ? percentage(partCount, length, 1) : '0.0';
   const totalPrecent = percentage(counter, totalStationCount, 3);
-  
+
   try {
     const startTime = Date.now()
     logger.debug(`[${station.id}] Testing url ${station.url}`);
     logger.debug(`[${station.id}] Station: ${partCount}/${length}, ${partPrecent}%`);
     logger.debug(`[${station.id}] Part: ${ndx + 1}/${parts}, Total progress: ${totalPrecent}%`);
-    
+
     const stream = await retry(() => isLiveStream(station.url));
 
     if (stationDataIsUnchanged(station, stream)) {
       logger.debug(`[${station.id}] No change.. ${Date.now() - startTime}ms`);
       return;
     }
-    
+
     await updateStationData(stations, station, stream);
     logger.debug(`[${station.id}] Updated.. ${Date.now() - startTime}ms`);
-    
+
     // count changes
     updatedCount++;
   } catch (e) {
     logger.debug(`[${station.id}] Error for (${station.name}): ${e.message}`);
-  } 
+  }
 }
 
 /**
@@ -269,23 +268,23 @@ async function testStreams() {
   updating = true;
 
   const start = await stations.dbStats();
-  
+
   logger.info(`Starting database update at ${new Date(start.time).toISOString()}`);
   try {
     const totalStationCount = start.total;
     const parts = Math.ceil(totalStationCount / UPDATE_PULL_COUNT);
-    
+
     counter = 0;
     updatedCount = 0;
-    
+
     for (let ndx = 0; ndx < parts; ndx++) {
       const offset = ndx * UPDATE_PULL_COUNT;
       const stationPull = await stations.getPaginatedStations(UPDATE_PULL_COUNT, offset);
       const length = stationPull.length;
 
       await Promise.all(
-        stationPull.map(station => 
-          limit(() => 
+        stationPull.map(station =>
+          limit(() =>
             processStream(station, ndx, offset, length, stations, totalStationCount, parts)
           )
         )
@@ -304,10 +303,10 @@ async function testStreams() {
 
     const end = await stations.dbStats();
     const duration = msToHhMmSs(end.time - start.time);
-    
+
     logger.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
     logger.info(`Stats - Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
-    try{
+    try {
       await getCollection(collections.DB_UPDATES).insertOne({
         changed: updatedCount,
         start,
@@ -315,10 +314,10 @@ async function testStreams() {
         type: 'update',
         version: require('../../package.json').version
       });
-    }catch(e) {
+    } catch (e) {
       logger.error(`Failed to save update details: ${e}`)
     }
-  } catch(e) {
+  } catch (e) {
     logError(e);
     logger.error(`Database update failed: ${e.message}`);
   } finally {
@@ -327,4 +326,4 @@ async function testStreams() {
 
 }
 
-module.exports = {testStreams, plural, testHomepageConnection, msToHhMmSs, updateStationData, stationDataIsUnchanged};
+module.exports = { testStreams, plural, testHomepageConnection, msToHhMmSs, updateStationData, stationDataIsUnchanged };
