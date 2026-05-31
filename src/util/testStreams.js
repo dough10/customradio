@@ -5,19 +5,16 @@ const pLimit = require('p-limit');
 
 const isLiveStream = require('./isLiveStream.js');
 const useableHomepage = require('./useableHomepage.js');
-const { stations, logger, getCollection, collections } = require('./../services.js');
+const { stations, logger } = require('./../services.js');
 const retry = require('./retry.js');
 const logError = require('./logError.js');
+const logResult = require('./logResult.js');
 
 const limit = pLimit(5);
 
 let counter = 0;
 let updatedCount = 0;
 let updateing = false;
-
-// function sleep(ms) {
-//   return new Promise(resolve => setTimeout(resolve, ms));
-// }
 
 /**
  * Returns `'y'` when the count is exactly **1** (e.g. “entry”) and `'ies'` for all other counts (e.g. “entries”).
@@ -74,7 +71,7 @@ async function testHomepageConnection(url) {
   }
 
   const controller = new AbortController();
-  const timeout = 1500;
+  const timeout = 5000;
 
   const timeoutId = setTimeout(() => {
     controller.abort();
@@ -100,6 +97,7 @@ async function testHomepageConnection(url) {
     ) {
       return homepage;
     }
+    return;
 
   } catch (e) {
     clearTimeout(timeoutId);
@@ -306,17 +304,7 @@ async function testStreams() {
 
     logger.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
     logger.info(`Stats - Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
-    try {
-      await getCollection(collections.DB_UPDATES).insertOne({
-        changed: updatedCount,
-        start,
-        end,
-        type: 'update',
-        version: require('../../package.json').version
-      });
-    } catch (e) {
-      logger.error(`Failed to save update details: ${e}`)
-    }
+    await logResult(updatedCount, start, end);
   } catch (e) {
     logError(e);
     logger.error(`Database update failed: ${e.message}`);
