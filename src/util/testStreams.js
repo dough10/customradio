@@ -160,13 +160,17 @@ function stationDataIsUnchanged(old, updated) {
   const genre = updated.icyGenre || old.genre || 'Unknown';
   const online = updated.isLive;
   const bitrate = updated.bitrate || 0;
+  const homepage = updated.homepage || old.homepage || 'Unknown';
+  const icon = updated.icon || old.icon || 'Unknown';
 
   return (
     old.name === name &&
     old.url === url &&
     old.genre === genre &&
     Boolean(old.online) === online &&
-    old.bitrate === bitrate
+    old.bitrate === bitrate &&
+    old.homepage === homepage &&
+    old.icon === icon
   );
 }
 
@@ -277,11 +281,11 @@ async function testStreams() {
 
     for (let ndx = 0; ndx < parts; ndx++) {
       const offset = ndx * UPDATE_PULL_COUNT;
-      const stationPull = await stations.getPaginatedStations(UPDATE_PULL_COUNT, offset);
-      const length = stationPull.length;
+      const pulledStations = await stations.getPaginatedStations(UPDATE_PULL_COUNT, offset);
+      const length = pulledStations.length;
 
       await Promise.all(
-        stationPull.map(station =>
+        pulledStations.map(station =>
           limit(() =>
             processStream(station, ndx, offset, length, stations, totalStationCount, parts)
           )
