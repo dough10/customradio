@@ -310,7 +310,7 @@ async function testStreams() {
     logger.info(`Stats - Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
     await logResult(updatedCount, start, end);
   } catch (e) {
-    logError(e);
+    await logError(e);
     logger.error(`Database update failed: ${e.message}`);
   } finally {
     updateing = false;
