@@ -169,23 +169,26 @@ module.exports = asyncHandler(async (req, res) => {
     .createHash('sha256')
     .update(
       [
-        req.ip, 
+        req.ip,
         cspReport['effective-directive'] || '',
         normalizeUrl(cspReport['blocked-uri']) || '',
         normalizeUrl(cspReport['document-uri']) || ''
       ].join('|')
-    )
-    .digest('hex');
+    ).digest('hex');
 
   res.status(204).send();
 
-  void getCollection(collections.CSP).updateOne(
-    { fingerprint: cspReport.fingerprint },
-    {
-      $setOnInsert: cspReport,
-      $inc: { count: 1 },
-      $set: { lastSeen: new Date() }
+  void getCollection(collections.CSP).updateOne({
+    fingerprint: cspReport.fingerprint
+  }, {
+    $setOnInsert: cspReport,
+    $inc: {
+      count: 1
     },
-    { upsert: true }
-  );
+    $set: {
+      lastSeen: new Date()
+    }
+  }, {
+    upsert: true
+  });
 });
