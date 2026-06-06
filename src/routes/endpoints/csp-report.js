@@ -164,17 +164,14 @@ module.exports = asyncHandler(async (req, res) => {
   }
 
   const cspReport = { ...baseObj, ...sanitizedReport };
-  cspReport['effective-directive'] = cspReport['effective-directive'] || cspReport['violated-directive'];
-  cspReport.fingerprint = crypto
-    .createHash('sha256')
-    .update(
-      [
-        req.ip,
-        cspReport['effective-directive'] || '',
-        normalizeUrl(cspReport['blocked-uri']) || '',
-        normalizeUrl(cspReport['document-uri']) || ''
-      ].join('|')
-    ).digest('hex');
+  if (!cspReport['effective-directive']) cspReport['effective-directive'] = cspReport['violated-directive'];
+  const fpString = [
+    req.ip,
+    cspReport['effective-directive'] || '',
+    normalizeUrl(cspReport['blocked-uri']) || '',
+    normalizeUrl(cspReport['document-uri']) || ''
+  ].join('|');
+  cspReport.fingerprint = crypto.createHash('sha256').update(fpString).digest('hex');
 
   res.status(204).send();
 
