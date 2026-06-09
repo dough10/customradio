@@ -1,5 +1,6 @@
 {
-  "Current": [
+  "Current": [],
+  "1.13.5": [
     "Fix browser memory bugs (better event namespacing for programaticaly created elements)",
     "More admin tool updates",
     "Added copy URL to right click context menu in the station list",
