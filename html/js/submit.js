@@ -1,4 +1,6 @@
-window.addEventListener('DOMContentLoaded', () => {
+const EVENTS = {CLICK: 'click', SUBMIT: 'submit', LOADED: 'DOMContentLoaded'};
+
+window.addEventListener(EVENTS.LOADED, () => {
   function opt(body = null) {
     const options = {
       method: 'POST',
@@ -35,7 +37,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('paragraph-container');
   const del = document.querySelector('#del');
 
-  form.addEventListener('submit', async (ev) => {
+  form.addEventListener(EVENTS.SUBMIT, async (ev) => {
     ev.preventDefault();
 
     const data = {
@@ -55,9 +57,9 @@ window.addEventListener('DOMContentLoaded', () => {
     window.location.href = window.location.href;
   });
 
-  add.addEventListener('click', _ => addParagraph(null, container));
+  add.addEventListener(EVENTS.CLICK, _ => addParagraph(null, container));
 
-  del.addEventListener('click', async _ => {
+  del.addEventListener(EVENTS.CLICK, async _ => {
     const res = await fetch('/dismissAlert', opt({
       id: selectedAlert.dataset.id,
       version: selectedAlert.dataset.version
@@ -70,7 +72,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const {id, title} = alert.dataset;
     if (!id || !title) return;
 
-    alert.addEventListener('click', () => {
+    alert.addEventListener(EVENTS.CLICK, () => {
       selectedAlert = alert;
 
       form.id.value = id;
