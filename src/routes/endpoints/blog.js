@@ -1,6 +1,7 @@
 const pug = require('pug');
 
 const {posts} = require('./../../services.js');
+const isAdmin = require('./../../util/isAdmin.js');
 
 const asyncHandler = require('../../util/asyncHandler.js');
 
@@ -15,7 +16,8 @@ module.exports = asyncHandler(async (req, res) => {
       picture: user.profilePictureUrl,
       firstName: user.firstName,
       lastName: user.lastName
-    } : null,  
+    } : null,
+    admin: isAdmin(req),
     lang: req.loadedLang,
     csrf: req.session.csrfToken,
     nonce: res.locals.nonce,
