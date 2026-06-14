@@ -6,8 +6,8 @@ const {badActor} = require('../../util/badActors.js');
  * @type {Set<string>}
  */
 const sensitivePaths = new Set([
-  '/.env',
-  '/.git',
+  '.env',
+  '.git',
   '.ssh',
   '.json',
   'wp-admin',
