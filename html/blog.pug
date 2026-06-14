@@ -16,3 +16,8 @@ html(lang=lang)
         ) #{post.id}: #{post.title}
       else
         li No posts
+
+  if admin
+    button#add_button.fab(type="button" title=addStation)
+      svg(viewBox="0 0 24 24" alt='add')
+        path(fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z")
