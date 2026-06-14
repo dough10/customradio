@@ -4,9 +4,17 @@ const WINDOW = 60 * 5;        // 5 minutes (seconds)
 const BAN_DURATION = 60 * 60 * 24; // 24 hours
 const MAX_ATTEMPTS = 3;
 
+function attempt_key(ip) {
+  return `customradio:rate:attempts:${ip}`;
+}
+
+function ban_key(ip) {
+  return `customradio:rate:ban:${ip}`;
+}
+
 async function badActor(ip, attempts = MAX_ATTEMPTS) {
-  const key = `customradio:rate:attempts:${ip}`;
-  const banKey = `customradio:rate:ban:${ip}`;
+  const key = attempt_key(ip);
+  const banKey = ban_key(ip);
   const now = Date.now();
   const windowStart = now - WINDOW * 1000;
 
@@ -29,14 +37,14 @@ async function badActor(ip, attempts = MAX_ATTEMPTS) {
 
   await redisClient.expire(key, WINDOW);
 
-  if (count > attempts) {
+  if (count >= attempts) {
     await redisClient.set(banKey, "1", { EX: BAN_DURATION });
     await redisClient.del(key);
   }
 }
 
 async function isBadActor(ip) {
-  return (await redisClient.exists(`rate:ban:${ip}`)) === 1;
+  return (await redisClient.exists(ban_key(ip))) === 1;
 }
 
 module.exports = { badActor, isBadActor };
