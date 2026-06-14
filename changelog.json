@@ -1,5 +1,7 @@
 {
-  "Current": [],
+  "Current": [
+    "better filtering of bad actors"
+  ],
   "1.13.5": [
     "Fix browser memory bugs (better event namespacing for programaticaly created elements)",
     "More admin tool updates",
