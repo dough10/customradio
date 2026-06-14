@@ -148,7 +148,10 @@ function logString(req, res, start) {
   parts.push(`${maskIP(req.ip)} -> [${req.method}] ${req.originalUrl}`);
 
   if (req.user) {
-    parts.push(`user: ${req.user.id.replace('user_', '')}, admin: ${isAdmin(req)}`);
+    [
+      `user: ${req.user.id.replace('user_', '')}`,
+      `admin: ${isAdmin(req)}`
+    ].forEach(str => parts.push(str));
   }
 
   if (req.count !== undefined) {
@@ -198,7 +201,8 @@ module.exports = (app, httpRequestCounter) => {
   app.use(async (req, res, next) => {
     try {
       if (await isBadActor(req.ip)) {
-        return res.status(403).send("forbidden");
+        res.destroy();
+        return;
       }
       next();
     } catch (err) {
