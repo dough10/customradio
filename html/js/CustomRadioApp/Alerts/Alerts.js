@@ -1,6 +1,7 @@
 import EventManager from '../EventManager/EventManager';
 import sleep from '../utils/sleep'
 import { t } from '../utils/i18n';
+import raf from '../utils/raf';
 
 const NAMESPACES = {
   alert_click: 'alert-click',
@@ -48,9 +49,11 @@ export default class Alert {
     this.localStorageKey = key;
     this.$alert = this.#createAlert(title, paragraphs);
     document.body.append(this.$alert);
-    sleep(20).then(_ => 
-      requestAnimationFrame(_ => this.$alert?.setAttribute('open', true))
-    );
+    sleep(20).then(async _ => {
+      await raf();
+      this.$alert?.setAttribute('open', true);
+      this._timer = setTimeout(_ => this.#destroy(), 5 * 60 * 1000);
+    });
   }
 
   /**
@@ -81,6 +84,7 @@ export default class Alert {
    */
   #destroy() {
     if (!this.$alert) return;
+    if (this._timer) clearTimeout(this._timer);
     if (this.localStorageKey) localStorage.setItem(this.localStorageKey, 1);
     this._em.add(
       this.$alert,
