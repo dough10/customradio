@@ -43,9 +43,6 @@ function sitemapxml(req, stats) {
  */
 module.exports = asyncHandler(async (req, res) => {
   const stats = await fs.stat('dist/index.js');
-
-  const xml = sitemapxml(req, stats);
-
   res.set('Content-Type', 'application/xml');
-  res.send(xml);
+  res.send(sitemapxml(req, stats));
 });
