@@ -66,7 +66,7 @@ module.exports = asyncHandler(async (req, res) => {
 
   if (!ok) {
     // logger.warning(`Test failed: ${error}`);
-    return res.status(status).json({ message: t('conTestFailed', error) });
+    return res.status(500).json({ message: t('conTestFailed', error) });
   }
 
   const data = {
