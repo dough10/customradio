@@ -14,9 +14,9 @@ const { logger, redisClient, getCollection, collections } = require("../services
 const { injectSecrets } = require("../config/secrets.js");
 const { setLanguage } = require("../util/i18n.js");
 const { isBadActor, badActor } = require("../util/badActors.js");
-const isAdmin = require("../util/isAdmin.js");
-const maskIP = require('../util/maskIP.js');
+
 const logError = require('../util/logError.js');
+const logString = require('../util/logString.js');
 
 injectSecrets(["SESSION_SECRET"]);
 
@@ -131,53 +131,7 @@ const cspConfig = helmet({
     includeSubDomains: true,
     preload: true,
   },
-})
-
-/**
- * generates a HTTP request string for system logger
- * 
- * @param {Object} req 
- * @param {Object} res 
- * @param {Number} start 
- * 
- * @returns {String}
- */
-function logString(req, res, start) {
-  const parts = [];
-
-  parts.push(`${maskIP(req.ip)} -> [${req.method}] ${req.originalUrl}`);
-
-  if (req.user) {
-    [
-      `user: ${req.user.id.replace('user_', '')}`,
-      `admin: ${isAdmin(req)}`
-    ].forEach(str => parts.push(str));
-  }
-
-  if (req.count !== undefined) {
-    parts.push(`count: ${req.count}`);
-  }
-
-  if (req.loadedLang) parts.push(`lang: ${req.loadedLang}`);
-
-  if (req.body && Object.keys(req.body).length > 0) {
-    parts.push(`body: ${JSON.stringify(req.body)}`);
-  }
-
-  parts.push(`status: ${res.statusCode}`);
-
-  const contentType = res.getHeader('Content-Type');
-  if (contentType) parts.push(`type: ${contentType}`);
-
-  const contentLength = res.getHeader('Content-Length');
-  if (contentLength) parts.push(`bytes: ${contentLength}`);
-
-  // if (req.requestId) parts.push(`request-id: ${req.requestId}`);
-
-  parts.push(`ms: ${(performance.now() - start).toFixed(2)}`);
-
-  return parts.join(', ');
-}
+});
 
 module.exports = (app, httpRequestCounter) => {
   /**
@@ -201,6 +155,7 @@ module.exports = (app, httpRequestCounter) => {
   app.use(async (req, res, next) => {
     try {
       if (await isBadActor(req.ip)) {
+        logger.warning(logString(req, res));
         res.destroy();
         return;
       }
@@ -229,7 +184,7 @@ module.exports = (app, httpRequestCounter) => {
       : [];
 
     if (forwardedIps.length && !forwardedIps.includes(clientInfo.ip)) {
-      await badActor(clientInfo.ip, 5);
+      await badActor(clientInfo.ip, req, res, 5);
       return res.status(403).json({error: "Invalid request origin"});
     }
 
@@ -340,17 +295,17 @@ module.exports = (app, httpRequestCounter) => {
     const sessionToken = req.session?.csrfToken;
 
     if (!req.session) {
-      await badActor(req.ip, 5);
+      await badActor(req.ip, req, res, 5);
       return res.status(440).send("Session expired or not established");
     }
 
     if (!sessionToken) {
-      await badActor(req.ip, 5);
+      await badActor(req.ip, req, res, 5);
       return res.status(419).send("CSRF token missing in session");
     }
 
     if (!token || token !== sessionToken) {
-      await badActor(req.ip, 5);
+      await badActor(req.ip, req, res, 5);
       return res.status(403).send("Invalid CSRF token");
     }
 
