@@ -12,6 +12,7 @@ const sensitivePaths = new Set([
   '.json',
   'wp-admin',
   'wp-login',
+  'wp-json',
   'phpmyadmin',
   '.aws',
   '.old',
@@ -19,7 +20,11 @@ const sensitivePaths = new Set([
   '.php',
   'settings',
   'api',
-  '.db'
+  '.db',
+  'actuator',
+  'powershell',
+  'firebase',
+  'admin'
 ]);
 
 /**
@@ -44,7 +49,7 @@ module.exports = asyncHandler(async (req, res) => {
 
   for (const sensitive of sensitivePaths) {
     if (requestedPath.includes(sensitive)) {
-      await badActor(req.ip, 1);
+      await badActor(req.ip, req, res, 1);
       res.destroy();
       return;
     }
