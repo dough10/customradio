@@ -1,5 +1,3 @@
 export default function raf() {
-  return new Promise(resolve => {
-    requestAnimationFrame(resolve);
-  });
+  return new Promise(resolve => requestAnimationFrame(resolve));
 }
