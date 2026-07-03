@@ -1,5 +1,6 @@
 const asyncHandler = require('../../util/asyncHandler.js');
-const {badActor} = require('../../util/badActors.js');
+const { badActor } = require('../../util/badActors.js');
+const logRequest = require('../../util/logRequest.js');
 
 /**
  * Set of sensitive path segments that indicate potential attacks or probing.
@@ -49,7 +50,8 @@ module.exports = asyncHandler(async (req, res) => {
 
   for (const sensitive of sensitivePaths) {
     if (requestedPath.includes(sensitive)) {
-      await badActor(req.ip, req, res, 1);
+      await badActor(req.ip, 1);
+      req.blocked = true;
       res.destroy();
       return;
     }

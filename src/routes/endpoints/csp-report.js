@@ -5,7 +5,7 @@ const UAParser = require('ua-parser-js');
 require('dotenv').config();
 
 const version = require('../../../package.json').version;
-const { getCollection, collections } = require('../../services.js');
+const { mongo } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 const maskIP = require('../../util/maskIP.js');
 
@@ -114,13 +114,7 @@ module.exports = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = errors.array().map(e => e.msg).join(', ');
-    await getCollection(collections.CSP_FAILS).insertOne({
-      ...baseObj,
-      error,
-      body: bodyStr,
-      contentType: req.headers['content-type'],
-      bodyType: typeof req.body
-    });
+    await mongo.logCSPFail(baseObj, error, bodyStr, req.headers['content-type'], typeof req.body);
     res.status(400).json({ error });
     return;
   }
@@ -137,13 +131,7 @@ module.exports = asyncHandler(async (req, res) => {
   }
 
   if (!rawReport) {
-    await getCollection(collections.CSP_FAILS).insertOne({
-      ...baseObj,
-      error: 'csp-report missing from body',
-      body: bodyStr,
-      contentType: req.headers['content-type'],
-      bodyType: typeof req.body
-    });
+    await mongo.logCSPFail(baseObj, 'csp-report missing from body', bodyStr, req.headers['content-type'], typeof req.body);
     return res.status(400).json({ error: 'csp-report missing' });
   }
 
@@ -175,17 +163,5 @@ module.exports = asyncHandler(async (req, res) => {
 
   res.status(204).send();
 
-  void getCollection(collections.CSP).updateOne({
-    fingerprint: cspReport.fingerprint
-  }, {
-    $setOnInsert: cspReport,
-    $inc: {
-      count: 1
-    },
-    $set: {
-      lastSeen: new Date()
-    }
-  }, {
-    upsert: true
-  });
+  void mongo.logCSP(cspReport);
 });

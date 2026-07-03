@@ -5,10 +5,8 @@ const pLimit = require('p-limit');
 
 const isLiveStream = require('./isLiveStream.js');
 const useableHomepage = require('./useableHomepage.js');
-const { stations, logger } = require('./../services.js');
+const { stations, logger, mongo } = require('./../services.js');
 const retry = require('./retry.js');
-const logError = require('./logError.js');
-const logResult = require('./logResult.js');
 
 const limit = pLimit(5);
 
@@ -308,9 +306,9 @@ async function testStreams() {
 
     logger.info(`Update complete: ${updatedCount} entr${plural(updatedCount)} updated in ${duration}.`);
     logger.info(`Stats - Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
-    await logResult(updatedCount, start, end);
+    await mongo.logDBUpdateResults(updatedCount, start, end, 'update');
   } catch (e) {
-    await logError(e);
+    await mongo.logJSError(e);
     logger.error(`Database update failed: ${e.message}`);
   } finally {
     updateing = false;

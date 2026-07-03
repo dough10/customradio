@@ -1,25 +1,17 @@
 require('dotenv').config();
 const xml2js = require('xml2js');
 const pack = require('../../package.json');
-const pLimit = require('p-limit');
 
 const { testHomepageConnection, plural, msToHhMmSs } = require('./testStreams.js');
 const isLiveStream = require('./isLiveStream.js');
 const usedTypes = require("./usedTypes.js");
 const retry = require('./retry.js');
-const logError = require('./logError.js');
-const {stations, logger, getCollection, collections} = require('./../services.js');
-
-const limit = pLimit(5);
+const { stations, logger, mongo } = require('./../services.js');
 
 
 let scraping = false;
 let progressCounter = 0;
 let changed = 0;
-
-// function sleep(ms) {
-//   return new Promise(resolve => setTimeout(resolve, ms));
-// }
 
 /**
  * get data from icecast directory
@@ -48,11 +40,13 @@ async function requestData() {
       return false;
     }
 
-    const text = await res.text();
+    let text = await res.text();
     if (!text) return false;
 
     const parser = new xml2js.Parser();
     const result = await parser.parseStringPromise(text);
+
+    text = null;
 
     return result?.directory?.entry || false;
 
@@ -88,12 +82,21 @@ async function requestData() {
  *   current_song: [ "Coolio - Gangsta's Paradise" ],
  *   genre: [ '2000-х Музыка' ]
  * }
- */  
+ */
 async function processStream(entry, length, stations) {
   progressCounter++;
   logger.debug(`Scrape progress: ${((progressCounter / length) * 100).toFixed(3)}%`);
-  
-  try{
+
+  if (progressCounter % 100 === 0) {
+    const mem = process.memoryUsage();
+
+    logger.debug(
+      `Progress ${progressCounter}/${length} | ` +
+      `Heap ${(mem.heapUsed / 1024 / 1024).toFixed(1)} MB | ` +
+      `RSS ${(mem.rss / 1024 / 1024).toFixed(1)} MB`
+    );
+  }
+  try {
     const url = entry.listen_url[0];
 
     if (!url) return;
@@ -102,15 +105,15 @@ async function processStream(entry, length, stations) {
     // isLiveStream may change url protocol (http -> https)
     // addStation method checks again. this line keeps from doing extra work
     if (await stations.exists(url)) return;
-    
+
     const stream = await isLiveStream(url);
-  
+
     // do not add if stream offline
     if (!stream.ok) return;
-    
+
     // check if stream is allowed content type
     if (!usedTypes.includes(stream.content)) return;
-  
+
     const result = await stations.addStation({
       name: stream.name || entry.server_name[0] || stream.description,
       url: stream.url,
@@ -127,7 +130,7 @@ async function processStream(entry, length, stations) {
     if (result === 'Station exists') return;
     logger.debug(`Added station: ${result}`);
     changed++;
-  } catch(e) {
+  } catch (e) {
     logger.error(`Error processing entry: ${e.message}`);
   }
 }
@@ -145,32 +148,32 @@ module.exports = async () => {
   progressCounter = 0;
   changed = 0;
   try {
+    logger.info(`Scraping Icecast Directory for new stations.`);
     const data = await requestData();
     if (!data) throw Error('Fetch failed');
     const length = data.length;
-    
-    logger.info(`Scraping Icecast Directory for new stations. ${length} stations pulled`);
-    await Promise.all(
-      data.map(entry => 
-        limit(() => processStream(entry, length, stations))
-      )
+
+    const mem = process.memoryUsage();
+    logger.info(
+      `Initial heap: ${(mem.heapUsed / 1024 / 1024).toFixed(1)} MB | Initial RSS ${(mem.rss / 1024 / 1024).toFixed(1)} MB | (${length} stations)`
     );
+
+
+    const workers = Array.from({ length: 5 }, async _ => {
+      while (data.length > 0) {
+        const entry = data.pop();
+        if (!entry) break;
+
+        await processStream(entry, length, stations);
+      }
+    });
+
+    await Promise.all(workers);
     const end = await stations.dbStats();
     logger.info(`Icecast Directory scrape complete: ${changed} entry${plural(changed)} added over ${msToHhMmSs(end.time - start.time)}. Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
-    try {
-      await getCollection(collections.DB_UPDATES).insertOne({
-        changed,
-        start,
-        end,
-        type: 'scrape',
-        version: require('../../package.json').version
-      });
-    } catch (e) {
-      logError(e);
-      logger.error(`Failed saving update details: ${e}`);
-    }
+    await mongo.logDBUpdateResults(changed, start, end, 'scrape');
   } catch (err) {
-    logError(err);
+    await mongo.logJSError(err);
     logger.critical(`Scrape failed: ${err.message}`);
   } finally {
     changed = 0;

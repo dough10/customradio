@@ -9,14 +9,14 @@ const path = require("path");
 const crypto = require("crypto");
 const cookieParser = require("cookie-parser");
 const { performance } = require("perf_hooks");
+const onFinished = require("on-finished");
 
-const { logger, redisClient, getCollection, collections } = require("../services.js");
+const { logger, redisClient, mongo } = require("../services.js");
 const { injectSecrets } = require("../config/secrets.js");
 const { setLanguage } = require("../util/i18n.js");
 const { isBadActor, badActor } = require("../util/badActors.js");
 
-const logError = require('../util/logError.js');
-const logString = require('../util/logString.js');
+const logRequest = require('../util/logRequest.js');
 
 injectSecrets(["SESSION_SECRET"]);
 
@@ -140,7 +140,13 @@ module.exports = (app, httpRequestCounter) => {
   app.use((req, res, next) => {
     if (req.path === '/metrics') return next();
     const start = performance.now();
-    res.on("finish", () => logger.info(logString(req, res, start)));
+    onFinished(res, (err, res) => {
+      if (req.blocked) {
+        logRequest(req);
+        return;
+      }
+      logRequest(req, res, Math.round(performance.now() - start));
+    });
     next();
   });
 
@@ -155,14 +161,14 @@ module.exports = (app, httpRequestCounter) => {
   app.use(async (req, res, next) => {
     try {
       if (await isBadActor(req.ip)) {
-        logger.warning(logString(req, res));
+        req.blocked = true;
         res.destroy();
         return;
       }
       next();
     } catch (err) {
       logger.error(`badActor check error: ${err}`);
-      await logError(err);
+      await mongo.logJSError(err);
       next();
     }
   });
@@ -184,8 +190,8 @@ module.exports = (app, httpRequestCounter) => {
       : [];
 
     if (forwardedIps.length && !forwardedIps.includes(clientInfo.ip)) {
-      await badActor(clientInfo.ip, req, res, 5);
-      return res.status(403).json({error: "Invalid request origin"});
+      // await badActor(clientInfo.ip, 5);
+      return res.status(403).json({ error: "Invalid request origin" });
     }
 
     next();
@@ -295,17 +301,17 @@ module.exports = (app, httpRequestCounter) => {
     const sessionToken = req.session?.csrfToken;
 
     if (!req.session) {
-      await badActor(req.ip, req, res, 5);
+      // await badActor(req.ip, req, res, 5);
       return res.status(440).send("Session expired or not established");
     }
 
     if (!sessionToken) {
-      await badActor(req.ip, req, res, 5);
+      // await badActor(req.ip, req, res, 5);
       return res.status(419).send("CSRF token missing in session");
     }
 
     if (!token || token !== sessionToken) {
-      await badActor(req.ip, req, res, 5);
+      // await badActor(req.ip, req, res, 5);
       return res.status(403).send("Invalid CSRF token");
     }
 
@@ -345,7 +351,7 @@ module.exports = (app, httpRequestCounter) => {
    */
   app.use((err, req, res, next) => {
     logger.error(err.stack);
-    logError(err);
+    mongo.logJSError(err).catch(err => logger.error(`Failed to log error: ${err}`));
     res.status(500).json({
       success: false,
       message: "Internal Server Error",

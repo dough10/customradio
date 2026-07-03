@@ -20,8 +20,6 @@ const { httpRequestCounter, register } = require('./util/promClient.js');
  * 2. Logs a message indicating that the server is online.
  * 
  * @function
- * @param {number} port - The port number on which the server listens.
- * @param {Function} callback - The function to be called once the server starts.
  * 
  * @returns {void}
  * 
@@ -31,30 +29,21 @@ const { httpRequestCounter, register } = require('./util/promClient.js');
  *   console.log('Online. o( ❛ᴗ❛ )o');
  * });
  */
-function launch() {
-  middleware(app, httpRequestCounter);
-  routes(app, register);
-
-  schedule.scheduleJob('0 0 * * 0', testStreams);
-  schedule.scheduleJob('0 12 1 * *', scrapeIceDir);
-  schedule.scheduleJob('0 0 1 * *', async _ => {
-    await alerts.cleanupExpired();
-    await alerts.cleanupOldVersions();
-  });
-
-  app.listen(3000, _ => {
-    logger.critical(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
-  });
-}
-
 (async () => {
   try {
-    try{
-      await initMongo();
-    } catch(er) {
-      logger.error(`MongoDB connection failed: ${er}`);
-    }
-    await launch();
+    middleware(app, httpRequestCounter);
+    routes(app, register);
+
+    schedule.scheduleJob('0 0 * * 0', testStreams);
+    schedule.scheduleJob('0 12 1 * *', scrapeIceDir);
+    schedule.scheduleJob('0 0 1 * *', async _ => {
+      await alerts.cleanupExpired();
+      await alerts.cleanupOldVersions();
+    });
+
+    app.listen(3000, _ => {
+      logger.critical(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
+    });
   } catch (err) {
     logger.critical(err);
     process.exit(1);

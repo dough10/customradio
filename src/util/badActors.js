@@ -1,5 +1,4 @@
-const { redisClient, logger } = require('../services.js');
-const logString = require('../util/logString.js');
+const { redisClient } = require('../services.js');
 
 const WINDOW = 60 * 5;        // 5 minutes (seconds)
 const BAN_DURATION = 60 * 60 * 24; // 24 hours
@@ -10,7 +9,7 @@ const KEYS = {
   ban: ip => `customradio:rate:ban:${ip}`
 };
 
-async function badActor(ip, req, res, attempts = MAX_ATTEMPTS) {
+async function badActor(ip, attempts = MAX_ATTEMPTS) {
   const key = KEYS.attempts(ip);
   const banKey = KEYS.ban(ip);
   const now = Date.now();
@@ -36,7 +35,6 @@ async function badActor(ip, req, res, attempts = MAX_ATTEMPTS) {
   await redisClient.expire(key, WINDOW);
 
   if (count >= attempts) {
-    logger.warning(logString(req, res));
     await redisClient.set(banKey, "1", { EX: BAN_DURATION });
     await redisClient.del(key);
   }

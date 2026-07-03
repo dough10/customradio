@@ -10,13 +10,14 @@ injectSecrets([
 ]);
 
 const { WorkOS } = require('@workos-inc/node');
-const { createClient } = require("redis");
-const { MongoClient } = require("mongodb");
 
 const Stations = require('./model/Stations.js');
 const UserData = require('./model/UserData.js');
 const Alerts = require('./model/Alerts.js');
 const Posts = require('./model/Posts.js');
+const Mongo = require('./model/Mongo.js');
+
+const getRedisClient = require('./model/getRedisClient.js');
 
 const Logger = require('./util/logger.js');
 
@@ -29,104 +30,15 @@ const stations = new Stations(DB_PATH);
 const userData = new UserData(DB_PATH);
 const alerts = new Alerts(DB_PATH);
 const posts = new Posts(DB_PATH);
+const mongo = new Mongo(process.env.MONGODB_URL, "radiotxt", logger);
+
+mongo.initConnection();
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
 });
 
-let mongoClient;
-const mongo = {};
-
-const collections = {
-  CSP: 'csp',
-  CSP_FAILS: 'csp-fails',
-  DB_UPDATES: 'db-updates',
-  ERRORS: 'errors'
-};
-
-/**
- * Initalize mongodb
- * 
- * @returns {Object}
- */
-async function initMongo() {
-  try {
-    mongoClient = new MongoClient(process.env.MONGODB_URL || 'mongodb://127.0.0.1:27017', {
-      maxPoolSize: 10,
-      minPoolSize: 1,
-    });
-    mongoClient.on('close', _ => logger.warning('MongoDB connection closed'));
-    mongoClient.on('error', err => logger.error(`MongoDB error: ${err}`));
-    await mongoClient.connect();
-    logger.debug("MongoDB connected");
-    const db = mongoClient.db("radiotxt");
-    for (const name of Object.values(collections)) {
-      mongo[name] = db.collection(name);
-      logger.debug(`MongoDB ${name} collection ready`);
-    }
-  } catch (err) {
-    throw err;
-  }
-}
-
-/**
- * gets a mongo collection
- * 
- * @param {String} name 
- * 
- * @returns {Object} mongodb collection
- */
-function getCollection(name) {
-  if (!mongo[name]) {
-    throw new Error(`Mongo collection "${name}" not initialized`);
-  }
-  return mongo[name];
-}
-
-/**
- * clsoes the mongoDB connection
-*/
-async function closeMongo() {
-  if (!mongoClient) return;
-  await mongoClient.close();
-  logger.warning("MongoDB connection closed");
-}
-
-/**
- * creates redis client object
- * 
- * @returns {Object}
- */
-function getRedisClient() {
-  const client = createClient({
-    url: process.env.REDIS_URL || "redis://localhost:6379",
-    password: process.env.REDIS_PASSWORD,
-    legacyMode: false,
-  });
-
-  client.on("error", err => logger.error(`Redis Client ${err}`));
-  client.on("connect", () => logger.debug("Redis Connected"));
-  client.on("end", () => logger.warning("Redis connection closed"));
-  
-  client.close = async _ => {
-    if (client.isOpen) {
-      await client.quit();
-      return; 
-    }
-    client.disconnect();
-  };
-  
-  client.connect()
-  .then(() => logger.debug("Redis ready"))
-  .catch((error) => {
-    logger.error(`Redis connection error: ${error}`);
-    process.exit(1);
-  });
-
-  return client;
-}
-
-const redisClient = getRedisClient();
+const redisClient = getRedisClient(logger);
 
 /**
  * application shutdown callback
@@ -137,7 +49,7 @@ async function shutdown() {
   try {
     logger.debug("Shutting down...");
     await redisClient.close();
-    await closeMongo();
+    await mongo.close();
     process.exit(0);
   } catch (err) {
     logger.error(`Error during shutdown: ${err}`);
@@ -153,11 +65,9 @@ module.exports = {
   userData,
   alerts,
   posts,
+  mongo,
   logger,
   redisClient,
   logLevel,
-  workos,
-  initMongo,
-  getCollection,
-  collections
+  workos
 }
