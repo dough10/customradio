@@ -16,13 +16,13 @@ class Mongo extends MongoBase {
       {
         collection: this.collections.REQUESTS,
         indexes: [
-          { 
-            spec: { 
+          {
+            spec: {
               time: 1
-            }, 
-            options: { 
-              name: "idx_requests_time" 
-            } 
+            },
+            options: {
+              name: "idx_requests_time"
+            }
           }
         ]
       }
@@ -37,6 +37,8 @@ class Mongo extends MongoBase {
     const end = new Date();
     const start = new Date(end.getTime() - (hours * 60 * 60 * 1000));
 
+    let DATAPOINTS = 96;
+
     let bucketMinutes;
     if (hours <= 1) {
       bucketMinutes = 1;
@@ -45,7 +47,7 @@ class Mongo extends MongoBase {
     } else if (hours <= 24) {
       bucketMinutes = 15;
     } else {
-      bucketMinutes = 60;
+      bucketMinutes = Math.ceil((hours * 60) / DATAPOINTS);
     }
 
     const bucketMs = bucketMinutes * 60 * 1000;
@@ -92,6 +94,9 @@ class Mongo extends MongoBase {
 
     for (let t = startTs; t <= endTs; t += bucketMs) {
       times.push(new Date(t).toLocaleTimeString([], {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
       }));
@@ -101,6 +106,26 @@ class Mongo extends MongoBase {
     return {
       counts,
       times
+    };
+  }
+
+  async cleanupRequests(retentionDays = 90) {
+    if (!Number.isInteger(retentionDays) || retentionDays <= 0) {
+      throw new TypeError('retentionDays must be a positive integer');
+    }
+
+    const cutoff = new Date(
+      Date.now() - (retentionDays * 24 * 60 * 60 * 1000)
+    );
+
+    const result = await this.getCollection(this.collections.REQUESTS)
+      .deleteMany({
+        time: { $lt: cutoff }
+      });
+
+    return {
+      deleted: result.deletedCount,
+      cutoff
     };
   }
 
@@ -117,7 +142,7 @@ class Mongo extends MongoBase {
   }
 
   async logJSError(error) {
-    return this.getCollection(this.collections.ERRORS).insertOne(error);
+    return this.getCollection(this.collections.ERRORS).insertOne({ error });
   }
 
   async logDBUpdateResults(changed, start, end, type) {
