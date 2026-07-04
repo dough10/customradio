@@ -1,13 +1,108 @@
 const MongoBase = require('./MongoBase.js');
 
+const collections = {
+  REQUESTS: 'requests',
+  CSP: 'csp',
+  CSP_FAILS: 'csp-fails',
+  DB_UPDATES: 'db-updates',
+  ERRORS: 'errors'
+};
+
 class Mongo extends MongoBase {
-  collections = {
-    REQUESTS: 'requests',
-    CSP: 'csp',
-    CSP_FAILS: 'csp-fails',
-    DB_UPDATES: 'db-updates',
-    ERRORS: 'errors'
-  };
+  collections = Object.freeze(collections);
+
+  get indexPlan() {
+    return [
+      {
+        collection: this.collections.REQUESTS,
+        indexes: [
+          { 
+            spec: { 
+              time: 1
+            }, 
+            options: { 
+              name: "idx_requests_time" 
+            } 
+          }
+        ]
+      }
+    ];
+  }
+
+  async getRequestCounts(hours) {
+    if (!Number.isFinite(hours) || hours <= 0) {
+      throw new TypeError('hours must be a positive number');
+    }
+
+    const end = new Date();
+    const start = new Date(end.getTime() - (hours * 60 * 60 * 1000));
+
+    let bucketMinutes;
+    if (hours <= 1) {
+      bucketMinutes = 1;
+    } else if (hours <= 6) {
+      bucketMinutes = 5;
+    } else if (hours <= 24) {
+      bucketMinutes = 15;
+    } else {
+      bucketMinutes = 60;
+    }
+
+    const bucketMs = bucketMinutes * 60 * 1000;
+
+    const collection = this.getCollection(this.collections.REQUESTS);
+
+    const results = await collection.aggregate([
+      {
+        $match: {
+          time: {
+            $gte: start,
+            $lte: end
+          }
+        }
+      }, {
+        $group: {
+          _id: {
+            $toLong: {
+              $dateTrunc: {
+                date: "$time",
+                unit: "minute",
+                binSize: bucketMinutes
+              }
+            }
+          },
+          count: { $sum: 1 }
+        }
+      }, {
+        $sort: {
+          _id: 1
+        }
+      }
+    ]).toArray();
+
+    const lookup = new Map(results.map(r => [r._id, r.count]));
+
+    const times = [];
+    const counts = [];
+
+    const align = (ts) => Math.floor(ts / bucketMs) * bucketMs;
+
+    const startTs = align(start.getTime());
+    const endTs = align(end.getTime());
+
+    for (let t = startTs; t <= endTs; t += bucketMs) {
+      times.push(new Date(t).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      }));
+      counts.push(lookup.get(t) ?? 0);
+    }
+
+    return {
+      counts,
+      times
+    };
+  }
 
   async logRequest(ip, method, path, query, status, responseTime) {
     return this.getCollection(this.collections.REQUESTS).insertOne({
