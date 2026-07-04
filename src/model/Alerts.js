@@ -141,7 +141,7 @@ class Alerts extends DbCon {
   async dismissAlert(id, version) {
     const now = Date.now();
 
-    await this.run(`
+    return await this.run(`
       INSERT INTO alert_state (alert_id, version, dismissed, dismissed_at)
       VALUES (?, ?, 1, ?)
       ON CONFLICT(alert_id, version) DO UPDATE SET
@@ -163,14 +163,14 @@ class Alerts extends DbCon {
   async cleanupExpired() {
     const now = Date.now();
 
-    await this.run(
+    return await this.run(
       `DELETE FROM alerts WHERE expires_at IS NOT NULL AND expires_at <= ?`,
       [now]
     );
   }
 
   async cleanupOldVersions() {
-    await this.run(`
+    return await this.run(`
       DELETE FROM alert_state
       WHERE NOT EXISTS (
         SELECT 1 FROM alerts a
