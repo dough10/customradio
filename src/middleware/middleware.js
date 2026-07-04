@@ -351,7 +351,7 @@ module.exports = (app, httpRequestCounter) => {
    */
   app.use((err, req, res, next) => {
     logger.error(err.stack);
-    mongo.logJSError(err).catch(err => logger.error(`Failed to log error: ${err}`));
+    mongo.logJSError(err.stack).catch(err => logger.error(`Failed to log error: ${err}`));
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
