@@ -10,33 +10,22 @@ html(lang=lang)
     script(nonce=nonce).
       window.user = !{JSON.stringify(user)};
       window.requests = !{JSON.stringify(requests || { time: [], counts: [] })};
+    link(rel="preload" href="dashboard.min.css" as="style")
+    link(rel='stylesheet' href='dashboard.min.css')
 
   body
     header
       h1 dashboard
 
     main
+      label(for="hours") Time:
+      select#hours(name="hours")
+        option(value=1) 1 hour
+        option(value=6) 6 hours
+        option(value=12) 12 hours
+        option(value=24 selected) 24 hours
+        option(value=48) 2 days
+        option(value=720) 30 days
       canvas#requests
 
-    script(nonce=nonce).
-      function renderChart({times, counts}) {
-        const canvas = document.getElementById('requests');
-        new Chart(canvas, {
-          type: 'bar',
-          data: {
-            labels: times,
-            datasets: [{
-              label: 'requests',
-              data: counts,
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: { beginAtZero: true }
-            }
-          }
-        });
-      }
-      renderChart(window.requests);
+    script(nonce=nonce src=dashboard.min.js async)

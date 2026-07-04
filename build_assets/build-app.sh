@@ -5,6 +5,7 @@ configs=(
   "config/runtime.config.js"
   "config/index.config.js"
   "config/submit.config.js"
+  "config/dashboard.config.js"
 )
 
 for config in "${configs[@]}"; do

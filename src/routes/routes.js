@@ -31,6 +31,8 @@ const allStationsTxt = require('./endpoints/allStationsTxt.js');
 const trafficAdvice = require('./endpoints/trafficadvice.js');
 const metrics = require('./endpoints/metrics.js');
 const viewDuplicates = require('./endpoints/viewDuplicates.js');
+const dashboard = require('./endpoints/dashboard.js');
+const requestsData = require('./endpoints/requestsData.js');
 // const blog = require('./endpoints/blog.js');
 // const blogPost = require('./endpoints/blog.post.js');
 
@@ -145,6 +147,9 @@ module.exports = async (app, register) => {
    */
   app.post('/mark-duplicate', markDuplicateValidator, markDuplicate);
 
+  /**
+   * remove duplicate indicator
+   */
   app.post('/unmark-duplicate', markDuplicateValidator, unmarkDuplicate);
 
   /**
@@ -451,6 +456,16 @@ module.exports = async (app, register) => {
    */
   // app.get('/blog/:postID', blogPost);
 
+  /**
+   * admin dashboard
+   */
+  app.get('/dashboard', dashboard);
+
+  /**
+   * structured data for rendering graphs of http requests
+   */
+  app.get('/requests/:hours', requestsData);
+  
   /**
    * Catch-all route for handling 404 errors.
    * 
