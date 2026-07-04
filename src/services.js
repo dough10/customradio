@@ -32,8 +32,6 @@ const alerts = new Alerts(DB_PATH);
 const posts = new Posts(DB_PATH);
 const mongo = new Mongo(process.env.MONGODB_URL, "radiotxt", logger);
 
-mongo.initConnection();
-
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
 });
