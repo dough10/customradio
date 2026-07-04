@@ -1,0 +1,42 @@
+html(lang=lang)
+  head
+    meta(charset="UTF-8")
+    meta(name="author" content="dough10")
+    meta(name="csrf-token" content=csrf)
+    meta(name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover")
+
+    script(src="https://cdn.jsdelivr.net/npm/chart.js" nonce=nonce)
+
+    script(nonce=nonce).
+      window.user = !{JSON.stringify(user)};
+      window.requests = !{JSON.stringify(requests || { time: [], counts: [] })};
+
+  body
+    header
+      h1 dashboard
+
+    main
+      canvas#requests
+
+    script(nonce=nonce).
+      function renderChart({times, counts}) {
+        const canvas = document.getElementById('requests');
+        new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: times,
+            datasets: [{
+              label: 'requests',
+              data: counts,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      }
+      renderChart(window.requests);
