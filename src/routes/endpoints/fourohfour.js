@@ -15,6 +15,7 @@ const sensitivePaths = new Set([
   'wp-login',
   'wp-json',
   'phpmyadmin',
+  'phpinfo',
   '.aws',
   '.old',
   '.save',
