@@ -1,16 +1,26 @@
 const pack = require('../package.json');
 const express = require('express');
-const schedule = require('node-schedule');
+const { scheduleJob } = require('node-schedule');
 const app = express();
 require('dotenv').config();
 
-const { logger, logLevel, alerts, initMongo } = require('./services.js');
+const { logger, logLevel, alerts, mongo } = require('./services.js');
 const { testStreams } = require('./util/testStreams.js');
 const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./middleware/middleware.js');
 const routes = require('./routes/routes.js');
 const { httpRequestCounter, register } = require('./util/promClient.js');
 
+async function cleanDB() {
+  try {
+    await alerts.cleanupExpired();
+    await alerts.cleanupOldVersions();
+    const result = await mongo.cleanupRequests();
+    logger.info(`Deleted ${result.deleted} requests older than ${result.cutoff.toISOString()}`);
+  } catch(err) {
+    logger.error(`Failed to clean database: ${err}`);
+  }
+}
 
 /**
  * Starts the Express server and sets up necessary initializations.
@@ -31,15 +41,13 @@ const { httpRequestCounter, register } = require('./util/promClient.js');
  */
 (async () => {
   try {
+    await mongo.initConnection();
     middleware(app, httpRequestCounter);
     routes(app, register);
 
-    schedule.scheduleJob('0 0 * * 0', testStreams);
-    schedule.scheduleJob('0 12 1 * *', scrapeIceDir);
-    schedule.scheduleJob('0 0 1 * *', async _ => {
-      await alerts.cleanupExpired();
-      await alerts.cleanupOldVersions();
-    });
+    scheduleJob('0 0 * * 0', testStreams);
+    scheduleJob('0 12 1 * *', scrapeIceDir);
+    scheduleJob('0 0 1 * *', cleanDB);
 
     app.listen(3000, _ => {
       logger.critical(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
