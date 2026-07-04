@@ -4,7 +4,7 @@ const asyncHandler = require('../../util/asyncHandler.js');
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
 
 module.exports = asyncHandler(async (req, res) => {
-  const { code } = req.query;
+  const { code, state } = req.query;
   if (!code) {
     return res.status(400).send('Missing code');
   }
@@ -33,5 +33,17 @@ module.exports = asyncHandler(async (req, res) => {
     sameSite: 'lax',
     maxAge: THIRTY_DAYS
   });
-  res.redirect(`/`);
+  let redirect = "/";
+  if (state) {
+    try {
+      const parsed = JSON.parse(state);
+      if (
+        typeof parsed.ref === "string" &&
+        parsed.ref.startsWith("/")
+      ) {
+        redirect = parsed.ref;
+      }
+    } catch {}
+  }
+  res.redirect(redirect);
 });
