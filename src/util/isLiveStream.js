@@ -95,7 +95,7 @@ function looksLikeMP3(buf) {
  * @returns {Object}
  */
 function returnError(message, status) {
-  logger.debug(message);
+  // logger.debug(message);
   return {
     ok: false,
     error: message,
