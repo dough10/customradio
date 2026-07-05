@@ -129,7 +129,7 @@ class Mongo extends MongoBase {
     };
   }
 
-  async logRequest(ip, method, path, query, status, responseTime) {
+  async logRequest(ip, method, path, query, status, userAgent, responseTime) {
     return this.getCollection(this.collections.REQUESTS).insertOne({
       time: new Date(),
       ip,
@@ -137,6 +137,7 @@ class Mongo extends MongoBase {
       path,
       query,
       status,
+      userAgent,
       responseTime
     });
   }
