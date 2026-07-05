@@ -28,6 +28,7 @@ function renderChart({ times, counts }) {
 }
 
 async function selectorChanged(ev) {
+  window.requests = null;
   const res = await fetch(`/requests/${ev.target.value}`);
   if (!res.ok) throw new Error('fetch failed');
   const data = await res.json();
