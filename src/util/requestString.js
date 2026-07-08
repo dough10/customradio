@@ -1,6 +1,14 @@
 const { performance } = require("perf_hooks");
 
-const isAdmin = require('./isAdmin.js');
+// const isAdmin = require('./isAdmin.js');
+
+function formatBytes(bytes) {
+  const format = (n) => Number(n.toFixed(1));
+
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 ** 2) return `${format(bytes / 1024)} KB`;
+  return `${format(bytes / 1024 ** 2)} MB`;
+}
 
 /**
  * generates a HTTP request string for system logger
@@ -48,7 +56,7 @@ module.exports = function requestString({
   if (contentType) parts.push(`type: ${contentType}`);
 
   const contentLength = res.getHeader('Content-Length');
-  if (contentLength) parts.push(`bytes: ${contentLength}`);
+  if (contentLength) parts.push(`bytes: ${formatBytes(contentLength)}`);
 
   // if (requestId) parts.push(`request-id: ${requestId}`);
 
