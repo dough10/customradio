@@ -1,33 +1,7 @@
 const asyncHandler = require('../../util/asyncHandler.js');
 const { badActor } = require('../../util/badActors.js');
 const logRequest = require('../../util/logRequest.js');
-
-/**
- * Set of sensitive path segments that indicate potential attacks or probing.
- * @type {Set<string>}
- */
-const sensitivePaths = new Set([
-  '.env',
-  '.git',
-  '.ssh',
-  '.json',
-  'wp-admin',
-  'wp-login',
-  'wp-json',
-  'phpmyadmin',
-  'phpinfo',
-  '.aws',
-  '.old',
-  '.save',
-  '.php',
-  'settings',
-  'api',
-  '.db',
-  'actuator',
-  'powershell',
-  'firebase',
-  'admin'
-]);
+const pathIsSensative = require('../../util/pathIsSensative.js');
 
 /**
  * Express handler for 404 errors, logs request details.
@@ -49,14 +23,13 @@ module.exports = asyncHandler(async (req, res) => {
     requestedPath = req.originalUrl.toLowerCase();
   }
 
-  for (const sensitive of sensitivePaths) {
-    if (requestedPath.includes(sensitive)) {
-      await badActor(req.ip, 1);
-      req.blocked = true;
-      res.destroy();
-      return;
-    }
+  if (pathIsSensative(requestedPath)) {
+    await badActor(req.ip, 1);
+    req.blocked = true;
+    res.destroy();
+    return;
   }
+
 
   res.status(404).send();
 });
