@@ -1,3 +1,5 @@
+const version = require('../../package.json').version;
+
 const MongoBase = require('./MongoBase.js');
 
 const collections = {
@@ -8,25 +10,31 @@ const collections = {
   ERRORS: 'errors'
 };
 
+const indexes = [
+  {
+    collection: collections.REQUESTS,
+    indexes: [
+      {
+        spec: {
+          time: 1
+        },
+        options: {
+          name: "idx_requests_time"
+        }
+      }
+    ]
+  }
+];
+
+[collections, indexes].forEach(Object.freeze);
+
 class Mongo extends MongoBase {
-  collections = Object.freeze(collections);
+  get collections() {
+    return collections;
+  }
 
   get indexPlan() {
-    return [
-      {
-        collection: this.collections.REQUESTS,
-        indexes: [
-          {
-            spec: {
-              time: 1
-            },
-            options: {
-              name: "idx_requests_time"
-            }
-          }
-        ]
-      }
-    ];
+    return indexes;
   }
 
   async getRequestCounts(hours) {
@@ -34,10 +42,10 @@ class Mongo extends MongoBase {
       throw new TypeError('hours must be a positive number');
     }
 
-    const end = new Date();
-    const start = new Date(end.getTime() - (hours * 60 * 60 * 1000));
+    const end = this._now();
+    const start = this._now(end.getTime() - (hours * 60 * 60 * 1000));
 
-    let DATAPOINTS = 96;
+    const DATAPOINTS = 96;
 
     let bucketMinutes;
     if (hours <= 1) {
@@ -93,7 +101,7 @@ class Mongo extends MongoBase {
     const endTs = align(end.getTime());
 
     for (let t = startTs; t <= endTs; t += bucketMs) {
-      times.push(new Date(t).toLocaleTimeString([], {
+      times.push(this._now(t).toLocaleTimeString([], {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
@@ -103,9 +111,13 @@ class Mongo extends MongoBase {
       counts.push(lookup.get(t) ?? 0);
     }
 
+    const totalRequests = results.reduce((sum, r) => sum + r.count, 0);
+
     return {
       counts,
-      times
+      times,
+      totalRequests,
+      averagePerHour: totalRequests / hours
     };
   }
 
@@ -114,8 +126,8 @@ class Mongo extends MongoBase {
       throw new TypeError('retentionDays must be a positive integer');
     }
 
-    const cutoff = new Date(
-      Date.now() - (retentionDays * 24 * 60 * 60 * 1000)
+    const cutoff = this._now(
+      this._now().getTime() - (retentionDays * 24 * 60 * 60 * 1000)
     );
 
     const result = await this.getCollection(this.collections.REQUESTS)
@@ -131,19 +143,20 @@ class Mongo extends MongoBase {
 
   async logRequest(ip, method, path, query, status, userAgent, responseTime) {
     return this.getCollection(this.collections.REQUESTS).insertOne({
-      time: new Date(),
+      time: this._now(),
       ip,
       method,
       path,
       query,
       status,
       userAgent,
+      version,
       responseTime
     });
   }
 
   async logJSError(error) {
-    return this.getCollection(this.collections.ERRORS).insertOne({ error });
+    return this.getCollection(this.collections.ERRORS).insertOne({ error, version });
   }
 
   async logDBUpdateResults(changed, start, end, type) {
@@ -152,7 +165,7 @@ class Mongo extends MongoBase {
       start,
       end,
       type,
-      version: require('../../package.json').version
+      version
     });
   }
 
@@ -165,7 +178,7 @@ class Mongo extends MongoBase {
         count: 1
       },
       $set: {
-        lastSeen: new Date()
+        lastSeen: this._now()
       }
     }, {
       upsert: true
