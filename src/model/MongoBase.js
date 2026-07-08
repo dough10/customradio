@@ -1,5 +1,4 @@
 const { MongoClient } = require("mongodb");
-const Logger = require("../util/logger");
 
 const log = s => console.log(s);
 const err = s => console.error(s);
@@ -9,8 +8,7 @@ const defaultLogger = {
   debug: log,
   warning: err,
   error: err,
-  critical: err,
-  security: log
+  critical: err
 }
 
 const required = Object.keys(defaultLogger);
@@ -36,6 +34,8 @@ class MongoBase {
    * @param {String} url 
    * @param {String} dbname 
    * @param {Logger} logger 
+   * 
+   * @throws {TypeError} if logger lacks needed function
    */
   constructor(url, dbname='default', logger=defaultLogger) {
     for (const fn of required) {
@@ -56,6 +56,8 @@ class MongoBase {
    * initalize the mongodb instance
    * 
    * @returns {void}
+   * 
+   * @throws {Error} if connection has previously been closed
    */
   async initConnection() {
     if (this.#connected) return;
@@ -69,7 +71,7 @@ class MongoBase {
     }
     await this.#ensureIndexes();
     this.#connected = true;
-    this.#logger.debug(`MongoDB Connected: Collections ${collectionList.join(', ')}`);
+    this.#logger.debug(`MongoDB Connected: Collections - ${collectionList.join(', ')}`);
   }
 
   /**
@@ -91,6 +93,8 @@ class MongoBase {
    * @param {String} name collection requested
    * 
    * @returns {Object} mongodb collection instance
+   * 
+   * @throws {Error} if collection doesn't exist
    */
   getCollection(name) {
     if (!this.#db[name]) {
