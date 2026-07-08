@@ -25,5 +25,6 @@ module.exports = function logRequest(req, res=DEFAULT, ms) {
     .catch(err => logger.error(`Failed to log request: ${err}`));
   
   // application logger
-  logger.info(requestString(newReq, res, ms));
+  const str = requestString(newReq, res, ms);
+  logger.info(str);
 }
