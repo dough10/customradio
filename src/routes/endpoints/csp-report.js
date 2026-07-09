@@ -38,6 +38,45 @@ function normalizeUrl(url) {
   }
 }
 
+function rawBody(req) {
+  if (req.body?.['csp-report']) {
+    return req.body['csp-report'];
+  } else if (
+    Array.isArray(req.body) &&
+    req.body[0]?.type === 'csp-violation'
+  ) {
+    return req.body[0].body;
+  }
+}
+
+function stringifyBody(req) {
+  let bodyStr;
+  try {
+    bodyStr = JSON.stringify(req.body) || '';
+  } catch {
+    bodyStr = '[unserializable body]';
+  }
+  bodyStr = bodyStr.slice(0, 2000);
+}
+
+function sanatizeReport(rawReport) {
+  const sanitizedReport = {};
+
+  for (const key of allowedFields) {
+    if (rawReport[key] === undefined) continue;
+
+    if (key === 'document-uri' || key === 'referrer' || key === 'source-file') {
+      sanitizedReport[key] = stripQuery(rawReport[key]);
+    } else if (key === 'script-sample') {
+      const sample = rawReport[key];
+      if (!sample) continue;
+      sanitizedReport[key] = typeof sample === 'string' ? sample.slice(0, 200) : '';
+    } else {
+      sanitizedReport[key] = rawReport[key];
+    }
+  }
+}
+
 /**
  * @api {post} /csp-report Receive Content Security Policy Violation Reports
  * @apiName PostCspReport
@@ -103,13 +142,7 @@ module.exports = asyncHandler(async (req, res) => {
     version
   };
 
-  let bodyStr = '';
-  try {
-    bodyStr = JSON.stringify(req.body) || '';
-  } catch {
-    bodyStr = '[unserializable body]';
-  }
-  bodyStr = bodyStr.slice(0, 2000);
+  const bodyStr = stringifyBody(req);
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -119,37 +152,14 @@ module.exports = asyncHandler(async (req, res) => {
     return;
   }
 
-  let rawReport = null;
-
-  if (req.body?.['csp-report']) {
-    rawReport = req.body['csp-report'];
-  } else if (
-    Array.isArray(req.body) &&
-    req.body[0]?.type === 'csp-violation'
-  ) {
-    rawReport = req.body[0].body;
-  }
+  const rawReport = rawBody(req);
 
   if (!rawReport) {
     await mongo.logCSPFail(baseObj, 'csp-report missing from body', bodyStr, req.headers['content-type'], typeof req.body);
     return res.status(400).json({ error: 'csp-report missing' });
   }
 
-  const sanitizedReport = {};
-
-  for (const key of allowedFields) {
-    if (rawReport[key] === undefined) continue;
-
-    if (key === 'document-uri' || key === 'referrer' || key === 'source-file') {
-      sanitizedReport[key] = stripQuery(rawReport[key]);
-    } else if (key === 'script-sample') {
-      const sample = rawReport[key];
-      if (!sample) continue;
-      sanitizedReport[key] = typeof sample === 'string' ? sample.slice(0, 200) : '';
-    } else {
-      sanitizedReport[key] = rawReport[key];
-    }
-  }
+  const sanitizedReport = sanatizeReport(rawReport);
 
   const cspReport = { ...baseObj, ...sanitizedReport };
   if (!cspReport['effective-directive']) cspReport['effective-directive'] = cspReport['violated-directive'];
