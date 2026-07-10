@@ -1,5 +1,16 @@
 const { MongoClient } = require("mongodb");
 
+/**
+ * Logger interface used by MongoBase.
+ *
+ * @typedef {Object} Logger
+ * @property {(message: string) => void} info Informational logging.
+ * @property {(message: string) => void} debug Debug logging.
+ * @property {(message: string) => void} warning Warning logging.
+ * @property {(message: string) => void} error Error logging.
+ * @property {(message: string) => void} critical Critical error logging.
+ */
+
 const log = s => console.log(s);
 const err = s => console.error(s);
 
@@ -13,29 +24,86 @@ const defaultLogger = {
 
 const required = Object.keys(defaultLogger);
 
+/**
+ * Base class for MongoDB data access.
+ *
+ * Manages the MongoDB client lifecycle, collection initialization,
+ * index creation, and common utility methods. Subclasses are expected
+ * to provide collection definitions, index plans, and domain-specific
+ * database operations.
+ */
 class MongoBase {
+
+  /**
+   * MongoDB client instance.
+   *
+   * @type {import("mongodb").MongoClient|null}
+   */
   #mongoClient = null;
+
+  /**
+   * Logger implementation.
+   *
+   * @type {Logger}
+   */
   #logger = null;
+
+  /**
+   * Database name.
+   *
+   * @type {string}
+   */
   #dbname = null;
+
+  /**
+   * Initialized collection instances.
+   *
+   * @type {Record<string, import("mongodb").Collection>}
+   */
   #db = {};
+
+  /**
+   * Indicates whether the client has been initialized.
+   *
+   * @type {boolean}
+   */
   #connected = false;
 
+  /**
+   * Registered MongoDB collection names.
+   *
+   * Must be implemented by subclasses.
+   *
+   * @returns {Readonly<Record<string, string>>}
+   * @throws {Error} Always thrown by the base implementation.
+   */
   get collections() {
     throw new Error("collections getter must be implemented");
   };
 
+  /**
+   * MongoDB index creation plan.
+   *
+   * Must be implemented by subclasses.
+   *
+   * @returns {ReadonlyArray<Object>}
+   * @throws {Error} Always thrown by the base implementation.
+   */
   get indexPlan() {
     throw new Error("indexPlan getter must be implemented");
   };
 
   /**
-   * creates mongodb connection instance
-   * 
-   * @param {String} url 
-   * @param {String} dbname 
-   * @param {Logger} logger 
-   * 
-   * @throws {TypeError} if logger lacks needed function
+   * Creates a MongoDB client instance.
+   *
+   * The connection is not established until {@link initConnection}
+   * is called.
+   *
+   * @param {string} [url] MongoDB connection string.
+   * @param {string} [dbname="default"] Database name.
+   * @param {Logger} [logger=defaultLogger] Logger implementation.
+   *
+   * @throws {TypeError} If the logger does not implement the required methods.
    */
   constructor(url, dbname='default', logger=defaultLogger) {
     for (const fn of required) {
@@ -53,11 +121,15 @@ class MongoBase {
   }
 
   /**
-   * initalize the mongodb instance
-   * 
-   * @returns {void}
-   * 
-   * @throws {Error} if connection has previously been closed
+   * Connects to MongoDB and initializes all configured collections.
+   *
+   * The configured indexes are created after the collections have
+   * been initialized. Calling this method multiple times has no effect
+   * after the first successful connection.
+   *
+   * @returns {Promise<void>}
+   *
+   * @throws {Error} If the MongoDB client has already been closed.
    */
   async initConnection() {
     if (this.#connected) return;
@@ -73,9 +145,15 @@ class MongoBase {
     this.#connected = true;
     this.#logger.debug(`MongoDB Connected: Collections - ${collectionList.join(', ')}`);
   }
-
   /**
-   * setup collection indexes
+   * Creates all configured indexes defined by {@link indexPlan}.
+   *
+   * Called automatically during {@link initConnection}. Existing indexes
+   * are left unchanged by MongoDB.
+   *
+   * @returns {Promise<void>}
+   *
+   * @private
    */
   async #ensureIndexes() {
     for (const item of this.indexPlan) {
@@ -88,13 +166,13 @@ class MongoBase {
   }
 
   /**
-   * returns a mongodb collection
-   * 
-   * @param {String} name collection requested
-   * 
-   * @returns {Object} mongodb collection instance
-   * 
-   * @throws {Error} if collection doesn't exist
+   * Returns an initialized MongoDB collection.
+   *
+   * @param {string} name Collection name.
+   *
+   * @returns {import("mongodb").Collection}
+   *
+   * @throws {Error} If the requested collection has not been initialized.
    */
   getCollection(name) {
     if (!this.#db[name]) {
@@ -104,21 +182,28 @@ class MongoBase {
   }
 
   /**
-   * Returns the current time.
-   * Exists primarily to allow deterministic unit tests.
-   * 
-   * @param {Date} time 
-   * 
+   * Returns a Date instance.
+   *
+   * Exists primarily to allow deterministic unit testing by allowing
+   * subclasses to override the source of the current time.
+   *
+   * @param {number|Date} [time] Timestamp or Date to wrap. If omitted,
+   * the current date and time is returned.
+   *
    * @returns {Date}
    */
   _now(time) {
-    return new Date(time);
+    return time === undefined
+      ? new Date()
+      : new Date(time);
   }
 
   /**
-   * closes mongodb instance
-   * 
-   * @returns {void}
+   * Closes the MongoDB client and clears all initialized collections.
+   *
+   * Once closed, the instance cannot be reconnected.
+   *
+   * @returns {Promise<void>}
    */
   async close() {
     if (!this.#mongoClient) return;
