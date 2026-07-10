@@ -35,6 +35,36 @@ const MongoBase = require('./MongoBase.js');
  * @property {Date} cutoff Cutoff timestamp used for deletion.
  */
 
+/**
+ * Application MongoDB collection names.
+ *
+ * @typedef {Object} Collections
+ * @property {string} REQUESTS HTTP request log collection.
+ * @property {string} CSP Content Security Policy reports.
+ * @property {string} CSP_FAILS Failed CSP report processing.
+ * @property {string} DB_UPDATES Database update history.
+ * @property {string} ERRORS JavaScript error reports.
+ */
+
+/**
+ * MongoDB index definition.
+ *
+ * @typedef {Object} IndexDefinition
+ * @property {Object<string, 1|-1|"text"|"hashed">} spec Index key specification.
+ * @property {import("mongodb").CreateIndexesOptions} [options] Index creation options.
+ */
+
+/**
+ * Collection index configuration.
+ *
+ * @typedef {Object} CollectionIndexes
+ * @property {string} collection Collection name.
+ * @property {IndexDefinition[]} indexes Indexes to create.
+ */
+
+/**
+ * @type {Collections}
+ */
 const collections = {
   REQUESTS: 'requests',
   CSP: 'csp',
@@ -43,6 +73,9 @@ const collections = {
   ERRORS: 'errors'
 };
 
+/**
+ * @type {CollectionIndexes[]}
+ */
 const indexes = [
   {
     collection: collections.REQUESTS,
@@ -59,6 +92,11 @@ const indexes = [
   }
 ];
 
+/**
+ * Graph data formatting options.
+ *
+ * @type {Intl.DateTimeFormatOptions}
+ */
 const GRAPH_DATE_CONFIG = {
   weekday: 'short',
   month: 'short',
