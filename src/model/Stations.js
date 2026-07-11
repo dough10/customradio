@@ -545,7 +545,7 @@ class Stations extends DbCon {
    * @throws {Error} If the database connection cannot be closed.
    */
   async close() {
-    return this.run('PRAGMA optimize').then(() => this.close());
+    return this.run('PRAGMA optimize').then(() => super.close());
   }
 
   /**
