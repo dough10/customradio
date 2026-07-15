@@ -51,7 +51,7 @@ window.addEventListener(EVENTS.LOADED, () => {
       return alert('id, title and 1 or more paragraphs are required');
     }
 
-    const res = await fetch('/addAlert', opt(data));
+    const res = await fetch('/alerts/add', opt(data));
 
     if (!res.ok) return alert('Submit Failed');
     window.location.href = window.location.href;
@@ -60,7 +60,7 @@ window.addEventListener(EVENTS.LOADED, () => {
   add.addEventListener(EVENTS.CLICK, _ => addParagraph(null, container));
 
   del.addEventListener(EVENTS.CLICK, async _ => {
-    const res = await fetch('/dismissAlert', opt({
+    const res = await fetch('/alerts/dismiss', opt({
       id: selectedAlert.dataset.id,
       version: selectedAlert.dataset.version
     }));
