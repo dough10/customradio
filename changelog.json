@@ -1,5 +1,8 @@
 {
-  "Current": [],
+  "Current": [
+    "Major changes to API endpoints",
+    ""
+  ],
   "1.13.6": [
     "better filtering of bad actors"
   ],
