@@ -223,7 +223,7 @@ async function cleanUpElement($el) {
 async function markDuplicate($el, attempts = 1) {
   const id = $el.id;
   try {
-    const response = await fetch('/mark-duplicate', _OPTIONS({ id }));
+    const response = await fetch('/stations/duplicates/mark', _OPTIONS({ id }));
     if (response.ok) {
       const result = await response.json();
       new Toast(t('dupLogged'), 1.5);

@@ -73,7 +73,7 @@ export default class AddStreamDialog extends DialogBase {
       this.$submit.setAttribute("disabled", true);
 
       const opts = _OPTIONS({ url });
-      const res = await retry(() => fetch("/add", opts));
+      const res = await retry(() => fetch("/stations/add", opts));
       
       if ([403,419,440].includes(res.status)) {
         if (retryCount < 1) {

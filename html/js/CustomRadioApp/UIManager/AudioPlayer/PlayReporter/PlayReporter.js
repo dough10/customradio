@@ -5,7 +5,7 @@ import retry from '../../../utils/retry.js';
 export const REPORTING_INTERVAL = 1;
 
 const CONFIG = Object.freeze({
-  REPORT_ENDPOINT: id => new URL(`/reportPlay/${encodeURIComponent(id)}`, window.location.origin).toString(),
+  REPORT_ENDPOINT: id => new URL(`/report/play/${encodeURIComponent(id)}`, window.location.origin).toString(),
   IDLE_TIMEOUT: 2000,
   REPORT_INTERVAL_MS: minsToMs(REPORTING_INTERVAL)
 });

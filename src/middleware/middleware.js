@@ -123,7 +123,7 @@ const cspConfig = helmet({
         cspProperties.HTTPS
       ],
       trustedTypes: [],
-      reportUri: "/csp-report",
+      reportUri: "/report/csp",
     },
   },
   hsts: {
@@ -205,7 +205,7 @@ module.exports = (app, httpRequestCounter) => {
   /**
    * CSP LIMITER
    */
-  app.use("/csp-report", cspLimiter);
+  app.use("/report/csp", cspLimiter);
 
   /**
    * REQUEST ID
@@ -293,7 +293,7 @@ module.exports = (app, httpRequestCounter) => {
    * Skips verification for GET requests
    */
   app.use(async (req, res, next) => {
-    if (["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path === "/csp-report") {
+    if (["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path === "/report/csp") {
       return next();
     }
 
@@ -301,17 +301,14 @@ module.exports = (app, httpRequestCounter) => {
     const sessionToken = req.session?.csrfToken;
 
     if (!req.session) {
-      // await badActor(req.ip, req, res, 5);
       return res.status(440).send("Session expired or not established");
     }
 
     if (!sessionToken) {
-      // await badActor(req.ip, req, res, 5);
       return res.status(419).send("CSRF token missing in session");
     }
 
     if (!token || token !== sessionToken) {
-      // await badActor(req.ip, req, res, 5);
       return res.status(403).send("Invalid CSRF token");
     }
 
@@ -349,9 +346,9 @@ module.exports = (app, httpRequestCounter) => {
   /**
    * ERROR HANDLER
    */
-  app.use((err, req, res, next) => {
+  app.use(async (err, req, res, next) => {
     logger.error(err.stack);
-    mongo.logJSError(err.stack).catch(err => logger.error(`Failed to log error: ${err}`));
+    await mongo.logJSError(err).catch(err => logger.error(`Failed to log error: ${err}`));
     res.status(500).json({
       success: false,
       message: "Internal Server Error",

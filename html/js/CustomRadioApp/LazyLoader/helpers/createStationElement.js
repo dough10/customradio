@@ -34,7 +34,7 @@ async function csrf(res) {
  */
 async function postStreamIssue(id, error, attempts = 1) {
   try {
-    const url = new URL('/stream-issue', window.location.origin);
+    const url = new URL('/report/stream-issue', window.location.origin);
     const response = await retry(_ => fetch(url.toString(), _OPTIONS({
       id,
       error
@@ -59,7 +59,7 @@ async function postStreamIssue(id, error, attempts = 1) {
  */
 async function reportInList(id, state, attempts = 1) {
   try {
-    const url = new URL(`/reportInList/${id}`, window.location.origin);
+    const url = new URL(`/report/list/${id}`, window.location.origin);
     url.searchParams.append('state', state ? '1' : '0');
     const res = await retry(_ => fetch(url.toString(), _OPTIONS()));
     if (!await csrf(res) || attempts === 0) return;

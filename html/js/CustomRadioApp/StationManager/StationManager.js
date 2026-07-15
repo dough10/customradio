@@ -97,7 +97,7 @@ export default class StationManager {
    */
   async getGenres() {
     try {
-      const url = this.#url('/topGenres');
+      const url = this.#url('/stations/topGenres');
       const res = await retryFetch(url);
       if (res.status !== 200) {
         throw new Error(`Error fetching genres: ${res.statusText}`);
@@ -137,7 +137,7 @@ export default class StationManager {
   async getSelectedStations(loadSaved, container) {
     if (loadSaved) {
       try {
-        const url = this.#url('/userStations');
+        const url = this.#url('/stations/user');
         const res = await fetch(url);
         if (!res.ok) {
           throw new Error(`Error fetching user stations: ${res.statusText}`);

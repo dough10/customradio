@@ -146,7 +146,7 @@ export default class UIManager {
    */
   async #fetchAlerts() {
     try {
-      const url = new URL('/getAlerts', window.location.origin);
+      const url = new URL('/alerts', window.location.origin);
       const res = await fetch(url.toString());
       if (!res.ok) throw new Error('Failed to fetch alerts');
       const alerts = await res.json();
@@ -303,7 +303,7 @@ export default class UIManager {
     if (window.user) return;
     try {
       window.location.href = new URL(
-        '/signup',
+        '/auth/signup',
         window.location.origin
       ).toString();
     } catch (e) {
@@ -375,7 +375,7 @@ export default class UIManager {
    */
   _openAddAlert() {
     try {
-      const url = new URL('/addAlert', window.location.origin);
+      const url = new URL('/alerts/add', window.location.origin);
       window.open(
         url.toString(),
         "_blank",
@@ -392,7 +392,7 @@ export default class UIManager {
    */
   _openDuplicates() {
     try {
-      const url = new URL('/duplicates', window.location.origin);
+      const url = new URL('/stations/duplicates', window.location.origin);
       window.open(
         url.toString(),
         "_blank",
@@ -409,7 +409,7 @@ export default class UIManager {
    */
   async _startUpdate() {
     try {
-      const url = new URL('/updatedb', window.location.origin);
+      const url = new URL('/stations/update', window.location.origin);
       const res = await fetch(url.toString());
       if (!res.ok) {
         throw new Error('Failed to start update');
