@@ -6,7 +6,7 @@ module.exports = {
   entry: './html/js/submit.js',
   output: {
     filename: 'submit.min.js',
-    path: path.resolve(__dirname, '..', 'public'),
+    path: path.resolve(__dirname, '..', 'public', 'alerts'),
   },
   module: {
     rules: [
