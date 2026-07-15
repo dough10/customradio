@@ -1,5 +1,31 @@
-const CACHE_VERSION = '1.13.7';
+const CACHE_VERSION = '1.14.0';
 const urlsToCache = [];
+
+const bypassPaths = [
+  '/info',
+  '/report/play/',
+  '/report/list/',
+  '/auth',
+  '/auth/callback',
+  '/alerts',
+  '/stations/update',
+  '/stations/scrape',
+  '/stations/duplicates',
+  '/stations/duplicates/mark',
+  '/stations/duplicates/unmark',
+];
+
+const shouldBypassCache = url =>
+  bypassPaths.some(path => url.includes(path));
+
+const appRoutes = [
+  '/stations',
+  '/stations/topGenres',
+  '/stations/user',
+];
+
+const isAppRoute = url =>
+  appRoutes.some(path => url.includes(path));
 
 /**
  * Handles fetch requests
@@ -36,36 +62,20 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
   const url = event.request.url;
-  if (
-    url.includes('/info') ||
-    url.includes('/reportPlay/') ||
-    url.includes('/reportInList/') ||
-    url.includes('/auth') ||
-    url.includes('/auth/callback') ||
-    url.includes('/getAlerts') ||
-    url.includes('/updatedb')
-  ) {
+  if (shouldBypassCache(url)) {
     event.respondWith(fetch(event.request));
     return;
   }
   if (
-    event.request.headers.get('Accept')?.includes('text/html') || 
-    event.request.url.includes('/stations') || 
-    event.request.url.includes('/topGenres') || 
-    event.request.url.includes('/userStations')
+    event.request.headers.get('Accept')?.includes('text/html') ||
+    isAppRoute(url)
   ) {
     event.respondWith(handleRequest(event));
-  } else {
-    event.respondWith(
-      caches.match(event.request)
-        .then(response => {
-          if (response) {
-            return response;
-          }
-          return fetch(event.request);
-        })
-    );
+    return;
   }
+  event.respondWith(
+    caches.match(event.request).then(response => response || fetch(event.request))
+  );
 });
 
 self.addEventListener('activate', event => {
