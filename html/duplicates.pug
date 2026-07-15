@@ -47,7 +47,7 @@ html(lang=lang)
 
     async function go(button) {
       const id = button.parentElement.dataset;
-      const res = await fetch('/unmark-duplicate', opt(id));
+      const res = await fetch('/stations/duplicates/unmark', opt(id));
       if (!res.ok) return alert('failed to unmark as duplicate');
       window.location.href = window.location.href;
     }
