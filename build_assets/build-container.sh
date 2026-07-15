@@ -15,3 +15,4 @@ if [ -z "$1" ]; then
 fi
 docker build --no-cache -t "$1:$VERSION" -t "$1:latest" .
 docker push "$1:$VERSION" && docker push "$1:latest"
+docker system prune -a --volumes
