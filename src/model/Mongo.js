@@ -114,15 +114,10 @@ const GRAPH_DATE_CONFIG = {
  */
 function getBucketSize(hours) {
   const DATAPOINTS = 96;
-  if (hours <= 1) {
-    return 1;
-  } else if (hours <= 6) {
-    return 5;
-  } else if (hours <= 24) {
-    return 15;
-  } else {
-    return Math.ceil((hours * 60) / DATAPOINTS);
-  }
+  if (hours <= 1) return 1;
+  if (hours <= 6) return 5;
+  if (hours <= 24) return 15;
+  return Math.ceil((hours * 60) / DATAPOINTS);
 }
 
 /**
