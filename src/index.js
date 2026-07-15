@@ -15,8 +15,8 @@ async function cleanDB() {
   try {
     await alerts.cleanupExpired();
     await alerts.cleanupOldVersions();
-    const result = await mongo.cleanupRequests();
-    logger.info(`Deleted ${result.deleted} requests older than ${result.cutoff.toISOString()}`);
+    const { deleted, cutoff } = await mongo.cleanupRequests();
+    logger.info(`Deleted ${deleted} requests older than ${cutoff.toISOString()}`);
   } catch(err) {
     logger.error(`Failed to clean database: ${err}`);
   }
