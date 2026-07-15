@@ -13,13 +13,13 @@ const files = fs.readdirSync(dest)
     'worker.js', 
     'screenshots'
   ].includes(file))
-  .filter(file => !file.startsWith('submit.min'))
+  .filter(file => !file.startsWith('submit.min') || !file.startsWith('dashboard.min'))
   .map(file => `/${file}`);
 
 [
   '/',
   '/stations',
-  '/topGenres'
+  '/stations/topGenres'
 ].forEach(endpoint => files.push(endpoint));
 
 screenshots = screenshots.map(image => `/screenshots/${image}`);
