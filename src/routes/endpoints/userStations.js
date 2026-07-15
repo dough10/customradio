@@ -1,6 +1,11 @@
 const {userData} = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 
+function respond(req, res, list) {
+  req.count = list.length;
+  res.json(list);
+}
+
 /**
  * Fetches user-specific audio stations from the database.
  * 
@@ -13,8 +18,7 @@ const asyncHandler = require('../../util/asyncHandler.js');
  */
 module.exports = asyncHandler(async (req, res) => {
   if (!req.user || !req.user.id) {
-    req.count = 0;
-    res.send([]);
+    respond(req, res, []);
     return;
   }
   
@@ -22,10 +26,9 @@ module.exports = asyncHandler(async (req, res) => {
   const stations = await userData.userStations(userID);
   
   if (!stations || stations.length === 0) {
-    res.send([]);
+    respond(req, res, []);
     return;
   }
   
-  req.count = stations.length;
-  res.json(stations);
+  respond(req, res, stations);
 });
