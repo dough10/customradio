@@ -40,7 +40,7 @@ replace_path dashboard.min.css "./$dashboard_css" $dashboard_template
 
 mv public/styles.min.css public/"$css_path"
 mv public/bundle.min.js public/"$js_path"
-mv public/submit.min.js public/"$submit_path"
+mv public/alerts/submit.min.js public/alerts/"$submit_path"
 mv public/dashboard.min.js public/"$dashboard_path"
 mv public/dashboard.min.css public/"$dashboard_css"
 
