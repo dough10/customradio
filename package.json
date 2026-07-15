@@ -1,6 +1,6 @@
 {
   "name": "customradio",
-  "version": "1.13.7",
+  "version": "1.14.0",
   "description": "build custion radio.txt for use on hiby audio players",
   "main": "index.js",
   "scripts": {
@@ -13,8 +13,8 @@
     "build-docker": "bash build_assets/build-container.sh \"registry.dough10.me/customradio\"",
     "docs": "node assets/make-docs.js",
     "run container": "bash build_assets/run.sh",
-    "translate-front": "node scripts/translate-js.js front bg cs de es fr fi it nl gl he hu ja kk ko pl pt ro ru sk sr sv tr uk vi zh",
-    "translate-back": "node scripts/translate-js.js back bg cs de es fr fi it nl gl he hu ja kk ko pl pt ro ru sk sr sv tr uk vi zh"
+    "translate-front": "node scripts/translate-js.js front bg ca cs de es fr fi it nl gl he hu ja kk ko pl pt ro ru sk sr sv tr uk vi zh",
+    "translate-back": "node scripts/translate-js.js back bg ca cs de es fr fi it nl gl he hu ja kk ko pl pt ro ru sk sr sv tr uk vi zh"
   },
   "author": "dough10",
   "license": "ISC",
