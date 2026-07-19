@@ -70,6 +70,13 @@ class MongoBase {
   #connected = false;
 
   /**
+   * Indicates whether the client is connecting to server.
+   *
+   * @type {boolean}
+   */ 
+  #connecting = false;
+
+  /**
    * Registered MongoDB collection names.
    *
    * Must be implemented by subclasses.
@@ -132,7 +139,8 @@ class MongoBase {
    * @throws {Error} If the MongoDB client has already been closed.
    */
   async initConnection() {
-    if (this.#connected) return;
+    if (this.#connected || this.#connecting) return;
+    this.#connecting = true;
     if (!this.#mongoClient) throw new Error("Mongo client has been closed.");
     await this.#mongoClient.connect();
     const db = this.#mongoClient.db(this.#dbname);
@@ -143,6 +151,7 @@ class MongoBase {
     }
     await this.#ensureIndexes();
     this.#connected = true;
+    this.#connecting = false;
     this.#logger.debug(`MongoDB Connected: Collections - ${collectionList.join(', ')}`);
   }
   /**
