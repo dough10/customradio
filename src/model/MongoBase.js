@@ -72,9 +72,9 @@ class MongoBase {
   /**
    * Indicates whether the client is connecting to server.
    *
-   * @type {boolean}
+   * @type {Promise<void>|null}
    */ 
-  #connecting = false;
+  #connectionPromise = null;
 
   /**
    * Registered MongoDB collection names.
@@ -139,21 +139,37 @@ class MongoBase {
    * @throws {Error} If the MongoDB client has already been closed.
    */
   async initConnection() {
-    if (this.#connected || this.#connecting) return;
-    this.#connecting = true;
-    if (!this.#mongoClient) throw new Error("Mongo client has been closed.");
-    await this.#mongoClient.connect();
-    const db = this.#mongoClient.db(this.#dbname);
-    const collections = this.collections;
-    const collectionList = Object.values(collections);
-    for (const name of collectionList) {
-      this.#db[name] = db.collection(name);
+    if (this.#connected) return;
+    
+    if (this.#connectionPromise) {
+      return this.#connectionPromise;
     }
-    await this.#ensureIndexes();
-    this.#connected = true;
-    this.#connecting = false;
-    this.#logger.debug(`MongoDB Connected: Collections - ${collectionList.join(', ')}`);
+
+    if (!this.#mongoClient) throw new Error("Mongo client has been closed.");
+
+    this.#connectionPromise = (async () => {
+      try {
+        await this.#mongoClient.connect();
+        const db = this.#mongoClient.db(this.#dbname);
+        const collectionList = Object.values(this.collections);
+        
+        for (const name of collectionList) {
+          this.#db[name] = db.collection(name);
+        }
+        
+        await this.#ensureIndexes();
+        this.#connected = true;
+        this.#logger.debug(`MongoDB Connected: Collections - ${collectionList.join(', ')}`);
+      } catch (error) {
+        this.#logger.critical(`MongoDB Connection Failed: ${error.message}`);
+        this.#connectionPromise = null;
+        throw error;
+      }
+    })();
+
+    return this.#connectionPromise;
   }
+
   /**
    * Creates all configured indexes defined by {@link indexPlan}.
    *
@@ -165,13 +181,15 @@ class MongoBase {
    * @private
    */
   async #ensureIndexes() {
+    const indexPromises = [];
     for (const item of this.indexPlan) {
       if (!item.collection) continue;
       const col = this.getCollection(item.collection);
       for (const idx of item.indexes) {
-        await col.createIndex(idx.spec, idx.options);
+        indexPromises.push(col.createIndex(idx.spec, idx.options));
       }
     }
+    await Promise.all(indexPromises);
   }
 
   /**
@@ -202,9 +220,7 @@ class MongoBase {
    * @returns {Date}
    */
   _now(time) {
-    return time === undefined
-      ? new Date()
-      : new Date(time);
+    return time === undefined ? new Date() : new Date(time);
   }
 
   /**
