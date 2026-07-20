@@ -89,6 +89,19 @@ const indexes = [
         }
       }
     ]
+  }, {
+    collection: collections.CSP,
+    indexes: [
+      {
+        spec: {
+          fingerprint: 1
+        },
+        options: {
+          name: "idx_csp_fingerprint",
+          unique: true
+        }
+      }
+    ]
   }
 ];
 
