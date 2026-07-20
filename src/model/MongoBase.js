@@ -162,6 +162,7 @@ class MongoBase {
         this.#logger.debug(`MongoDB Connected: Collections - ${collectionList.join(', ')}`);
       } catch (error) {
         this.#logger.critical(`MongoDB Connection Failed: ${error.message}`);
+        this.#db = {};
         this.#connectionPromise = null;
         throw error;
       }
@@ -232,10 +233,14 @@ class MongoBase {
    */
   async close() {
     if (!this.#mongoClient) return;
-    await this.#mongoClient.close();
-    this.#db = {};
+    
+    const client = this.#mongoClient;
     this.#mongoClient = null;
+    this.#db = {};
     this.#connected = false;
+    this.#connectionPromise = null;
+    
+    await client.close();
   }
 }
 
