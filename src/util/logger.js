@@ -3,6 +3,16 @@ const path = require('path');
 const { promises: fsPromises } = require('fs');
 const { appendFile, stat, rename, readdir, unlink} = fsPromises;
 
+const TIME_FORMAT = {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false
+};
+
 /**
  * A mapping of log levels to their respective numeric severity values.
  * 
@@ -156,15 +166,7 @@ class Logger {
    * @returns {string} The formatted timestamp.
    */
   _timestamp() {
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    });
+    const formatter = new Intl.DateTimeFormat('en-US', TIME_FORMAT);
     return formatter.format(new Date());
   }
 
