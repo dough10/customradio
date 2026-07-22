@@ -131,7 +131,7 @@ export default class UIManager {
       }, {
         el: this.$dashboardLink,
         event: this._em.types.click,
-        handler: _=> this._openDashboard()
+        handler: _ => this._openDashboard()
       }
     ];
 
@@ -183,12 +183,12 @@ export default class UIManager {
   async #showActiveAlerts() {
     const alerts = await this.#fetchAlerts();
 
-    for (const alert of alerts) {
+    for (const { id, version, title, paragraphs } of alerts) {
       if (document.querySelector('.alert')) {
         await this.#waitForAlertClose();
       }
-      const key = `alert_${alert.id}_${alert.version}`;
-      new Alert(key, alert.title, alert.paragraphs);
+      const key = `alert_${id}_${version}`;
+      new Alert(key, title, paragraphs);
     }
   }
 
@@ -390,7 +390,7 @@ export default class UIManager {
         "_blank",
         "noopener,noreferrer"
       );
-    } catch(e) {
+    } catch (e) {
       new Toast('Failed to open add alert page');
       console.error(e);
     }
