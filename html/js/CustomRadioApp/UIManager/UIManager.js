@@ -42,6 +42,7 @@ export default class UIManager {
     this.$main = document.querySelector(this._selectors.main);
     this.$sharelink = document.querySelector(this._selectors.sharelink);
     this.$toggleSelected = document.querySelector(this._selectors.toggleSelected);
+    this.$dashboardLink = document.querySelector(this._selectors.dashboard);
 
     const required = [
       this.$toTop,
@@ -127,11 +128,15 @@ export default class UIManager {
         el: this.$signupButton,
         event: this._em.types.click,
         handler: _ => this._signupRedirect()
+      }, {
+        el: this.$dashboardLink,
+        event: this._em.types.click,
+        handler: _=> this._openDashboard()
       }
     ];
 
     for (const { el, event, handler } of listeners) {
-      this._em.add(el, event, handler);
+      if (el) this._em.add(el, event, handler);
     }
 
     document.querySelectorAll('.menu-button').forEach(btn => {
@@ -368,14 +373,14 @@ export default class UIManager {
   }
 
   /**
-   * opens the addAlert page in a sererate window
+   * opens the dashboard page in a sererate window
    * 
    * @private
    * @function
    */
-  _openAddAlert() {
+  _openDashboard() {
     try {
-      const url = new URL('/alerts/add', window.location.origin);
+      const url = new URL('/dashboard', window.location.origin);
       window.open(
         url.toString(),
         "_blank",
@@ -384,40 +389,6 @@ export default class UIManager {
     } catch(e) {
       new Toast('Failed to open add alert page');
       console.error(e);
-    }
-  }
-
-  /**
-   * 
-   */
-  _openDuplicates() {
-    try {
-      const url = new URL('/stations/duplicates', window.location.origin);
-      window.open(
-        url.toString(),
-        "_blank",
-        "noopener,noreferrer"
-      );
-    } catch(e) {
-      new Toast('Failed to open duplicates page');
-      console.error(e);
-    }
-  }
-
-  /**
-   * starts database udpate in background
-   */
-  async _startUpdate() {
-    try {
-      const url = new URL('/stations/update', window.location.origin);
-      const res = await fetch(url.toString());
-      if (!res.ok) {
-        throw new Error('Failed to start update');
-      }
-      const {message} = await res.json();
-      new Toast(message);
-    } catch(e) {
-      new Toast(e);
     }
   }
 
@@ -463,17 +434,6 @@ export default class UIManager {
     this.$loginButton.style.display = 'none';
     this.$signupButton.style.display = 'none';
     this.$logoutButton.style.display = 'flex';
-
-    const {click} = this._em.types;
-
-    const addAlertBtn = document.querySelector('button[title="alert"]');
-    if (addAlertBtn) this._em.add(addAlertBtn, click, _ => this._openAddAlert());
-
-    const dupButton = document.querySelector('button[title="duplicates"]');
-    if (dupButton) this._em.add(dupButton, click, _ => this._openDuplicates());
-
-    const updateButton = document.querySelector('button[title="update"]');
-    if (updateButton) this._em.add(updateButton, click, _ => this._startUpdate())
   }
 
   /**
