@@ -223,7 +223,10 @@ const selectors = {
   toggleSelected: '#toggle-selected',
 
   /** @type {String} signup button */
-  signup: 'nav>button[title="signup"]'
+  signup: 'nav>button[title="signup"]',
+
+  /** @type {String} dashboarrd button */
+  dashboard: 'button[title="dashboard"]'
 };
 
 export default selectors;
