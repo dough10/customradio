@@ -166,8 +166,12 @@ export default class UIManager {
    * async wait for an alert to be closed
    */
   #waitForAlertClose() {
+    const ns = `alert-close${Date.now()}`;
     return new Promise((resolve) => {
-      this._em.add(document, this._em.types.alertClosed, resolve, { once: true });
+      this._em.add(document, this._em.types.alertClosed, _ => {
+        this._em.removeByNamespace(ns)
+        resolve();
+      }, { once: true }, ns);
     });
   }
 
