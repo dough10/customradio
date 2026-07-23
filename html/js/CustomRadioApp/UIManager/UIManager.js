@@ -169,7 +169,7 @@ export default class UIManager {
     const ns = `alert-close${Date.now()}`;
     return new Promise((resolve) => {
       this._em.add(document, this._em.types.alertClosed, _ => {
-        this._em.removeByNamespace(ns)
+        this._em.removeByNamespace(ns);
         resolve();
       }, { once: true }, ns);
     });
