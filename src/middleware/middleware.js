@@ -27,6 +27,12 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 };
 
+const bypass = [
+  '/logs',
+  '/metrics',
+  '/progress'
+];
+
 const generalLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 120,
@@ -219,7 +225,14 @@ module.exports = (app, httpRequestCounter) => {
    * CORE MIDDLEWARE
    */
   app.disable("x-powered-by");
-  app.use(compression());
+  app.use(compression({
+    filter: (req, res) => {
+      if (bypass.includes(req.path)) {
+        return false;
+      }
+      return compression.filter(req, res);
+    }
+  }));
   app.use(cookieParser());
   app.use(cors(corsOptions));
   app.use(express.urlencoded({ extended: true }));
@@ -244,7 +257,7 @@ module.exports = (app, httpRequestCounter) => {
    * SESSION
    */
   app.use((req, res, next) => {
-    if (req.path === "/metrics") return next();
+    if (bypass.includes(req.path)) return next();
     return session({
       store: initSessionStorage(),
       secret: process.env.SESSION_SECRET,
@@ -276,7 +289,7 @@ module.exports = (app, httpRequestCounter) => {
    * Makes token available to templates via res.locals
    */
   app.use((req, res, next) => {
-    if (req.path === "/metrics") return next();
+    if (bypass.includes(req.path)) return next();
     if (!req.session.csrfToken) {
       const csrfToken = crypto.randomBytes(32).toString("hex");
       req.session.csrfToken = csrfToken;
@@ -293,7 +306,8 @@ module.exports = (app, httpRequestCounter) => {
    * Skips verification for GET requests
    */
   app.use(async (req, res, next) => {
-    if (["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path === "/report/csp") {
+    if (bypass.includes(req.path)) return next();
+    if (["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path.includes('/report/')) {
       return next();
     }
 
@@ -319,7 +333,7 @@ module.exports = (app, httpRequestCounter) => {
    * REQUEST COUNTER
    */
   app.use((req, res, next) => {
-    if (req.path === '/metrics') return next();
+    if (bypass.includes(req.path)) return next();
     res.on("finish", () => {
       httpRequestCounter.inc({
         method: req.method,
