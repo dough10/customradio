@@ -1,28 +1,6 @@
 const { MongoClient } = require("mongodb");
 
-/**
- * Logger interface used by MongoBase.
- *
- * @typedef {Object} Logger
- * @property {(message: string) => void} info Informational logging.
- * @property {(message: string) => void} debug Debug logging.
- * @property {(message: string) => void} warning Warning logging.
- * @property {(message: string) => void} error Error logging.
- * @property {(message: string) => void} critical Critical error logging.
- */
-
-const log = s => console.log(s);
-const err = s => console.error(s);
-
-const defaultLogger = {
-  info: log,
-  debug: log,
-  warning: err,
-  error: err,
-  critical: err
-}
-
-const required = Object.keys(defaultLogger);
+const { enforceLogger, defaultLogger } = require('../util/defaultLogger.js');
 
 /**
  * Base class for MongoDB data access.
@@ -73,7 +51,7 @@ class MongoBase {
    * Indicates whether the client is connecting to server.
    *
    * @type {Promise<void>|null}
-   */ 
+   */
   #connectionPromise = null;
 
   /**
@@ -112,11 +90,8 @@ class MongoBase {
    *
    * @throws {TypeError} If the logger does not implement the required methods.
    */
-  constructor(url, dbname='default', logger=defaultLogger) {
-    for (const fn of required) {
-      if (typeof logger[fn] !== "function")
-        throw new TypeError(`logger.${fn} must be a function`);
-    }
+  constructor(url, dbname = 'default', logger = defaultLogger) {
+    enforceLogger(logger);
     this.#dbname = dbname;
     this.#logger = logger;
     this.#mongoClient = new MongoClient(url || 'mongodb://127.0.0.1:27017', {
@@ -140,7 +115,7 @@ class MongoBase {
    */
   async initConnection() {
     if (this.#connected) return;
-    
+
     if (this.#connectionPromise) {
       return this.#connectionPromise;
     }
@@ -152,11 +127,11 @@ class MongoBase {
         await this.#mongoClient.connect();
         const db = this.#mongoClient.db(this.#dbname);
         const collectionList = Object.values(this.collections);
-        
+
         for (const name of collectionList) {
           this.#db[name] = db.collection(name);
         }
-        
+
         await this.#ensureIndexes();
         this.#connected = true;
         this.#logger.debug(`MongoDB Connected: Collections - ${collectionList.join(', ')}`);
@@ -233,13 +208,13 @@ class MongoBase {
    */
   async close() {
     if (!this.#mongoClient) return;
-    
+
     const client = this.#mongoClient;
     this.#mongoClient = null;
     this.#db = {};
     this.#connected = false;
     this.#connectionPromise = null;
-    
+
     await client.close();
   }
 }
