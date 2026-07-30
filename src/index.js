@@ -4,8 +4,7 @@ const { scheduleJob } = require('node-schedule');
 const app = express();
 require('dotenv').config();
 
-const { logger, logLevel, alerts, mongo } = require('./services.js');
-const { testStreams } = require('./util/testStreams.js');
+const { logger, logLevel, alerts, mongo, updater } = require('./services.js');
 const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./middleware/middleware.js');
 const routes = require('./routes/routes.js');
@@ -45,7 +44,7 @@ async function cleanDB() {
     middleware(app, httpRequestCounter);
     routes(app, register);
 
-    scheduleJob('0 0 * * 0', testStreams);
+    scheduleJob('0 0 * * 0', updater.run);
     scheduleJob('0 12 1 * *', scrapeIceDir);
     scheduleJob('0 0 1 * *', cleanDB);
 

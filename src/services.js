@@ -16,8 +16,11 @@ const UserData = require('./model/UserData.js');
 const Alerts = require('./model/Alerts.js');
 const Posts = require('./model/Posts.js');
 const Mongo = require('./model/Mongo.js');
+const DatabaseUpdater = require('./util/DatabaseUpdater.js');
 
 const getRedisClient = require('./model/getRedisClient.js');
+
+const logUpdates = require('./util/logUpdates.js');
 
 const Logger = require('./util/logger.js');
 
@@ -26,16 +29,29 @@ const logger = new Logger(logLevel);
 
 const DB_PATH = 'data/customradio.db';
 
+// app data
 const stations = new Stations(DB_PATH);
 const userData = new UserData(DB_PATH);
 const alerts = new Alerts(DB_PATH);
 const posts = new Posts(DB_PATH);
+
+// analytics
 const mongo = new Mongo(process.env.MONGODB_URL, "radiotxt", logger);
 
+// db updater !!!!
+const updater = new DatabaseUpdater({
+  batchSize: 100,
+  concurrency: 5
+}, stations, mongo);
+
+logUpdates(updater, logger);
+
+// workos
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
 });
 
+// redis session
 const redisClient = getRedisClient(logger);
 
 /**
@@ -67,5 +83,6 @@ module.exports = {
   logger,
   redisClient,
   logLevel,
-  workos
+  workos,
+  updater
 }

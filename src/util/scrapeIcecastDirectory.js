@@ -2,11 +2,13 @@ require('dotenv').config();
 const xml2js = require('xml2js');
 const pack = require('../../package.json');
 
-const { testHomepageConnection, plural, msToHhMmSs } = require('./testStreams.js');
+const msToHhMmSs = require('./msToHhMmSs.js');
+const testHomepageConnection = require('./testHomepageConnection.js');
 const isLiveStream = require('./isLiveStream.js');
 const usedTypes = require("./usedTypes.js");
 const retry = require('./retry.js');
 const { stations, logger, mongo } = require('./../services.js');
+const plural = require('./plural.js');
 
 
 let scraping = false;

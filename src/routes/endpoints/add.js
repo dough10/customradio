@@ -65,8 +65,7 @@ module.exports = asyncHandler(async (req, res) => {
   } = await isLiveStream(url);
 
   if (!ok) {
-    // logger.warning(`Test failed: ${error}`);
-    return res.status(500).json({ message: t('conTestFailed', error) });
+    return res.json({ message: t('conTestFailed', error) });
   }
 
   const data = {

@@ -28,6 +28,7 @@ module.exports = asyncHandler(async (req, res) => {
     lang: req.loadedLang,
     csrf: req.session.csrfToken,
     nonce: res.locals.nonce,
-    requests: await mongo.getRequestCounts(24)
+    requests: await mongo.getRequestCounts(24),
+    lastUpdate: await mongo.getLastDBUpdate()
   }));
 });

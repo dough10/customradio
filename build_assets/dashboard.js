@@ -1,4 +1,11 @@
 import '../html/css/reset.css';
+import '../html/css/Alert.css';
+import '../html/css/Toast.css';
+import '../html/css/small-button.css';
+import '../html/css/user-menu.css';
+import '../html/css/menu-button.css';
 import '../html/css/header.css';
+import '../html/css/card.css';
+import '../html/css/log.css';
 import '../html/css/base.css';
 import '../html/js/dashboard.js';

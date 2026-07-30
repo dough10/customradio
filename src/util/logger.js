@@ -1,3 +1,4 @@
+const EventEmitter = require('events');
 const fs = require('fs');
 const path = require('path');
 const { promises: fsPromises } = require('fs');
@@ -72,7 +73,7 @@ async function retryOperation(operation, retries = RETRY_LIMIT) {
 /**
  * Logger class that handles logging messages to a file with different log levels and log rotation.
  */
-class Logger {
+class Logger extends EventEmitter {
   /**
    * Creates an instance of Logger.
    * 
@@ -81,6 +82,7 @@ class Logger {
    * @param {number} [maxBackups=5] - The maximum number of backup log files to retain.
    */
   constructor(level = '', maxSize = 5 * 1024 * 1024, maxBackups = 5) {
+    super();
     this._threshold = getLevel(level);
     this._logDir = path.join(__dirname, '..', 'logs');
     this._baseLogFile = path.join(this._logDir, 'customradio.log');
@@ -108,7 +110,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async debug(message) {
-    await this._log(this._timestamp(), 'DEBUG', message);
+    await this._log('DEBUG', message);
   }
 
   /**
@@ -118,7 +120,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async info(message) {
-    await this._log(this._timestamp(), 'INFO', message);
+    await this._log('INFO', message);
   }
   
   /**
@@ -128,7 +130,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async warning(message) {
-    await this._log(this._timestamp(), 'WARNING', message);
+    await this._log('WARNING', message);
   }
 
   /**
@@ -138,7 +140,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async error(message) {
-    await this._log(this._timestamp(), 'ERROR', message);
+    await this._log('ERROR', message);
   }
 
   /**
@@ -148,7 +150,7 @@ class Logger {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async critical(message) {
-    await this._log(this._timestamp(), 'CRITICAL', message);
+    await this._log('CRITICAL', message);
   }
 
   /**
@@ -157,7 +159,7 @@ class Logger {
    * @param {String} message 
    */
   async security(message) {
-    await this._log(this._timestamp(), 'SECURITY', message);
+    await this._log('SECURITY', message);
   }
 
   /**
@@ -173,20 +175,28 @@ class Logger {
   /**
    * Writes a log entry to the log file sequentially by chaining log operations.
    * 
-   * @param {string} timestamp - The timestamp of the log entry.
    * @param {string} level - The log level (e.g., 'debug', 'info', 'warning', 'critical').
    * @param {string} message - The log message.
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
-  async _log(timestamp, level, message) {
+  async _log(level, message) {
     if (this._threshold > levels[level.toLowerCase()]) {
       return;
     }
     if (typeof message === 'object') {
       message = JSON.stringify(message, null, 2);
     }
+
+    const timestamp = this._timestamp();
+
     const logEntry = `${timestamp} [${level}] ${message}`;
     
+    this.emit('line', {
+      timestamp,
+      level,
+      message
+    });
+
     console.log(logEntry);
 
     await this._rotateLogFile();

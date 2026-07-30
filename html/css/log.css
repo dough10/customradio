@@ -1,0 +1,40 @@
+#log {
+  height: 150px;
+  width: 100%;
+  flex-direction: column;
+  align-items: start;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+#log>div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  flex-direction: row;
+}
+#log>div>span {
+  margin-right: 8px;
+  overflow: hidden;
+  height: 24px;
+}
+#log>div>span:first-child {
+  min-width: 155px;
+}
+.debug {
+  color: purple;
+  min-width: 55px;
+}
+.info {
+  color: blue;
+  min-width: 45px;
+}
+.warning {
+  color: yellow;
+}
+.error {
+  color: red;
+}
+.critical {
+  color: orange;
+}

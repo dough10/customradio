@@ -84,11 +84,10 @@ export default class AddStreamDialog extends DialogBase {
         return;
       }
 
-      const data = await res.json();
-      const msg = data.message;
+      const { message } = await res.json();
 
-      this.$response.textContent = msg;
-      new Toast(msg);
+      this.$response.textContent = message;
+      new Toast(message);
 
     } catch (err) {
       new Toast("An error occurred");

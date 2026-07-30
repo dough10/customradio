@@ -1,0 +1,14 @@
+.card {
+  flex-direction: column;
+  background: var(--main-color);
+  max-width: 900px;
+  border-radius: 5px;
+  padding: 16px;
+  margin: 8px auto;
+}
+
+.card>div {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
