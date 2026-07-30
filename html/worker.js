@@ -2,12 +2,16 @@ const CACHE_VERSION = '1.14.0';
 const urlsToCache = [];
 
 const bypassPaths = [
+  '/logs',
+  '/progress',
   '/info',
   '/report/play/',
   '/report/list/',
   '/auth',
   '/auth/callback',
   '/alerts',
+  '/dashbaord',
+  '/stations/add',
   '/stations/update',
   '/stations/scrape',
   '/stations/duplicates',
@@ -35,6 +39,9 @@ const isAppRoute = url =>
  * @returns {Promise<Response>} The response from cache or network.
  */
 async function handleRequest(event) {
+  if (event.request.method !== "GET") {
+    return fetch(event.request);
+  }
   const cache = await caches.open(CACHE_VERSION);
   try {
     const networkResponse = await fetch(event.request);
@@ -61,6 +68,10 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
+  if (event.request.method !== "GET") {
+    event.respondWith(fetch(event.request));
+    return;
+  }
   const url = event.request.url;
   if (shouldBypassCache(url)) {
     event.respondWith(fetch(event.request));
