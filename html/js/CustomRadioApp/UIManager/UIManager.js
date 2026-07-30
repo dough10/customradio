@@ -1,6 +1,7 @@
 import AudioPlayer from './AudioPlayer/AudioPlayer.js';
 import CollapsingHeader from './CollapsingHeader/CollapsingHeader.js';
 import EventManager from '../EventManager/EventManager.js';
+import Toast from '../Toast/Toast.js';
 
 import { initDialogInteractions, destroyDialogInteractions } from './dialogs/dialog.js';
 import insertLoadingAnimation from './helpers/insertLoadingAnimation.js';
@@ -10,13 +11,11 @@ import toggleActiveState from '../utils/toggleActiveState.js';
 import { t } from '../utils/i18n.js';
 import hapticFeedback from '../utils/hapticFeedback.js';
 import selectors from '../selectors.js';
-import txtDownloadUrl from '../utils/txtDownloadUrl.js';
-import Alert from '../Alerts/Alerts.js';
-import Toast from '../Toast/Toast.js';
 
-const NAMESPACE = {
-  backdropClick: 'backdrop-click'
-};
+import showActiveAlerts from '../Alerts/alertHelpers.js';
+
+import userMenu from './menu/menu.js';
+
 
 /**
  * manages UI elements
@@ -34,39 +33,27 @@ export default class UIManager {
     this.$downloadButton = document.querySelector(this._selectors.downloadButton);
     this.$stationCount = document.querySelector(this._selectors.stationCount);
     this.$resetButton = document.querySelector(this._selectors.resetButton);
-    this.$loginButton = document.querySelector(this._selectors.login);
-    this.$logoutButton = document.querySelector(this._selectors.logout);
-    this.$signupButton = document.querySelector(this._selectors.signup);
-    this.$userMenu = document.querySelector(this._selectors.userMenu);
     this.$userMenuButton = document.querySelector(this._selectors.userMenuButton);
     this.$main = document.querySelector(this._selectors.main);
-    this.$sharelink = document.querySelector(this._selectors.sharelink);
     this.$toggleSelected = document.querySelector(this._selectors.toggleSelected);
-    this.$dashboardLink = document.querySelector(this._selectors.dashboard);
 
     const required = [
       this.$toTop,
       this.$filter,
       this.$downloadButton,
       this.$stationCount,
-      this.$resetButton,
-      this.$loginButton,
-      this.$logoutButton,
-      this.$userMenu,
       this.$userMenuButton,
       this.$main,
-      this.$sharelink,
-      this.$toggleSelected,
-      this.$signupButton
+      this.$toggleSelected
     ];
 
     if (required.some(el => !el)) {
       throw new Error("Initialization failed — missing DOM elements.");
     }
 
-    this._loadUser(window.user);
+    userMenu.loadUser(window.user);
 
-    this.#showActiveAlerts();
+    showActiveAlerts();
   }
 
   /**
@@ -90,17 +77,9 @@ export default class UIManager {
         event: this._em.types.click,
         handler: _ => this.toggleSelectedVisibility()
       }, {
-        el: this.$loginButton,
-        event: this._em.types.click,
-        handler: _ => this._loginRedirect()
-      }, {
-        el: this.$logoutButton,
-        event: this._em.types.click,
-        handler: _ => this._logoutRedirect()
-      }, {
         el: this.$userMenuButton,
         event: this._em.types.click,
-        handler: ev => this._userMenuOpen(ev)
+        handler: ev => userMenu.open(ev)
       }, {
         el: this.$filter,
         event: this._em.types.change,
@@ -124,14 +103,6 @@ export default class UIManager {
         el: this.$downloadButton,
         event: this._em.types.click,
         handler: _ => this._dl()
-      }, {
-        el: this.$signupButton,
-        event: this._em.types.click,
-        handler: _ => this._signupRedirect()
-      }, {
-        el: this.$dashboardLink,
-        event: this._em.types.click,
-        handler: _ => this._openDashboard()
       }
     ];
 
@@ -140,56 +111,8 @@ export default class UIManager {
     }
 
     document.querySelectorAll('.menu-button').forEach(btn => {
-      this._em.add(btn, this._em.types.click, _ => this._userMenuClose());
+      this._em.add(btn, this._em.types.click, _ => userMenu.close());
     });
-  }
-
-  /**
-   * fetches active alerts
-   * 
-   * @returns {Object[]}
-   */
-  async #fetchAlerts() {
-    try {
-      const url = new URL('/alerts', window.location.origin);
-      const res = await fetch(url.toString());
-      if (!res.ok) throw new Error('Failed to fetch alerts');
-      const alerts = await res.json();
-      return alerts;
-    } catch (err) {
-      console.error('Error fetching alerts:', err);
-      return [];
-    }
-  }
-
-  /**
-   * async wait for an alert to be closed
-   */
-  #waitForAlertClose() {
-    const ns = `alert-close${Date.now()}`;
-    return new Promise((resolve) => {
-      this._em.add(document, this._em.types.alertClosed, _ => {
-        this._em.removeByNamespace(ns);
-        resolve();
-      }, { once: true }, ns);
-    });
-  }
-
-  /**
-   * displays active alerts fatched from api
-   * 
-   * @returns {void}
-   */
-  async #showActiveAlerts() {
-    const alerts = await this.#fetchAlerts();
-
-    for (const { id, version, title, paragraphs } of alerts) {
-      if (document.querySelector('.alert')) {
-        await this.#waitForAlertClose();
-      }
-      const key = `alert_${id}_${version}`;
-      new Alert(key, title, paragraphs);
-    }
   }
 
   /**
@@ -248,199 +171,6 @@ export default class UIManager {
   }
 
   /**
-   * Closes the user menu
-   * 
-   * @private
-   * @function
-   * 
-   * @returns {void}
-   */
-  _userMenuClose() {
-    const bd = document.querySelector('.backdrop');
-    if (!bd) return;
-    let timeoutID = null;
-    const cleanup = () => {
-      if (timeoutID) clearTimeout(timeoutID);
-      if (!bd) return;
-      this._em.removeByNamespace(NAMESPACE.backdropClick);
-      bd.remove();
-    };
-    this._em.add(bd, this._em.types.transitionend, _ => cleanup(), null, NAMESPACE.backdropClick);
-    timeoutID = setTimeout(() => cleanup(), 300);
-    requestAnimationFrame(_ => {
-      this.$userMenu.removeAttribute('open');
-      bd.removeAttribute('visible');
-    });
-  }
-
-  /**
-   * Toggles the user menu open/close state
-   *
-   * @private
-   * @function
-   * 
-   * @param {Event} ev
-   * @returns {void}
-   */
-  async _userMenuOpen(ev) {
-    if (document.querySelector('.backdrop')) return;
-    const backdrop = document.createElement('div');
-    backdrop.classList.add('backdrop');
-    this._em.add(backdrop, this._em.types.click, _ => this._userMenuClose(), null, NAMESPACE.backdropClick);
-    document.body.appendChild(backdrop);
-
-    const { top } = this.$userMenuButton.getBoundingClientRect();
-    const left = 8;
-    this.$userMenu.style.top = `${top + 8}px`;
-    this.$userMenu.style.left = `${left}px`;
-    await sleep(20);
-    requestAnimationFrame(_ => {
-      backdrop.setAttribute('visible', true);
-      this.$userMenu.setAttribute('open', true);
-    });
-  }
-
-  /**
-   * redirects to signup UI
-   * 
-   * @private
-   * @function
-   * 
-   * @returns {void}
-   */
-  _signupRedirect() {
-    if (window.user) return;
-    try {
-      window.location.href = new URL(
-        '/auth/signup',
-        window.location.origin
-      ).toString();
-    } catch (e) {
-      console.error('UIManager: signup redirect failed', e);
-      return;
-    }
-  }
-
-  /**
-   * Redirects to the login page if the user is not authenticated
-   *
-   * @returns {void}
-   */
-  _loginRedirect() {
-    if (window.user) return;
-    try {
-      window.location.href = new URL(
-        '/auth',
-        window.location.origin
-      ).toString();
-    } catch (e) {
-      console.error('UIManager: login redirect failed', e);
-      return;
-    }
-  }
-
-  /**
-   * Redirects to the logout page if the user is authenticated
-   *
-   * @returns {void}
-   */
-  _logoutRedirect() {
-    if (!window.user) return;
-    try {
-      window.location.href = new URL(
-        '/auth/logout',
-        window.location.origin
-      ).toString();
-    } catch (e) {
-      console.error('UIManager: logout redirect failed', e);
-      return;
-    }
-  }
-
-  /**
-   * creates a user image element
-   * 
-   * @private
-   * @function
-   * 
-   * @param {Object} user
-   * @param {String} user.picture
-   * @param {Number} size
-   * @returns {HTMLElement}
-   */
-  _userImage({ picture }, size) {
-    const img = document.createElement('img');
-    img.src = picture;
-    img.alt = 'user profile picture';
-    img.width = size;
-    return img;
-  }
-
-  /**
-   * opens the dashboard page in a sererate window
-   * 
-   * @private
-   * @function
-   */
-  _openDashboard() {
-    try {
-      const url = new URL('/dashboard', window.location.origin);
-      window.open(
-        url.toString(),
-        "_blank",
-        "noopener,noreferrer"
-      );
-    } catch (e) {
-      new Toast('Failed to open add alert page');
-      console.error(e);
-    }
-  }
-
-  /**
-   * loads the user data to UI
-   * 
-   * @private
-   * @function
-   * 
-   * @param {Object} user
-   * @param {String} user.firstName
-   * @param {String} user.lastName
-   * @param {String} user.picture
-   * @return {void}
-   */
-  _loadUser(user) {
-    this.$logoutButton.style.display = 'none';
-    this.$sharelink.style.display = 'none';
-
-    if (!user) return;
-
-    if (!this.$userMenuButton) {
-      console.error('Login button element is missing.');
-      return;
-    }
-
-    const small = this._userImage(user, 24);
-    const big = this._userImage(user, 70);
-
-    document.querySelector(this._selectors.userAvatar).replaceChildren(big);
-    this.$userMenuButton.replaceChildren(small);
-
-    document.querySelector(this._selectors.firstname).textContent = user.firstName;
-    document.querySelector(this._selectors.lastname).textContent = user.lastName;
-
-    const input = document.querySelector(this._selectors.shareInput);
-    if (!input) {
-      console.error('Share input element is missing.');
-      return;
-    }
-    input.value = txtDownloadUrl();
-
-    this.$loginButton.style.display = 'none';
-    this.$signupButton.style.display = 'none';
-    this.$logoutButton.style.display = 'flex';
-  }
-
-  /**
    * displays the share button if user is logged in and has selected stations
    * 
    * @public
@@ -449,7 +179,7 @@ export default class UIManager {
    * @return {void}
    */
   loadShareButton() {
-    this.$sharelink.style.display = 'flex';
+    userMenu.loadShareButton();
   }
 
   /**
