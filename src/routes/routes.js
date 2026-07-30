@@ -11,6 +11,8 @@ const trafficAdvice = require('./endpoints/trafficadvice.js');
 const metrics = require('./endpoints/metrics.js');
 const dashboard = require('./endpoints/dashboard.js');
 const requestsData = require('./endpoints/requestsData.js');
+const logs = require('./endpoints/logs.js');
+const updateProgress = require('./endpoints/updateProgress.js');
 
 // routers
 const alerts = require('./routers/alerts.js');
@@ -84,6 +86,11 @@ module.exports = async (app, register) => {
   app.get('/info', info);
 
   /**
+   * log stream
+   */
+  app.get('/logs', logs);
+
+  /**
    * /report router
    */
   app.use('/report', report);
@@ -117,6 +124,11 @@ module.exports = async (app, register) => {
    * admin dashboard
    */
   app.get('/dashboard', dashboard);
+
+  /**
+   * database update progress
+   */
+  app.get('/progress', updateProgress);
 
   /**
    * structured data for rendering graphs of http requests
