@@ -226,7 +226,12 @@ const selectors = {
   signup: 'nav>button[title="signup"]',
 
   /** @type {String} dashboarrd button */
-  dashboard: 'button[title="dashboard"]'
+  dashboard: 'button[title="dashboard"]',
+
+  addAlertBtn: 'button[title="alert"]',
+  dupButton: 'button[title="duplicates"]',
+  updateButton: 'button[title="update"]',
+  scrape: 'button[title="scrape"]'
 };
 
 export default selectors;
