@@ -23,7 +23,7 @@ module.exports = function logRequest(req, res=DEFAULT, ms) {
   // log in mognodb
   mongo.logRequest(ip, method, path, query, res.statusCode, uaParser.getResult(), ms)
     .catch(err => logger.error(`Failed to log request: ${err}`));
-  
+
   // application logger
   const str = requestString(newReq, res, ms);
   logger.info(str);
