@@ -102,6 +102,18 @@ const indexes = [
         }
       }
     ]
+  }, {
+    collection: collections.DB_UPDATES,
+    indexes: [
+      {
+        spec: {
+          "end.time": -1
+        },
+        options: {
+          name: "idx_db_updates_end_time"
+        }
+      }
+    ]
   }
 ];
 
@@ -112,8 +124,6 @@ const indexes = [
  */
 const GRAPH_DATE_CONFIG = {
   weekday: 'short',
-  month: 'short',
-  day: 'numeric',
   hour: '2-digit',
   minute: '2-digit'
 };
@@ -125,12 +135,11 @@ const GRAPH_DATE_CONFIG = {
  * 
  * @returns {number}
  */
-function getBucketSize(hours) {
-  const DATAPOINTS = 96;
-  if (hours <= 1) return 1;
-  if (hours <= 6) return 5;
-  if (hours <= 24) return 15;
-  return Math.ceil((hours * 60) / DATAPOINTS);
+function getBucketSize(hours, targetPoints = 96) {
+  const ideal = (hours * 60) / targetPoints;
+  const buckets = [1, 2, 5, 10, 15, 30, 60, 120, 180, 360, 720, 1440];
+
+  return buckets.find(b => b >= ideal) ?? Math.ceil(ideal);
 }
 
 /**
@@ -258,7 +267,7 @@ class Mongo extends MongoBase {
     const totalRequests = results.reduce((sum, r) => sum + r.count, 0);
 
     return {
-      averagePerHour: totalRequests / hours,
+      averagePerHour: Math.ceil(totalRequests / hours),
       ...graphData,
       totalRequests
     };
@@ -291,6 +300,20 @@ class Mongo extends MongoBase {
       deleted: result.deletedCount,
       cutoff
     };
+  }
+
+  /**
+   * Returns the most recently completed database update.
+   *
+   * @returns {Promise<Object|null>}
+   */
+  async getLastDBUpdate() {
+    return this.getCollection(this.collections.DB_UPDATES).findOne(
+      {type: 'update'},
+      {
+        sort: { "end.time": -1 }
+      }
+    );
   }
 
   /**
@@ -328,15 +351,22 @@ class Mongo extends MongoBase {
    * @returns {Promise<import("mongodb").InsertOneResult>}
    */
   async logJSError(error) {
-    return this.getCollection(this.collections.ERRORS).insertOne({ error, version });
+    return this.getCollection(this.collections.ERRORS).insertOne({ 
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      }, 
+      version
+    });
   }
 
   /**
    * Records the results of a database update operation.
    *
    * @param {number} changed Number of records changed.
-   * @param {Date} start Update start time.
-   * @param {Date} end Update completion time.
+   * @param {Date} start Update start object.
+   * @param {Date} end Update completion object.
    * @param {string} type Update type.
    *
    * @returns {Promise<import("mongodb").InsertOneResult>}
