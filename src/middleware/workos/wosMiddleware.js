@@ -9,7 +9,14 @@ injectSecrets([
 const COOKIE_NAME = 'wos-session';
 const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
 
+const bypass = [
+  '/logs',
+  '/metrics',
+  '/progress'
+];
+
 module.exports = async (req, res, next) => {
+  if (bypass.includes(req.path)) return next();
   if (req.session?.user) {
     req.user = req.session.user;
     return next();
@@ -46,7 +53,7 @@ module.exports = async (req, res, next) => {
     }
 
   } catch (err) {
-    logger.warn('WorkOS session validation failed:', err.message);
+    // logger.warning(`WorkOS session validation failed: ${err.message}`);
     res.clearCookie(COOKIE_NAME);
   }
 
