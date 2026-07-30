@@ -29,7 +29,6 @@ export default class ShareDialog extends DialogBase {
     this.shareURL = txtDownloadUrl();
 
     const required = [
-      this.$trigger,
       this.$copy,
       this.$fb,
       this.$tw,
@@ -72,7 +71,7 @@ export default class ShareDialog extends DialogBase {
     ];
 
     for (const { el, event, handler } of listeners) {
-      this.em.add(el, event, handler);
+      if (el) this.em.add(el, event, handler);
     }
   }
 
