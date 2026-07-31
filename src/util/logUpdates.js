@@ -3,6 +3,12 @@ const plural = require('./plural.js');
 const DatabaseUpdater = require('../util/DatabaseUpdater.js');
 const Logger = require('../util/logger.js');
 
+/**
+ * adds listeners to database updater events, log start, done and station changes and errors
+ * 
+ * @param {DatabaseUpdater} updater 
+ * @param {Logger} logger 
+ */
 module.exports = (updater, logger) => {
   if (!(updater instanceof DatabaseUpdater)) throw new TypeError('updater must be an instance of DatabaseUpdater class');
   if (!(logger instanceof Logger)) throw new TypeError('logger must be an instance of Logger class');
