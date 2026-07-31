@@ -11,14 +11,19 @@ const msToHhMmSs = require('./msToHhMmSs.js');
 
 const UPDATE_PULL_COUNT = 100;
 
+/**
+ * runs through all database entrys and checks for changes.
+ * 
+ * @param {object} options batchSize=100 , concurrency=5
+ * @param {Stations} stations instance of Stations class
+ * @param {Mongo} mongo instance of Mongo class
+ * 
+ * @throws {TypeError} if stations is not instance of Stations class
+ * @throws {TypeError} if mongo is not instance of Mongo class
+ * 
+ * @extends {EventEmitter}
+ */
 class DatabaseUpdater extends EventEmitter {
-  /**
-   * 
-   * 
-   * @param {object} options 
-   * @param {Stations} stations 
-   * @param {Mongo} mongo 
-   */
   constructor(options = {}, stations, mongo) {
     if (!(stations instanceof Stations)) throw new TypeError('stations must be a instance of Stations class');
     if (!(mongo instanceof Mongo)) throw new TypeError('mongo must be an instance of Mongo class');
