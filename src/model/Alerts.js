@@ -50,7 +50,7 @@ class Alerts extends DbCon {
     ];
   }
 
-  async replaceParagraphs(alertId, paragraphs) {
+  async #replaceParagraphs(alertId, paragraphs) {
     await this.run(`DELETE FROM alert_paragraphs WHERE alert_id = ?`, [alertId]);
 
     if (paragraphs.length === 0) return;
@@ -87,7 +87,7 @@ class Alerts extends DbCon {
         [id, title, now, expiresAt, priority, version]
       );
 
-      await this.replaceParagraphs(id, paragraphs);
+      await this.#replaceParagraphs(id, paragraphs);
     });
   }
 
