@@ -25,6 +25,8 @@ const unhelpfulNames = [
   "this is my server name"
 ];
 
+const unhelpfulRegex = /^\d{1,2}$/;
+
 /**
  * An array containing default port numbers used in network protocols.
  *
@@ -160,8 +162,8 @@ async function streamTest(url) {
     const content = headers.get("content-type");
     const icyurl = headers.get("icy-url") || "";
     const finalUrl = response.url;
-    let bitrate = parseInt(headers.get("icy-br"), 10);
 
+    let bitrate = parseInt(headers.get("icy-br"), 10);
     if (!Number.isFinite(bitrate)) bitrate = 0;
     if (bitrate > 0 && (bitrate < 8 || bitrate > 512)) bitrate = 0;
 
@@ -209,7 +211,7 @@ async function streamTest(url) {
     }
 
     if (looksLikeHTML(firstChunk)) {
-      return returnError("HTML response instead of audio stream", response.status);
+      return returnError("HTML only, no audio stream", response.status);
     }
 
     if (!looksLikeMP3(firstChunk)) {
@@ -217,10 +219,7 @@ async function streamTest(url) {
     }
 
     if (name) {
-      name = fixEncoding(name);
-      const unhelpfulRegex = /^\d{1,2}$/;
-      const cleanName = name.toLowerCase().trim();
-
+      const cleanName = fixEncoding(name).toLowerCase().trim();
       if (unhelpfulNames.includes(cleanName) || unhelpfulRegex.test(cleanName)) {
         name = null;
       }
@@ -311,7 +310,7 @@ module.exports = async (url) => {
 
   url = cleanURL(url);
 
-  // Always test HTTPS first
+  // force HTTPS
   if (url.startsWith("http://")) {
     const httpsUrl = url.replace("http://", "https://");
     try {
