@@ -10,7 +10,7 @@ const DEFAULT = {
   getHeader: _ => null
 }
 
-module.exports = function logRequest(req, res=DEFAULT, ms) {
+module.exports = (req, res=DEFAULT, ms) => {
   const uaParser = new UAParser(req.headers['user-agent']);
 
   // create new request object with masked ip address 
