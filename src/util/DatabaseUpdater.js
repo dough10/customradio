@@ -1,6 +1,9 @@
 const EventEmitter = require('events');
 const pLimit = require('p-limit');
 
+const Stations = require('../model/Stations.js');
+const Mongo = require('../model/Mongo.js');
+
 const retry = require('./retry.js');
 const isLiveStream = require('./isLiveStream.js');
 const testHomepageConnection = require('./testHomepageConnection.js');
@@ -9,7 +12,17 @@ const msToHhMmSs = require('./msToHhMmSs.js');
 const UPDATE_PULL_COUNT = 100;
 
 class DatabaseUpdater extends EventEmitter {
+  /**
+   * 
+   * 
+   * @param {object} options 
+   * @param {Stations} stations 
+   * @param {Mongo} mongo 
+   */
   constructor(options = {}, stations, mongo) {
+    if (!(stations instanceof Stations)) throw new TypeError('stations must be a instance of Stations class');
+    if (!(mongo instanceof Mongo)) throw new TypeError('mongo must be an instance of Mongo class');
+
     super();
 
     this.stations = stations; 
@@ -26,10 +39,30 @@ class DatabaseUpdater extends EventEmitter {
     this.totalStations = 0;
   }
 
+  /**
+   * unprocessed stations
+   * 
+   * @public
+   * 
+   * @returns {number}
+   */
   get remainingStations() {
     return this.totalStations - this.counter;
   }
 
+  /**
+   * process all streams in database and update online status and headers
+   * 
+   * @public
+   * 
+   * @emits start
+   * @emits batchStart
+   * @emits batchComplete
+   * @emits done
+   * @emits error
+   * 
+   * @returns {boolean} successfull completion
+   */
   async run() {
     if (this.running) {
       return false;
@@ -67,7 +100,7 @@ class DatabaseUpdater extends EventEmitter {
 
         await Promise.all(
           pulledStations.map(station =>
-            this.limit(() => this.processStream(station, batch + 1, parts))
+            this.limit(() => this.#processStream(station, batch + 1, parts))
           )
         );
 
@@ -99,6 +132,7 @@ class DatabaseUpdater extends EventEmitter {
 
       return true;
     } catch (err) {
+      this.error = err;
       await this.mongo.logJSError(err);
       this.emit('error', err);
       return false;
@@ -108,7 +142,24 @@ class DatabaseUpdater extends EventEmitter {
     }
   }
 
-  async processStream(station, batch, totalBatches) {
+  /**
+   * makes a get request to the stream url, if header data of online status has changed it updates the database
+   * 
+   * @private
+   * 
+   * @param {object} station 
+   * @param {number} batch 
+   * @param {number} totalBatches 
+   * 
+   * @emits stationStart
+   * @emits stationUnchanged
+   * @emits stationUpdated
+   * @emits stationError
+   * @emits progress
+   * 
+   * @returns {void}
+   */
+  async #processStream(station, batch, totalBatches) {
     const started = Date.now();
 
     this.emit('stationStart', {
@@ -121,7 +172,7 @@ class DatabaseUpdater extends EventEmitter {
     try {
       const stream = await retry(() => isLiveStream(station.url));
 
-      if (this.stationDataIsUnchanged(station, stream)) {
+      if (this.#stationDataIsUnchanged(station, stream)) {
         this.emit('stationUnchanged', {
           id: station.id,
           url: station.url,
@@ -131,7 +182,7 @@ class DatabaseUpdater extends EventEmitter {
         return;
       }
 
-      await this.updateStationData(station, stream);
+      await this.#updateStationData(station, stream);
 
       this.updatedCount++;
 
@@ -179,7 +230,15 @@ class DatabaseUpdater extends EventEmitter {
     }
   }
 
-  async updateStationData(old, updated) {
+  /**
+   * tests connection to any homepage url from header and saves the changes to the database
+   * 
+   * @private
+   * 
+   * @param {object} old 
+   * @param {object} updated 
+   */
+  async #updateStationData(old, updated) {
     const homepage = await retry(() =>
       testHomepageConnection(updated.icyurl)
     ).catch(() => null);
@@ -210,7 +269,17 @@ class DatabaseUpdater extends EventEmitter {
     await this.stations.updateStation(updatedData);
   }
 
-  stationDataIsUnchanged(old, updated) {
+  /**
+   * checks for changes between the old and new data
+   * 
+   * @private
+   * 
+   * @param {object} old 
+   * @param {object} updated 
+   * 
+   * @returns {boolean}
+   */
+  #stationDataIsUnchanged(old, updated) {
     return (
       old.name === (updated.name || old.name) &&
       old.url === (updated.url || old.url) &&

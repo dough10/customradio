@@ -1,6 +1,6 @@
 const { MongoClient } = require("mongodb");
 
-const { enforceLogger, defaultLogger } = require('../util/defaultLogger.js');
+const Logger = require('../util/logger.js');
 
 /**
  * Base class for MongoDB data access.
@@ -86,12 +86,12 @@ class MongoBase {
    *
    * @param {string} [url] MongoDB connection string.
    * @param {string} [dbname="default"] Database name.
-   * @param {Logger} [logger=defaultLogger] Logger implementation.
+   * @param {Logger} [logger] Logger implementation.
    *
    * @throws {TypeError} If the logger does not implement the required methods.
    */
-  constructor(url, dbname = 'default', logger = defaultLogger) {
-    enforceLogger(logger);
+  constructor(url, dbname = 'default', logger) {
+    if (!(logger instanceof Logger)) throw new TypeError('logger must be an instance of Logger class');
     this.#dbname = dbname;
     this.#logger = logger;
     this.#mongoClient = new MongoClient(url || 'mongodb://127.0.0.1:27017', {
