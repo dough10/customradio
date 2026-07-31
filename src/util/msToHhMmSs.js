@@ -8,7 +8,7 @@ const unit = (value, singular, plural) =>
  * 
  * @returns {String} - formatted time as "HH hours MM minutes and SS seconds"
  */
-module.exports = function msToHhMmSs(milliseconds) {
+module.exports = (milliseconds) => {
   const totalSeconds = Math.floor(milliseconds / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const remainder = totalSeconds % 3600;
