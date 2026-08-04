@@ -53,7 +53,6 @@ module.exports = async (req, res, next) => {
     }
 
   } catch (err) {
-    // logger.warning(`WorkOS session validation failed: ${err.message}`);
     res.clearCookie(COOKIE_NAME);
   }
 
