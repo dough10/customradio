@@ -3,7 +3,7 @@ const pack = require("../../package.json");
 const isValidURL = require("./isValidURL.js");
 const retry = require("./retry.js");
 const fixEncoding = require("./fixEncoding.js");
-const {logger} = require('./../services.js');
+const { logger } = require('../services.js');
 const usedTypes = require("./usedTypes.js");
 const rmRef = require('./rmRef.js');
 
@@ -97,7 +97,6 @@ function looksLikeMP3(buf) {
  * @returns {Object}
  */
 function returnError(message, status) {
-  // logger.debug(message);
   return {
     ok: false,
     error: message,
@@ -317,7 +316,6 @@ module.exports = async (url) => {
       return await retry(() => streamTest(httpsUrl));
     } catch (error) {
       logger.error(`HTTPS test failed for ${httpsUrl}: ${error.message}`);
-      logger.debug(`Falling back to HTTP: ${url}`);
     }
   }
 
