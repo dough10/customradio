@@ -47,12 +47,6 @@ module.exports = async function testHomepageConnection(url) {
   } catch (e) {
     clearTimeout(timeoutId);
 
-    const isAbort = e.name === 'AbortError';
-    logger.debug(
-      `${url} failed homepage test connection: ${isAbort ? 'timeout' : e.message
-      }`
-    );
-
     return;
   }
 }
