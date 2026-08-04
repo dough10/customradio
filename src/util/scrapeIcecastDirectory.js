@@ -56,9 +56,9 @@ async function requestData() {
     clearTimeout(timeoutId);
 
     if (err.name === 'AbortError') {
-      logger.warn('requestData timeout');
+      logger.warning('requestData timeout');
     } else {
-      logger.warn('requestData failed:', err.message);
+      logger.warning('requestData failed:', err.message);
     }
 
     return false;
@@ -87,7 +87,7 @@ async function requestData() {
  */
 async function processStream(entry, length, stations) {
   progressCounter++;
-  logger.debug(`Scrape progress: ${((progressCounter / length) * 100).toFixed(3)}%`);
+  logger.debug(`Scrape progress: ${((progressCounter / length) * 100).toFixed(1)}%`);
 
   if (progressCounter % 100 === 0) {
     const mem = process.memoryUsage();
