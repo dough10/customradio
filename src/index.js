@@ -5,7 +5,6 @@ const app = express();
 require('dotenv').config();
 
 const { logger, logLevel, alerts, mongo, updater, scraper } = require('./services.js');
-const scrapeIceDir = require('./util/scrapeIcecastDirectory.js');
 const middleware = require('./middleware/middleware.js');
 const routes = require('./routes/routes.js');
 const { httpRequestCounter, register } = require('./util/promClient.js');
