@@ -70,6 +70,7 @@ const collections = {
   CSP: 'csp',
   CSP_FAILS: 'csp-fails',
   DB_UPDATES: 'db-updates',
+  STASH: 'stash',
   ERRORS: 'errors'
 };
 
@@ -314,6 +315,74 @@ class Mongo extends MongoBase {
         sort: { "end.time": -1 }
       }
     );
+  }
+
+  /**
+   * Retrieves a paginated list of stashed stations.
+   *
+   * @param {number} [limit=50] Maximum number of stations to return.
+   * @param {number} [offset=0] Number of stations to skip.
+   *                                                 
+   * @returns {Promise<{
+   *   stations: Object[],
+   *   total: number,
+   *   limit: number,
+   *   offset: number
+   * }>}
+   *
+   * @throws {TypeError} If limit or offset are invalid.
+   */
+  async getPaginatedStations(limit = 50, offset = 0) {
+    if (!Number.isInteger(limit) || limit <= 0) {
+      throw new TypeError("limit must be a positive integer");
+    }
+
+    if (!Number.isInteger(offset) || offset < 0) {
+      throw new TypeError("offset must be a non-negative integer");
+    }
+
+    const collection = this.getCollection(this.collections.STASH);
+
+    const [stations, total] = await Promise.all([
+      collection
+        .find({})
+        .skip(offset)
+        .limit(limit)
+        .toArray(),
+      collection.countDocuments()
+    ]);
+
+    return {
+      stations,
+      total,
+      limit,
+      offset
+    };
+  }
+
+  /**
+   * stores scraped stations in mongo as temp storage
+   * 
+   * @param {Array} jsonArray
+   * 
+   * @returns {???}
+   */
+  async stashStations(jsonArray) {
+    return this.getCollection(this.collections.STASH).insertMany(jsonArray);
+  }
+
+  /**
+   * Removes all stations from the stash collection.
+   *
+   * @returns {Promise<{
+   *   deleted: number
+   * }>}
+   */
+  async clearStash() {
+    const result = await this.getCollection(this.collections.STASH).deleteMany({});
+    return { 
+      deleted: result.deletedCount 
+    };
   }
 
   /**
