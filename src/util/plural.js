@@ -18,6 +18,6 @@
  * plural(5);
  * // Returns: 'ies'
  */
-module.exports = function plural(num) {
+module.exports = (num) => {
   return Number.isInteger(num) && num === 1 ? 'y' : 'ies';
 }
