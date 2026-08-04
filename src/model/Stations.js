@@ -233,7 +233,7 @@ class Stations extends DbCon {
     validateStation(obj);
 
     const exists = await this.exists(obj.url);
-    if (exists) return 'Station exists';
+    if (exists) return false;
 
     const result = await this.run(
       `INSERT INTO stations (
