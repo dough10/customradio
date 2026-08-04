@@ -1,178 +1,61 @@
-const EventEmitter = require('events');
-const pLimit = require('p-limit');
-
-const Stations = require('../model/Stations.js');
-const Mongo = require('../model/Mongo.js');
+const BaseStationProcessor = require('./BaseStationProcessor.js');
 
 const retry = require('./retry.js');
 const isLiveStream = require('./isLiveStream.js');
 const testHomepageConnection = require('./testHomepageConnection.js');
-const msToHhMmSs = require('./msToHhMmSs.js');
-
-const UPDATE_PULL_COUNT = 100;
 
 /**
- * runs through all database entrys and checks for changes.
- * 
- * @param {object} options batchSize=100 , concurrency=5
- * @param {Stations} stations instance of Stations class
- * @param {Mongo} mongo instance of Mongo class
- * 
- * @throws {TypeError} if stations is not instance of Stations class
- * @throws {TypeError} if mongo is not instance of Mongo class
- * 
- * @extends {EventEmitter}
+ * Updates existing stations by checking whether their
+ * stream metadata has changed.
+ *
+ * @extends BaseStationProcessor
  */
-class DatabaseUpdater extends EventEmitter {
-  constructor(options = {}, stations, mongo) {
-    if (!(stations instanceof Stations)) throw new TypeError('stations must be a instance of Stations class');
-    if (!(mongo instanceof Mongo)) throw new TypeError('mongo must be an instance of Mongo class');
+class DatabaseUpdater extends BaseStationProcessor {
 
-    super();
-
-    this.stations = stations; 
-    this.mongo = mongo;
-
-    this.batchSize = options.batchSize || UPDATE_PULL_COUNT;
-    this.concurrency = options.concurrency || 5;
-
-    this.limit = pLimit(this.concurrency);
-
-    this.running = false;
-    this.counter = 0;
-    this.updatedCount = 0;
-    this.totalStations = 0;
+  /**
+   * Called before processing begins.
+   *
+   * @returns {Promise<void>}
+   */
+  async initialize() {
+    this.startStats = await this.stations.dbStats();
   }
 
   /**
-   * unprocessed stations
-   * 
-   * @public
-   * 
+   * Total number of stations that will be processed.
+   *
    * @returns {number}
    */
-  get remainingStations() {
-    return this.totalStations - this.counter;
+  get total() {
+    return this.startStats.total;
   }
 
   /**
-   * process all streams in database and update online status and headers
+   * Retrieves a batch of stations.
+   *
+   * @param {number} limit
+   * @param {number} offset
    * 
-   * @public
-   * 
-   * @emits start
-   * @emits batchStart
-   * @emits batchComplete
-   * @emits done
-   * @emits error
-   * 
-   * @returns {boolean} successfull completion
+   * @returns {Promise<Array>}
    */
-  async run() {
-    if (this.running) {
-      return false;
-    }
-
-    this.running = true;
-    this.counter = 0;
-    this.updatedCount = 0;
-
-    const start = await this.stations.dbStats();
-    this.startTime = start.time;
-    this.totalStations = start.total;
-
-    this.emit('start', {
-      total: this.totalStations,
-      started: start.time,
-    });
-
-    try {
-      const parts = Math.ceil(this.totalStations / this.batchSize);
-
-      for (let batch = 0; batch < parts; batch++) {
-        const offset = batch * this.batchSize;
-
-        const pulledStations = await this.stations.getPaginatedStations(
-          this.batchSize,
-          offset
-        );
-
-        this.emit('batchStart', {
-          batch: batch + 1,
-          totalBatches: parts,
-          count: pulledStations.length,
-        });
-
-        await Promise.all(
-          pulledStations.map(station =>
-            this.limit(() => this.#processStream(station, batch + 1, parts))
-          )
-        );
-
-        this.emit('batchComplete', {
-          batch: batch + 1,
-          totalBatches: parts,
-          processed: this.counter,
-          updated: this.updatedCount
-        });
-      }
-
-      const end = await this.stations.dbStats();
-      const duration = msToHhMmSs(end.time - start.time);
-
-      await this.mongo.logDBUpdateResults(
-        this.updatedCount,
-        start,
-        end,
-        'update'
-      );
-
-      this.emit('done', {
-        processed: this.counter,
-        updated: this.updatedCount,
-        duration,
-        start,
-        end,
-      });
-
-      return true;
-    } catch (err) {
-      this.error = err;
-      await this.mongo.logJSError(err);
-      this.emit('error', err);
-      return false;
-    } finally {
-      this.running = false;
-      this.startTime = null;
-    }
+  async getBatch(limit, offset) {
+    return this.stations.getPaginatedStations(
+      limit,
+      offset
+    );
   }
 
   /**
-   * makes a get request to the stream url, if header data of online status has changed it updates the database
+   * Processes a single station.
+   *
+   * Called once for every station returned by getBatch().
+   *
+   * @param {Object} station
    * 
-   * @private
-   * 
-   * @param {object} station 
-   * @param {number} batch 
-   * @param {number} totalBatches 
-   * 
-   * @emits stationStart
-   * @emits stationUnchanged
-   * @emits stationUpdated
-   * @emits stationError
-   * @emits progress
-   * 
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  async #processStream(station, batch, totalBatches) {
+  async processStation(station) {
     const started = Date.now();
-
-    this.emit('stationStart', {
-      id: station.id,
-      url: station.url,
-      batch,
-      totalBatches,
-    });
 
     try {
       const stream = await retry(() => isLiveStream(station.url));
@@ -180,75 +63,62 @@ class DatabaseUpdater extends EventEmitter {
       if (this.#stationDataIsUnchanged(station, stream)) {
         this.emit('stationUnchanged', {
           id: station.id,
-          url: station.url,
-          duration: Date.now() - started,
+          duration: Date.now() - started
         });
-
         return;
       }
 
-      await this.#updateStationData(station, stream);
+      await this.#updateStationData(
+        station,
+        stream
+      );
 
-      this.updatedCount++;
+      this.changed++;
 
       this.emit('stationUpdated', {
         id: station.id,
-        url: station.url,
         stream,
-        duration: Date.now() - started,
+        duration: Date.now() - started
       });
-    } catch (err) {
+    } catch(err) {
       this.emit('stationError', {
         id: station.id,
-        name: station.name,
-        url: station.url,
-        error: err,
-        duration: Date.now() - started,
+        error: err
       });
     } finally {
       this.counter++;
-
-      let approxCompletion = null;
-
-      if (this.counter >= 10) {
-        const elapsed = Date.now() - this.startTime;
-        const stationsPerMs = this.counter / elapsed;
-
-        approxCompletion = msToHhMmSs(
-          this.remainingStations / stationsPerMs
-        );
-      }
-
-      this.emit('progress', {
-        processed: this.counter,
-        updated: this.updatedCount,
-        total: this.totalStations,
-        remaining: this.remainingStations,
-        approxCompletion,
-        percent:
-          this.totalStations === 0
-            ? 100
-            : Number(
-                ((this.counter / this.totalStations) * 100).toFixed(2)
-              ),
-      });
+      this.emitProgress();
     }
   }
 
   /**
-   * tests connection to any homepage url from header and saves the changes to the database
+   * Called after all stations have been processed.
+   *
+   * @param {Object} start Starting database statistics.
+   * @param {Object} end Ending database statistics.
    * 
+   * @returns {Promise<void>}
+   */
+  async complete(start, end) {
+    await this.mongo.logDBUpdateResults(this.changed, start, end, 'update');
+  }
+
+  /**
+   * Updates a station record with newly discovered metadata.
+   *
    * @private
    * 
-   * @param {object} old 
-   * @param {object} updated 
+   * @param {Object} old Existing station.
+   * @param {Object} updated Stream metadata.
+   * 
+   * @returns {Promise<void>}
    */
   async #updateStationData(old, updated) {
     const homepage = await retry(() =>
       testHomepageConnection(updated.icyurl)
     ).catch(() => null);
 
-    const updatedData = {
+    await this.stations.updateStation({
       id: old.id,
       name: updated.name || old.name,
       url: updated.url || old.url,
@@ -269,18 +139,17 @@ class DatabaseUpdater extends EventEmitter {
       duplicate: Boolean(old.duplicate),
       playMinutes: old.playMinutes,
       inList: old.inList,
-    };
-
-    await this.stations.updateStation(updatedData);
+    });
   }
 
   /**
-   * checks for changes between the old and new data
-   * 
+   * Determines whether the fetched metadata differs from
+   * the existing station.
+   *
    * @private
    * 
-   * @param {object} old 
-   * @param {object} updated 
+   * @param {Object} old
+   * @param {Object} updated
    * 
    * @returns {boolean}
    */
@@ -296,5 +165,6 @@ class DatabaseUpdater extends EventEmitter {
     );
   }
 }
+
 
 module.exports = DatabaseUpdater;
