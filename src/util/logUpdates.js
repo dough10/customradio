@@ -1,6 +1,6 @@
 const plural = require('./plural.js');
 
-const DatabaseUpdater = require('../util/DatabaseUpdater.js');
+const DatabaseUpdater = require('./DatabaseUpdater.js');
 const Logger = require('../util/logger.js');
 
 /**
@@ -29,8 +29,8 @@ module.exports = (updater, logger) => {
     logger.error(`[${id}] error: ${error} ${duration}ms`);
   });
 
-  updater.on('done', ({ updated, duration, end }) => {
-    logger.info(`Update complete: ${updated} entr${plural(updated)} updated in ${duration}.`);
+  updater.on('done', ({ changed, duration, end }) => {
+    logger.info(`Update complete: ${changed} entr${plural(changed)} updated in ${duration}.`);
     logger.info(`Stats - Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
   });
 
