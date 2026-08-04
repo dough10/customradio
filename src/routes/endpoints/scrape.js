@@ -1,7 +1,6 @@
 const asyncHandler = require('../../util/asyncHandler.js');
-const scrape = require('./../../util/scrapeIcecastDirectory.js');
 const isAdmin = require('./../../util/isAdmin.js');
-const { updater } = require('../../services.js');
+const { updater, scraper } = require('../../services.js');
 
 module.exports = asyncHandler(async (req, res) => {
   if (!isAdmin(req)) return res.status(403).json({message:'Forbidden'});
@@ -11,7 +10,7 @@ module.exports = asyncHandler(async (req, res) => {
     });
     return;
   }
-  scrape();
+  scraper.run();
   res.json({
     message: 'scrape has began.'
   });

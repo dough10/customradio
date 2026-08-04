@@ -1,10 +1,10 @@
-const { updater } = require('../../services.js');
+const { updater, scraper } = require('../../services.js');
 
 module.exports = (req, res) => {
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  res.setHeader("X-Accel-Buffering", "no");
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
 
   res.flushHeaders();
 
@@ -14,14 +14,19 @@ module.exports = (req, res) => {
     res.write(`data: ${JSON.stringify(value)}\n\n`);
   };
 
-  updater.on("progress", send);
-
   const heartbeat = setInterval(() => {
-    res.write(": heartbeat\n\n");
+    res.write(': heartbeat\n\n');
   }, 15000);
 
-  req.on("close", () => {
+  const us = v => send({...v, type: 'update'});
+  const ss = v => send({...v, type: 'scrape'});
+
+  updater.on('progress', us);
+  scraper.on('progress', ss);
+
+  req.on('close', () => {
     clearInterval(heartbeat);
-    updater.off("progress", send);
+    updater.off('progress', us);
+    scraper.off('progress', ss);
   });
 };

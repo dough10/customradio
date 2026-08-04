@@ -17,10 +17,12 @@ const Alerts = require('./model/Alerts.js');
 const Posts = require('./model/Posts.js');
 const Mongo = require('./model/Mongo.js');
 const DatabaseUpdater = require('./util/DatabaseUpdater.js');
+const IcecastDBScraper = require('./util/IcecastDBScraper.js');
 
 const getRedisClient = require('./model/getRedisClient.js');
 
 const logUpdates = require('./util/logUpdates.js');
+const logScrape = require('./util/logScrape.js');
 
 const Logger = require('./util/logger.js');
 
@@ -39,12 +41,13 @@ const posts = new Posts(DB_PATH);
 const mongo = new Mongo(process.env.MONGODB_URL, "radiotxt", logger);
 
 // db updater !!!!
-const updater = new DatabaseUpdater({
-  batchSize: 100,
-  concurrency: 5
-}, stations, mongo);
+const updater = new DatabaseUpdater(null, stations, mongo);
 
 logUpdates(updater, logger);
+
+const scraper = new IcecastDBScraper(null, stations, mongo);
+
+logScrape(scraper, logger);
 
 // workos
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
@@ -84,5 +87,6 @@ module.exports = {
   redisClient,
   logLevel,
   workos,
-  updater
+  updater,
+  scraper
 }
