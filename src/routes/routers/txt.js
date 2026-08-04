@@ -7,7 +7,7 @@ const allStationsTxt = require('../endpoints/allStationsTxt.js');
 /**
  * get all online statiosn and generates a txt file download
  */
-router.get('/', allStationsTxt);
+router.get('/all', allStationsTxt);
 
 /**
  * Endpoint to download user stations as a TXT file.
