@@ -61,10 +61,6 @@ class DatabaseUpdater extends BaseStationProcessor {
       const stream = await retry(() => isLiveStream(station.url));
 
       if (this.#stationDataIsUnchanged(station, stream)) {
-        this.emit('stationUnchanged', {
-          id: station.id,
-          duration: Date.now() - started
-        });
         return;
       }
 
