@@ -1,13 +1,20 @@
-const { performance } = require("perf_hooks");
+const msToHhMmSs = require('./msToHhMmSs.js');
 
 // const isAdmin = require('./isAdmin.js');
 
 function formatBytes(bytes) {
-  const format = (n) => Number(n.toFixed(1));
-
   if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 ** 2) return `${format(bytes / 1024)} KB`;
-  return `${format(bytes / 1024 ** 2)} MB`;
+
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let i = 0;
+
+  while (value >= 1024 && i < units.length - 1) {
+    value /= 1024;
+    i++;
+  }
+
+  return `${Number(value.toFixed(1))} ${units[i]}`;
 }
 
 /**
@@ -29,9 +36,23 @@ module.exports = function requestString({
   body,
   requestId
 }, res, ms) {
-  const parts = [];
+  
+  const parts = [
+    `${ip} -> [${method}] ${originalUrl}`,
+    `status: ${res.statusCode}`
+  ];
 
-  parts.push(`${ip} -> [${method}] ${originalUrl}`);
+  const contentType = res.getHeader('Content-Type');
+  if (contentType != null) parts.push(`type: ${contentType}`);
+
+  const contentLength = res.getHeader("Content-Length");
+  if (contentLength != null) {
+    parts.push(`bytes: ${formatBytes(Number(contentLength))}`);
+  }
+
+  if (ms != null) {
+    parts.push(ms < 10000 ? `ms: ${ms}` : `time: ${msToHhMmSs(ms)}`);
+  }
 
   // if (user) {
   //   [
@@ -40,27 +61,16 @@ module.exports = function requestString({
   //   ].forEach(str => parts.push(str));
   // }
 
+  if (loadedLang) parts.push(`lang: ${loadedLang}`);
+
   if (count !== undefined) {
     parts.push(`count: ${count}`);
   }
 
-  if (loadedLang) parts.push(`lang: ${loadedLang}`);
-
-  if (body && Object.keys(body).length > 0) {
-    parts.push(`body: ${JSON.stringify(body)}`);
+  if (body && Object.keys(body).length) {
+    const json = JSON.stringify(body);
+    parts.push(`body: ${json.length > 500 ? json.slice(0, 500) + "..." : json}`);
   }
-
-  parts.push(`status: ${res.statusCode}`);
-
-  const contentType = res.getHeader('Content-Type');
-  if (contentType) parts.push(`type: ${contentType}`);
-
-  const contentLength = res.getHeader('Content-Length');
-  if (contentLength) parts.push(`bytes: ${formatBytes(contentLength)}`);
-
-  // if (requestId) parts.push(`request-id: ${requestId}`);
-
-  if (ms) parts.push(`ms: ${ms}`);
 
   return parts.join(', ');
 }
