@@ -323,12 +323,7 @@ class Mongo extends MongoBase {
    * @param {number} [limit=50] Maximum number of stations to return.
    * @param {number} [offset=0] Number of stations to skip.
    *                                                 
-   * @returns {Promise<{
-   *   stations: Object[],
-   *   total: number,
-   *   limit: number,
-   *   offset: number
-   * }>}
+   * @returns {Promise<Object[]>}
    *
    * @throws {TypeError} If limit or offset are invalid.
    */
@@ -341,23 +336,9 @@ class Mongo extends MongoBase {
       throw new TypeError("offset must be a non-negative integer");
     }
 
-    const collection = this.getCollection(this.collections.STASH);
-
-    const [stations, total] = await Promise.all([
-      collection
-        .find({})
-        .skip(offset)
-        .limit(limit)
-        .toArray(),
-      collection.countDocuments()
-    ]);
-
-    return {
-      stations,
-      total,
-      limit,
-      offset
-    };
+    return this.getCollection(this.collections.STASH)
+      .find({}).skip(offset)
+      .limit(limit).toArray();
   }
 
   /**
