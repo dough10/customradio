@@ -10,13 +10,13 @@ module.exports = (req, res) => {
 
   res.write(`: connected\n\n`);
   
-  const send = (value) => {
-    res.write(`data: ${JSON.stringify(value)}\n\n`);
-  };
-
   const heartbeat = setInterval(() => {
     res.write(': heartbeat\n\n');
   }, 15000);
+
+  const send = (value) => {
+    res.write(`data: ${JSON.stringify(value)}\n\n`);
+  };
 
   const us = v => send({...v, type: 'update'});
   const ss = v => send({...v, type: 'scrape'});

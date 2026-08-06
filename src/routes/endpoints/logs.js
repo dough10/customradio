@@ -17,19 +17,17 @@ module.exports = (req, res) => {
 
   res.flushHeaders();
 
-  for (const line of recentLogs) {
-    res.write(`data: ${JSON.stringify(line)}\n\n`);
-  }
+  const heartbeat = setInterval(() => {
+    res.write(": heartbeat\n\n");
+  }, 15000);
 
   const send = (line) => {
     res.write(`data: ${JSON.stringify(line)}\n\n`);
   };
 
-  logger.on("line", send);
+  for (const line of recentLogs) send(line);
 
-  const heartbeat = setInterval(() => {
-    res.write(": heartbeat\n\n");
-  }, 15000);
+  logger.on("line", send);
 
   req.on("close", () => {
     clearInterval(heartbeat);
