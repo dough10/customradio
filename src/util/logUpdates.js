@@ -17,10 +17,6 @@ module.exports = (updater, logger) => {
     logger.info(`Starting database update at ${new Date(started).toISOString()}`);
   });
 
-  updater.on('stationUnchanged', ({ id, duration }) => {
-    logger.debug(`[${id}] unchanged ${duration}ms`);
-  });
-
   updater.on('stationUpdated', ({ id, duration }) => {
     logger.debug(`[${id}] updated ${duration}ms`);
   });
