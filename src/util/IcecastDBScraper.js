@@ -41,7 +41,7 @@ class IcecastDBScraper extends BaseStationProcessor {
         signal: controller.signal
       });
 
-      if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+      if (!res.ok) throw new Error(`Fetch failed ${res.status} ${res.statusText}`);
 
       const text = await res.text();
       const parser = new xml2js.Parser();
@@ -81,8 +81,7 @@ class IcecastDBScraper extends BaseStationProcessor {
    * @returns {Promise<Object[]>}
    */
   async getBatch(limit, offset) {
-    const result = await this.mongo.getPaginatedStations(limit, offset);
-    return result.stations;
+    return await this.mongo.getPaginatedStations(limit, offset);
   }
 
   /**
@@ -118,34 +117,34 @@ class IcecastDBScraper extends BaseStationProcessor {
       if (!usedTypes.includes(stream.content)) return;
 
       const result = await this.stations.addStation({
+        name: stream.name ||
+          station.server_name?.[0] ||
+          stream.description,
 
-          name: stream.name ||
-            station.server_name?.[0] ||
-            stream.description,
+        url: stream.url,
 
-          url: stream.url,
+        genre: stream.icyGenre ||
+          station.genre?.[0] ||
+          'Unknown',
 
-          genre: stream.icyGenre ||
-            station.genre?.[0] ||
-            'Unknown',
+        online: stream.isLive,
 
-          online: stream.isLive,
+        'content-type': stream.content,
 
-          'content-type': stream.content,
+        bitrate: stream.bitrate || 0,
 
-          bitrate: stream.bitrate || 0,
+        icon: 'Unknown',
 
-          icon: 'Unknown',
+        homepage: await retry(() =>
+            testHomepageConnection(
+              stream.icyurl
+            )
+          ) || 'Unknown',
 
-          homepage: await retry(() =>
-              testHomepageConnection(
-                stream.icyurl
-              )
-            ) || 'Unknown',
-
-          error: '',
-          duplicate: false
-        });
+        error: '',
+        
+        duplicate: false
+      });
 
       if (result === false) {
         return;
