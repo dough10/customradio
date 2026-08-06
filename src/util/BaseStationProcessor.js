@@ -31,6 +31,8 @@ class BaseStationProcessor extends EventEmitter {
   /**
    * Creates a new station processor.
    *
+   * @param {Stations} stations Station database instance.
+   * @param {Mongo} mongo MongoDB helper instance.
    * @param {Object} [options={}] Processor options.
    * @param {number} [options.batchSize=100]
    * Number of stations processed per batch.
@@ -38,10 +40,8 @@ class BaseStationProcessor extends EventEmitter {
    * Maximum number of stations processed concurrently.
    * @param {number} [options.scrapeTimeout=20000]
    * Timeout in milliseconds used by scrapers when downloading station lists.
-   * @param {Stations} stations Station database instance.
-   * @param {Mongo} mongo MongoDB helper instance.
    */
-  constructor(options = {}, stations, mongo) {
+  constructor(stations, mongo, options = {}) {
     super();
     options = options || {};
 
@@ -63,9 +63,9 @@ class BaseStationProcessor extends EventEmitter {
     this.batchSize = options.batchSize || DEFAULT_BATCH_SIZE;
     this.concurrency = options.concurrency || DEFAULT_CONCURRENCY;
     this.scrapeTimeout = options.scrapeTimeout || DEFAULT_SCRAPE_TIMEOUT;
-    
+
     this.running = false;
-    
+
     this.startStats = null;
     this.startTime = null;
 
@@ -82,6 +82,15 @@ class BaseStationProcessor extends EventEmitter {
    */
   get remainingStations() {
     return this.totalStations - this.counter;
+  }
+
+  /**
+   * Precentage of stations completed
+   * 
+   * @returns {number}
+   */
+  get completedPrecentage() {
+    return this.totalStations === 0 ? 100 : Number(((this.counter / this.totalStations) * 100).toFixed(2));
   }
 
   /**
@@ -112,10 +121,10 @@ class BaseStationProcessor extends EventEmitter {
    * }}
    */
   #memoryUsage() {
-    const mem = process.memoryUsage();
+    const { heapUsed, rss } = process.memoryUsage();
     return {
-      heap: mb(mem.heapUsed),
-      RSS: mb(mem.rss)
+      heap: mb(heapUsed),
+      RSS: mb(rss)
     };
   }
 
@@ -145,7 +154,7 @@ class BaseStationProcessor extends EventEmitter {
       changed: this.changed,
       approxCompletion,
       approxCompletionTime,
-      percent: this.totalStations === 0 ? 100 : Number(((this.counter / this.totalStations) * 100).toFixed(2)),
+      percent: this.completedPrecentage,
       ...extra
     });
   }
@@ -176,13 +185,13 @@ class BaseStationProcessor extends EventEmitter {
       await this.initialize();
 
       const start = this.startStats || await this.stations.dbStats();
-      
+
       this.startTime = start.time;
       this.totalStations = this.total;
 
       this.emit('start', {
         total: this.totalStations,
-        started: this.startTime,
+        time: this.startTime,
         ...this.#memoryUsage()
       });
 
@@ -195,8 +204,11 @@ class BaseStationProcessor extends EventEmitter {
         this.emit('batchStart', {
           batch: batch + 1,
           totalBatches: parts,
-          count: pulledStations.length,
-          ...this.#memoryUsage()
+          batchCount: pulledStations.length,
+          processed: this.counter,
+          changed: this.changed,
+          ...this.#memoryUsage(),
+          time: Date.now()
         });
 
         await Promise.all(
@@ -208,9 +220,11 @@ class BaseStationProcessor extends EventEmitter {
         this.emit('batchComplete', {
           batch: batch + 1,
           totalBatches: parts,
+          batchCount: pulledStations.length,
           processed: this.counter,
           changed: this.changed,
-          ...this.#memoryUsage()
+          ...this.#memoryUsage(),
+          time: Date.now()
         });
       }
 
@@ -224,7 +238,8 @@ class BaseStationProcessor extends EventEmitter {
         duration: msToHhMmSs(end.time - start.time),
         start,
         end,
-        ...this.#memoryUsage()
+        ...this.#memoryUsage(),
+        time: Date.now()
       });
 
       return true;

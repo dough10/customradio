@@ -41,11 +41,11 @@ const posts = new Posts(DB_PATH);
 const mongo = new Mongo(process.env.MONGODB_URL, "radiotxt", logger);
 
 // db updater !!!!
-const updater = new DatabaseUpdater(null, stations, mongo);
+const updater = new DatabaseUpdater(stations, mongo);
 
 logUpdates(updater, logger);
 
-const scraper = new IcecastDBScraper(null, stations, mongo);
+const scraper = new IcecastDBScraper(stations, mongo);
 
 logScrape(scraper, logger);
 
