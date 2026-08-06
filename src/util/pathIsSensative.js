@@ -22,7 +22,8 @@ const sensitivePaths = new Set([
   'actuator',
   'powershell',
   'firebase',
-  'admin'
+  'admin',
+  'hello.world'
 ]);
 
 module.exports = function pathIsSensative(path) {
