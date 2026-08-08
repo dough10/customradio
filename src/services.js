@@ -43,11 +43,11 @@ const mongo = new Mongo(process.env.MONGODB_URL, "radiotxt", logger);
 // db updater !!!!
 const updater = new DatabaseUpdater(stations, mongo);
 
-logUpdates(updater, logger);
+logUpdates(updater, logger, mongo);
 
 const scraper = new IcecastDBScraper(stations, mongo);
 
-logScrape(scraper, logger);
+logScrape(scraper, logger, mongo);
 
 // workos
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
@@ -63,10 +63,33 @@ const redisClient = getRedisClient(logger);
  * @returns {void}
  */
 async function shutdown() {
+  const databases = [
+    {
+      db: redisClient,
+      text: false
+    }, {
+      db: mongo,
+      text: 'MongoDB closed'
+    }, {
+      db: stations,
+      text: 'Stations closed'
+    }, {
+      db: userData,
+      text: 'UserData closed'
+    }, {
+      db: alerts,
+      text: 'Alerts closed'
+    }, {
+      db: posts,
+      text: 'Posts closed'
+    }
+  ];
   try {
-    logger.debug("Shutting down...");
-    await redisClient.close();
-    await mongo.close();
+    for (const { db, text } of databases) {
+      await db.close();
+      if (text) logger.warning(text);
+    }
+    logger.critical('Exiting...');
     process.exit(0);
   } catch (err) {
     logger.error(`Error during shutdown: ${err}`);
@@ -89,4 +112,4 @@ module.exports = {
   workos,
   updater,
   scraper
-}
+};
