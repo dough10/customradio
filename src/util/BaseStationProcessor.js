@@ -188,14 +188,14 @@ class BaseStationProcessor extends EventEmitter {
 
       this.startTime = start.time;
       this.totalStations = this.total;
+      const parts = Math.ceil(this.totalStations / this.batchSize);
 
       this.emit('start', {
         total: this.totalStations,
+        totalBatches: parts,
         time: this.startTime,
         ...this.#memoryUsage()
       });
-
-      const parts = Math.ceil(this.totalStations / this.batchSize);
 
       for (let batch = 0; batch < parts; batch++) {
         const offset = batch * this.batchSize;
@@ -244,10 +244,7 @@ class BaseStationProcessor extends EventEmitter {
 
       return true;
     } catch (err) {
-      this.emit(
-        'error',
-        err
-      );
+      this.emit('error', err);
       return false;
     } finally {
       this.running = false;
