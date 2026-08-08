@@ -51,7 +51,7 @@ module.exports = function requestString({
   }
 
   if (ms != null) {
-    parts.push(ms < 10000 ? `ms: ${ms}` : `time: ${msToHhMmSs(ms)}`);
+    parts.push(ms < 10000 ? `time: ${ms} ms` : `time: ${msToHhMmSs(ms)}`);
   }
 
   // if (user) {
