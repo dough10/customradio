@@ -16,7 +16,7 @@ function getRedisClient(logger) {
 
   client.on("error", err => logger.error(`Redis Client ${err}`));
   client.on("connect", () => logger.debug("Redis Connected"));
-  client.on("end", () => logger.warning("Redis connection closed"));
+  client.on("end", () => logger.warning("Redis closed"));
   
   client.close = async _ => {
     if (client.isOpen) {
