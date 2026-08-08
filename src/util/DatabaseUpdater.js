@@ -11,6 +11,9 @@ const testHomepageConnection = require('./testHomepageConnection.js');
  * @extends BaseStationProcessor
  */
 class DatabaseUpdater extends BaseStationProcessor {
+  startStats = {
+    total: 0
+  };
 
   /**
    * Called before processing begins.
@@ -76,7 +79,7 @@ class DatabaseUpdater extends BaseStationProcessor {
         stream,
         duration: Date.now() - started
       });
-    } catch(err) {
+    } catch (err) {
       this.emit('stationError', {
         id: station.id,
         error: err
