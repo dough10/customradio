@@ -11,9 +11,6 @@ const testHomepageConnection = require('./testHomepageConnection.js');
  * @extends BaseStationProcessor
  */
 class DatabaseUpdater extends BaseStationProcessor {
-  startStats = {
-    total: 0
-  };
 
   /**
    * Called before processing begins.
