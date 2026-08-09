@@ -94,19 +94,16 @@ class BaseStationProcessor extends EventEmitter {
   }
 
   /**
-   * Resets the processor state before a new run.
-   *
-   * Clears any cached statistics and resets all runtime counters.
-   *
-   * @private
-   * @returns {void}
+   * timestamp in object form
+   * 
+   * @returns {{
+   *  time: number
+   * }}
    */
-  #reset() {
-    this.startStats = null;
-    this.startTime = null;
-    this.totalStations = 0;
-    this.counter = 0;
-    this.changed = 0;
+  get timestamp() {
+    return {
+      time: Date.now()
+    }
   }
 
   /**
@@ -120,12 +117,28 @@ class BaseStationProcessor extends EventEmitter {
    *   RSS: number
    * }}
    */
-  #memoryUsage() {
+  get memoryUsage() {
     const { heapUsed, rss } = process.memoryUsage();
     return {
       heap: mb(heapUsed),
       RSS: mb(rss)
     };
+  }
+
+  /**
+   * Resets the processor state before a new run.
+   *
+   * Clears any cached statistics and resets all runtime counters.
+   *
+   * @private
+   * @returns {void}
+   */
+  #reset() {
+    this.startStats = null;
+    this.startTime = null;
+    this.totalStations = 0;
+    this.counter = 0;
+    this.changed = 0;
   }
 
   /**
@@ -194,7 +207,7 @@ class BaseStationProcessor extends EventEmitter {
         total: this.totalStations,
         totalBatches: parts,
         time: this.startTime,
-        ...this.#memoryUsage()
+        ...this.memoryUsage
       });
 
       for (let batch = 0; batch < parts; batch++) {
@@ -207,8 +220,8 @@ class BaseStationProcessor extends EventEmitter {
           batchCount: pulledStations.length,
           processed: this.counter,
           changed: this.changed,
-          ...this.#memoryUsage(),
-          time: Date.now()
+          ...this.memoryUsage,
+          ...this.timestamp
         });
 
         await Promise.all(
@@ -223,9 +236,11 @@ class BaseStationProcessor extends EventEmitter {
           batchCount: pulledStations.length,
           processed: this.counter,
           changed: this.changed,
-          ...this.#memoryUsage(),
-          time: Date.now()
+          ...this.memoryUsage,
+          ...this.timestamp
         });
+
+        if (global.gc) global.gc();
       }
 
       const end = await this.stations.dbStats();
@@ -238,8 +253,8 @@ class BaseStationProcessor extends EventEmitter {
         duration: msToHhMmSs(end.time - start.time),
         start,
         end,
-        ...this.#memoryUsage(),
-        time: Date.now()
+        ...this.memoryUsage,
+        ...this.timestamp
       });
 
       return true;
