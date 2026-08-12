@@ -1,5 +1,12 @@
 const { updater, scraper } = require('../../services.js');
 
+const EVENTS = {
+  start: 'start',
+  batchStart: 'batchStart',
+  progress: 'progress',
+  done: 'done'
+};
+
 module.exports = (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -21,12 +28,18 @@ module.exports = (req, res) => {
   const us = v => send({...v, type: 'update'});
   const ss = v => send({...v, type: 'scrape'});
 
-  updater.on('progress', us);
-  scraper.on('progress', ss);
+  const events = Object.values(EVENTS);
+
+  for (const ev of events) {
+    updater.on(ev, us);
+    scraper.on(ev, ss);
+  }
 
   req.on('close', () => {
     clearInterval(heartbeat);
-    updater.off('progress', us);
-    scraper.off('progress', ss);
+    for (const ev of events) {
+      updater.off(ev, us);
+      scraper.off(ev, ss);
+    }
   });
 };
