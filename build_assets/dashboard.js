@@ -7,5 +7,6 @@ import '../html/css/menu-button.css';
 import '../html/css/header.css';
 import '../html/css/card.css';
 import '../html/css/log.css';
+import '../html/css/progress.css';
 import '../html/css/base.css';
 import '../html/js/dashboard.js';
