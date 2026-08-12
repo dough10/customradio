@@ -65,6 +65,7 @@ class BaseStationProcessor extends EventEmitter {
     this.scrapeTimeout = options.scrapeTimeout || DEFAULT_SCRAPE_TIMEOUT;
 
     this.running = false;
+    this.stopping = false;
 
     this.startStats = null;
     this.startTime = null;
@@ -89,7 +90,7 @@ class BaseStationProcessor extends EventEmitter {
    * 
    * @returns {number}
    */
-  get completedPrecentage() {
+  get completedPercentage() {
     return this.totalStations === 0 ? 100 : Number(((this.counter / this.totalStations) * 100).toFixed(2));
   }
 
@@ -126,6 +127,19 @@ class BaseStationProcessor extends EventEmitter {
   }
 
   /**
+   * Requests the processor to stop after the current batch completes.
+   *
+   * @returns {boolean}
+   */
+  stop() {
+    if (!this.running) {
+      return false;
+    }
+    this.stopping = true;
+    return true;
+  }
+
+  /**
    * Resets the processor state before a new run.
    *
    * Clears any cached statistics and resets all runtime counters.
@@ -134,6 +148,7 @@ class BaseStationProcessor extends EventEmitter {
    * @returns {void}
    */
   #reset() {
+    this.stopping = false;
     this.startStats = null;
     this.startTime = null;
     this.totalStations = 0;
@@ -156,7 +171,10 @@ class BaseStationProcessor extends EventEmitter {
       const stationsPerMs = this.counter / elapsed;
       const ms = this.remainingStations / stationsPerMs;
       approxCompletion = msToHhMmSs(ms);
-      approxCompletionTime = new Date(Date.now() + ms).toLocaleTimeString();
+      approxCompletionTime = new Date(Date.now() + ms).toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit"
+      });
     }
 
     this.emit('progress', {
@@ -167,7 +185,7 @@ class BaseStationProcessor extends EventEmitter {
       changed: this.changed,
       approxCompletion,
       approxCompletionTime,
-      percent: this.completedPrecentage,
+      percent: this.completedPercentage,
       ...extra
     });
   }
@@ -197,6 +215,10 @@ class BaseStationProcessor extends EventEmitter {
     try {
       await this.initialize();
 
+      if (this.stopping) {
+        return false;
+      }
+
       const start = this.startStats || await this.stations.dbStats();
 
       this.startTime = start.time;
@@ -211,9 +233,21 @@ class BaseStationProcessor extends EventEmitter {
       });
 
       for (let batch = 0; batch < parts; batch++) {
+        if (this.stopping) {
+          this.emit('stopped', {
+            processed: this.counter,
+            total: this.totalStations,
+            changed: this.changed,
+            ...this.memoryUsage,
+            ...this.timestamp
+          });
+          
+          return false;
+        }
+        
         const offset = batch * this.batchSize;
         const pulledStations = await this.getBatch(this.batchSize, offset);
-
+        
         this.emit('batchStart', {
           batch: batch + 1,
           totalBatches: parts,
@@ -253,8 +287,7 @@ class BaseStationProcessor extends EventEmitter {
         duration: msToHhMmSs(end.time - start.time),
         start,
         end,
-        ...this.memoryUsage,
-        ...this.timestamp
+        ...this.memoryUsage
       });
 
       return true;
@@ -299,6 +332,8 @@ class BaseStationProcessor extends EventEmitter {
   /**
    * Retrieves a batch of stations.
    * 
+   * Must be overridden by subclasses.
+   * 
    * @abstract
    *
    * @param {number} limit
@@ -317,6 +352,8 @@ class BaseStationProcessor extends EventEmitter {
    *
    * Called once for every station returned by getBatch().
    * 
+   * Must be overridden by subclasses.
+   * 
    * @abstract
    *
    * @param {Object} station
@@ -331,6 +368,8 @@ class BaseStationProcessor extends EventEmitter {
 
   /**
    * Called after all stations have been processed.
+   * 
+   * Must be overridden by subclasses.
    * 
    * @abstract
    *
