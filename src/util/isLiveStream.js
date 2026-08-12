@@ -107,7 +107,7 @@ function returnError(message, status) {
 /**
  * Tests if the provided URL is an audio stream and retrieves related information.
  *
- * This function sends a HEAD request to the given URL to check if it is a live audio stream
+ * This function sends a GET request to the given URL to check if it is a live audio stream
  * by inspecting the response headers. It checks for audio-related headers and parses them,
  * returning an object with stream details if the URL points to a valid audio stream.
  *
@@ -128,26 +128,25 @@ function returnError(message, status) {
  */
 async function streamTest(url) {
   const controller = new AbortController();
-  const timeout = 10000;
-
   const timeoutId = setTimeout(() => {
     controller.abort();
-  }, timeout);
+  }, 10000);
+
+  let response;
+  let reader;
 
   try {
-    const response = await fetch(url, {
+    response = await fetch(url, {
       redirect: "follow",
-      method: 'GET',
+      method: "GET",
       headers: {
         "User-Agent": `radiotxt.site/${pack.version}`,
         "Accept": "audio/*, */*;q=0.9",
         "Icy-MetaData": "1",
         "Range": "bytes=0-"
       },
-      signal: controller.signal,
+      signal: controller.signal
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       return returnError(`http_${response.status}`, response.status);
@@ -155,71 +154,106 @@ async function streamTest(url) {
 
     const headers = response.headers;
 
-    let name = headers.get("icy-name") || headers.get("x-audiocast-name");
-    const description = headers.get("icy-description") || "";
-    const icyGenre = headers.get("icy-genre") || headers.get("x-audiocast-genre") || "Unknown";
+    let name =
+      headers.get("icy-name") ||
+      headers.get("x-audiocast-name");
+
+    const description =
+      headers.get("icy-description") || "";
+
+    const icyGenre =
+      headers.get("icy-genre") ||
+      headers.get("x-audiocast-genre") ||
+      "Unknown";
+
     const content = headers.get("content-type");
     const icyurl = headers.get("icy-url") || "";
     const finalUrl = response.url;
 
     let bitrate = parseInt(headers.get("icy-br"), 10);
-    if (!Number.isFinite(bitrate)) bitrate = 0;
-    if (bitrate > 0 && (bitrate < 8 || bitrate > 512)) bitrate = 0;
 
-    const normalizedContent = content?.split(";")[0].trim().toLowerCase();
+    if (!Number.isFinite(bitrate)) {
+      bitrate = 0;
+    }
+
+    if (bitrate > 0 && (bitrate < 8 || bitrate > 512)) {
+      bitrate = 0;
+    }
+
+    const normalizedContent =
+      content?.split(";")[0].trim().toLowerCase();
 
     if (!normalizedContent) {
-      return returnError("missing_content_type", response.status);
+      return returnError(
+        "missing_content_type",
+        response.status
+      );
     }
 
     if (!usedTypes.includes(normalizedContent)) {
-      return returnError(`invalid content-type: ${content}`, response.status);
+      return returnError(
+        `invalid content-type: ${content}`,
+        response.status
+      );
     }
 
     if (!response.body) {
-      return returnError("no_response_body", response.status);
+      return returnError(
+        "no_response_body",
+        response.status
+      );
     }
 
-    const reader = response.body.getReader();
-    let firstChunk;
+    reader = response.body.getReader();
 
-    if (reader) {
-      const { value } = await reader.read();
-      firstChunk = value;
+    const { value: firstValue } = await reader.read();
 
-      if (!firstChunk) {
-        await reader.cancel();
-        return returnError("No audio data received", response.status);
-      }
+    let firstChunk = firstValue;
 
-      if (!looksLikeMP3(firstChunk)) {
-        const { value: secondChunk } = await reader.read();
-        if (secondChunk) {
-          const combined = new Uint8Array(firstChunk.length + secondChunk.length);
-          combined.set(firstChunk);
-          combined.set(secondChunk, firstChunk.length);
-          firstChunk = combined;
-        }
-      }
-
-      await reader.cancel();
-    }
-
-    if (!firstChunk || firstChunk.length === 0) {
-      return returnError("No audio data received", response.status);
-    }
-
-    if (looksLikeHTML(firstChunk)) {
-      return returnError("HTML only, no audio stream", response.status);
+    if (!firstChunk) {
+      return returnError(
+        "No audio data received",
+        response.status
+      );
     }
 
     if (!looksLikeMP3(firstChunk)) {
-      return returnError("Invalid MP3 stream", response.status);
+      const { value: secondChunk } = await reader.read();
+
+      if (secondChunk) {
+        const combined = new Uint8Array(
+          firstChunk.length + secondChunk.length
+        );
+
+        combined.set(firstChunk);
+        combined.set(secondChunk, firstChunk.length);
+
+        firstChunk = combined;
+      }
+    }
+
+    if (looksLikeHTML(firstChunk)) {
+      return returnError(
+        "HTML only, no audio stream",
+        response.status
+      );
+    }
+
+    if (!looksLikeMP3(firstChunk)) {
+      return returnError(
+        "Invalid MP3 stream",
+        response.status
+      );
     }
 
     if (name) {
-      const cleanName = fixEncoding(name).toLowerCase().trim();
-      if (unhelpfulNames.includes(cleanName) || unhelpfulRegex.test(cleanName)) {
+      const cleanName =
+        fixEncoding(name).toLowerCase().trim();
+
+      if (
+        unhelpfulNames.includes(cleanName) ||
+        unhelpfulRegex.test(cleanName)
+      ) {
         name = null;
       }
     }
@@ -243,24 +277,39 @@ async function streamTest(url) {
       content,
       bitrate,
       error: "",
-      status: response.status,
+      status: response.status
     };
 
   } catch (error) {
-    clearTimeout(timeoutId);
-
-    const isAbort = error.name === 'AbortError';
+    const isAbort = error?.name === "AbortError";
 
     let errorMessage;
 
-    if (isAbort) errorMessage = "timeout";
-    else if (error.cause?.code === "ENOTFOUND") errorMessage = "dns_failure";
-    else if (error.cause?.code === "ECONNREFUSED") errorMessage = "connection_refused";
-    else errorMessage = error.message;
+    if (isAbort) {
+      errorMessage = "timeout";
+    } else if (error?.cause?.code === "ENOTFOUND") {
+      errorMessage = "dns_failure";
+    } else if (error?.cause?.code === "ECONNREFUSED") {
+      errorMessage = "connection_refused";
+    } else {
+      errorMessage = error?.message || "fetch_failed";
+    }
 
     return returnError(errorMessage, 500);
+
+  } finally {
+    clearTimeout(timeoutId);
+
+    if (reader) {
+      try {
+        await reader.cancel();
+      } catch {
+        // Reader may already be closed/errored.
+      }
+    }
   }
 }
+
 
 /**
  * Checks if the provided URL is a live stream and retrieves its metadata.
