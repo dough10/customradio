@@ -342,9 +342,7 @@ class BaseStationProcessor extends EventEmitter {
    * @returns {Promise<Object[]>}
    */
   async getBatch(limit, offset) {
-    throw new Error(
-      'getBatch() not implemented'
-    );
+    throw new Error('getBatch() not implemented');
   }
 
   /**
@@ -361,9 +359,7 @@ class BaseStationProcessor extends EventEmitter {
    * @returns {Promise<void>}
    */
   async processStation(station) {
-    throw new Error(
-      'processStation() not implemented'
-    );
+    throw new Error('processStation() not implemented');
   }
 
   /**
