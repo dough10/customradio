@@ -55,10 +55,12 @@ class DatabaseUpdater extends BaseStationProcessor {
    * @returns {Promise<void>}
    */
   async processStation(station) {
+    if (this.stopping) return;
+
     const started = Date.now();
 
     try {
-      const stream = await retry(() => isLiveStream(station.url));
+      const stream = await isLiveStream(station.url);
 
       if (this.#stationDataIsUnchanged(station, stream)) {
         return;
@@ -79,7 +81,8 @@ class DatabaseUpdater extends BaseStationProcessor {
     } catch (err) {
       this.emit('stationError', {
         id: station.id,
-        error: err
+        error: err,
+        duration: Date.now() - started
       });
     } finally {
       this.counter++;

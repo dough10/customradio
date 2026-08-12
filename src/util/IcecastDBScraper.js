@@ -1,9 +1,9 @@
 const BaseStationProcessor = require('./BaseStationProcessor.js');
 
+const retry = require('./retry.js');
 const xml2js = require('xml2js');
 const pack = require('../../package.json');
 
-const retry = require('./retry.js');
 const isLiveStream = require('./isLiveStream.js');
 const testHomepageConnection = require('./testHomepageConnection.js');
 const usedTypes = require('./usedTypes.js');
@@ -94,6 +94,8 @@ class IcecastDBScraper extends BaseStationProcessor {
    * @returns {Promise<void>}
    */
   async processStation(station) {
+    if (this.stopping) return;
+
     const started = Date.now();
 
     const url = station.listen_url?.[0];
@@ -110,7 +112,7 @@ class IcecastDBScraper extends BaseStationProcessor {
         return;
       }
 
-      const stream = await retry(() => isLiveStream(url));
+      const stream = await isLiveStream(url);
 
       if (!stream.ok) return;
 
