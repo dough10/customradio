@@ -4,9 +4,9 @@ const { updater, scraper } = require('../../services.js');
 
 module.exports = asyncHandler(async (req, res) => {
   if (!isAdmin(req)) return res.status(403).json({message:'Forbidden'});
-  if (updater.running) {
+  if (updater.running || scraper.running) {
     res.json({
-      message: 'Updater is currently running'
+      message: 'A database process is currently running'
     });
     return;
   }

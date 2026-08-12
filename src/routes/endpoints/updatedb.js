@@ -4,9 +4,9 @@ const isAdmin = require('./../../util/isAdmin.js');
 
 module.exports = asyncHandler(async (req, res) => {
   if (!isAdmin(req)) return res.status(403).send('Forbidden');
-  if (scraper.running) {
+  if (updater.running || scraper.running) {
     res.json({
-      message: 'scraper is currently running'
+      message: 'A database process is currently running'
     });
     return;
   }
