@@ -15,8 +15,8 @@ module.exports = (scraper, logger, mongo) => {
   if (!(logger instanceof Logger)) throw new TypeError('logger must be an instance of Logger class');
   if (!(mongo instanceof Mongo))  throw new TypeError('mongo must be an instance of Mongo class');
   
-  scraper.on('start', ({ started, total }) => {
-    logger.info(`Starting IcecastDB scrape ${total} stations pulled at ${new Date(started).toISOString()}`);
+  scraper.on('start', ({ time, total }) => {
+    logger.info(`Starting IcecastDB scrape ${total} stations pulled at ${new Date(time).toISOString()}`);
   });
 
   scraper.on('stationAdded', ({ id, duration }) => {
@@ -32,5 +32,8 @@ module.exports = (scraper, logger, mongo) => {
     logger.info(`Stats - Total: ${end.total}, Online: ${end.online}, Offline: ${end.total - end.online}`);
   });
 
-  scraper.on('error', error => mongo.logJSError(error));
+  scraper.on('error', error => {
+    logger.error(error.message);
+    mongo.logJSError(error);
+  });
 };
