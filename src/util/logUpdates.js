@@ -27,7 +27,10 @@ module.exports = (updater, logger, mongo) => {
     logger.error(`[${id}] error: ${error} ${duration}ms`);
   });
 
-  updater.on('error', error => mongo.logJSError(error));
+  updater.on('error', error => {
+    logger.error(error.message);
+    mongo.logJSError(error);
+  });
 
   updater.on('done', ({ changed, duration, end }) => {
     logger.info(`Update complete: ${changed} entr${plural(changed)} updated in ${duration}.`);
