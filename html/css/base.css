@@ -197,3 +197,7 @@ ul {
 .stretch { 
   min-width: stretch;
 }
+
+h4 {
+  margin-bottom: 8px;
+}

@@ -55,27 +55,89 @@ html(lang=lang)
 
     main
       .card
+        h4
+          | LAST UPDATE
         div
           span
-            | Last update: !{new Date(lastUpdate.end.time).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            span
+              | Last update: 
+            span#lastCompleted
+              | !{new Date(lastUpdate.end.time).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           span
-            | Update duration: 
+            span
+              | Update duration: 
             span#updateDuration
 
-        span
-          | Next update: 
-          span#nextUpdate
+        div
+          span
+            span
+              | Next update: 
+            span#nextUpdate
 
         div
           span
-            | Total stations: !{lastUpdate.end.total}
+            span
+              | Total stations: 
+            span#total
+              | !{lastUpdate.end.total}
           span
-            | Online stations: !{lastUpdate.end.online}
+            span
+              | Online stations: 
+            span#online
+              | !{lastUpdate.end.online}
+
+      .card#updates
+        h4
+          | UPDATING
+        #progress.bar-wrapper
+          .bar
+        div
+          span#counts
+            | 0/0
+          span#percent
+            | 0%
+        div
+          span
+            span
+              | Changed:
+            span#changed
+              | 0
+          span 
+            span
+              | Remaining:
+            span#remaining
+              | 0
+        div
+          span
+            span
+              | Run Time:
+            span#runTime
+              | 0 Seconds
+          span 
+            span
+              | Approx Completion Time:
+            span#ACT
+              | !{new Date().toLocaleTimeString()}
+        div
+          span
+            span
+              | Mem Heap:
+            span#heap
+              | ?? MB
+          span 
+            span
+              | Mem RSS:
+            span#RSS
+              | ?? MB
 
       .card
+        h4 
+          | LOG
         #log
 
       .card
+        h4
+          | REQUESTS
         label(for="hours") Time period:
         select#hours(name="hours")
           option(value=1) 1 hour
@@ -87,11 +149,13 @@ html(lang=lang)
 
         div
           span
-            | Requests: 
-            span#total
+            span
+              | Requests: 
+            span#reqTotal
               | #{requests.totalRequests}
           span
-            | Average request pre hour: 
+            span
+              | Average request pre hour: 
             span#ave 
               | #{requests.averagePerHour}
 

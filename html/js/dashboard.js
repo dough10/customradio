@@ -7,13 +7,30 @@ import selectors from './CustomRadioApp/selectors.js';
 import msToHhMmSs from '../../src/util/msToHhMmSs.js';
 import sleep from './CustomRadioApp/utils/sleep.js';
 
+const MAX_LOG_LINES = 500;
+const MAX_HISTORY = 1000;
+
+const validLevels = new Set([
+  'debug',
+  'info',
+  'warning',
+  'error',
+  'critical'
+]);
+
 const em = new EventManager();
+
+let requestsChart;
+const history = [];
+let timeoutID = 0;
+let requestsController;
+const usedElements = {};
 
 const chartOptions = {
   responsive: true,
   scales: {
-    y: { 
-      beginAtZero: true 
+    y: {
+      beginAtZero: true
     },
     x: {
       ticks: {
@@ -24,20 +41,38 @@ const chartOptions = {
   }
 };
 
-let requestsChart;
+function qs(selector) {
+  const $el = (usedElements[selector] != null) ? usedElements[selector] : document.querySelector(selector);
+  if (!usedElements[selector]) usedElements[selector] = $el;
+  return $el;
+}
 
 function updateText(selector, text) {
   try {
-    document.querySelector(selector).textContent = text;
-  } catch(er) {
+    const $el = qs(selector);
+    if (!$el) throw new Error('Element missing');
+    if ($el.textContent === text) return;
+    requestAnimationFrame(_ => $el.textContent = text);
+  } catch (er) {
     console.error(`Error updating ${selector} text: ${er}`);
   }
 }
 
+function updateTexts(list) {
+  for (const { el, str } of list) updateText(el, str);
+}
+
 function renderChart({ averagePerHour, counts, times, totalRequests }) {
-  const canvas = document.getElementById('requests');
-  updateText('#total', totalRequests);
-  updateText('#ave', averagePerHour);
+  updateTexts([
+    {
+      el: '#reqTotal',
+      str: totalRequests
+    }, {
+      el: '#ave',
+      str: averagePerHour
+    }
+  ]);
+  const canvas = qs('#requests');
   if (!requestsChart) {
     requestsChart = new Chart(canvas, {
       type: 'bar',
@@ -46,7 +81,8 @@ function renderChart({ averagePerHour, counts, times, totalRequests }) {
         datasets: [{
           label: 'requests',
           data: counts,
-          borderWidth: 1
+          borderWidth: 1,
+          backgroundColor: 'rgba(166, 136, 250, 1)'
         }]
       },
       options: chartOptions
@@ -58,7 +94,7 @@ function renderChart({ averagePerHour, counts, times, totalRequests }) {
   requestsChart.update();
 }
 
-function nextUpdate() {
+function nextWeeksUpdateDate() {
   const d = new Date();
   const daysUntilNextSunday = 7 - d.getDay();
   d.setDate(d.getDate() + daysUntilNextSunday);
@@ -73,21 +109,31 @@ function nextUpdate() {
 }
 
 async function selectorChanged(ev) {
+  requestsController?.abort();
+  const controller = new AbortController();
+  requestsController = controller;
   try {
-    const res = await fetch(`/requests/${ev.target.value}`);
-    if (!res.ok) throw new Error('API endpoint failure');
-    const data = await res.json();
-    renderChart(data); 
-  } catch(e) {
-    new Toast(`selecton Failed: ${e}`);
+    const res = await fetch(`/requests/${encodeURIComponent(ev.target.value)}`, { 
+      signal: controller.signal 
+    });
+    if (!res.ok) throw new Error(`API request failed: ${res.status}`);
+    renderChart(await res.json());
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    console.error(error);
+    new Toast(`Selection failed: ${error.message}`);
+  } finally {
+    if (requestsController === controller) {
+      requestsController = null;
+    }
   }
 }
 
 function addListeners() {
-  const timePeriodSelector = document.querySelector('#hours');
+  const timePeriodSelector = qs('#hours');
   em.add(timePeriodSelector, em.types.change, ev => selectorChanged(ev));
 
-  const userMenuButton = document.querySelector(selectors.userMenuButton);
+  const userMenuButton = qs(selectors.userMenuButton);
   em.add(userMenuButton, em.types.click, _ => userMenu.open());
 
   document.querySelectorAll('.menu-button').forEach(btn => {
@@ -95,44 +141,179 @@ function addListeners() {
   });
 }
 
+function appendLogLine(wrapper) {
+  const log = qs('#log');
+  log.append(wrapper);
+  while (log.children.length > MAX_LOG_LINES) {
+    log.firstElementChild.remove();
+  }
+}
+
 async function logLine(line) {
-  const {timestamp, level, message} = JSON.parse(line);
-
-  const $timestamp = document.createElement('span');
-  $timestamp.textContent = timestamp;
+  try {
+    const { timestamp, level, message } = JSON.parse(line);
   
-  const $level = document.createElement('span');
-  $level.classList.add(level.toLowerCase());
-  $level.textContent = `[${level}]`;
-
-  const $message = document.createElement('span');
-  $message.textContent = message;
-
-  const $wrapper = document.createElement('div');
-  $wrapper.append($timestamp, $level, $message);
-  $wrapper.title = message;
-
-  document.querySelector('#log').append($wrapper);
-
-  await sleep(40);
-  keepAtBottom();
+    const $timestamp = document.createElement('span');
+    $timestamp.textContent = timestamp;
+  
+    const normalizedLevel = String(level).toLowerCase();
+    const levelClass = validLevels.has(normalizedLevel) ? normalizedLevel : 'unknown';
+  
+    const $level = document.createElement('span');
+    $level.classList.add(levelClass);
+    $level.textContent = `[${level}]`;
+  
+    const $message = document.createElement('span');
+    $message.textContent = message;
+  
+    const $wrapper = document.createElement('div');
+    $wrapper.append($timestamp, $level, $message);
+    $wrapper.title = message;
+  
+    appendLogLine($wrapper);
+  
+    await sleep(40);
+    keepAtBottom();
+  } catch(err) {
+    console.error(`invalid log data: ${err}`);
+  }
 }
 
 function keepAtBottom() {
-  const scrollContainer = document.querySelector('#log');
+  const scrollContainer = qs('#log');
   requestAnimationFrame(() => scrollContainer.scrollTop = scrollContainer.scrollHeight);
 }
 
 function tailLog() {
-  const es = new EventSource("/logs");
+  const es = new EventSource("/logs", {withCredentials: true});
   es.onmessage = e => logLine(e.data);
-  es.onerror = e => {throw e}
+  es.onerror = e => console.error(e);
 }
 
-function updateStatus() {
-  const es = new EventSource('/progress');
-  es.onmessage = e => console.log(JSON.parse(e.data));
-  es.onerror = e => {throw e}
+function updateProgBar(percent) {
+  const $progBar = qs('#progress>.bar');
+  requestAnimationFrame(_ => {
+    $progBar.style.transform = `translateX(-${100 - percent}%)`;
+  });
+  $progBar.title = `${percent}% Completed`;
+}
+
+function updateTimeout($updatesCard) {
+  clearTimeout(timeoutID);
+  $updatesCard.style.display = 'none';
+  timeoutID = setTimeout(_ => updateProgBar(0), 1000);
+}
+
+function updateProgress(ev) {
+  try {
+    const {
+      processed,
+      total,
+      remaining,
+      runTime,
+      changed,
+      approxCompletion,
+      approxCompletionTime,
+      percent,
+      start,
+      end,
+      heap,
+      RSS,
+      time,
+      type
+    } = JSON.parse(ev.data);
+
+    updateText('#updates>h4', (type === 'update') ? 'UPDATING' : 'SCRAPING');
+
+    const $updatesCard = qs('#updates');
+    $updatesCard.style.display = 'flex';
+    if (timeoutID) clearTimeout(timeoutID);
+    timeoutID = setTimeout(_ => updateTimeout($updatesCard), 60000);
+
+    if (heap != null && RSS != null) {
+      history.push({
+        heap,
+        RSS,
+        time
+      });
+      if (history.length > MAX_HISTORY) {
+        history.shift();
+      }
+      updateTexts([
+        {
+          el: '#heap',
+          str: `${heap} MB`
+        }, {
+          el:'#RSS',
+          str: `${RSS} MB`
+        }
+      ]);
+    }
+
+    if (percent != null) {
+      updateProgBar(percent);
+      updateTexts([
+        {
+          el: '#percent',
+          str: `${percent}%`
+        }, {
+          el: '#changed',
+          str: String(changed)
+        }, {
+          el: '#remaining',
+          str: String(remaining)
+        }, {
+          el: '#runTime',
+          str: runTime
+        }, {
+          el: '#ACT',
+          str: approxCompletionTime
+        }, {
+          el: '#counts',
+          str: `${processed}/${total}`
+        }
+      ]);
+    }
+
+    if (start != null && end != null) {
+      const duration = msToHhMmSs(end.time - start.time);
+      updateTexts([
+        {
+          el: '#updateDuration',
+          str: duration
+        }, {
+          el: '#lastCompleted',
+          str: new Date(end.time).toLocaleString(undefined, {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        }, {
+          el: '#online',
+          str: String(end.online)
+        }, {
+          el: '#nextUpdate',
+          str: nextWeeksUpdateDate()
+        }, {
+          el: '#runTime',
+          str: duration
+        }, {
+          el: '#total',
+          str: String(end.total)
+        }
+      ]);
+    }
+  } catch (e) {
+    console.error(e.message);
+  }
+}
+
+function progressStatus() {
+  const es = new EventSource('/progress', {withCredentials: true});
+  es.onmessage = ev => updateProgress(ev);
+  es.onerror = e => console.error(e);
 }
 
 function loaded() {
@@ -140,10 +321,17 @@ function loaded() {
   addListeners();
   renderChart(window.requests);
   const { changed, start, end, type, version } = window.lastUpdate;
-  updateText('#updateDuration', msToHhMmSs(end.time - start.time));
-  updateText('#nextUpdate', nextUpdate());
+  updateTexts([
+    {
+      el: '#updateDuration',
+      str: msToHhMmSs(end.time - start.time)
+    }, {
+      el: '#nextUpdate',
+      str: nextWeeksUpdateDate()
+    }
+  ]);
   tailLog();
-  updateStatus();
+  progressStatus();
 }
 
-window.onload = loaded;
+window.addEventListener('DOMContentLoaded', loaded);

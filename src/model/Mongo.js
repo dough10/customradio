@@ -310,8 +310,7 @@ class Mongo extends MongoBase {
    */
   async getLastDBUpdate() {
     return this.getCollection(this.collections.DB_UPDATES).findOne(
-      {type: 'update'},
-      {
+      {}, {
         sort: { "end.time": -1 }
       }
     );
@@ -406,7 +405,8 @@ class Mongo extends MongoBase {
         name: error.name,
         message: error.message,
         stack: error.stack
-      }, 
+      },
+      time: this._now(),
       version
     });
   }

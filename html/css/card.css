@@ -1,7 +1,7 @@
 .card {
   flex-direction: column;
   background: var(--main-color);
-  max-width: 900px;
+  max-width: 1024px;
   border-radius: 5px;
   padding: 16px;
   margin: 8px auto;
@@ -11,4 +11,23 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.card>div>span>span:first-of-type {
+  font-weight: bold;
+  margin-right: 8px;
+  color: var(--pop-color, #333333);
+}
+
+.card>div>span>span:last-of-type {
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.card>div>span {
+  font-size: 14px;
+}
+
+#updates {
+  display: none;
 }

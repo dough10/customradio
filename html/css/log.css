@@ -5,6 +5,11 @@
   align-items: start;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+#log::-webkit-scrollbar {
+  display: none;
 }
 #log>div {
   display: flex;
@@ -22,11 +27,11 @@
   min-width: 155px;
 }
 .debug {
-  color: purple;
+  color: rgb(166, 136, 250);
   min-width: 55px;
 }
 .info {
-  color: blue;
+  color: rgb(53, 53, 255);
   min-width: 45px;
 }
 .warning {
