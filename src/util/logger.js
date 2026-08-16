@@ -180,23 +180,25 @@ class Logger extends EventEmitter {
    * @returns {Promise<void>} A promise that resolves when the log entry is written.
    */
   async _log(level, message) {
-    if (this._threshold > levels[level.toLowerCase()]) {
-      return;
-    }
+    const timestamp = this._timestamp();
+
     if (typeof message === 'object') {
       message = JSON.stringify(message, null, 2);
     }
 
-    const timestamp = this._timestamp();
-
-    const logEntry = `${timestamp} [${level}] ${message}`;
-    
     this.emit('line', {
       timestamp,
       level,
-      message
+      message,
+      threshold: this._threshold
     });
 
+    if (this._threshold > levels[level.toLowerCase()]) {
+      return;
+    }
+
+    const logEntry = `${timestamp} [${level}] ${message}`;
+    
     console.log(logEntry);
 
     await this._rotateLogFile();
