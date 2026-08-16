@@ -468,7 +468,8 @@ class Stations extends DbCon {
    * 
    * @returns {Promise<{
    *   online: number, 
-   *   total: number
+   *   total: number,
+   *   time: number
    * }>} Object containing counts
    * 
    * @throws {Error} If queries fail
