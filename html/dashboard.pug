@@ -35,12 +35,12 @@ html(lang=lang)
 
         button.menu-button(title='update')
           svg(viewBox="0 -960 960 960" aria-label='share', fill="currentColor" )
-            path(d="M480-120q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q82 0 155.5 35T760-706v-94h80v240H600v-80h110q-41-56-101-88t-129-32q-117 0-198.5 81.5T200-480q0 117 81.5 198.5T480-200q105 0 183.5-68T756-440h82q-15 137-117.5 228.5T480-120Zm112-192L440-464v-216h80v184l128 128-56 56Z")
-          | Update DB
+            path(d="M480-120q-151 0-255.5-46.5T120-280v-400q0-66 105.5-113T480-840q149 0 254.5 47T840-680v400q0 67-104.5 113.5T480-120Zm0-479q89 0 179-25.5T760-679q-11-29-100.5-55T480-760q-91 0-178.5 25.5T200-679q14 30 101.5 55T480-599Zm0 199q42 0 81-4t74.5-11.5q35.5-7.5 67-18.5t57.5-25v-120q-26 14-57.5 25t-67 18.5Q600-528 561-524t-81 4q-42 0-82-4t-75.5-11.5Q287-543 256-554t-56-25v120q25 14 56 25t66.5 18.5Q358-408 398-404t82 4Zm0 200q46 0 93.5-7t87.5-18.5q40-11.5 67-26t32-29.5v-98q-26 14-57.5 25t-67 18.5Q600-328 561-324t-81 4q-42 0-82-4t-75.5-11.5Q287-343 256-354t-56-25v99q5 15 31.5 29t66.5 25.5q40 11.5 88 18.5t94 7Z")
+          | Update
 
         button.menu-button(title='scrape')
           svg(viewBox="0 -960 960 960" aria-label='share', fill="currentColor" )
-            path(d="M480-120q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q82 0 155.5 35T760-706v-94h80v240H600v-80h110q-41-56-101-88t-129-32q-117 0-198.5 81.5T200-480q0 117 81.5 198.5T480-200q105 0 183.5-68T756-440h82q-15 137-117.5 228.5T480-120Zm112-192L440-464v-216h80v184l128 128-56 56Z")
+            path(d="M480-120q-151 0-255.5-46.5T120-280v-400q0-66 105.5-113T480-840q149 0 254.5 47T840-680v400q0 67-104.5 113.5T480-120Zm0-479q89 0 179-25.5T760-679q-11-29-100.5-55T480-760q-91 0-178.5 25.5T200-679q14 30 101.5 55T480-599Zm0 199q42 0 81-4t74.5-11.5q35.5-7.5 67-18.5t57.5-25v-120q-26 14-57.5 25t-67 18.5Q600-528 561-524t-81 4q-42 0-82-4t-75.5-11.5Q287-543 256-554t-56-25v120q25 14 56 25t66.5 18.5Q358-408 398-404t82 4Zm0 200q46 0 93.5-7t87.5-18.5q40-11.5 67-26t32-29.5v-98q-26 14-57.5 25t-67 18.5Q600-328 561-324t-81 4q-42 0-82-4t-75.5-11.5Q287-343 256-354t-56-25v99q5 15 31.5 29t66.5 25.5q40 11.5 88 18.5t94 7Z")
           | Scrape
 
       button.menu-button(title='logout')
@@ -56,23 +56,27 @@ html(lang=lang)
     main
       .card
         h4
-          | LAST UPDATE
+          | DATABASE STATS
         div
           span
             span
-              | Last update: 
+              | Last update ended: 
             span#lastCompleted
               | !{new Date(lastUpdate.end.time).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           span
             span
-              | Update duration: 
+              | Last update duration: 
             span#updateDuration
 
         div
           span
             span
-              | Next update: 
+              | Next scheduled update: 
             span#nextUpdate
+          span
+            span 
+              | Time till scheduled update: 
+            span#nextTime
 
         div
           span
@@ -87,15 +91,22 @@ html(lang=lang)
               | !{lastUpdate.end.online}
 
       .card#updates
-        h4
-          | UPDATING
+        div
+          h4#updateHeader
+            | UPDATING
+          button.small-button#stop
+            svg(viewBox="0 0 24 24" alt='stop')
+              path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
+
         #progress.bar-wrapper
           .bar
+
         div
           span#counts
             | 0/0
           span#percent
             | 0%
+
         div
           span
             span
@@ -107,6 +118,7 @@ html(lang=lang)
               | Remaining:
             span#remaining
               | 0
+
         div
           span
             span
@@ -118,6 +130,7 @@ html(lang=lang)
               | Approx Completion Time:
             span#ACT
               | ??:??
+
         div
           span
             span
@@ -131,21 +144,30 @@ html(lang=lang)
               | ?? MB
 
       .card
-        h4 
-          | LOG
+        div
+          h4 
+            | LOG
+          div
+            label(for='level') Log Level:
+            select#level(name='level')
+              //- populated by JS
+
         #log
 
       .card
-        h4
-          | REQUESTS
-        label(for="hours") Time period:
-        select#hours(name="hours")
-          option(value=1) 1 hour
-          option(value=6) 6 hours
-          option(value=12) 12 hours
-          option(value=24 selected) 24 hours
-          option(value=48) 2 days (48 hours)
-          option(value=120) 5 days (120 hours)
+        div
+          h4
+            | REQUESTS
+
+          div
+            label(for="hours") Time period:
+            select#hours(name="hours")
+              option(value=1) 1 hour
+              option(value=6) 6 hours
+              option(value=12) 12 hours
+              option(value=24 selected) 24 hours
+              option(value=48) 2 days (48 hours)
+              option(value=120) 5 days (120 hours)
 
         div
           span
@@ -159,6 +181,6 @@ html(lang=lang)
             span#ave 
               | #{requests.averagePerHour}
 
-        canvas#requests
+        canvas#requests(width='1000px' height='200px')
 
     script(nonce=nonce src='dashboard.min.js' async)
