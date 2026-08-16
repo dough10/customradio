@@ -17,6 +17,9 @@ module.exports = (milliseconds) => {
   const parts = [];
   if (hours) parts.push(unit(hours, 'hour', 'hours'));
   if (minutes) parts.push(unit(minutes, 'minute', 'minutes'));
+  if (hours > 1) {
+    return parts.join(' ');
+  }
   if (secs) {
     if (hours && minutes) parts.push('and');
     parts.push(unit(secs, 'second', 'seconds'));
