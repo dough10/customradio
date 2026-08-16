@@ -7,6 +7,7 @@
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  justify-content: initial;
 }
 #log::-webkit-scrollbar {
   display: none;
@@ -17,6 +18,9 @@
   justify-content: center;
   align-items: start;
   flex-direction: row;
+}
+#log>div[hidden] {
+  display: none;
 }
 #log>div>span {
   margin-right: 8px;
