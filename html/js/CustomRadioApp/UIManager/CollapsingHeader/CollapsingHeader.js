@@ -142,17 +142,20 @@ export default class CollapsingHeader {
       this.loginButton,
       this.infoButton
     ].filter(button => button !== null).forEach(button => {
-      button.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
+      if (button) button.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
     });
 
     if (this._isMobile) {
       const infoOpacity = this._mobileOpacity(transform);
-
-      this.infoButton.style.opacity = infoOpacity.toFixed(2);
-      this.infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
+      if (this.infoButton) {
+        this.infoButton.style.opacity = infoOpacity.toFixed(2);
+        this.infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
+      }
     } else {
-      this.infoButton.style.opacity = '1';
-      this.infoButton.style.display = 'flex';
+      if (this.infoButton) {
+        this.infoButton.style.opacity = '1';
+        this.infoButton.style.display = 'flex';
+      }
     }
   }
 
