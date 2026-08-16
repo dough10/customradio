@@ -4,7 +4,8 @@ const EVENTS = {
   start: 'start',
   batchStart: 'batchStart',
   progress: 'progress',
-  done: 'done'
+  done: 'done',
+  stop: 'stop'
 };
 
 module.exports = (req, res) => {
