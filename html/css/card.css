@@ -7,6 +7,10 @@
   margin: 8px auto;
 }
 
+.card:last-of-type {
+  margin-bottom: 150px;
+}
+
 .card>div {
   display: flex;
   flex-direction: row;
@@ -30,4 +34,9 @@
 
 #updates {
   display: none;
+}
+
+#stop {
+  right: -9px;
+  top: -9px;
 }
