@@ -1,3 +1,5 @@
+const started = Date.now();
+
 require('dotenv').config();
 
 const { injectSecrets } = require('./config/secrets.js');
@@ -20,6 +22,7 @@ const DatabaseUpdater = require('./util/DatabaseUpdater.js');
 const IcecastDBScraper = require('./util/IcecastDBScraper.js');
 
 const getRedisClient = require('./model/getRedisClient.js');
+const msToHhMmSs = require('./util/msToHhMmSs.js');
 
 const logUpdates = require('./util/logUpdates.js');
 const logScrape = require('./util/logScrape.js');
@@ -100,6 +103,8 @@ async function shutdown() {
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
+const uptime = _ => msToHhMmSs(Date.now() - started);
+
 module.exports = {
   stations,
   userData,
@@ -111,5 +116,6 @@ module.exports = {
   logLevel,
   workos,
   updater,
-  scraper
+  scraper,
+  uptime
 };
