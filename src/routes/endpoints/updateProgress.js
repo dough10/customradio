@@ -1,4 +1,5 @@
-const { updater, scraper } = require('../../services.js');
+const { updater, scraper, uptime } = require('../../services.js');
+const isAdmin = require('../../util/isAdmin.js');
 
 const EVENTS = {
   start: 'start',
@@ -9,6 +10,8 @@ const EVENTS = {
 };
 
 module.exports = (req, res) => {
+  if (!isAdmin(req)) return res.status(403).send('You shall not pass');
+
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -16,31 +19,40 @@ module.exports = (req, res) => {
 
   res.flushHeaders();
 
-  res.write(`: connected\n\n`);
+  res.write(`data: ${JSON.stringify({
+    uptime: uptime()
+  })}\n\n`);
   
-  const heartbeat = setInterval(() => {
-    res.write(': heartbeat\n\n');
-  }, 15000);
+  const ut = setInterval(_ => res.write(`data: ${JSON.stringify({
+    uptime: uptime()
+  })}\n\n`), 10000);
 
   const send = (value) => {
     res.write(`data: ${JSON.stringify(value)}\n\n`);
   };
 
-  const us = v => send({...v, type: 'update'});
-  const ss = v => send({...v, type: 'scrape'});
+  const sendUpdate = v => send({
+    ...v, 
+    type: 'update'
+  });
+  
+  const sendScrape = v => send({
+    ...v, 
+    type: 'scrape'
+  });
 
   const events = Object.values(EVENTS);
 
   for (const ev of events) {
-    updater.on(ev, us);
-    scraper.on(ev, ss);
+    updater.on(ev, sendUpdate);
+    scraper.on(ev, sendScrape);
   }
 
   req.on('close', () => {
-    clearInterval(heartbeat);
+    clearInterval(ut);
     for (const ev of events) {
-      updater.off(ev, us);
-      scraper.off(ev, ss);
+      updater.off(ev, sendUpdate);
+      scraper.off(ev, sendScrape);
     }
   });
 };

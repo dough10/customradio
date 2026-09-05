@@ -1,4 +1,5 @@
 const { logger } = require('../../services.js');
+const isAdmin = require('../../util/isAdmin.js');
 
 const recentLogs = [];
 
@@ -10,6 +11,8 @@ logger.on("line", (line) => {
 });
 
 module.exports = (req, res) => {
+  if (!isAdmin(req)) return res.status(403).send('You shall not pass');
+
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
