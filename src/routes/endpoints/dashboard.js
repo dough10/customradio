@@ -3,7 +3,7 @@ const pug = require('pug');
 const asyncHandler = require('../../util/asyncHandler.js');
 const isAdmin = require('./../../util/isAdmin.js');
 
-const { mongo } = require('../../services.js');
+const { mongo, stations, userData, uptime } = require('../../services.js');
 
 module.exports = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -28,7 +28,13 @@ module.exports = asyncHandler(async (req, res) => {
     lang: req.loadedLang,
     csrf: req.session.csrfToken,
     nonce: res.locals.nonce,
-    requests: await mongo.getRequestCounts(24),
-    lastUpdate: await mongo.getLastDBUpdate()
+    requests: {
+      ...await mongo.getRequestCounts(24),
+      ...await mongo.getRequestAnalytics(24)
+    },
+    lastUpdate: await mongo.getLastDBUpdate(),
+    duplicates: await stations.getDuplicates(),
+    userStats: await userData.stats(),
+    uptime: uptime()
   }));
 });
