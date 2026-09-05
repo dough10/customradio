@@ -231,7 +231,8 @@ const selectors = {
   addAlertBtn: 'button[title="alert"]',
   dupButton: 'button[title="duplicates"]',
   updateButton: 'button[title="update"]',
-  scrape: 'button[title="scrape"]'
+  scrape: 'button[title="scrape"]',
+  duplicates: '#duplicates'
 };
 
 export default selectors;
