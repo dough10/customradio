@@ -166,19 +166,24 @@ class BaseStationProcessor extends EventEmitter {
     const elapsed = this.startTime ? Date.now() - this.startTime : 0;
     let approxCompletion = null;
     let approxCompletionTime = null;
+    let stationsPerSecond = 0;
 
-    if (this.counter >= 10 && elapsed > 0) {
+    if (elapsed > 0 && this.counter > 0) {
       const stationsPerMs = this.counter / elapsed;
-      const ms = this.remainingStations / stationsPerMs;
-      approxCompletion = msToHhMmSs(ms);
-      approxCompletionTime = new Date(Date.now() + ms).toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit"
-      });
+      stationsPerSecond = Number((stationsPerMs * 1000).toFixed(2));
+      if (this.counter >= 10) {
+        const ms = this.remainingStations / stationsPerMs;
+        approxCompletion = msToHhMmSs(ms);
+        approxCompletionTime = new Date(Date.now() + ms).toLocaleTimeString([], {
+          hour: 'numeric',
+          minute: '2-digit'
+        });
+      }
     }
 
     this.emit('progress', {
       processed: this.counter,
+      stationsPerSecond,
       total: this.totalStations,
       remaining: this.remainingStations,
       runTime: msToHhMmSs(elapsed),
