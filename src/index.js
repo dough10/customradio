@@ -4,13 +4,15 @@ const { scheduleJob } = require('node-schedule');
 const app = express();
 require('dotenv').config();
 
-const { logger, logLevel, alerts, mongo, updater, scraper } = require('./services.js');
+const { logger, logLevel, alerts, mongo, updater, scraper, userData } = require('./services.js');
 const middleware = require('./middleware/middleware.js');
 const routes = require('./routes/routes.js');
 const { httpRequestCounter, register } = require('./util/promClient.js');
 
 async function cleanDB() {
   try {
+    const orphans = await userData.orphanedUserStations();
+    orphans.forEach(({ user, id }) => userData.removeStation(user, id));
     await alerts.cleanupExpired();
     await alerts.cleanupOldVersions();
     const { deleted, cutoff } = await mongo.cleanupRequests();
