@@ -1,7 +1,7 @@
 html(lang=lang)
   head
     meta(charset="UTF-8")
-    meta(name="author" content="dough10")
+    meta(name="author" content="dough20")
     meta(name="csrf-token" content=csrf)
     meta(name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover")
 
@@ -9,8 +9,10 @@ html(lang=lang)
 
     script(nonce=nonce).
       window.user = !{JSON.stringify(user)};
-      window.requests = !{JSON.stringify(requests || { averagePerHour: 0, time: [], counts: [], totalRequests: 0 })};
-      window.lastUpdate = !{JSON.stringify(lastUpdate)}
+      window.requests = !{JSON.stringify(requests || { requestsPerHour: 0, time: [], counts: [], totalRequests: 0 })};
+      window.lastUpdate = !{JSON.stringify(lastUpdate)};
+      window.duplicates = !{JSON.stringify(duplicates)};
+      window.uptime = !{JSON.stringify(uptime)}
     link(rel="preload" href="dashboard.min.css" as="style")
     link(rel='stylesheet' href='dashboard.min.css')
 
@@ -25,12 +27,12 @@ html(lang=lang)
       if admin
         button.menu-button(title='alert')
           svg(viewBox="0 -960 960 960" aria-label='share', fill="currentColor" )
-            path(d="M440-360h80v-80h80v-80h-80v-80h-80v80h-80v80h80v80ZM160-200v-80h80v-280q0-83 50-147.5T420-792v-28q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820v28q80 20 130 84.5T720-560v280h80v80H160Zm320-300Zm0 420q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80ZM320-280h320v-280q0-66-47-113t-113-47q-66 0-113 47t-47 113v280Z")
+            path(d="M440-360h80v-80h80v-80h-80v-80h-80v80h-80v80h80v80ZM160-200v-80h80v-280q0-83 50-147.5T420-792v-28q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820v28q80 20 130 84.5T720-560v280h80v80H160Zm320-300Zm0 420q-33 0-56.5-23.5T400-160h260q0 33-23.5 56.5T480-80ZM320-280h320v-280q0-66-47-113t-113-47q-66 0-113 47t-47 113v280Z")
           | add alert
 
         button.menu-button(title='duplicates')
           svg(viewBox="0 -960 960 960" aria-label='share', fill="currentColor" )
-            path(d="M500-520h80v-80h80v-80h-80v-80h-80v80h-80v80h80v80Zm-80 160h240v-80H420v80ZM320-200q-33 0-56.5-23.5T240-280v-560q0-33 23.5-56.5T320-920h280l240 240v400q0 33-23.5 56.5T760-200H320Zm0-80h440v-360L560-840H320v560ZM160-40q-33 0-56.5-23.5T80-120v-560h80v560h440v80H160Zm160-240v-560 560Z")
+            path(d="M500-520h80v-80h80v-80h-80v-80h-80v80h-80v80h80v80Zm-80 160h240v-80H420v80ZM320-200q-33 0-56.5-23.5T240-280v-560q0-33 23.5-56.5T320-920h280l240 240v400q0 33-23.5 56.5T760-200H320Zm0-80h240v-360L560-840H320v560ZM160-40q-33 0-56.5-23.5T80-120v-560h80v560h240v80H160Zm160-240v-560 560Z")
           | view Duplicates
 
         button.menu-button(title='update')
@@ -55,8 +57,14 @@ html(lang=lang)
 
     main
       .card
-        h4
-          | DATABASE STATS
+        div
+          h2
+            | DATABASE STATS
+          span
+            span
+              | Uptime:
+            span#uptime
+
         div
           span
             span
@@ -90,9 +98,33 @@ html(lang=lang)
             span#online
               | !{lastUpdate.end.online}
 
+        div
+          span
+            span
+              | Total users: 
+            span#total
+              | !{userStats.total_users}
+          span
+            span
+              | Users last 30 days: 
+            span#online
+              | !{userStats.users_last_30_days}
+
+        div
+          span
+            span
+              | Total user stations: 
+            span#total
+              | !{userStats.total_user_stations}
+          span
+            span
+              | Users stations last 30 days: 
+            span#online
+              | !{userStats.user_stations_last_30_days}
+
       .card#updates
         div
-          h4#updateHeader
+          h2#updateHeader
             | UPDATING
           button.small-button#stop
             svg(viewBox="0 0 24 24" alt='stop')
@@ -127,6 +159,18 @@ html(lang=lang)
               | 0 Seconds
           span 
             span
+              | Stations per second: 
+            span#SPS
+              | ??
+
+        div 
+          span 
+            span
+              | Approx Completion:
+            span#AC
+              | ??
+          span 
+            span
               | Approx Completion Time:
             span#ACT
               | ??:??
@@ -145,29 +189,27 @@ html(lang=lang)
 
       .card
         div
-          h4 
+          h2 
             | LOG
           div
             label(for='level') Log Level:
             select#level(name='level')
-              //- populated by JS
 
         #log
 
-      .card
+      .card#analytics
         div
-          h4
+          h2
             | REQUESTS
 
           div
             label(for="hours") Time period:
             select#hours(name="hours")
-              option(value=1) 1 hour
-              option(value=6) 6 hours
-              option(value=12) 12 hours
               option(value=24 selected) 24 hours
-              option(value=48) 2 days (48 hours)
-              option(value=120) 5 days (120 hours)
+              option(value=168) 7 days
+              option(value=336) 14 days
+              option(value=720) 30 days
+              option(value=2160) 90 days
 
         div
           span
@@ -177,10 +219,40 @@ html(lang=lang)
               | #{requests.totalRequests}
           span
             span
-              | Average request pre hour: 
+              | Request pre hour: 
             span#ave 
-              | #{requests.averagePerHour}
+              | #{requests.requestPerHour}
+
+        div
+          span
+            span
+              | Unique IPs: 
+            span#ips
+              | #{requests.uniqueIPs}
+          span
+            span
+              | Average response time: 
+            span#ART
+              | #{requests.averageResponseTime} ms
 
         canvas#requests(width='1000px' height='200px')
+
+    dialog#duplicates
+      button.small-button.close(type="button" autofocus title=closeButtonText)
+        svg(viewBox="0 0 24 24" alt='close')
+          path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
+      h2
+        | Duplicates
+      .scrollable
+        each dup in duplicates
+          div(data-id=dup.id) 
+            div
+              span #{dup.name}
+              span #{dup.url} 
+            button.small-button
+              svg(viewBox="0 0 24 24" alt='close')
+                path(fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
+        else
+          div No Duplicates
 
     script(nonce=nonce src='dashboard.min.js' async)

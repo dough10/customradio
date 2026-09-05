@@ -1,0 +1,49 @@
+#duplicates {
+  padding: 0;
+  width: 1000px;
+}
+
+#duplicates>h2 {
+  margin-top: 12px
+}
+
+#duplicates>.scrollable {
+  width: 100%;
+  padding: 0;
+  margin: 12px;
+  height: initial;
+}
+
+#duplicates>.scrollable>div {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 8px 0 8px 16px;
+  border-bottom: var(--seperator-line);
+}
+
+#duplicates>.scrollable>div:first-of-type {
+  border-top: var(--seperator-line);
+}
+
+#duplicates>.scrollable>div>div {
+  display: flex;
+  flex-direction: column;
+}
+
+#duplicates>.scrollable>div>div>span:first-of-type {
+  font-size: 18px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 350px;
+  color: var(--pop-color, #333333);
+}
+
+#duplicates>.scrollable>div>div>span:last-of-type {
+  font-size: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 350px;
+}

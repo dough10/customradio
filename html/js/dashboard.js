@@ -22,7 +22,7 @@ const levels = {
   security: 5
 };
 
-const UPDATE_TIMEOUT = 20000;
+const UPDATE_UI_TIMEOUT = 20000;
 const DEFAULT_LOG_LEVEL = 1;
 let logLevel = DEFAULT_LOG_LEVEL;
 
@@ -38,6 +38,7 @@ let timeoutID = 0;
 let requestsController;
 const usedElements = new Map();
 let followingBackendLogLevel = true;
+
 
 const chartOptions = {
   responsive: true,
@@ -80,16 +81,118 @@ async function updateTexts(list) {
   for (const { el, str } of list) updateText(el, str);
 }
 
-function renderChart({ averagePerHour, counts, times, totalRequests }) {
+function structureKey({ title, count }) {
+  const $key = document.createElement('span');
+  $key.textContent = title;
+
+  const $val = document.createElement('span');
+  $val.textContent = count;
+
+  return [$key, $val];
+}
+
+function values(keys, obj) {
+  const vals = {};
+  for (const key of keys) {
+    if (key != 'count') {
+      vals.title = obj[key];
+    } else {
+      vals.count = obj[key]
+    }
+  }
+  return vals;
+}
+
+function parseKeys(short, long) {
+  const $left = document.createElement('div');
+  const $right = document.createElement('div');
+
+  if (short) {
+    const skeys = Object.keys(short);
+    $left.append(...structureKey(values(skeys, short)));
+  }
+
+  if (long) {
+    const lkeys = Object.keys(long);
+    $right.append(...structureKey(values(lkeys, long)));
+  }
+
+  const $div = document.createElement('div');
+  $div.classList.add('stats');
+  $div.append($left, $right);
+
+  return $div;
+}
+
+function requestStatsRow(title1, array1, title2, array2) {
+  const maxLength = Math.max(array1.length, array2.length);
+
+  const $header1 = document.createElement('h4');
+  $header1.textContent = title1;
+
+  const $header2 = document.createElement('h4');
+  $header2.textContent = title2;
+
+  const $hWrapper = document.createElement('div');
+  $hWrapper.classList.add('stats');
+  $hWrapper.append($header1, $header2);
+
+  const fragment = document.createDocumentFragment();
+  fragment.append($hWrapper);
+
+  for (let i = 0; i < maxLength; i++) {
+    fragment.append(
+      parseKeys(array1[i], array2[i])
+    );
+  }
+
+  return fragment;
+}
+
+async function renderChart({
+  uniqueIPs,
+  averageResponseTime,
+  requestsPerHour,
+  counts,
+  times,
+  totalRequests,
+  browsers,
+  operatingSystems,
+  methods,
+  statusCodes
+}) {
+  document.querySelectorAll('.stats').forEach(el => el.remove());
   updateTexts([
     {
       el: '#reqTotal',
       str: totalRequests
     }, {
       el: '#ave',
-      str: averagePerHour
+      str: requestsPerHour
+    }, {
+      el: '#ips',
+      str: uniqueIPs
+    }, {
+      el: '#ART',
+      str: `${averageResponseTime} ms`
     }
   ]);
+
+  const row1 = requestStatsRow(
+    'Browsers',
+    browsers,
+    'Operating systems',
+    operatingSystems
+  );
+  const row2 = requestStatsRow(
+    'Methods ',
+    methods,
+    'Status codes',
+    statusCodes
+  );
+  await raf();
+  qs('#analytics').append(row1, row2);
+
   const canvas = qs('#requests');
   if (!canvas) return;
   if (!requestsChart) {
@@ -114,21 +217,54 @@ function renderChart({ averagePerHour, counts, times, totalRequests }) {
 }
 
 function nextScheduledUpdate() {
-    const d = new Date();
-    const daysUntilNextSunday = 7 - d.getDay();
-    d.setDate(d.getDate() + daysUntilNextSunday);
-    d.setHours(0, 0, 0, 0);
-    const date = d.toLocaleString(undefined, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    return {
-      date,
-      str: msToHhMmSs(d.getTime() - Date.now())
-    };
+  const now = new Date();
+
+  // Next Sunday at midnight
+  const nextSunday = new Date(now);
+  const daysUntilNextSunday = (7 - now.getDay()) % 7;
+
+  nextSunday.setDate(now.getDate() + daysUntilNextSunday);
+  nextSunday.setHours(0, 0, 0, 0);
+
+  // If it's already Sunday at midnight (i.e. that time has passed),
+  // move to next Sunday.
+  if (nextSunday <= now) {
+    nextSunday.setDate(nextSunday.getDate() + 7);
+  }
+
+  // First of the month at noon
+  const firstOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+    12,
+    0,
+    0,
+    0
+  );
+
+  // If this month's update has already happened, use next month
+  if (firstOfMonth <= now) {
+    firstOfMonth.setMonth(firstOfMonth.getMonth() + 1);
+  }
+
+  // Return whichever happens first
+  const nextUpdate = nextSunday < firstOfMonth
+    ? nextSunday
+    : firstOfMonth;
+
+  const date = nextUpdate.toLocaleString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  return {
+    date,
+    str: msToHhMmSs(nextUpdate.getTime() - now.getTime())
+  };
 }
 
 async function selectorChanged(ev) {
@@ -169,7 +305,7 @@ function addListeners() {
     }, {
       el: qs('#stop'),
       type: em.types.click,
-      fn: _ => new ConfirmationDialog('stop database scan?', requestStop)
+      fn: _ => new ConfirmationDialog('Stop scan?', requestStop)
     }, {
       el: qs('main'),
       type: em.types.scroll,
@@ -177,6 +313,12 @@ function addListeners() {
     }
   ];
   for (const { el, type, fn } of listeners) em.add(el, type, fn);
+
+  document.querySelectorAll('#duplicates>.scrollable>div>button').forEach(el => {
+    em.add(el, em.types.click, ev => {
+      const { id } = ev.target.parentNode.dataset;
+    });
+  });
 
   document.querySelectorAll('.menu-button').forEach(btn => {
     em.add(btn, em.types.click, _ => userMenu.close());
@@ -284,6 +426,7 @@ function updateProgress(ev) {
       remaining,
       runTime,
       changed,
+      approxCompletion,
       approxCompletionTime,
       percent,
       start,
@@ -291,15 +434,10 @@ function updateProgress(ev) {
       heap,
       RSS,
       time,
-      type
+      type,
+      stationsPerSecond,
+      uptime
     } = JSON.parse(ev.data);
-
-    updateText('#updateHeader', (type === 'update') ? 'UPDATING' : 'SCRAPING');
-
-    const $updatesCard = qs('#updates');
-    $updatesCard.style.display = 'flex';
-    if (timeoutID) clearTimeout(timeoutID);
-    timeoutID = setTimeout(_ => updateTimeout($updatesCard), UPDATE_TIMEOUT);
 
     if (heap != null && RSS != null) {
       history.push({
@@ -322,10 +460,18 @@ function updateProgress(ev) {
     }
 
     if (percent != null) {
+      const $updatesCard = qs('#updates');
+      $updatesCard.style.display = 'flex';
+      if (timeoutID) clearTimeout(timeoutID);
+      timeoutID = setTimeout(_ => updateTimeout($updatesCard), UPDATE_UI_TIMEOUT);
+
       const value = Math.max(0, Math.min(100, Number(percent)));
       updateProgBar(value);
       updateTexts([
         {
+          el: '#updateHeader',
+          str: (type === 'update') ? 'UPDATING' : 'SCRAPING'
+        }, {
           el: '#percent',
           str: `${value}%`
         }, {
@@ -338,13 +484,26 @@ function updateProgress(ev) {
           el: '#runTime',
           str: runTime
         }, {
+          el: '#AC',
+          str: approxCompletion
+        }, {
           el: '#ACT',
           str: approxCompletionTime
         }, {
           el: '#counts',
           str: `${processed}/${total}`
+        }, {
+          el: '#SPS',
+          str: stationsPerSecond
         }
       ]);
+    }
+
+    if (uptime != null) {
+      updateTexts([{
+        el: '#uptime',
+        str: uptime
+      }]);
     }
 
     if (start != null && end != null) {
@@ -418,12 +577,12 @@ async function requestStop() {
 function keepTimeUpdated() {
   const { date, str } = nextScheduledUpdate();
   updateTexts([{
-      el: '#nextUpdate',
-      str: date
-    }, {
-      el: '#nextTime',
-      str
-    }
+    el: '#nextUpdate',
+    str: date
+  }, {
+    el: '#nextTime',
+    str
+  }
   ]);
 }
 
