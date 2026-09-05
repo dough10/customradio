@@ -16,7 +16,6 @@ const bypass = [
 ];
 
 module.exports = async (req, res, next) => {
-  if (bypass.includes(req.path)) return next();
   if (req.session?.user) {
     req.user = req.session.user;
     return next();

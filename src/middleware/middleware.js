@@ -257,7 +257,6 @@ module.exports = (app, httpRequestCounter) => {
    * SESSION
    */
   app.use((req, res, next) => {
-    if (bypass.includes(req.path)) return next();
     return session({
       store: initSessionStorage(),
       secret: process.env.SESSION_SECRET,
