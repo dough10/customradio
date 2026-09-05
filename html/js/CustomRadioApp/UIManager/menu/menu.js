@@ -1,5 +1,6 @@
 import EventManager from '../../EventManager/EventManager.js';
 import Toast from '../../Toast/Toast.js';
+import DupDialog from '../dialogs/DupDialog.js';
 
 import selectors from '../../selectors.js';
 
@@ -38,6 +39,8 @@ const NAMESPACE = {
   menuButton: 'menu-button'
 };
 
+let dupdialog;
+
 const buttons = [
   {
     el: $loginButton,
@@ -56,7 +59,7 @@ const buttons = [
     handler: _ => redirect('/alerts/add')
   }, {
     el: $dupButton,
-    handler: _ => redirect('/stations/duplicates')
+    handler: _ => openDuplicates()
   }, {
     el: $updateButton,
     handler: _ => run('/stations/update')
@@ -215,6 +218,18 @@ function dashboard() {
     new Toast('Failed to open dashboard');
     console.error(e);
   }
+}
+
+/**
+ * opens the duplicates dialog in admin dashboard
+ * 
+ * @function
+ */
+function openDuplicates() {
+  if (!dupdialog) {
+    dupdialog = new DupDialog(selectors.duplicates);
+  }
+  dupdialog.open();
 }
 
 /**
