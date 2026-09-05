@@ -107,10 +107,45 @@ module.exports = class UserData extends DbCon {
   }
 
   /**
-   * Closes the database connection.
-   * @returns {Promise<void>}
+   * Get user stations that do not have a corresponding user
+   *
+   * @returns {Promise<Array>}
    */
-  async close() {
-    return super.close();
+  async orphanedUserStations() {
+    return this.all(`
+      SELECT
+        us.id,
+        us.user,
+        us.station_id,
+        us.added_at
+      FROM user_stations us
+      LEFT JOIN users u ON u.workos_id = us.user
+      WHERE u.workos_id IS NULL
+      ORDER BY us.added_at DESC
+    `);
+  }
+
+  /**
+   * Get user and station statistics
+   *
+   * @returns {Promise<Object>}
+   */
+  async stats() {
+    return this.get(`
+      SELECT
+        (SELECT COUNT(*) FROM users) AS total_users,
+
+        (SELECT COUNT(*)
+        FROM users
+        WHERE created_at >= datetime('now', '-30 days')
+        ) AS users_last_30_days,
+
+        (SELECT COUNT(*) FROM user_stations) AS total_user_stations,
+
+        (SELECT COUNT(*)
+        FROM user_stations
+        WHERE added_at >= datetime('now', '-30 days')
+        ) AS user_stations_last_30_days
+    `);
   }
 };
