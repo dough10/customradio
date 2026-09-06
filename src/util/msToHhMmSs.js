@@ -9,7 +9,8 @@ const unit = (value, singular, plural) =>
  * @returns {String} - formatted time as "HH hours MM minutes and SS seconds"
  */
 module.exports = (milliseconds) => {
-  if (milliseconds < 1000) return '< 1 second'
+  if (milliseconds < 1000) return '< 1 second';
+  
   const totalSeconds = Math.floor(milliseconds / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const remainder = totalSeconds % 3600;
