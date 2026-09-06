@@ -22,7 +22,7 @@ const levels = {
   security: 5
 };
 
-const UPDATE_UI_TIMEOUT = 20000;
+const UPDATE_UI_TIMEOUT = 10000;
 const DEFAULT_LOG_LEVEL = 1;
 let logLevel = DEFAULT_LOG_LEVEL;
 
@@ -64,6 +64,10 @@ function qs(selector) {
   return usedElements.get(selector);
 }
 
+function qsAll(selector) {
+  return document.querySelectorAll(selector);
+}
+
 function updateText(selector, text) {
   try {
     const $el = qs(selector);
@@ -97,7 +101,7 @@ function values(keys, obj) {
     if (key != 'count') {
       vals.title = obj[key];
     } else {
-      vals.count = obj[key]
+      vals.count = obj[key];
     }
   }
   return vals;
@@ -161,7 +165,7 @@ async function renderChart({
   methods,
   statusCodes
 }) {
-  document.querySelectorAll('.stats').forEach(el => el.remove());
+  qsAll('.stats').forEach(el => el.remove());
   updateTexts([
     {
       el: '#reqTotal',
@@ -314,13 +318,7 @@ function addListeners() {
   ];
   for (const { el, type, fn } of listeners) em.add(el, type, fn);
 
-  document.querySelectorAll('#duplicates>.scrollable>div>button').forEach(el => {
-    em.add(el, em.types.click, ev => {
-      const { id } = ev.target.parentNode.dataset;
-    });
-  });
-
-  document.querySelectorAll('.menu-button').forEach(btn => {
+  qsAll('.menu-button').forEach(btn => {
     em.add(btn, em.types.click, _ => userMenu.close());
   });
 }
@@ -380,7 +378,7 @@ function setLogLevel(level) {
   const selector = qs('#level');
   if (selector) selector.value = String(logLevel);
 
-  document.querySelectorAll('#log > [data-level]').forEach(line => {
+  qsAll('#log > [data-level]').forEach(line => {
     line.hidden = Number(line.dataset.level) < logLevel;
   });
 }
@@ -465,15 +463,15 @@ function updateProgress(ev) {
       if (timeoutID) clearTimeout(timeoutID);
       timeoutID = setTimeout(_ => updateTimeout($updatesCard), UPDATE_UI_TIMEOUT);
 
-      const value = Math.max(0, Math.min(100, Number(percent)));
-      updateProgBar(value);
+      const percVal = Math.max(0, Math.min(100, Number(percent)));
+      updateProgBar(percVal);
       updateTexts([
         {
           el: '#updateHeader',
           str: (type === 'update') ? 'UPDATING' : 'SCRAPING'
         }, {
           el: '#percent',
-          str: `${value}%`
+          str: `${percVal}%`
         }, {
           el: '#changed',
           str: changed
