@@ -1,7 +1,8 @@
 .card {
   flex-direction: column;
   background: var(--main-color);
-  max-width: 1024px;
+  width: 95%;
+  max-width: 1400px;
   border-radius: 5px;
   padding: 16px;
   margin: 8px auto;
