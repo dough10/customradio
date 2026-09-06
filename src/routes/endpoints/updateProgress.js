@@ -25,7 +25,7 @@ module.exports = (req, res) => {
   
   const ut = setInterval(_ => res.write(`data: ${JSON.stringify({
     uptime: uptime()
-  })}\n\n`), 10000);
+  })}\n\n`), 1000);
 
   const send = (value) => {
     res.write(`data: ${JSON.stringify(value)}\n\n`);
