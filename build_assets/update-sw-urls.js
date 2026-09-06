@@ -11,9 +11,10 @@ let screenshots = fs.readdirSync(path.join(src, 'screenshots'));
 const files = fs.readdirSync(dest)
   .filter(file => ![
     'worker.js', 
-    'screenshots'
+    'screenshots',
+    'alerts'
   ].includes(file))
-  .filter(file => !file.startsWith('submit.min') || !file.startsWith('dashboard.min'))
+  .filter(file => !file.startsWith('dashboard'))
   .map(file => `/${file}`);
 
 [
