@@ -163,7 +163,8 @@ async function renderChart({
   browsers,
   operatingSystems,
   methods,
-  statusCodes
+  statusCodes,
+  interval
 }) {
   qsAll('.stats').forEach(el => el.remove());
   updateTexts([
@@ -199,13 +200,14 @@ async function renderChart({
 
   const canvas = qs('#requests');
   if (!canvas) return;
+  const label = msToHhMmSs(interval);
   if (!requestsChart) {
     requestsChart = new Chart(canvas, {
       type: 'bar',
       data: {
         labels: times,
         datasets: [{
-          label: 'requests',
+          label,
           data: counts,
           borderWidth: 1,
           backgroundColor: 'rgba(166, 136, 250, 1)'
@@ -217,6 +219,7 @@ async function renderChart({
   }
   requestsChart.data.labels = times;
   requestsChart.data.datasets[0].data = counts;
+  requestsChart.data.datasets[0].label = label;
   requestsChart.update();
 }
 

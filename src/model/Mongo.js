@@ -209,64 +209,6 @@ class Mongo extends MongoBase {
   }
 
   /**
-   * Retrieves request statistics for the requested time period.
-   *
-   * Request counts are grouped into time buckets suitable for graphing.
-   * The returned object contains graph labels, bucket counts, total
-   * requests, and the average requests per hour.
-   *
-   * @param {number} hours Number of hours to include.
-   *
-   * @returns {Promise<RequestCounts>}
-   *
-   * @throws {TypeError} If {@link hours} is not a positive number.
-   */
-  async getRequestCounts(hours) {
-    if (!Number.isFinite(hours) || hours <= 0) {
-      throw new TypeError('hours must be a positive number');
-    }
-
-    const end = this._now();
-    const start = this._now(end.getTime() - (hours * 60 * 60 * 1000));
-
-    const bucketMinutes = getBucketSize(hours);
-
-    const bucketMs = bucketMinutes * 60 * 1000;
-
-    const collection = this.getCollection(this.collections.REQUESTS);
-
-    const results = await collection.aggregate([
-      {
-        $match: {
-          time: {
-            $gte: start,
-            $lte: end
-          }
-        }
-      }, {
-        $group: {
-          _id: {
-            $toLong: {
-              $dateTrunc: {
-                date: "$time",
-                unit: "minute",
-                binSize: bucketMinutes
-              }
-            }
-          },
-          count: { $sum: 1 }
-        }
-      }, {
-        $sort: {
-          _id: 1
-        }
-      }
-    ]).toArray();
-
-    return processGraphData(results, start, end, bucketMs, this._now.bind(this));
-  }
-
-  /**
    * Retrieves aggregated analytics for HTTP requests.
    *
    * Long-running endpoints such as `/logs` and `/progress` are included
@@ -290,7 +232,9 @@ class Mongo extends MongoBase {
    *   }>,
    *   browsers: Array<{browser: string, count: number}>,
    *   operatingSystems: Array<{os: string, count: number}>,
-   *   hourly: Array<{time: Date, count: number}>
+   *   times: string[], 
+   *   counts: number[],
+   *   interval: number
    * }>}
    *
    * @throws {TypeError} If hours is not a positive number.
@@ -304,6 +248,10 @@ class Mongo extends MongoBase {
     const start = this._now(
       end.getTime() - (hours * 60 * 60 * 1000)
     );
+
+    const bucketMinutes = getBucketSize(hours);
+
+    const bucketMs = bucketMinutes * 60 * 1000;
 
     const collection = this.getCollection(this.collections.REQUESTS);
 
@@ -319,7 +267,7 @@ class Mongo extends MongoBase {
       paths,
       browsers,
       operatingSystems,
-      hourly
+      rawGraphData
     ] = await Promise.all([
       collection.aggregate([
         {
@@ -578,30 +526,22 @@ class Mongo extends MongoBase {
               $lte: end
             }
           }
-        },
-        {
+        }, {
           $group: {
             _id: {
-              $dateTrunc: {
-                date: '$time',
-                unit: 'hour'
+              $toLong: {
+                $dateTrunc: {
+                  date: "$time",
+                  unit: "minute",
+                  binSize: bucketMinutes
+                }
               }
             },
-            count: {
-              $sum: 1
-            }
+            count: { $sum: 1 }
           }
-        },
-        {
-          $project: {
-            _id: 0,
-            time: '$_id',
-            count: 1
-          }
-        },
-        {
+        }, {
           $sort: {
-            time: 1
+            _id: 1
           }
         }
       ]).toArray()
@@ -630,7 +570,8 @@ class Mongo extends MongoBase {
       paths,
       browsers,
       operatingSystems,
-      hourly
+      ...processGraphData(rawGraphData, start, end, bucketMs, this._now.bind(this)),
+      interval: bucketMs
     };
   }
 

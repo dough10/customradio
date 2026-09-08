@@ -7,8 +7,5 @@ module.exports = asyncHandler(async (req, res) => {
   if (!admin) return res.status(403).json({ message: 'Forbidden' });
   const {hours} = req.params; 
   const num = Number(hours);
-  res.json({
-    ...await mongo.getRequestCounts(num),
-    ...await mongo.getRequestAnalytics(num)
-  });
+  res.json(await mongo.getRequestAnalytics(num));
 });

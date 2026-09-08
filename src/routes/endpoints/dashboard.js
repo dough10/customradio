@@ -28,10 +28,7 @@ module.exports = asyncHandler(async (req, res) => {
     lang: req.loadedLang,
     csrf: req.session.csrfToken,
     nonce: res.locals.nonce,
-    requests: {
-      ...await mongo.getRequestCounts(24),
-      ...await mongo.getRequestAnalytics(24)
-    },
+    requests: await mongo.getRequestAnalytics(24),
     lastUpdate: await mongo.getLastDBUpdate(),
     duplicates: await stations.getDuplicates(),
     userStats: await userData.stats(),
