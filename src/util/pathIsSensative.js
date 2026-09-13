@@ -3,27 +3,30 @@
  * @type {Set<string>}
  */
 const sensitivePaths = new Set([
-  '.env',
-  '.git',
-  '.ssh',
-  '.json',
+  'env',
+  'git',
+  'ssh',
+  'json',
   'wp-admin',
   'wp-login',
   'wp-json',
   'phpmyadmin',
   'phpinfo',
-  '.aws',
-  '.old',
-  '.save',
-  '.php',
+  'aws',
+  'old',
+  'save',
+  'php',
   'settings',
   'api',
-  '.db',
+  'db',
   'actuator',
   'powershell',
   'firebase',
   'admin',
-  'hello.world'
+  'hello.world',
+  'backup',
+  'htdocs',
+  'config'
 ]);
 
 module.exports = function pathIsSensative(path) {
