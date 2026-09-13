@@ -160,6 +160,7 @@ async function renderChart({
   counts,
   times,
   totalRequests,
+  non4xxRequests,
   browsers,
   operatingSystems,
   methods,
@@ -170,7 +171,7 @@ async function renderChart({
   updateTexts([
     {
       el: '#reqTotal',
-      str: totalRequests
+      str: `${totalRequests} (${non4xxRequests} Actual, ${totalRequests - non4xxRequests} 4xx)`
     }, {
       el: '#ave',
       str: requestsPerHour
