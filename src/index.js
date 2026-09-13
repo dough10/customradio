@@ -12,15 +12,40 @@ const { httpRequestCounter, register } = require('./util/promClient.js');
 async function cleanDB() {
   try {
     const orphans = await userData.orphanedUserStations();
-    orphans.forEach(({ user, id }) => userData.removeStation(user, id));
+
+    for (const { user, station_id } of orphans) {
+      try {
+        const result = await userData.removeStation(user, station_id);
+
+        if (result.changes > 0) {
+          logger.debug(
+            `Removed orphaned station for user: ${user}, station: ${station_id}`
+          );
+        } else {
+          logger.warning(
+            `Orphaned station was not removed for user: ${user}, station: ${station_id}`
+          );
+        }
+      } catch (err) {
+        await mongo.logJSError(err);
+        logger.error(
+          `Failed removing orphan station id: ${station_id} for user: ${user}, error: ${err}`
+        );
+      }
+    }
+
     await alerts.cleanupExpired();
     await alerts.cleanupOldVersions();
+
     const { deleted, cutoff } = await mongo.cleanupRequests();
-    logger.info(`Deleted ${deleted} requests older than ${cutoff.toISOString()}`);
-  } catch(err) {
+    logger.info(
+      `Deleted ${deleted} requests older than ${cutoff.toISOString()}`
+    );
+  } catch (err) {
     logger.error(`Failed to clean database: ${err}`);
   }
 }
+
 
 /**
  * Starts the Express server and sets up necessary initializations.
@@ -48,7 +73,7 @@ async function cleanDB() {
     scheduleJob('0 0 * * 0', _ => updater.run());
     scheduleJob('0 12 1 * *', _ => scraper.run());
     scheduleJob('0 0 1 * *', cleanDB);
-
+    
     app.listen(3000, _ => {
       logger.critical(`${pack.name} V:${pack.version} - Online. o( ❛ᴗ❛ )o, log_level: ${logLevel.toUpperCase()}`);
     });
