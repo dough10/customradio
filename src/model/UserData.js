@@ -91,8 +91,14 @@ module.exports = class UserData extends DbCon {
    * @returns {Promise<void>}
    */
   async removeStation(user, stationId) {
-    await this.run('DELETE FROM user_stations WHERE user = ? AND station_id = ?', [user, stationId]);
+    const result = await this.run(
+      'DELETE FROM user_stations WHERE user = ? AND station_id = ?',
+      [user, stationId]
+    );
+
+    return result;
   }
+
 
   /**
    * Check if a user has a station in their list
