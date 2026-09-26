@@ -205,7 +205,7 @@ const selectors = {
   userMenu: 'nav',
 
   /** @type {String} user avatar */
-  userAvatar: '.avatar-wrapper',
+  userAvatar: 'nav>header>.avatar-wrapper',
 
   /** @type {String} facebook share button */
   fbShare: '#facebookshare',

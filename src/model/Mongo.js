@@ -88,6 +88,13 @@ const indexes = [
         options: {
           name: "idx_requests_time"
         }
+      }, {
+        spec: {
+          status: 1
+        },
+        options: {
+          name: 'idx_requests_status'
+        }
       }
     ]
   }, {
@@ -487,6 +494,14 @@ class Mongo extends MongoBase {
 
           graph: [
             {
+              $match: {
+                $or: [
+                  { status: { $lt: 400 } },
+                  { status: { $gte: 500 } }
+                ]
+              }
+            },
+            {
               $group: {
                 _id: {
                   $toLong: {
@@ -551,341 +566,53 @@ class Mongo extends MongoBase {
     };
   }
 
-  // async getRequestAnalytics(hours = 24) {
-  //   if (!Number.isFinite(hours) || hours <= 0) {
-  //     throw new TypeError('hours must be a positive number');
-  //   }
+  /**
+   * Retrieves unique IP addresses that received HTTP 444 responses,
+   * along with the total number of 444 requests for each IP.
+   *
+   * @param {number} [limit=100] Maximum number of IPs to return.
+   *
+   * @returns {Promise<Array<{ip: string, count: number}>>}
+   *
+   * @throws {TypeError} If limit is not a positive integer.
+   */
+  async getBlockedIPs(limit = 100) {
+    if (!Number.isInteger(limit) || limit <= 0) {
+      throw new TypeError('limit must be a positive integer');
+    }
 
-  //   const end = this._now();
-  //   const start = this._now(
-  //     end.getTime() - (hours * 60 * 60 * 1000)
-  //   );
-
-  //   const bucketMinutes = getBucketSize(hours);
-
-  //   const bucketMs = bucketMinutes * 60 * 1000;
-
-  //   const collection = this.getCollection(this.collections.REQUESTS);
-
-  //   const excludedResponseTimePaths = [
-  //     '/logs',
-  //     '/progress'
-  //   ];
-
-  //   const [
-  //     summary,
-  //     statusCodes,
-  //     methods,
-  //     paths,
-  //     browsers,
-  //     operatingSystems,
-  //     rawGraphData
-  //   ] = await Promise.all([
-  //     collection.aggregate([
-  //       {
-  //         $match: {
-  //           time: {
-  //             $gte: start,
-  //             $lte: end
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           _id: null,
-  //           totalRequests: {
-  //             $sum: 1
-  //           },
-  //           uniqueIPs: {
-  //             $addToSet: '$ip'
-  //           },
-  //           averageResponseTime: {
-  //             $avg: {
-  //               $cond: [
-  //                 {
-  //                   $in: [
-  //                     '$path',
-  //                     excludedResponseTimePaths
-  //                   ]
-  //                 },
-  //                 null,
-  //                 '$responseTime'
-  //               ]
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           _id: 0,
-  //           totalRequests: 1,
-  //           uniqueIPs: {
-  //             $size: '$uniqueIPs'
-  //           },
-  //           averageResponseTime: {
-  //             $round: [
-  //               {
-  //                 $ifNull: [
-  //                   '$averageResponseTime',
-  //                   0
-  //                 ]
-  //               },
-  //               2
-  //             ]
-  //           }
-  //         }
-  //       }
-  //     ]).toArray(),
-
-  //     collection.aggregate([
-  //       {
-  //         $match: {
-  //           time: {
-  //             $gte: start,
-  //             $lte: end
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           _id: '$status',
-  //           count: {
-  //             $sum: 1
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           _id: 0,
-  //           status: '$_id',
-  //           count: 1
-  //         }
-  //       },
-  //       {
-  //         $sort: {
-  //           count: -1
-  //         }
-  //       }
-  //     ]).toArray(),
-
-  //     collection.aggregate([
-  //       {
-  //         $match: {
-  //           time: {
-  //             $gte: start,
-  //             $lte: end
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           _id: '$method',
-  //           count: {
-  //             $sum: 1
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           _id: 0,
-  //           method: '$_id',
-  //           count: 1
-  //         }
-  //       },
-  //       {
-  //         $sort: {
-  //           count: -1
-  //         }
-  //       }
-  //     ]).toArray(),
-
-  //     collection.aggregate([
-  //       {
-  //         $match: {
-  //           time: {
-  //             $gte: start,
-  //             $lte: end
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           _id: '$path',
-  //           count: {
-  //             $sum: 1
-  //           },
-  //           averageResponseTime: {
-  //             $avg: {
-  //               $cond: [
-  //                 {
-  //                   $in: [
-  //                     '$path',
-  //                     excludedResponseTimePaths
-  //                   ]
-  //                 },
-  //                 null,
-  //                 '$responseTime'
-  //               ]
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           _id: 0,
-  //           path: '$_id',
-  //           count: 1,
-  //           averageResponseTime: {
-  //             $round: [
-  //               {
-  //                 $ifNull: [
-  //                   '$averageResponseTime',
-  //                   0
-  //                 ]
-  //               },
-  //               2
-  //             ]
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $sort: {
-  //           count: -1
-  //         }
-  //       },
-  //       {
-  //         $limit: 25
-  //       }
-  //     ]).toArray(),
-
-  //     collection.aggregate([
-  //       {
-  //         $match: {
-  //           time: {
-  //             $gte: start,
-  //             $lte: end
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           _id: '$userAgent.browser.name',
-  //           count: {
-  //             $sum: 1
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           _id: 0,
-  //           browser: {
-  //             $ifNull: [
-  //               '$_id',
-  //               'Unknown'
-  //             ]
-  //           },
-  //           count: 1
-  //         }
-  //       },
-  //       {
-  //         $sort: {
-  //           count: -1
-  //         }
-  //       }
-  //     ]).toArray(),
-
-  //     collection.aggregate([
-  //       {
-  //         $match: {
-  //           time: {
-  //             $gte: start,
-  //             $lte: end
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           _id: '$userAgent.os.name',
-  //           count: {
-  //             $sum: 1
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           _id: 0,
-  //           os: {
-  //             $ifNull: [
-  //               '$_id',
-  //               'Unknown'
-  //             ]
-  //           },
-  //           count: 1
-  //         }
-  //       },
-  //       {
-  //         $sort: {
-  //           count: -1
-  //         }
-  //       }
-  //     ]).toArray(),
-
-  //     collection.aggregate([
-  //       {
-  //         $match: {
-  //           time: {
-  //             $gte: start,
-  //             $lte: end
-  //           }
-  //         }
-  //       }, {
-  //         $group: {
-  //           _id: {
-  //             $toLong: {
-  //               $dateTrunc: {
-  //                 date: "$time",
-  //                 unit: "minute",
-  //                 binSize: bucketMinutes
-  //               }
-  //             }
-  //           },
-  //           count: { $sum: 1 }
-  //         }
-  //       }, {
-  //         $sort: {
-  //           _id: 1
-  //         }
-  //       }
-  //     ]).toArray()
-  //   ]);
-
-  //   const stats = summary[0] ?? {
-  //     totalRequests: 0,
-  //     uniqueIPs: 0,
-  //     averageResponseTime: 0
-  //   };
-
-  //   return {
-  //     start,
-  //     end,
-
-  //     totalRequests: stats.totalRequests,
-  //     uniqueIPs: stats.uniqueIPs,
-  //     averageResponseTime: stats.averageResponseTime,
-
-  //     requestsPerHour: Number(
-  //       (stats.totalRequests / hours).toFixed(2)
-  //     ),
-
-  //     statusCodes,
-  //     methods,
-  //     paths,
-  //     browsers,
-  //     operatingSystems,
-  //     ...processGraphData(rawGraphData, start, end, bucketMs, this._now.bind(this)),
-  //     interval: bucketMs
-  //   };
-  // }
+    return this.getCollection(this.collections.REQUESTS).aggregate([
+      {
+        $match: {
+          status: 444
+        }
+      },
+      {
+        $group: {
+          _id: '$ip',
+          count: {
+            $sum: 1
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          ip: '$_id',
+          count: 1
+        }
+      },
+      {
+        $sort: {
+          count: -1
+        }
+      },
+      {
+        $limit: limit
+      }
+    ])
+    .toArray();
+  }
 
   /**
    * Deletes request log entries older than the specified retention period.

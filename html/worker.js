@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.14.1';
+const CACHE_VERSION = '1.14.2';
 const urlsToCache = [];
 
 const bypassPaths = [
@@ -9,7 +9,7 @@ const bypassPaths = [
   '/report/list/',
   '/auth',
   '/auth/callback',
-  '/alerts',
+  '/alerts/',
   '/dashbaord',
   '/stations/add',
   '/stations/update',

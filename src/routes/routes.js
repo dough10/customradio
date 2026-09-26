@@ -14,6 +14,7 @@ const requestsData = require('./endpoints/requestsData.js');
 const logs = require('./endpoints/logs.js');
 const updateProgress = require('./endpoints/updateProgress.js');
 const stop = require('./endpoints/stopDBProcess.js');
+const getBlocked = require('./endpoints/blocked.js');
 
 // routers
 const alerts = require('./routers/alerts.js');
@@ -140,6 +141,11 @@ module.exports = async (app, register) => {
    * stops any database process
    */
   app.get('/stop', stop);
+
+  /**
+   * get a list of shady fuckers
+   */
+  app.get('/blocked', getBlocked);
 
   /**
    * Catch-all route for handling 404 errors.

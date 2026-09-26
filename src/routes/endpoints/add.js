@@ -2,7 +2,7 @@ const { validationResult } = require('express-validator');
 
 const isLiveStream = require('../../util/isLiveStream.js');
 const { t } = require('../../util/i18n.js');
-const { logger, stations } = require('../../services.js');
+const { stations } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
 
 /**

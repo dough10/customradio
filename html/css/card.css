@@ -29,18 +29,24 @@
   font-size: 14px;
 }
 
-.stats>div>span:first-of-type {
+.stats>div>h4 {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.stats>div>div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stats>div>div>span:first-of-type {
   font-weight: bold;
-  margin-right: 8px;
+  margin-right: 74px;
   color: var(--pop-color, #333333);
 }
 
-.stats>div>span:last-of-type {
+.stats>div>div>span:last-of-type {
   font-size: 14px;
-}
-
-.stats>h4 {
-  margin-top: 8px;
 }
 
 .card>div>span {

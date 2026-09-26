@@ -1,6 +1,5 @@
 const pack = require('../../package.json');
 const useableHomepage = require('./useableHomepage.js');
-const { logger } = require('./../services.js');
 
 /**
  * breaks a string into parts and attempts to get a usable url from it
@@ -11,16 +10,15 @@ const { logger } = require('./../services.js');
  */
 module.exports = async function testHomepageConnection(url) {
   const homepage = useableHomepage(url);
+
   if (!homepage) {
     return;
   }
 
   const controller = new AbortController();
-  const timeout = 5000;
-
   const timeoutId = setTimeout(() => {
     controller.abort();
-  }, timeout);
+  }, 5000);
 
   try {
     const response = await fetch(homepage, {
@@ -31,8 +29,6 @@ module.exports = async function testHomepageConnection(url) {
       signal: controller.signal
     });
 
-    clearTimeout(timeoutId);
-
     const contentType = response.headers.get('content-type') || '';
 
     if (
@@ -42,11 +38,9 @@ module.exports = async function testHomepageConnection(url) {
     ) {
       return homepage;
     }
+  } catch {
     return;
-
-  } catch (e) {
+  } finally {
     clearTimeout(timeoutId);
-
-    return;
   }
-}
+};

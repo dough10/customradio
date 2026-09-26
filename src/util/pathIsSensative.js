@@ -26,7 +26,8 @@ const sensitivePaths = new Set([
   'hello.world',
   'backup',
   'htdocs',
-  'config'
+  'config',
+  'amplifyrc'
 ]);
 
 module.exports = function pathIsSensative(path) {

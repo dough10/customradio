@@ -4,9 +4,10 @@ const isAdmin = require('../../util/isAdmin.js');
 const EVENTS = {
   start: 'start',
   batchStart: 'batchStart',
+  batchComplete: 'batchComplete',
   progress: 'progress',
   done: 'done',
-  stop: 'stop'
+  stopped: 'stopped'
 };
 
 module.exports = (req, res) => {

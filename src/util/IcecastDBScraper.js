@@ -157,14 +157,19 @@ class IcecastDBScraper extends BaseStationProcessor {
       this.emit('stationAdded', {
         id: result,
         url: stream.url,
-        stream,
+        // stream,
         duration: Date.now() - started
       });
     } catch(err) {
       this.emit('stationError', {
         id: station.id,
         url,
-        error: err,
+        error: {
+          name: err?.name,
+          message: err?.message,
+          code: err?.code,
+          stack: err?.stack
+        },
         duration: Date.now() - started
       });
     } finally {

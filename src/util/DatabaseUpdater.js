@@ -1,8 +1,7 @@
 const BaseStationProcessor = require('./BaseStationProcessor.js');
 
-const retry = require('./retry.js');
 const isLiveStream = require('./isLiveStream.js');
-const testHomepageConnection = require('./testHomepageConnection.js');
+// const testHomepageConnection = require('./testHomepageConnection.js');
 
 /**
  * Updates existing stations by checking whether their
@@ -62,6 +61,10 @@ class DatabaseUpdater extends BaseStationProcessor {
     try {
       const stream = await isLiveStream(station.url);
 
+      if (!stream?.ok) {
+        return;
+      }
+
       if (this.#stationDataIsUnchanged(station, stream)) {
         return;
       }
@@ -75,13 +78,18 @@ class DatabaseUpdater extends BaseStationProcessor {
 
       this.emit('stationUpdated', {
         id: station.id,
-        stream,
+        // stream,
         duration: Date.now() - started
       });
     } catch (err) {
       this.emit('stationError', {
         id: station.id,
-        error: err,
+        error: {
+          name: err?.name,
+          message: err?.message,
+          code: err?.code,
+          stack: err?.stack
+        },
         duration: Date.now() - started
       });
     } finally {
@@ -113,9 +121,7 @@ class DatabaseUpdater extends BaseStationProcessor {
    * @returns {Promise<void>}
    */
   async #updateStationData(old, updated) {
-    const homepage = await retry(() =>
-      testHomepageConnection(updated.icyurl)
-    ).catch(() => null);
+    const homepage = updated.icyurl; //await testHomepageConnection(updated.icyurl);
 
     await this.stations.updateStation({
       id: old.id,

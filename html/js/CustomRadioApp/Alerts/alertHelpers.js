@@ -10,7 +10,7 @@ const em = new EventManager();
  */
 async function fetchAlerts() {
   try {
-    const url = new URL('/alerts', window.location.origin);
+    const url = new URL('/alerts/', window.location.origin);
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error('Failed to fetch alerts');
     return await res.json();

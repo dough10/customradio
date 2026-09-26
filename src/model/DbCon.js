@@ -1,7 +1,9 @@
 const sqlite3 = require('sqlite3').verbose();
+const EventEmitter = require('events');
 
-class DbCon {
+class DbCon extends EventEmitter {
   constructor(filePath) {
+    super();
     if (!filePath) throw new Error('Database file path is required');
 
     this.db = new sqlite3.Database(filePath);

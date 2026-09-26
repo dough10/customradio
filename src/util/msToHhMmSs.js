@@ -28,7 +28,7 @@ module.exports = (milliseconds) => {
   if (hours) parts.push(unit(hours, 'hour', 'hours'));
   if (minutes) parts.push(unit(minutes, 'minute', 'minutes'));
 
-  if (hours > 1) {
+  if (days || hours > 1) {
     return parts.join(' ');
   }
 

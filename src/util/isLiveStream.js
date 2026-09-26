@@ -1,9 +1,7 @@
 const pack = require("../../package.json");
 
 const isValidURL = require("./isValidURL.js");
-const retry = require("./retry.js");
 const fixEncoding = require("./fixEncoding.js");
-const { logger } = require('../services.js');
 const usedTypes = require("./usedTypes.js");
 const rmRef = require('./rmRef.js');
 
@@ -126,37 +124,58 @@ function returnError(message, status) {
  *
  * @throws {Error} Throws an error if the HTTP request fails or if there is an issue with the URL.
  */
-async function streamTest(url) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => {
-    controller.abort();
-  }, 10000);
+async function streamTest(url, timeout = 10_000) {
+  const signal = AbortSignal.timeout(timeout);
 
-  let response;
-  let reader;
+  let response = null;
+  let reader = null;
 
   try {
     response = await fetch(url, {
-      redirect: "follow",
       method: "GET",
+      redirect: "manual",
       headers: {
         "User-Agent": `radiotxt.site/${pack.version}`,
         "Accept": "audio/*, */*;q=0.9",
         "Icy-MetaData": "1",
         "Range": "bytes=0-"
       },
-      signal: controller.signal
+      signal
     });
 
+    /*
+     * Do not allow fetch/Undici to automatically follow
+     * redirects. We can deal with them explicitly.
+     */
+    if (
+      response.status >= 300 &&
+      response.status < 400
+    ) {
+      const location =
+        response.headers.get("location");
+
+      return {
+        ok: false,
+        error: "redirect",
+        status: response.status,
+        redirect: location || null,
+        url
+      };
+    }
+
     if (!response.ok) {
-      return returnError(`http_${response.status}`, response.status);
+      return returnError(
+        `http_${response.status}`,
+        response.status
+      );
     }
 
     const headers = response.headers;
 
-    let name =
+    let name = String(
       headers.get("icy-name") ||
-      headers.get("x-audiocast-name");
+      headers.get("x-audiocast-name")
+    );
 
     const description =
       headers.get("icy-description") || "";
@@ -166,22 +185,36 @@ async function streamTest(url) {
       headers.get("x-audiocast-genre") ||
       "Unknown";
 
-    const content = headers.get("content-type");
-    const icyurl = headers.get("icy-url") || "";
-    const finalUrl = response.url;
+    const content =
+      headers.get("content-type");
 
-    let bitrate = parseInt(headers.get("icy-br"), 10);
+    const icyurl =
+      headers.get("icy-url") || "";
+
+    const finalUrl =
+      response.url || url;
+
+    let bitrate = parseInt(
+      headers.get("icy-br"),
+      10
+    );
 
     if (!Number.isFinite(bitrate)) {
       bitrate = 0;
     }
 
-    if (bitrate > 0 && (bitrate < 8 || bitrate > 512)) {
+    if (
+      bitrate > 0 &&
+      (bitrate < 8 || bitrate > 512)
+    ) {
       bitrate = 0;
     }
 
     const normalizedContent =
-      content?.split(";")[0].trim().toLowerCase();
+      content
+        ?.split(";")[0]
+        .trim()
+        .toLowerCase();
 
     if (!normalizedContent) {
       return returnError(
@@ -190,7 +223,9 @@ async function streamTest(url) {
       );
     }
 
-    if (!usedTypes.includes(normalizedContent)) {
+    if (
+      !usedTypes.includes(normalizedContent)
+    ) {
       return returnError(
         `invalid content-type: ${content}`,
         response.status
@@ -204,60 +239,81 @@ async function streamTest(url) {
       );
     }
 
-    reader = response.body.getReader();
+    // reader =
+    //   response.body.getReader();
 
-    const { value: firstValue } = await reader.read();
+    // const {
+    //   value: firstValue
+    // } = await reader.read();
 
-    let firstChunk = firstValue;
+    // if (!firstValue) {
+    //   return returnError(
+    //     "No audio data received",
+    //     response.status
+    //   );
+    // }
 
-    if (!firstChunk) {
-      return returnError(
-        "No audio data received",
-        response.status
-      );
-    }
+    // let firstChunk = firstValue;
 
-    if (!looksLikeMP3(firstChunk)) {
-      const { value: secondChunk } = await reader.read();
+    // /*
+    //  * Some streams don't provide enough data in
+    //  * the first chunk to identify the MP3 stream.
+    //  */
+    // if (!looksLikeMP3(firstChunk)) {
+    //   const {
+    //     value: secondChunk
+    //   } = await reader.read();
 
-      if (secondChunk) {
-        const combined = new Uint8Array(
-          firstChunk.length + secondChunk.length
-        );
+    //   if (secondChunk) {
+    //     const combined =
+    //       new Uint8Array(
+    //         firstChunk.length +
+    //         secondChunk.length
+    //       );
 
-        combined.set(firstChunk);
-        combined.set(secondChunk, firstChunk.length);
+    //     combined.set(firstChunk);
+    //     combined.set(
+    //       secondChunk,
+    //       firstChunk.length
+    //     );
 
-        firstChunk = combined;
-      }
-    }
+    //     firstChunk = combined;
+    //   }
+    // }
 
-    if (looksLikeHTML(firstChunk)) {
-      return returnError(
-        "HTML only, no audio stream",
-        response.status
-      );
-    }
+    // if (looksLikeHTML(firstChunk)) {
+    //   return returnError(
+    //     "HTML only, no audio stream",
+    //     response.status
+    //   );
+    // }
 
-    if (!looksLikeMP3(firstChunk)) {
-      return returnError(
-        "Invalid MP3 stream",
-        response.status
-      );
-    }
+    // if (!looksLikeMP3(firstChunk)) {
+    //   return returnError(
+    //     "Invalid MP3 stream",
+    //     response.status
+    //   );
+    // }
 
+    /*
+     * Clean up useless station names.
+     */
     if (name) {
-      const cleanName =
-        fixEncoding(name).toLowerCase().trim();
-
+      const cleanName = fixEncoding(name).trim();
       if (
         unhelpfulNames.includes(cleanName) ||
         unhelpfulRegex.test(cleanName)
       ) {
         name = null;
+      } else {
+        name = cleanName;
       }
     }
 
+    /*
+     * Fall back to the hostname when the stream
+     * doesn't provide a useful name.
+     */
     if (!name) {
       try {
         name = new URL(finalUrl).hostname;
@@ -281,35 +337,77 @@ async function streamTest(url) {
     };
 
   } catch (error) {
-    const isAbort = error?.name === "AbortError";
-
-    let errorMessage;
-
-    if (isAbort) {
-      errorMessage = "timeout";
-    } else if (error?.cause?.code === "ENOTFOUND") {
-      errorMessage = "dns_failure";
-    } else if (error?.cause?.code === "ECONNREFUSED") {
-      errorMessage = "connection_refused";
-    } else {
-      errorMessage = error?.message || "fetch_failed";
+    if (
+      error?.name === "TimeoutError" ||
+      error?.name === "AbortError"
+    ) {
+      return returnError(
+        "timeout",
+        500
+      );
     }
 
-    return returnError(errorMessage, 500);
+    if (
+      error?.cause?.code === "ENOTFOUND"
+    ) {
+      return returnError(
+        "dns_failure",
+        500
+      );
+    }
+
+    if (
+      error?.cause?.code === "ECONNREFUSED"
+    ) {
+      return returnError(
+        "connection_refused",
+        500
+      );
+    }
+
+    return returnError(
+      error?.message || "fetch_failed",
+      500
+    );
 
   } finally {
-    clearTimeout(timeoutId);
-
+    /*
+     * If we acquired a reader, cancel it.
+     *
+     * Radio streams are effectively infinite, so we
+     * must explicitly terminate the stream after reading
+     * enough data to identify it.
+     */
     if (reader) {
       try {
         await reader.cancel();
       } catch {
-        // Reader may already be closed/errored.
+        // Stream may already be closed/aborted.
+      }
+
+      try {
+        reader.releaseLock();
+      } catch {
+        // Lock may already have been released.
+      }
+    }
+
+    /*
+     * If we never acquired a reader, make sure the
+     * response body is still terminated.
+     *
+     * This covers redirects, invalid responses, and
+     * other early-return paths after fetch().
+     */
+    else if (response?.body) {
+      try {
+        await response.body.cancel();
+      } catch {
+        // Response may already be closed/aborted.
       }
     }
   }
 }
-
 
 /**
  * Checks if the provided URL is a live stream and retrieves its metadata.
@@ -348,29 +446,66 @@ async function streamTest(url) {
  *     console.error('Error checking stream:', err);
  *   });
  */
-module.exports = async (url) => {
-  if (!url || typeof url !== "string" || !isValidURL(url)) {
+module.exports = async (url, timeout = 10_000) => {
+  if (
+    !url ||
+    typeof url !== "string" ||
+    !isValidURL(url)
+  ) {
     return {
       ok: false,
-      error: `url must be a string with a valid URL format: ${url}`,
+      error: `url must be a string with a valid URL format: ${url}`
     };
   }
 
   url = cleanURL(url);
 
-  // force HTTPS
+  /*
+   * Try HTTPS first for HTTP URLs.
+   *
+   * If HTTPS fails, fall back to the original HTTP URL.
+   */
   if (url.startsWith("http://")) {
-    const httpsUrl = url.replace("http://", "https://");
-    try {
-      return await retry(() => streamTest(httpsUrl));
-    } catch (error) {
-      logger.error(`HTTPS test failed for ${httpsUrl}: ${error.message}`);
+    const httpsUrl =
+      url.replace(/^http:\/\//i, "https://");
+
+    const httpsResult =
+      await streamTest(
+        httpsUrl,
+        timeout
+      );
+
+    if (httpsResult?.ok) {
+      return httpsResult;
     }
+
+    /*
+     * HTTPS failed, so try the original HTTP URL.
+     */
+    const httpResult =
+      await streamTest(
+        url,
+        timeout
+      );
+
+    if (httpResult?.ok) {
+      return httpResult;
+    }
+
+    /*
+     * Preserve the HTTPS error if both attempts failed,
+     * unless the HTTP attempt produced a more useful
+     * result.
+     */
+    return {
+      ...httpResult,
+      httpsError: httpsResult?.error
+    };
   }
 
-  try {
-    return await retry(() => streamTest(url));
-  } catch (e) {
-    logger.error(`Failed testing http: ${e.message}`);
-  }
+  return streamTest(
+    url,
+    timeout
+  );
 };
+

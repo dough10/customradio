@@ -11,7 +11,7 @@ import raf from './CustomRadioApp/utils/raf.js';
 import ConfirmationDialog from './CustomRadioApp/UIManager/dialogs/ConfirmationDialog.js';
 
 const MAX_LOG_LINES = 1000;
-const MAX_HISTORY = 1000;
+const MAX_HISTORY = 500;
 
 const levels = {
   debug: 0,
@@ -85,72 +85,20 @@ async function updateTexts(list) {
   for (const { el, str } of list) updateText(el, str);
 }
 
-function structureKey({ title, count }) {
+function structureKey(title, count) {
   const $key = document.createElement('span');
   $key.textContent = title;
 
   const $val = document.createElement('span');
   $val.textContent = count;
 
-  return [$key, $val];
-}
-
-function values(keys, obj) {
-  const vals = {};
-  for (const key of keys) {
-    if (key != 'count') {
-      vals.title = obj[key];
-    } else {
-      vals.count = obj[key];
-    }
-  }
-  return vals;
-}
-
-function parseKeys(short, long) {
-  const $left = document.createElement('div');
-  const $right = document.createElement('div');
-
-  if (short) {
-    const skeys = Object.keys(short);
-    $left.append(...structureKey(values(skeys, short)));
-  }
-
-  if (long) {
-    const lkeys = Object.keys(long);
-    $right.append(...structureKey(values(lkeys, long)));
-  }
-
   const $div = document.createElement('div');
-  $div.classList.add('stats');
-  $div.append($left, $right);
-
+  $div.append($key, $val);
   return $div;
 }
 
-function requestStatsRow(title1, array1, title2, array2) {
-  const maxLength = Math.max(array1.length, array2.length);
-
-  const $header1 = document.createElement('h4');
-  $header1.textContent = title1;
-
-  const $header2 = document.createElement('h4');
-  $header2.textContent = title2;
-
-  const $hWrapper = document.createElement('div');
-  $hWrapper.classList.add('stats');
-  $hWrapper.append($header1, $header2);
-
-  const fragment = document.createDocumentFragment();
-  fragment.append($hWrapper);
-
-  for (let i = 0; i < maxLength; i++) {
-    fragment.append(
-      parseKeys(array1[i], array2[i])
-    );
-  }
-
-  return fragment;
+function calculatePercent(little, big) {
+  return `${((little / big) * 100).toFixed(1)}%`;
 }
 
 async function renderChart({
@@ -165,13 +113,16 @@ async function renderChart({
   operatingSystems,
   methods,
   statusCodes,
+  paths,
   interval
 }) {
   qsAll('.stats').forEach(el => el.remove());
+  const fourxx = totalRequests - non4xxRequests;
+  const totalReqStr = totalRequests === non4xxRequests ? totalRequests : `${totalRequests} Total, ${non4xxRequests} (${calculatePercent(non4xxRequests, totalRequests)}) Valid, ${fourxx} (${calculatePercent(fourxx, totalRequests)}) 4xx`;
   updateTexts([
     {
       el: '#reqTotal',
-      str: `${totalRequests} (${non4xxRequests} Actual, ${totalRequests - non4xxRequests} 4xx)`
+      str: totalReqStr
     }, {
       el: '#ave',
       str: requestsPerHour
@@ -184,20 +135,57 @@ async function renderChart({
     }
   ]);
 
-  const row1 = requestStatsRow(
-    'Browsers',
-    browsers,
-    'Operating systems',
-    operatingSystems
-  );
-  const row2 = requestStatsRow(
-    'Methods ',
-    methods,
-    'Status codes',
-    statusCodes
-  );
+  const $left = document.createElement('div');
+
+  const $bh4 = document.createElement('h4');
+  $bh4.textContent = 'Browsers';
+  $left.append($bh4);
+  for (const {count, browser} of browsers) {
+    const $el = structureKey(browser, `${count} (${calculatePercent(count, totalRequests)})`);
+    $left.append($el);
+  }
+
+  const $mh4 = document.createElement('h4');
+  $mh4.textContent = 'Methods';
+  $left.append($mh4)
+  for (const {count, method} of methods) {
+    const $el = structureKey(method, `${count} (${calculatePercent(count, totalRequests)})`);
+    $left.append($el);
+  }
+
+  const $right = document.createElement('div');
+
+  const $oh4 = document.createElement('h4');
+  $oh4.textContent = 'Operating Systems';
+  $right.append($oh4);
+  for (const {count, os} of operatingSystems) {
+    const $el = structureKey(os, `${count} (${calculatePercent(count, totalRequests)})`);
+    $right.append($el);
+  }
+
+  const $sh4 = document.createElement('h4');
+  $sh4.textContent = 'Status';
+  $right.append($sh4);
+  for (const {count, status} of statusCodes) {
+    const $el = structureKey(status, `${count} (${calculatePercent(count, totalRequests)})`);
+    $right.append($el);
+  }
+
+  const $center = document.createElement('div');
+
+  const ph4 = document.createElement('h4');
+  ph4.textContent = 'Paths';
+  $center.append(ph4);
+  for (const {count, averageResponseTime, path} of paths) {
+    const $el = structureKey(path, `${count} (${calculatePercent(count, totalRequests)})${averageResponseTime > 0 ? `, ${averageResponseTime} ms` : ''}`);
+    $center.append($el);
+  }
+
+  const $wrapper = document.createElement('div');
+  $wrapper.classList.add('stats');
+  $wrapper.append($left, $center, $right);
   await raf();
-  qs('#analytics').append(row1, row2);
+  qs('#analytics').append($wrapper);
 
   const canvas = qs('#requests');
   if (!canvas) return;
@@ -433,18 +421,26 @@ function updateProgress(ev) {
       percent,
       start,
       end,
-      heap,
-      RSS,
+      rss,
+      heapTotal,
+      heapUsed,
+      external,
+      arrayBuffers,
       time,
       type,
       stationsPerSecond,
-      uptime
+      uptime,
+      batch
     } = JSON.parse(ev.data);
 
-    if (heap != null && RSS != null) {
+    if (heapUsed != null && rss != null) {
       history.push({
-        heap,
-        RSS,
+        rss,
+        heapTotal,
+        heapUsed,
+        external,
+        arrayBuffers,
+        batch,
         time
       });
       if (history.length > MAX_HISTORY) {
@@ -453,10 +449,10 @@ function updateProgress(ev) {
       updateTexts([
         {
           el: '#heap',
-          str: `${heap} MB`
+          str: `${heapUsed} MB`
         }, {
           el: '#RSS',
-          str: `${RSS} MB`
+          str: `${rss} MB`
         }
       ]);
     }
@@ -589,6 +585,7 @@ function keepTimeUpdated() {
 }
 
 function loaded() {
+  document.title = `Dashboard ${location.host}`;
   loadLogLevels();
   addListeners();
   userMenu.loadUser(window.user);
@@ -607,3 +604,5 @@ function loaded() {
 }
 
 window.onload = loaded;
+
+window.showHistory = () => console.log(history);

@@ -7,7 +7,7 @@ const Mongo = require('../model/Mongo.js');
 const msToHhMmSs = require('./msToHhMmSs.js');
 const mb = require('./mb.js');
 
-const DEFAULT_BATCH_SIZE = 100;
+const DEFAULT_BATCH_SIZE = 50;
 const DEFAULT_CONCURRENCY = 5;
 const DEFAULT_SCRAPE_TIMEOUT = 20000;
 
@@ -119,10 +119,20 @@ class BaseStationProcessor extends EventEmitter {
    * }}
    */
   get memoryUsage() {
-    const { heapUsed, rss } = process.memoryUsage();
+    const {
+      rss,
+      heapTotal,
+      heapUsed,
+      external,
+      arrayBuffers
+    } = process.memoryUsage();
+
     return {
-      heap: mb(heapUsed),
-      RSS: mb(rss)
+      rss: mb(rss),
+      heapTotal: mb(heapTotal),
+      heapUsed: mb(heapUsed),
+      external: mb(external),
+      arrayBuffers: mb(arrayBuffers)
     };
   }
 
@@ -250,36 +260,41 @@ class BaseStationProcessor extends EventEmitter {
           return false;
         }
         
-        const offset = batch * this.batchSize;
-        const pulledStations = await this.getBatch(this.batchSize, offset);
         
-        this.emit('batchStart', {
-          batch: batch + 1,
-          totalBatches: parts,
-          batchCount: pulledStations.length,
-          processed: this.counter,
-          changed: this.changed,
-          ...this.memoryUsage,
-          ...this.timestamp
-        });
+        {        
+          const offset = batch * this.batchSize;
+          const pulledStations = await this.getBatch(this.batchSize, offset);
 
-        await Promise.all(
-          pulledStations.map(station =>
-            this.limit(() => this.processStation(station))
-          )
-        );
+          this.emit('batchStart', {
+            batch: batch + 1,
+            totalBatches: parts,
+            batchCount: pulledStations.length,
+            processed: this.counter,
+            changed: this.changed,
+            ...this.memoryUsage,
+            ...this.timestamp
+          });
 
-        this.emit('batchComplete', {
-          batch: batch + 1,
-          totalBatches: parts,
-          batchCount: pulledStations.length,
-          processed: this.counter,
-          changed: this.changed,
-          ...this.memoryUsage,
-          ...this.timestamp
-        });
+          await Promise.all(
+            pulledStations.map(station =>
+              this.limit(() => this.processStation(station))
+            )
+          );
+            
+          this.emit('batchComplete', {
+            batch: batch + 1,
+            totalBatches: parts,
+            batchCount: pulledStations.length,
+            processed: this.counter,
+            changed: this.changed,
+            ...this.memoryUsage,
+            ...this.timestamp
+          });
+        }
 
-        if (global.gc) global.gc();
+        if (global.gc) {
+          global.gc();
+        }
       }
 
       const end = await this.stations.dbStats();
