@@ -77,8 +77,8 @@ class DatabaseUpdater extends BaseStationProcessor {
       this.changed++;
 
       this.emit('stationUpdated', {
+        ...stream,
         id: station.id,
-        // stream,
         duration: Date.now() - started
       });
     } catch (err) {
