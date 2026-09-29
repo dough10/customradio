@@ -3,7 +3,7 @@ const UAParser = require('ua-parser-js');
 const { mongo, logger } = require('../services.js');
 const requestString = require('./requestString.js');
 const parsePath = require('./parsePath.js');
-const maskIP = require('./maskIP.js');
+// const maskIP = require('./maskIP.js');
 
 const DEFAULT = {
   statusCode: 444,
@@ -14,10 +14,10 @@ module.exports = (req, res=DEFAULT, ms) => {
   const uaParser = new UAParser(req.headers['user-agent']);
 
   // create new request object with masked ip address 
-  const newReq = {...req, ip: maskIP(req.ip)};
+  // const newReq = {...req, ip: maskIP(req.ip)};
   
   // create variables
-  const { ip, method, originalUrl } = newReq;
+  const { ip, method, originalUrl } = req;
   const { path, query } = parsePath(originalUrl);
   
   // log in mognodb
@@ -25,6 +25,6 @@ module.exports = (req, res=DEFAULT, ms) => {
     .catch(err => logger.error(`Failed to log request: ${err}`));
 
   // application logger
-  const str = requestString(newReq, res, ms);
+  const str = requestString(req, res, ms);
   logger.info(str);
 }
