@@ -610,8 +610,7 @@ class Mongo extends MongoBase {
       {
         $limit: limit
       }
-    ])
-    .toArray();
+    ]).toArray();
   }
 
   /**
