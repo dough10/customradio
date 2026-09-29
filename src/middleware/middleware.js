@@ -146,12 +146,17 @@ module.exports = (app, httpRequestCounter) => {
   app.use((req, res, next) => {
     if (req.path === '/metrics') return next();
     const start = performance.now();
-    onFinished(res, (err, res) => {
-      if (req.blocked) {
-        logRequest(req);
+    onFinished(res, async (err, res) => {
+      if (err) {
+        await mongo.logJSError(err);
         return;
       }
-      logRequest(req, res, Math.round(performance.now() - start));
+      const resTime = Math.round(performance.now() - start);
+      if (req.blocked) {
+        logRequest(req, undefined, resTime);
+        return;
+      }
+      logRequest(req, res, resTime);
     });
     next();
   });
@@ -168,7 +173,7 @@ module.exports = (app, httpRequestCounter) => {
     try {
       if (await isBadActor(req.ip)) {
         req.blocked = true;
-        res.destroy();
+        res.status(404).send('no');
         return;
       }
       next();
