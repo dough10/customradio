@@ -1,6 +1,6 @@
 {
   "Current": [
-    "more backend things"
+    "blocking requests that return 500 status have lead to more spam... 40k+ requests in 7 days. really guys?"
   ], 
   "1.14.1": [
     "Admin dashboard"
