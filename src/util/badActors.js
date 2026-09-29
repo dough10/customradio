@@ -10,7 +10,7 @@ const KEYS = {
 };
 
 async function badActor(ip, attempts = MAX_ATTEMPTS) {
-  const key = KEYS.attempts(ip);
+  const attemptKey = KEYS.attempts(ip);
   const banKey = KEYS.ban(ip);
   const now = Date.now();
   const windowStart = now - WINDOW * 1000;
@@ -21,22 +21,22 @@ async function badActor(ip, attempts = MAX_ATTEMPTS) {
     return;
   }
 
-  await redisClient.zAdd(key, [
+  await redisClient.zAdd(attemptKey, [
     {
       score: now,
       value: now.toString()
     }
   ]);
 
-  await redisClient.zRemRangeByScore(key, 0, windowStart);
+  await redisClient.zRemRangeByScore(attemptKey, 0, windowStart);
 
-  const count = await redisClient.zCard(key);
+  const count = await redisClient.zCard(attemptKey);
 
-  await redisClient.expire(key, WINDOW);
+  await redisClient.expire(attemptKey, WINDOW);
 
   if (count >= attempts) {
     await redisClient.set(banKey, "1", { EX: BAN_DURATION });
-    await redisClient.del(key);
+    await redisClient.del(attemptKey);
   }
 }
 
