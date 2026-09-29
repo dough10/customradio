@@ -7,5 +7,5 @@ module.exports = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: 'You shall not pass' });
   }
   
-  res.json(mongo.getBlockedIPs());
+  res.json(await mongo.getBlockedIPs());
 });
