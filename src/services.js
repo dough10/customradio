@@ -43,12 +43,19 @@ const posts = new Posts(DB_PATH);
 // analytics
 const mongo = new Mongo(process.env.MONGODB_URL, "radiotxt", logger);
 
+const updaterOptions = {
+  batchSize: 25,
+  concurrency: 5,
+  scrapeTimeout: 20 * 1000,
+  stationTimeout: 10 * 1000
+};
+
 // db updater !!!!
-const updater = new DatabaseUpdater(stations, mongo);
+const updater = new DatabaseUpdater(stations, mongo, updaterOptions);
 
 logUpdates(updater, logger, mongo);
 
-const scraper = new IcecastDBScraper(stations, mongo);
+const scraper = new IcecastDBScraper(stations, mongo, updaterOptions);
 
 logScrape(scraper, logger, mongo);
 
