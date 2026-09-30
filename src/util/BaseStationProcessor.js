@@ -10,6 +10,7 @@ const mb = require('./mb.js');
 const DEFAULT_BATCH_SIZE = 50;
 const DEFAULT_CONCURRENCY = 5;
 const DEFAULT_SCRAPE_TIMEOUT = 20000;
+const DEFAULT_STATION_TIMEOUT = 10000;
 
 /**
  * Base class for processing radio stations in batches.
@@ -40,8 +41,10 @@ class BaseStationProcessor extends EventEmitter {
    * Maximum number of stations processed concurrently.
    * @param {number} [options.scrapeTimeout=20000]
    * Timeout in milliseconds used by scrapers when downloading station lists.
+   * @param {number} [options.stationTimeout=10000]
+   * Maximum expected processing time in milliseconds for a station.
    */
-  constructor(stations, mongo, options = {}) {
+  constructor(stations, mongo, options) {
     super();
     options = options || {};
 
@@ -63,6 +66,7 @@ class BaseStationProcessor extends EventEmitter {
     this.batchSize = options.batchSize || DEFAULT_BATCH_SIZE;
     this.concurrency = options.concurrency || DEFAULT_CONCURRENCY;
     this.scrapeTimeout = options.scrapeTimeout || DEFAULT_SCRAPE_TIMEOUT;
+    this.stationTimeout = options.stationTimeout || DEFAULT_STATION_TIMEOUT;
 
     this.running = false;
     this.stopping = false;
@@ -183,8 +187,11 @@ class BaseStationProcessor extends EventEmitter {
       stationsPerSecond = Number((stationsPerMs * 1000).toFixed(2));
       if (this.counter >= 10) {
         const ms = this.remainingStations / stationsPerMs;
-        approxCompletion = msToHhMmSs(ms);
-        approxCompletionTime = new Date(Date.now() + ms).toLocaleTimeString([], {
+        const maxMs = Math.ceil(this.remainingStations / this.concurrency) * this.stationTimeout;
+        const estimatedMs = Math.min(ms, maxMs);
+
+        approxCompletion = msToHhMmSs(estimatedMs);
+        approxCompletionTime = new Date(Date.now() + estimatedMs).toLocaleTimeString([], {
           hour: 'numeric',
           minute: '2-digit'
         });
