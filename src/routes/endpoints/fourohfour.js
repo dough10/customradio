@@ -1,6 +1,5 @@
 const asyncHandler = require('../../util/asyncHandler.js');
 const { badActor } = require('../../util/badActors.js');
-const logRequest = require('../../util/logRequest.js');
 const pathIsSensative = require('../../util/pathIsSensative.js');
 
 /**
