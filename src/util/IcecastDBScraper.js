@@ -112,7 +112,7 @@ class IcecastDBScraper extends BaseStationProcessor {
         return;
       }
 
-      const stream = await isLiveStream(url);
+      const stream = await isLiveStream(url, this.stationTimeout);
 
       if (!stream.ok) return;
 

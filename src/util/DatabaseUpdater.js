@@ -59,7 +59,7 @@ class DatabaseUpdater extends BaseStationProcessor {
     const started = Date.now();
 
     try {
-      const stream = await isLiveStream(station.url);
+      const stream = await isLiveStream(station.url, this.stationTimeout);
 
       if (!stream?.ok) {
         return;
