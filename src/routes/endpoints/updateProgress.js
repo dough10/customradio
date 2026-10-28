@@ -13,24 +13,13 @@ const EVENTS = {
 module.exports = (req, res) => {
   if (!isAdmin(req)) return res.status(403).send('You shall not pass');
 
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
-
-  res.flushHeaders();
-
-  res.write(`data: ${JSON.stringify({
-    uptime: uptime()
-  })}\n\n`);
-  
-  const ut = setInterval(_ => res.write(`data: ${JSON.stringify({
-    uptime: uptime()
-  })}\n\n`), 1000);
-
   const send = (value) => {
     res.write(`data: ${JSON.stringify(value)}\n\n`);
   };
+  
+  const sendUptime = _ => send({
+    uptime: uptime()
+  });
 
   const sendUpdate = v => send({
     ...v, 
@@ -41,6 +30,17 @@ module.exports = (req, res) => {
     ...v, 
     type: 'scrape'
   });
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+
+  res.flushHeaders();
+
+  sendUptime()
+  
+  const ut = setInterval(sendUptime, 1000);
 
   const events = Object.values(EVENTS);
 
