@@ -22,7 +22,7 @@ const levels = {
   security: 5
 };
 
-const UPDATE_UI_TIMEOUT = 10000;
+const UPDATE_UI_TIMEOUT = 11000;
 const DEFAULT_LOG_LEVEL = 1;
 let logLevel = DEFAULT_LOG_LEVEL;
 
