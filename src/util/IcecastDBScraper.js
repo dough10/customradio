@@ -1,11 +1,9 @@
 const BaseStationProcessor = require('./BaseStationProcessor.js');
 
-const retry = require('./retry.js');
 const xml2js = require('xml2js');
 const pack = require('../../package.json');
 
 const isLiveStream = require('./isLiveStream.js');
-const testHomepageConnection = require('./testHomepageConnection.js');
 const usedTypes = require('./usedTypes.js');
 
 
@@ -100,14 +98,13 @@ class IcecastDBScraper extends BaseStationProcessor {
 
     const url = station.listen_url?.[0];
 
+    if (!url) return;
     this.emit('stationStart', {
       id: station.id,
       url
     });
 
     try {
-      if (!url) return;
-
       if (await this.stations.exists(url)) {
         return;
       }
@@ -137,11 +134,7 @@ class IcecastDBScraper extends BaseStationProcessor {
 
         icon: 'Unknown',
 
-        homepage: await retry(() =>
-            testHomepageConnection(
-              stream.icyurl
-            )
-          ) || 'Unknown',
+        homepage: stream.icyurl || 'Unknown',
 
         error: '',
         

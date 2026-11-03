@@ -44,7 +44,7 @@ const posts = new Posts(DB_PATH);
 const mongo = new Mongo(process.env.MONGODB_URL, "radiotxt", logger);
 
 const updaterOptions = {
-  batchSize: 25,
+  batchSize: 50,
   concurrency: 5,
   scrapeTimeout: 20 * 1000,
   stationTimeout: 10 * 1000

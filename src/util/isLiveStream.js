@@ -1,4 +1,5 @@
 const pack = require("../../package.json");
+const { EnvHttpProxyAgent } = require('undici');
 
 const isValidURL = require("./isValidURL.js");
 const fixEncoding = require("./fixEncoding.js");
@@ -52,42 +53,6 @@ function cleanURL(url) {
 
 /**
  * 
- * @param {Buffer} buf 
- * @returns {Boolean}
- */
-function looksLikeHTML(buf) {
-  if (!buf || buf.length === 0) return false;
-  const str = new TextDecoder().decode(buf.slice(0, 128)).toLowerCase();
-  return str.includes("<html") || str.includes("<!doctype");
-}
-
-/**
- * 
- * @param {Buffer} buf 
- * @returns {Boolean}
- */
-function looksLikeMP3(buf) {
-  if (!buf || buf.length < 4) return false;
-
-  for (let i = 0; i < buf.length - 1; i++) {
-    if (
-      buf[i] === 0x49 &&
-      buf[i + 1] === 0x44 &&
-      buf[i + 2] === 0x33
-    ) {
-      return true;
-    }
-
-    if (buf[i] === 0xff && (buf[i + 1] & 0xe0) === 0xe0) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * 
  * @param {String} message 
  * @param {Boolean} ok 
  * @param {Number} status 
@@ -126,9 +91,9 @@ function returnError(message, status) {
  */
 async function streamTest(url, timeout = 10_000) {
   const signal = AbortSignal.timeout(timeout);
+  const dispatcher = new EnvHttpProxyAgent({ connections: 1 });
 
   let response = null;
-  let reader = null;
 
   try {
     response = await fetch(url, {
@@ -140,7 +105,8 @@ async function streamTest(url, timeout = 10_000) {
         "Icy-MetaData": "1",
         "Range": "bytes=0-"
       },
-      signal
+      signal,
+      dispatcher
     });
 
     /*
@@ -239,69 +205,13 @@ async function streamTest(url, timeout = 10_000) {
       );
     }
 
-    // reader =
-    //   response.body.getReader();
-
-    // const {
-    //   value: firstValue
-    // } = await reader.read();
-
-    // if (!firstValue) {
-    //   return returnError(
-    //     "No audio data received",
-    //     response.status
-    //   );
-    // }
-
-    // let firstChunk = firstValue;
-
-    // /*
-    //  * Some streams don't provide enough data in
-    //  * the first chunk to identify the MP3 stream.
-    //  */
-    // if (!looksLikeMP3(firstChunk)) {
-    //   const {
-    //     value: secondChunk
-    //   } = await reader.read();
-
-    //   if (secondChunk) {
-    //     const combined =
-    //       new Uint8Array(
-    //         firstChunk.length +
-    //         secondChunk.length
-    //       );
-
-    //     combined.set(firstChunk);
-    //     combined.set(
-    //       secondChunk,
-    //       firstChunk.length
-    //     );
-
-    //     firstChunk = combined;
-    //   }
-    // }
-
-    // if (looksLikeHTML(firstChunk)) {
-    //   return returnError(
-    //     "HTML only, no audio stream",
-    //     response.status
-    //   );
-    // }
-
-    // if (!looksLikeMP3(firstChunk)) {
-    //   return returnError(
-    //     "Invalid MP3 stream",
-    //     response.status
-    //   );
-    // }
-
     /*
      * Clean up useless station names.
      */
     if (name) {
       const cleanName = fixEncoding(name).trim();
       if (
-        unhelpfulNames.includes(cleanName) ||
+        unhelpfulNames.includes(cleanName.toLowerCase()) ||
         unhelpfulRegex.test(cleanName)
       ) {
         name = null;
@@ -372,40 +282,19 @@ async function streamTest(url, timeout = 10_000) {
 
   } finally {
     /*
-     * If we acquired a reader, cancel it.
-     *
-     * Radio streams are effectively infinite, so we
-     * must explicitly terminate the stream after reading
-     * enough data to identify it.
+     * The headers are enough to classify the response;
+     * cancel the body without buffering audio data.
      */
-    if (reader) {
-      try {
-        await reader.cancel();
-      } catch {
-        // Stream may already be closed/aborted.
-      }
-
-      try {
-        reader.releaseLock();
-      } catch {
-        // Lock may already have been released.
-      }
-    }
-
-    /*
-     * If we never acquired a reader, make sure the
-     * response body is still terminated.
-     *
-     * This covers redirects, invalid responses, and
-     * other early-return paths after fetch().
-     */
-    else if (response?.body) {
+    if (response?.body) {
       try {
         await response.body.cancel();
       } catch {
         // Response may already be closed/aborted.
       }
     }
+
+    await dispatcher.close();
+
   }
 }
 
