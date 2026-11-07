@@ -1,6 +1,7 @@
 {
   "Current": [
-    ""
+    "fix memory leak in database update processes",
+    "update node version & packages"
   ],
   "1.14.2": [
     "blocking requests that return 500 status have lead to more spam... 40k+ requests in 7 days. really guys?"
