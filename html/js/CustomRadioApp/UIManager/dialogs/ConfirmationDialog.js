@@ -1,5 +1,4 @@
 import DialogBase from './DialogBase.js';
-import EventManager from '../../EventManager/EventManager.js';
 import { t } from '../../utils/i18n.js';
 import raf from '../../utils/raf.js';
 import sleep from '../../utils/sleep.js';
@@ -37,8 +36,6 @@ class ConfirmationDialog extends DialogBase {
 
     super(`#${dialog.id}`);
 
-    this.em = new EventManager();
-
     const cleanup = () => {
       let called = false;
 
@@ -46,7 +43,6 @@ class ConfirmationDialog extends DialogBase {
         if (called) return;
         called = true;
         this.destroy();
-        this.em.removeAll();
         await sleep(100);
         await raf();
         dialog.remove();
