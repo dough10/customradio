@@ -1,5 +1,9 @@
 {
   "Current": [
+    "Minor change to how changelog string is created",
+    "Minor backend changes"
+  ], 
+  "1.14.3": [
     "fix memory leak in database update processes",
     "update node version & packages"
   ],
