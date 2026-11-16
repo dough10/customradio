@@ -88,7 +88,7 @@ export default class Alert {
     if (this.localStorageKey) localStorage.setItem(this.localStorageKey, 1);
     this._em.add(
       this.$alert,
-      this._em.types.transitionend,
+      EventManager.types.transitionend,
       _ => this.#cleanUp(),
       true,
       NAMESPACES.close_animation
@@ -143,7 +143,7 @@ export default class Alert {
 
     this._em.add(
       $dismiss,
-      this._em.types.keydown,
+      EventManager.types.keydown,
       e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -156,7 +156,7 @@ export default class Alert {
 
     this._em.add(
       $dismiss,
-      this._em.types.click,
+      EventManager.types.click,
       _ => this.#destroy(),
       true,
       NAMESPACES.alert_click

@@ -101,7 +101,7 @@ export default async function contextMenu(ev) {
   $popup.append(...$buttons);
   $body.append($popup, $backdrop);
 
-  em.add($popup, em.types.transitionend, _ => {
+  em.add($popup, EventManager.types.transitionend, _ => {
     addClosingListeners($popup, $body, $backdrop);
     em.removeByNamespace(NAMESPACES.openTransition);
   }, true, NAMESPACES.openTransition);
@@ -130,7 +130,7 @@ function contextMenuOption({ icon, text, title, func }) {
   const $li = document.createElement('li');
   $li.title = title;
   $li.append(svgIcon(icon), $txt);
-  em.add($li, em.types.click, func, true, NAMESPACES.clicks);
+  em.add($li, EventManager.types.click, func, true, NAMESPACES.clicks);
   return $li;
 }
 
@@ -177,14 +177,14 @@ function addClosingListeners($popup, $body, $backdrop) {
   const dismiss = ev => {
     ev.preventDefault();
     em.removeByNamespace(NAMESPACES.dismiss);
-    em.add($popup, em.types.transitionend, transitionEnd, true, NAMESPACES.dismissTransition);
+    em.add($popup, EventManager.types.transitionend, transitionEnd, true, NAMESPACES.dismissTransition);
     $popup.removeAttribute('open');
     $backdrop.removeAttribute('visable');
   };
 
   [
-    em.types.click,
-    em.types.contextmenu
+    EventManager.types.click,
+    EventManager.types.contextmenu
   ].forEach(ev => em.add($body, ev, dismiss, true, NAMESPACES.dismiss));
 }
 

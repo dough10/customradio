@@ -1,5 +1,6 @@
 // Greeting.js
 import DialogBase from './DialogBase.js';
+import EventManager from '../../EventManager/EventManager.js';
 import selectors from '../../selectors.js';
 
 const key = 'greeted';
@@ -22,7 +23,7 @@ export default class GreetingDialog extends DialogBase {
       return;
     }
 
-    this.em.add(this.$dialog, this.em.types.transitionend, _ => this._afterTransition());
+    this.em.add(this.$dialog, EventManager.types.transitionend, _ => this._afterTransition());
     requestAnimationFrame(_ => super.open());
   }
 

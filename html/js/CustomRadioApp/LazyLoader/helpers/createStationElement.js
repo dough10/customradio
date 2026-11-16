@@ -216,9 +216,9 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
   $li.dataset.icon = icon;
   $li.dataset.homepage = homepage;
 
-  em.add($li, em.types.contextmenu, contextMenu, null, ns);
+  em.add($li, EventManager.types.contextmenu, contextMenu, null, ns);
 
-  em.add($li,em.types.touchstart, ev => {
+  em.add($li,EventManager.types.touchstart, ev => {
     isScrolling = false;
     pressTimer = setTimeout(_ => {
       if (!isScrolling) contextMenu(ev);
@@ -227,11 +227,11 @@ export default function createStationElement({ id, name, url, bitrate, genre, ic
     passive: true
   }, ns);
 
-  em.add($li, em.types.touchend, _ => clearTimeout(pressTimer), {
+  em.add($li, EventManager.types.touchend, _ => clearTimeout(pressTimer), {
     passive: true
   }, ns);
   
-  em.add($li, em.types.touchmove, _ => isScrolling = true, {
+  em.add($li, EventManager.types.touchmove, _ => isScrolling = true, {
     passive: true
   }, ns);
 

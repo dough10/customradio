@@ -1,5 +1,6 @@
 // Add.js
 import DialogBase from './DialogBase.js';
+import EventManager from '../../EventManager/EventManager.js';
 
 import Toast from '../../Toast/Toast.js';
 
@@ -28,15 +29,15 @@ export default class AddStreamDialog extends DialogBase {
     const listeners = [
       { 
         el: this.$trigger, 
-        event: this.em.types.click, 
+        event: EventManager.types.click, 
         handler: () => this.open()
       }, { 
         el: this.$input, 
-        event: this.em.types.input, 
+        event: EventManager.types.input, 
         handler: () => this._validate()
       }, { 
         el: this.$form, 
-        event: this.em.types.submit, 
+        event: EventManager.types.submit, 
         handler: ev => this._submit(ev)
       }
     ];

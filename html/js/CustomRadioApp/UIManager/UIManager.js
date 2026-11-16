@@ -74,34 +74,34 @@ export default class UIManager {
     const listeners = [
       {
         el: this.$toggleSelected,
-        event: this._em.types.click,
+        event: EventManager.types.click,
         handler: _ => this.toggleSelectedVisibility()
       }, {
         el: this.$userMenuButton,
-        event: this._em.types.click,
+        event: EventManager.types.click,
         handler: ev => userMenu.open(ev)
       }, {
         el: this.$filter,
-        event: this._em.types.change,
+        event: EventManager.types.change,
         handler: onFilterChange
       }, {
         el: this.$filter,
-        event: this._em.types.focus,
+        event: EventManager.types.focus,
         handler: ev => this._filterFocus(ev)
       }, {
         el: this.$resetButton,
-        event: this._em.types.click,
+        event: EventManager.types.click,
         handler: ev => {
           this._filterFocus(ev);
           onReset();
         }
       }, {
         el: this.$toTop,
-        event: this._em.types.click,
+        event: EventManager.types.click,
         handler: _ => this._toTopHandler()
       }, {
         el: this.$downloadButton,
-        event: this._em.types.click,
+        event: EventManager.types.click,
         handler: _ => this._dl()
       }
     ];
@@ -111,7 +111,7 @@ export default class UIManager {
     }
 
     document.querySelectorAll('.menu-button').forEach(btn => {
-      this._em.add(btn, this._em.types.click, _ => userMenu.close());
+      this._em.add(btn, EventManager.types.click, _ => userMenu.close());
     });
   }
 

@@ -1,6 +1,6 @@
 // Info.js
 import DialogBase from './DialogBase.js';
-
+import EventManager from '../../EventManager/EventManager.js';
 import Toast from '../../Toast/Toast.js';
 
 import selectors from '../../selectors.js';
@@ -18,7 +18,7 @@ export default class InfoDialog extends DialogBase {
 
     if (!this.$dialog || !this.$trigger) return;
 
-    this.em.add(this.$trigger, this.em.types.click, () => this.open());
+    this.em.add(this.$trigger, EventManager.types.click, () => this.open());
   }
 
   /**

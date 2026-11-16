@@ -1,6 +1,6 @@
 // Share.js
 import DialogBase from './DialogBase.js';
-
+import EventManager from '../../EventManager/EventManager.js';
 import Toast from '../../Toast/Toast.js';
 
 import selectors from '../../selectors.js';
@@ -45,27 +45,27 @@ export default class ShareDialog extends DialogBase {
     const listeners = [
       { 
         el: this.$trigger, 
-        event: this.em.types.click, 
+        event: EventManager.types.click, 
         handler: () => this.open()
       }, { 
         el: this.$copy, 
-        event: this.em.types.click, 
+        event: EventManager.types.click, 
         handler: () => this._copy()
       }, { 
         el: this.$fb, 
-        event: this.em.types.click, 
+        event: EventManager.types.click, 
         handler: () => this._facebook()
       }, { 
         el: this.$tw, 
-        event: this.em.types.click, 
+        event: EventManager.types.click, 
         handler: () => this._twitter()
       }, { 
         el: this.$email, 
-        event: this.em.types.click, 
+        event: EventManager.types.click, 
         handler: () => this._email()
       }, { 
         el: this.$sms, 
-        event: this.em.types.click, 
+        event: EventManager.types.click, 
         handler: () => this._sms()
       }
     ];

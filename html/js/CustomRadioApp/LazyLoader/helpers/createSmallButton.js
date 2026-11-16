@@ -1,3 +1,5 @@
+import EventManager from '../../EventManager/EventManager.js';
+
 import svgIcon from './createSVGIcon.js';
 
 /**
@@ -23,6 +25,6 @@ export default function createSmallButton({ icon, cssClass, func, title, ns, em 
   $button.type = 'button';
   $button.classList.add('small-button', cssClass);
   $button.append(svgIcon(icon));
-  em.add($button, em.types.click, func, null, ns);
+  em.add($button, EventManager.types.click, func, null, ns);
   return $button;
 }

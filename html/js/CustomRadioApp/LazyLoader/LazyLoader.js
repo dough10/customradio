@@ -59,12 +59,12 @@ export default class LazyLoader {
 
     const listeners = [
       { 
-        type: this._em.types.scroll, 
+        type: EventManager.types.scroll, 
         handler: _ => this._onScroll(),
         options: { passive: true },
         target: this.$parent,
       }, { 
-        type: this._em.types.resize,
+        type: EventManager.types.resize,
         handler: _ => this._onResize(),
         options: { passive: true },
         target: window,

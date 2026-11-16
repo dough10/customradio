@@ -43,7 +43,7 @@ export const types = Object.freeze({
  * eventManager.removeAll(); // Removes all listeners
  */
 export default class EventManager {
-  types = types;
+  static types = types;
 
   constructor() {
     this.listeners = [];

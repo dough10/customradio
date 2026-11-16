@@ -70,7 +70,7 @@ const buttons = [
 ];
 
 for (const { el, handler } of buttons) {
-  if (el) em.add(el, em.types.click, handler, true, NAMESPACE.menuButton);
+  if (el) em.add(el, EventManager.types.click, handler, true, NAMESPACE.menuButton);
 }
 
 /**
@@ -85,7 +85,7 @@ async function open(ev) {
   if (document.querySelector('.backdrop')) return;
   const $backdrop = document.createElement('div');
   $backdrop.classList.add('backdrop');
-  em.add($backdrop, em.types.click, _ => close(), null, NAMESPACE.backdropClick);
+  em.add($backdrop, EventManager.types.click, _ => close(), null, NAMESPACE.backdropClick);
   document.body.appendChild($backdrop);
 
   const { top } = $userMenuButton.getBoundingClientRect();
@@ -116,7 +116,7 @@ async function close() {
     em.removeByNamespace(NAMESPACE.backdropClick);
     $bd.remove();
   };
-  em.add($bd, em.types.transitionend, _ => cleanup(), null, NAMESPACE.backdropClick);
+  em.add($bd, EventManager.types.transitionend, _ => cleanup(), null, NAMESPACE.backdropClick);
   timeoutID = setTimeout(() => cleanup(), 300);
   await raf();
   $userMenu.removeAttribute('open');

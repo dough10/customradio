@@ -103,22 +103,22 @@ export default class Toast {
 
     const listeners = [
       { 
-        type: this._em.types.transitionend, 
+        type: EventManager.types.transitionend, 
         handler: _ => this._transitionEnd(), 
         options: true, 
         namespace: NAMESPACES.OPEN_ANIMATION 
       }, { 
-        type: this._em.types.click, 
+        type: EventManager.types.click, 
         handler: _ => this._clicked(), 
         options: true, 
         namespace: NAMESPACES.USER_INTERACTIONS 
       }, { 
-        type: this._em.types.mouseenter,
+        type: EventManager.types.mouseenter,
         handler: _ => this._mouseIn(), 
         options: true, 
         namespace: NAMESPACES.USER_INTERACTIONS 
       }, { 
-        type: this._em.types.mouseleave, 
+        type: EventManager.types.mouseleave, 
         handler: _ => this._mouseOut(), 
         options: true, 
         namespace: NAMESPACES.USER_INTERACTIONS 
@@ -240,7 +240,7 @@ export default class Toast {
 
     // attach listener for closing transition
     // element will be deleted after
-    if (this._em.add(this.toast, this._em.types.transitionend, ev => this._removeToast(ev), true, NAMESPACES.CLOSE_ANIMATION) < 0) {
+    if (this._em.add(this.toast, EventManager.types.transitionend, ev => this._removeToast(ev), true, NAMESPACES.CLOSE_ANIMATION) < 0) {
       console.warn(`Failed to add transitionend listener for closing animation`);
     }
     requestAnimationFrame(() => {

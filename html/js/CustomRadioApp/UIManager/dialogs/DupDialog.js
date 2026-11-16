@@ -2,7 +2,6 @@ import EventManager from "../../EventManager/EventManager";
 import ConfirmationDialog from "./ConfirmationDialog.js";
 import Toast from "../../Toast/Toast.js";
 import DialogBase from "./DialogBase.js";
-import sleep from "../../utils/sleep.js";
 import opt from '../../utils/post_options.js';
 import createSVGIcon from '../../LazyLoader/helpers/createSVGIcon.js';
 
@@ -73,7 +72,7 @@ class DupDialog extends DialogBase {
     if (this.#buttonsActive) return;
     const buttons = document.querySelectorAll(this.#allButtonsSelector);
     buttons.forEach(button => {
-      em.add(button, em.types.click, ev => new ConfirmationDialog(
+      em.add(button, EventManager.types.click, ev => new ConfirmationDialog(
         'Remove from duplicate list?',
         _ => this.#unmarkDuplicate(ev)
       ));

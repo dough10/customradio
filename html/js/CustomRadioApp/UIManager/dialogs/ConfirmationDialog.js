@@ -1,4 +1,5 @@
 import DialogBase from './DialogBase.js';
+import EventManager from '../../EventManager/EventManager.js';
 import { t } from '../../utils/i18n.js';
 import raf from '../../utils/raf.js';
 import sleep from '../../utils/sleep.js';
@@ -50,7 +51,7 @@ class ConfirmationDialog extends DialogBase {
 
       this.em.add(
         this.$dialog,
-        this.em.types.transitionend,
+        EventManager.types.transitionend,
         (e) => {
           if (e.target !== this.$dialog) return;
           done();
@@ -63,12 +64,12 @@ class ConfirmationDialog extends DialogBase {
       this.close();
     };
 
-    this.em.add(yes, this.em.types.click, _ => {
+    this.em.add(yes, EventManager.types.click, _ => {
       if (typeof onConfirm === 'function') onConfirm();
       cleanup();
     });
 
-    this.em.add(no, this.em.types.click, cleanup);
+    this.em.add(no, EventManager.types.click, cleanup);
 
     raf().then(_ => this.open());
   }

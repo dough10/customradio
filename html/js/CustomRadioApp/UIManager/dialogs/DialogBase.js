@@ -97,7 +97,7 @@ export default class DialogBase {
   _attachCloseButton() {
     const btn = this.$(selectors.dialogClose);
     if (!btn) return;
-    this.em.add(btn, this.em.types.click, () => this.close(), null, NAMESPACES.close);
+    this.em.add(btn, EventManager.types.click, () => this.close(), null, NAMESPACES.close);
   }
 
   /**
@@ -124,7 +124,7 @@ export default class DialogBase {
       this.em.removeByNamespace(ns);
     };
 
-    this.em.add(this.$dialog, this.em.types.animationend, callback, null, ns);
+    this.em.add(this.$dialog, EventManager.types.animationend, callback, null, ns);
     // play wobble animation
     this.$dialog.classList.add("dialog-attention");
     if (closeButton) closeButton.classList.add('attention');
@@ -138,7 +138,7 @@ export default class DialogBase {
    * @returns {void}
    */
   _attachWobbleOnOutsideClick() {
-    this.em.add(this.$dialog, this.em.types.click, ev => this._wobble(ev), null, NAMESPACES.wobble);
+    this.em.add(this.$dialog, EventManager.types.click, ev => this._wobble(ev), null, NAMESPACES.wobble);
   }
 
   /**
