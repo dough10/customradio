@@ -42,6 +42,7 @@ const sensitivePaths = new Set([
   'claude',
   'cursor',
   'anthropic',
+  'openai',
   'codeium',
   'windsurf',
   'mcp',
