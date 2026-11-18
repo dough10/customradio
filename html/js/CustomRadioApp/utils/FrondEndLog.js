@@ -75,7 +75,7 @@ export default class FrontendLog {
     
     this.#scrollMinder = new ScrollMinder(container, {
       onCloseToBottom: () => this.follow(),
-      onScrollUp: () => this.followStop(),
+      onScrollUp: () => this.unfollow(),
       bottomThreshold
     });
 
@@ -222,8 +222,9 @@ export default class FrontendLog {
 
   toggleFollow() {
     this.#assertAlive();
+    this.#followIncommingLogLines = !this.#followIncommingLogLines;
     if (this.#followIncommingLogLines) {
-      this.followStop();
+      this.unfollow();
     } else {
       this.follow();
     }
@@ -235,7 +236,7 @@ export default class FrontendLog {
     this.#container.scrollTop = this.#container.scrollHeight;
   }
 
-  followStop() {
+  unfollow() {
     this.#assertAlive();
     this.#followIncommingLogLines = false;
   }
