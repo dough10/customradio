@@ -77,9 +77,4 @@ const sensitivePaths = new Set([
   '7z',
 ]);
 
-module.exports = (path) => {
-  for (const sensitive of sensitivePaths) {
-    if (path.includes(sensitive)) return true;
-  }
-  return false;
-}
+module.exports = path => sensitivePaths.some(sensitive => path.includes(sensitive));
