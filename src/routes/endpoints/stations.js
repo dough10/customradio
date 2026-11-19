@@ -1,9 +1,7 @@
 const { validationResult } = require('express-validator');
 
-const {stations, logger} = require('../../services.js');
+const { stations, logger, blacklist } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
-
-const blacklist = process.env.BLACKLIST?.split(',') || [];
 
 /**
  * Handles the request to fetch and return a list of audio stations based on query parameters.
@@ -40,15 +38,15 @@ const blacklist = process.env.BLACKLIST?.split(',') || [];
 module.exports = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const error =  errors.array().map(e => e.msg).join(', ');
+    const error = errors.array().map(e => e.msg).join(', ');
     logger.error(error);
-    return res.status(400).json({error});
-  }  
+    return res.status(400).json({ error });
+  }
 
   const decoded = decodeURIComponent(req.query.genres);
   const genres = decoded !== 'undefined' ? decoded.split(',').map(genre => genre.toLowerCase()) : [];
   const stationData = await stations.getStationsByGenre(genres);
-  
+
   const genreString = genres.join(',');
 
   if (genreString && !blacklist.includes(req.ip) && stationData.length) {

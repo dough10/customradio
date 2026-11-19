@@ -1,7 +1,5 @@
-const {stations} = require('../../services.js');
+const { stations, blacklist } = require('../../services.js');
 const asyncHandler = require('../../util/asyncHandler.js');
-
-const blacklist = process.env.BLACKLIST?.split(',') || [];
 
 /**
  * Reports a play for a station and increments its play count
@@ -20,7 +18,7 @@ module.exports = asyncHandler(async (req, res) => {
     res.json({ message: 'ip in blacklist' });
     return;
   }
-  
+
   const id = req.params.id;
   if (!id || isNaN(id)) {
     res.status(400).json({ error: 'Invalid station ID' });
