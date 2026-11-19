@@ -1,4 +1,4 @@
-const { updater, scraper, uptime } = require('../../services.js');
+const { updater, scraper, uptime, userData } = require('../../services.js');
 const isAdmin = require('../../util/isAdmin.js');
 
 const EVENTS = {
@@ -16,18 +16,18 @@ module.exports = (req, res) => {
   const send = (value) => {
     res.write(`data: ${JSON.stringify(value)}\n\n`);
   };
-  
+
   const sendUptime = _ => send({
     uptime: uptime()
   });
 
   const sendUpdate = v => send({
-    ...v, 
+    ...v,
     type: 'update'
   });
-  
+
   const sendScrape = v => send({
-    ...v, 
+    ...v,
     type: 'scrape'
   });
 
@@ -39,10 +39,12 @@ module.exports = (req, res) => {
   res.flushHeaders();
 
   sendUptime()
-  
+
   const ut = setInterval(sendUptime, 1000);
 
   const events = Object.values(EVENTS);
+
+  userData.on('user:change', updated => send({ userStats: updated }));
 
   for (const ev of events) {
     updater.on(ev, sendUpdate);
