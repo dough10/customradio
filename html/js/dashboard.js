@@ -431,6 +431,29 @@ function extendUITimeout() {
   }, UPDATE_UI_TIMEOUT);
 }
 
+function userChange({
+  total_users, 
+  users_last_30_days, 
+  total_user_stations, 
+  user_stations_last_30_days
+}) {
+  updateTexts([
+    {
+      el: '#totalUsers',
+      str: formatNumber(total_users)
+    }, {
+      el: '#usersIn30',
+      str: formatNumber(users_last_30_days)
+    }, {
+      el: '#userStationsCount',
+      str: formatNumber(total_user_stations)
+    }, {
+      el: '#userStationsIn30',
+      str: formatNumber(user_stations_last_30_days)
+    }
+  ]);
+}
+
 function updateTaskProgress(ev) {
   try {
     const {
@@ -453,8 +476,11 @@ function updateTaskProgress(ev) {
       type,
       stationsPerSecond,
       uptime,
-      batch
+      batch,
+      userStats
     } = JSON.parse(ev.data);
+
+    if (userStats != null) userChange(userStats);
 
     if (heapUsed != null && rss != null) {
       updateMemoryValues(
