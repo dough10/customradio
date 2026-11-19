@@ -26,14 +26,21 @@ module.exports = class UserData extends DbCon {
   }
 
   /**
+   * emits a "user change" event
+   */
+  async #emitChange() {
+    this.emit('user:change', await this.stats());
+  }
+
+  /**
    * inserts or updates user info
    * 
    * @param {Object} user
    * 
    * @returns {Promise<void>}
    */
-  async createUser({ id, firstName, lastName, email, profilePictureUrl, locale }) {
-    await this.run(`
+  async userLogin({ id, firstName, lastName, email, profilePictureUrl, locale }) {
+    const { changes } = await this.run(`
       INSERT INTO users (workos_id, first_name, last_name, picture_url, email, locale)
       VALUES (?, ?, ?, ?, ?, ?)
       ON CONFLICT(workos_id) DO UPDATE SET
@@ -43,6 +50,10 @@ module.exports = class UserData extends DbCon {
         email = COALESCE(excluded.email, users.email),
         locale = COALESCE(excluded.locale, users.locale)
     `, [id, firstName, lastName, profilePictureUrl, email, locale]);
+
+    if (changes > 5) {
+      await this.#emitChange();
+    }
   }
 
   /**
@@ -82,6 +93,7 @@ module.exports = class UserData extends DbCon {
       INSERT OR IGNORE INTO user_stations (user, station_id)
       VALUES (?, ?)
     `, [user, stationId]);
+    await this.#emitChange();
   }
 
   /**
@@ -95,7 +107,7 @@ module.exports = class UserData extends DbCon {
       'DELETE FROM user_stations WHERE user = ? AND station_id = ?',
       [user, stationId]
     );
-
+    await this.#emitChange();
     return result;
   }
 
