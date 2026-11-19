@@ -167,6 +167,7 @@ function redirect(path) {
  * @returns {HTMLElement}
  */
 function userImage({ picture }, size) {
+  if (!picture) return;
   const img = document.createElement('img');
   img.src = picture;
   img.alt = 'user profile picture';
@@ -191,8 +192,8 @@ function loadUser(user) {
   const small = userImage(user, 24);
   const big = userImage(user, 70);
 
-  document.querySelector(selectors.userAvatar).replaceChildren(big);
-  $userMenuButton.replaceChildren(small);
+  if (big) document.querySelector(selectors.userAvatar).replaceChildren(big);
+  if (small) $userMenuButton.replaceChildren(small);
 
   document.querySelector(selectors.firstname).textContent = user.firstName;
   document.querySelector(selectors.lastname).textContent = user.lastName;
