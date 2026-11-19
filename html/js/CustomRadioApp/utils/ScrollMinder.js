@@ -1,3 +1,29 @@
+/**
+ * example usage 1
+ * 
+ * const minder = new ScrollMinder(qs('#scroll'), {
+ *   onCloseToBottom: () => console.log('almost there')
+ * });
+ * 
+ * 
+ * example usage 2
+ * 
+ * const minder = new ScrollMinder(qs('#scroll'));
+ * minder.on(ScrollMinder.EVENTS.CLOSE_TO_BOTTOM, () => console.log('almost there'));
+ * 
+ * 
+ * example usage 3
+ *
+ * const el = qs('#scroll);
+ * const minder = new ScrollMinder(el);
+ * 
+ * el.addEventListener(
+ *  ScrollMinder.EVENTS.CLOSE_TO_BOTTOM,
+ *  () => {
+ *    console.log('almost there');
+ *  });
+ */
+
 import EventManager from "../EventManager/EventManager";
 
 export default class ScrollMinder {
@@ -9,25 +35,26 @@ export default class ScrollMinder {
   });
 
   #lastPos = 0;
+  #listeners = new Map();
   #em = new EventManager();
   #destroyed = false;
   #bottomThreshold;
   #wasCloseToBottom = false;
+
+  #scrollableElement
 
   #onScrollDown;
   #onScrollUp;
   #onCloseToBottom;
   #onScroll;
 
-  #handleScroll = (ev) => this.#scroll(ev);
-
   constructor(
     scrollableElement,
     {
-      onScroll = () => {},
-      onScrollDown = () => {},
-      onScrollUp = () => {},
-      onCloseToBottom = () => {},
+      onScroll = () => { },
+      onScrollDown = () => { },
+      onScrollUp = () => { },
+      onCloseToBottom = () => { },
       bottomThreshold = 50
     } = {}
   ) {
@@ -37,16 +64,16 @@ export default class ScrollMinder {
       );
     }
 
-    if (typeof onScrollDown !== "function") {
-      throw new TypeError("onScrollDown must be a function");
-    }
-
     if (typeof onScroll !== "function") {
       throw new TypeError("onScroll must be a function");
     }
 
     if (typeof onScrollUp !== "function") {
       throw new TypeError("onScrollUp must be a function");
+    }
+
+    if (typeof onScrollDown !== "function") {
+      throw new TypeError("onScrollDown must be a function");
     }
 
     if (typeof onCloseToBottom !== "function") {
@@ -62,6 +89,8 @@ export default class ScrollMinder {
         "bottomThreshold must be a non-negative number"
       );
     }
+    this.#scrollableElement = scrollableElement;
+
     const maxPos = scrollableElement.scrollHeight - scrollableElement.clientHeight;
 
     this.#wasCloseToBottom = Math.max(0, maxPos - scrollableElement.scrollTop) <= bottomThreshold;
@@ -76,7 +105,8 @@ export default class ScrollMinder {
     this.#em.add(
       scrollableElement,
       EventManager.types.scroll,
-      this.#handleScroll
+      (ev) => this.#scroll(ev),
+      { passive: true }
     );
   }
 
@@ -134,29 +164,82 @@ export default class ScrollMinder {
   }
 
   #notify(eventName, callback, el, pos, maxPos, remaining) {
-    el.dispatchEvent(new CustomEvent(eventName, {
-      detail: {
-        element: el,
-        scrollTop: pos,
-        scrollMax: maxPos,
-        remaining
-      }
-    }));
+    try {
+      callback(el, pos, maxPos, remaining);
+    } catch (err) {
+      throw new Error("ScrollMinder callback failed", {
+        cause: err
+      });
+    } finally {
+      el.dispatchEvent(new CustomEvent(eventName, {
+        detail: {
+          element: el,
+          scrollTop: pos,
+          scrollMax: maxPos,
+          remaining
+        }
+      }));
+    }
+  }
 
-    callback(el, pos, maxPos, remaining);
+  on(eventName, callback) {
+    if (this.#destroyed) {
+      throw new Error("ScrollMinder has been destroyed");
+    }
+
+    if (typeof callback !== "function") {
+      throw new TypeError("callback must be a function");
+    }
+
+    if (!this.#listeners.has(eventName)) {
+      this.#listeners.set(eventName, new Map());
+    }
+
+    const listeners = this.#listeners.get(eventName);
+
+    if (listeners.has(callback)) return this;
+
+    const ndx = this.#em.add(
+      this.#scrollableElement,
+      eventName,
+      callback
+    );
+
+    listeners.set(callback, ndx);
+
+    return this;
+  }
+
+  off(eventName, callback) {
+    if (this.#destroyed) {
+      throw new Error("ScrollMinder has been destroyed");
+    }
+
+    const listeners = this.#listeners.get(eventName);
+
+    if (!listeners) return this;
+
+    const ndx = listeners.get(callback);
+
+    if (ndx === undefined) return this;
+
+    this.#em.remove(ndx);
+
+    listeners.delete(callback);
+
+    if (listeners.size === 0) {
+      this.#listeners.delete(eventName);
+    }
+
+    return this;
   }
 
   destroy() {
     if (this.#destroyed) return;
+
     this.#em.removeAll();
+    this.#listeners.clear();
+
     this.#destroyed = true;
   }
 }
-
-
-/**
- * example desired usage
- * new ScrollMinder(qs('#scroll'), {
- *   onCloseToBottom: () => console.log('almost there')
- * });
- */
