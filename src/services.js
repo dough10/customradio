@@ -112,6 +112,8 @@ process.on("SIGTERM", shutdown);
 
 const uptime = _ => msToHhMmSs(Date.now() - started);
 
+const blacklist = process.env.BLACKLIST?.split(',') || [];
+
 module.exports = {
   stations,
   userData,
@@ -124,5 +126,6 @@ module.exports = {
   workos,
   updater,
   scraper,
+  blacklist,
   uptime
 };
