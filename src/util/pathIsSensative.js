@@ -1,8 +1,8 @@
 /**
  * Set of sensitive path segments that indicate potential attacks or probing.
- * @type {Set<string>}
+ * @type {Array<string>}
  */
-const sensitivePaths = new Set([
+const sensitivePaths = [
   'env',
   'git',
   'ssh',
@@ -75,6 +75,6 @@ const sensitivePaths = new Set([
   'gz',
   'rar',
   '7z',
-]);
+];
 
 module.exports = path => sensitivePaths.some(sensitive => path.includes(sensitive));
