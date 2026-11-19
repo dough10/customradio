@@ -1,6 +1,7 @@
 {
   "Current": [
-    "Minor change to how changelog string is created",
+    "fix bug the occured when user had no avatar",
+    "Change how changelog string is created",
     "Minor backend changes"
   ], 
   "1.14.3": [
