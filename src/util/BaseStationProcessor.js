@@ -29,6 +29,8 @@ const DEFAULT_STATION_TIMEOUT = 10000;
  */
 class BaseStationProcessor extends EventEmitter {
 
+  #running = false;
+
   /**
    * Creates a new station processor.
    *
@@ -68,7 +70,6 @@ class BaseStationProcessor extends EventEmitter {
     this.scrapeTimeout = options.scrapeTimeout || DEFAULT_SCRAPE_TIMEOUT;
     this.stationTimeout = options.stationTimeout || DEFAULT_STATION_TIMEOUT;
 
-    this.running = false;
     this.stopping = false;
 
     this.startStats = null;
@@ -140,13 +141,17 @@ class BaseStationProcessor extends EventEmitter {
     };
   }
 
+  get running() {
+    return this.#running;
+  }
+
   /**
    * Requests the processor to stop after the current batch completes.
    *
    * @returns {boolean}
    */
   stop() {
-    if (!this.running) {
+    if (!this.#running) {
       return false;
     }
     this.stopping = true;
@@ -227,11 +232,11 @@ class BaseStationProcessor extends EventEmitter {
    * otherwise false.
    */
   async run() {
-    if (this.running) {
+    if (this.#running) {
       return false;
     }
 
-    this.running = true;
+    this.#running = true;
     this.#reset();
 
     try {
@@ -322,7 +327,7 @@ class BaseStationProcessor extends EventEmitter {
       this.emit('error', err);
       return false;
     } finally {
-      this.running = false;
+      this.#running = false;
       try {
         await this.cleanup();
       } catch (err) {
