@@ -2,10 +2,10 @@ const pug = require('pug');
 
 const asyncHandler = require('./../../util/asyncHandler.js');
 const isAdmin = require('./../../util/isAdmin.js');
-const {alerts} = require('./../../services.js');
+const { alerts } = require('./../../services.js');
 
 module.exports = asyncHandler(async (req, res) => {
-  if(!isAdmin(req)) return res.redirect('/');
+  if (!isAdmin(req)) return res.redirect('/');
   const user = req.user;
   const allAlerts = await alerts.getActiveAlerts();
   req.count = allAlerts.length;
