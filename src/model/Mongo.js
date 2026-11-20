@@ -216,6 +216,33 @@ class Mongo extends MongoBase {
   }
 
   /**
+   * Records an HTTP request.
+   *
+   * @param {string} ip Client IP address.
+   * @param {string} method HTTP request method.
+   * @param {string} path Request path.
+   * @param {Object} query Parsed query parameters.
+   * @param {number} status HTTP response status code.
+   * @param {string} userAgent User-Agent header.
+   * @param {number} responseTime Request duration in milliseconds.
+   *
+   * @returns {Promise<import("mongodb").InsertOneResult>}
+   */
+  async logRequest(ip, method, path, query, status, userAgent, responseTime) {
+    return this.getCollection(this.collections.REQUESTS).insertOne({
+      time: this._now(),
+      ip,
+      method,
+      path,
+      query,
+      status,
+      userAgent,
+      version,
+      responseTime
+    });
+  }
+
+  /**
    * Retrieves aggregated analytics for HTTP requests.
    *
    * Long-running endpoints such as `/logs` and `/progress` are included
@@ -567,12 +594,25 @@ class Mongo extends MongoBase {
   }
 
   /**
-   * Retrieves unique IP addresses that received HTTP 444 responses,
-   * along with the total number of 444 requests for each IP.
+   * Retrieves analytics for IP addresses that received HTTP 444 responses.
    *
    * @param {number} [limit=100] Maximum number of IPs to return.
    *
-   * @returns {Promise<Array<{ip: string, count: number}>>}
+   * @returns {Promise<Array<{
+   *   ip: string,
+   *   count: number,
+   *   firstSeen: Date,
+   *   lastSeen: Date,
+   *   browsers: Array<{
+   *     browser: string,
+   *     os: string,
+   *     count: number
+   *   }>,
+   *   paths: Array<{
+   *     path: string,
+   *     count: number
+   *   }>
+   * }>>}
    *
    * @throws {TypeError} If limit is not a positive integer.
    */
@@ -588,27 +628,143 @@ class Mongo extends MongoBase {
         }
       },
       {
-        $group: {
-          _id: '$ip',
-          count: {
-            $sum: 1
-          }
+        $facet: {
+          ips: [
+            {
+              $group: {
+                _id: '$ip',
+                count: { $sum: 1 },
+                firstSeen: { $min: '$time' },
+                lastSeen: { $max: '$time' }
+              }
+            },
+            {
+              $sort: {
+                count: -1
+              }
+            },
+            {
+              $limit: limit
+            }
+          ],
+
+          browsers: [
+            {
+              $group: {
+                _id: {
+                  ip: '$ip',
+                  browser: '$userAgent.browser.name',
+                  os: '$userAgent.os.name'
+                },
+                count: { $sum: 1 }
+              }
+            }
+          ],
+
+          paths: [
+            {
+              $group: {
+                _id: {
+                  ip: '$ip',
+                  path: '$path'
+                },
+                count: { $sum: 1 }
+              }
+            }
+          ]
         }
       },
       {
         $project: {
-          _id: 0,
-          ip: '$_id',
-          count: 1
+          ips: {
+            $map: {
+              input: '$ips',
+              as: 'ip',
+              in: {
+                ip: '$$ip._id',
+                count: '$$ip.count',
+                firstSeen: '$$ip.firstSeen',
+                lastSeen: '$$ip.lastSeen',
+
+                browsers: {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: '$browsers',
+                        as: 'browser',
+                        cond: {
+                          $eq: ['$$browser._id.ip', '$$ip._id']
+                        }
+                      }
+                    },
+                    as: 'browser',
+                    in: {
+                      browser: {
+                        $ifNull: [
+                          '$$browser._id.browser',
+                          'Unknown'
+                        ]
+                      },
+                      os: {
+                        $ifNull: [
+                          '$$browser._id.os',
+                          'Unknown'
+                        ]
+                      },
+                      count: '$$browser.count'
+                    }
+                  }
+                },
+
+                paths: {
+                  $slice: [
+                    {
+                      $sortArray: {
+                        input: {
+                          $filter: {
+                            input: '$paths',
+                            as: 'path',
+                            cond: {
+                              $eq: ['$$path._id.ip', '$$ip._id']
+                            }
+                          }
+                        },
+                        sortBy: {
+                          count: -1
+                        }
+                      }
+                    },
+                    10
+                  ]
+                }
+              }
+            }
+          }
         }
       },
       {
-        $sort: {
-          count: -1
-        }
+        $unwind: '$ips'
       },
       {
-        $limit: limit
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              '$ips',
+              {
+                paths: {
+                  $map: {
+                    input: '$ips.paths',
+                    as: 'path',
+                    in: {
+                      path: '$$path._id.path',
+                      count: '$$path.count'
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
       }
     ]).toArray();
   }
@@ -650,8 +806,8 @@ class Mongo extends MongoBase {
   async getLastDBUpdate() {
     return this.getCollection(this.collections.DB_UPDATES).findOne(
       {}, {
-        sort: { "end.time": -1 }
-      }
+      sort: { "end.time": -1 }
+    }
     );
   }
 
@@ -699,36 +855,9 @@ class Mongo extends MongoBase {
    */
   async clearStash() {
     const result = await this.getCollection(this.collections.STASH).deleteMany({});
-    return { 
-      deleted: result.deletedCount 
+    return {
+      deleted: result.deletedCount
     };
-  }
-
-  /**
-   * Records an HTTP request.
-   *
-   * @param {string} ip Client IP address.
-   * @param {string} method HTTP request method.
-   * @param {string} path Request path.
-   * @param {Object} query Parsed query parameters.
-   * @param {number} status HTTP response status code.
-   * @param {string} userAgent User-Agent header.
-   * @param {number} responseTime Request duration in milliseconds.
-   *
-   * @returns {Promise<import("mongodb").InsertOneResult>}
-   */
-  async logRequest(ip, method, path, query, status, userAgent, responseTime) {
-    return this.getCollection(this.collections.REQUESTS).insertOne({
-      time: this._now(),
-      ip,
-      method,
-      path,
-      query,
-      status,
-      userAgent,
-      version,
-      responseTime
-    });
   }
 
   /**
@@ -739,7 +868,7 @@ class Mongo extends MongoBase {
    * @returns {Promise<import("mongodb").InsertOneResult>}
    */
   async logJSError(error) {
-    return this.getCollection(this.collections.ERRORS).insertOne({ 
+    return this.getCollection(this.collections.ERRORS).insertOne({
       error: {
         name: error.name,
         message: error.message,
