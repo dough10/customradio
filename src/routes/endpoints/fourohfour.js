@@ -25,7 +25,7 @@ module.exports = asyncHandler(async (req, res) => {
   if (pathIsSensative(requestedPath)) {
     await badActor(req.ip, 1);
     req.blocked = true;
-    res.status(404).send('no');
+    res.sendStatus(418);
     return;
   }
 

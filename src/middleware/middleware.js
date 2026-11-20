@@ -173,7 +173,7 @@ module.exports = (app, httpRequestCounter) => {
     try {
       if (await isBadActor(req.ip)) {
         req.blocked = true;
-        res.status(404).send('no');
+        res.sendStatus(418);
         return;
       }
       next();
