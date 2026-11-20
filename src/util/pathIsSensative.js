@@ -28,7 +28,7 @@ const sensitivePaths = [
   'config',
   'amplifyrc',
   'docker',
-  'docker-compose',
+  'compose',
   'credentials',
   'secrets',
   'serviceaccount',
@@ -75,6 +75,8 @@ const sensitivePaths = [
   'gz',
   'rar',
   '7z',
+  'llm',
+  'ai'
 ];
 
 module.exports = path => sensitivePaths.some(sensitive => path.includes(sensitive));
