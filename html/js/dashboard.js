@@ -11,52 +11,31 @@ import TimeoutManager from './CustomRadioApp/utils/TimeoutManager.js';
 import StreamManager from './CustomRadioApp/EventSourceManager/EventSourceManager.js';
 import ConfirmationDialog from './CustomRadioApp/UIManager/dialogs/ConfirmationDialog.js';
 import FrontendLog from './CustomRadioApp/utils/FrondEndLog.js';
+import ScrollMinder from './CustomRadioApp/utils/ScrollMinder.js';
 
 import userMenu from './CustomRadioApp/UIManager/menu/menu.js';
-import selectors from './CustomRadioApp/selectors.js';
 
 import msToHhMmSs from '../../src/util/msToHhMmSs.js';
 import raf from './CustomRadioApp/utils/raf.js';
 import { qs, qsAll } from './CustomRadioApp/utils/querySelectors.js';
+import { updateTexts } from './CustomRadioApp/utils/updateTexts.js';
 
+const em = new EventManager();
+const timeouts = new TimeoutManager();
 const history = [];
+
 let requestsController;
 let timeInterval;
-
-const timeouts = new TimeoutManager();
-const em = new EventManager();
-const header = new CollapsingHeader();
-const streams = new StreamManager();
-const requestsChart = new RequestsChart(qs('#requests'));
-const logz = new FrontendLog({
-  container: qs('#log'),
-  level: DEFAULT_LOG_LEVEL,
-  levelSelector: qs('#level'),
-  maxLines: MAX_LOG_LINES
-});
+let header;
+let streams;
+let requestsChart;
+let logz;
+let minder;
 
 
 function formatNumber(num) {
   num = Number(num);
   return num >= 1000 ? num.toLocaleString("en-US") : num;
-}
-
-function updateText(selector, text) {
-  try {
-    const $el = qs(selector);
-    if (!$el) throw new Error('Element missing');
-    const str = String(text);
-    if ($el.textContent === str) return;
-    $el.textContent = str;
-  } catch (er) {
-    console.error(`Error updating ${selector} text: ${er}`);
-  }
-}
-
-async function updateTexts(list) {
-  if (!Array.isArray(list)) throw Error('"list" must be of type Array');
-  await raf();
-  for (const { el, str } of list) updateText(el, str);
 }
 
 function structureKey(title, count) {
@@ -294,17 +273,13 @@ function addListeners() {
       type: EventManager.types.change,
       fn: selectorChanged
     }, {
-      el: qs(selectors.userMenuButton),
+      el: qs('#login'),
       type: EventManager.types.click,
       fn: () => userMenu.open()
     }, {
       el: qs('#stop'),
       type: EventManager.types.click,
       fn: () => new ConfirmationDialog('Stop scan?', requestStop)
-    }, {
-      el: qs('main'),
-      type: EventManager.types.scroll,
-      fn: ev => header.scroll(ev.target.scrollTop)
     }
   ];
 
@@ -432,9 +407,9 @@ function extendUITimeout() {
 }
 
 function userChange({
-  total_users, 
-  users_last_30_days, 
-  total_user_stations, 
+  total_users,
+  users_last_30_days,
+  total_user_stations,
   user_stations_last_30_days
 }) {
   updateTexts([
@@ -553,17 +528,31 @@ async function requestStop() {
 function keepTimeUpdated() {
   const { date, str } = nextScheduledUpdate();
   updateTexts([{
-      el: '#nextUpdate',
-      str: date
-    }, {
-      el: '#nextTime',
-      str
-    }
+    el: '#nextUpdate',
+    str: date
+  }, {
+    el: '#nextTime',
+    str
+  }
   ]);
 }
 
 function loaded() {
   document.title = `Dashboard ${location.host}`;
+
+  header = new CollapsingHeader();
+  streams = new StreamManager();
+  requestsChart = new RequestsChart(qs('#requests'));
+  logz = new FrontendLog({
+    container: qs('#log'),
+    level: DEFAULT_LOG_LEVEL,
+    levelSelector: qs('#level'),
+    maxLines: MAX_LOG_LINES
+  });
+  minder = new ScrollMinder(qs('main'), { 
+    onScroll: (_, pos) => header.scroll(pos)
+  });
+
   addListeners();
 
   userMenu.loadUser(window.user);
@@ -577,6 +566,7 @@ function loaded() {
 }
 
 function dispose() {
+  minder.destroy();
   logz.destroy();
   streams.closeAll();
   requestsController?.abort();
