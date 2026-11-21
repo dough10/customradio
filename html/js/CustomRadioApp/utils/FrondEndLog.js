@@ -36,6 +36,7 @@ export default class FrontendLog {
 
   #container;
   #levelSelector;
+  #syncButton;
   #maxLines;
   #logLevel;
   #selectedStatus = 0;
@@ -47,6 +48,7 @@ export default class FrontendLog {
     container,
     level = 1,
     levelSelector,
+    syncButton,
     maxLines = 1000,
     bottomThreshold = 50
   }) {
@@ -56,6 +58,10 @@ export default class FrontendLog {
 
     if (!(levelSelector instanceof HTMLElement)) {
       throw new TypeError("levelSelector must be an HTMLElement");
+    }
+
+    if (!(syncButton instanceof HTMLElement)) {
+      throw new TypeError("syncButton must be an HTMLElement");
     }
 
     if (!FrontendLog.validLevelsNumeric.has(level)) {
@@ -68,6 +74,7 @@ export default class FrontendLog {
 
     this.#container = container;
     this.#levelSelector = levelSelector;
+    this.#syncButton = syncButton;
     this.#maxLines = maxLines;
     this.#logLevel = level;
     
@@ -86,6 +93,12 @@ export default class FrontendLog {
         this.#followingBackendLogLevel = false;
         this.setLevel(Number(ev.target.value));
       }
+    );
+
+    this.#em.add(
+      syncButton,
+      EventManager.types.click,
+      () => this.toggleFollow()
     );
   }
 
@@ -127,6 +140,10 @@ export default class FrontendLog {
       if (!line.hasAttribute('data-level')) continue;
       line.hidden = !this.#isLogLineVisible(line);
     }
+  }
+
+  #setIcon() {
+    this.#syncButton.disabled = this.#followIncommingLogLines;
   }
 
   async #keepAtBottom() {
@@ -222,7 +239,6 @@ export default class FrontendLog {
 
   toggleFollow() {
     this.#assertAlive();
-    this.#followIncommingLogLines = !this.#followIncommingLogLines;
     if (this.#followIncommingLogLines) {
       this.unfollow();
     } else {
@@ -234,11 +250,13 @@ export default class FrontendLog {
     this.#assertAlive();
     this.#followIncommingLogLines = true;
     this.#container.scrollTop = this.#container.scrollHeight;
+    this.#setIcon();
   }
-
+  
   unfollow() {
     this.#assertAlive();
     this.#followIncommingLogLines = false;
+    this.#setIcon();
   }
 
   destroy() {

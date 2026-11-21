@@ -163,6 +163,10 @@ ul {
   align-items: center;
 }
 
+#sync {
+  top: -8px;
+}
+
 .flex-row {
   display: flex;
   flex-direction: row;

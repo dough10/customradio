@@ -546,6 +546,7 @@ function loaded() {
   logz = new FrontendLog({
     container: qs('#log'),
     level: DEFAULT_LOG_LEVEL,
+    syncButton: qs('#sync'),
     levelSelector: qs('#level'),
     maxLines: MAX_LOG_LINES
   });
@@ -566,13 +567,14 @@ function loaded() {
 }
 
 function dispose() {
-  minder.destroy();
-  logz.destroy();
+  em.removeAll();
   streams.closeAll();
   requestsController?.abort();
   timeouts.clearAll();
+  header.destroy();
+  minder.destroy();
+  logz.destroy();
   requestsChart.destroy();
-  em.removeAll();
   clearInterval(timeInterval);
 }
 
@@ -581,4 +583,3 @@ window.addEventListener('pagehide', dispose, { once: true });
 
 window.filterStatus = s => logz.filterStatus(s);
 window.showHistory = () => console.log(history);
-window.followLog = () => logz.toggleFollow();
