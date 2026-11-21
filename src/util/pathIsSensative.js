@@ -74,9 +74,7 @@ const sensitivePaths = [
   'tar',
   'gz',
   'rar',
-  '7z',
-  'llm',
-  'ai'
+  '7z'
 ];
 
 module.exports = path => sensitivePaths.some(sensitive => path.includes(sensitive));
