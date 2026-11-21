@@ -1,3 +1,5 @@
+const { logger } = require('../services.js');
+
 const pack = require("../../package.json");
 const { EnvHttpProxyAgent } = require('undici');
 
@@ -157,8 +159,7 @@ async function streamTest(url, timeout = 10_000) {
     const icyurl =
       headers.get("icy-url") || "";
 
-    const finalUrl =
-      response.url || url;
+    const finalUrl = response.url || url;
 
     let bitrate = parseInt(
       headers.get("icy-br"),
@@ -205,31 +206,31 @@ async function streamTest(url, timeout = 10_000) {
       );
     }
 
-    /*
-     * Clean up useless station names.
-     */
     if (name) {
       const cleanName = fixEncoding(name).trim();
+      /*
+       * Clean up useless station names.
+       */
       if (
         unhelpfulNames.includes(cleanName.toLowerCase()) ||
         unhelpfulRegex.test(cleanName)
       ) {
-        name = null;
+        /*
+         * Fall back to the hostname when the stream
+         * doesn't provide a useful name.
+         */
+        try {
+          name = new URL(finalUrl).hostname;
+        } catch {
+          name = finalUrl || url;
+        }
       } else {
         name = cleanName;
       }
     }
 
-    /*
-     * Fall back to the hostname when the stream
-     * doesn't provide a useful name.
-     */
-    if (!name) {
-      try {
-        name = new URL(finalUrl).hostname;
-      } catch {
-        name = finalUrl;
-      }
+    if (!name || name === 'null') {
+      logger.error('name failure: name = ' + name + ' url = ' + url,)
     }
 
     return {
