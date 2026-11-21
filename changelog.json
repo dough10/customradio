@@ -1,6 +1,6 @@
 {
   "Current": [
-    "fix bug the occured when user had no avatar",
+    "fix bug that occured when user had no avatar",
     "Change how changelog string is created",
     "Minor backend changes"
   ], 
