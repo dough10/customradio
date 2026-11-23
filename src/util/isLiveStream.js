@@ -140,10 +140,8 @@ async function streamTest(url, timeout = 10_000) {
 
     const headers = response.headers;
 
-    let name = String(
-      headers.get("icy-name") ||
-      headers.get("x-audiocast-name")
-    );
+    let name;
+    const rawName = headers.get("icy-name") || headers.get("x-audiocast-name") || "";
 
     const description =
       headers.get("icy-description") || "";
@@ -206,31 +204,31 @@ async function streamTest(url, timeout = 10_000) {
       );
     }
 
-    if (name) {
-      const cleanName = fixEncoding(name).trim();
-      /*
-       * Clean up useless station names.
-       */
-      if (
-        unhelpfulNames.includes(cleanName.toLowerCase()) ||
-        unhelpfulRegex.test(cleanName)
-      ) {
-        /*
-         * Fall back to the hostname when the stream
-         * doesn't provide a useful name.
-         */
-        try {
-          name = new URL(finalUrl).hostname;
-        } catch {
-          name = finalUrl || url;
-        }
-      } else {
-        name = cleanName;
+    const fixedName = fixEncoding(rawName);
+
+    const cleanName =
+      typeof fixedName === "string"
+        ? fixedName.trim()
+        : "";
+
+    const invalidName = !cleanName ||
+      ["null", "undefined", ...unhelpfulNames].includes(cleanName.toLowerCase()) ||
+      unhelpfulRegex.test(cleanName);
+
+    if (invalidName) {
+      try {
+        name = new URL(finalUrl).hostname;
+      } catch {
+        name = finalUrl || url;
       }
+    } else {
+      name = cleanName;
     }
 
     if (!name || name === 'null') {
-      logger.error('name failure: name = ' + name + ' url = ' + url,)
+      logger.warn(
+        `Stream missing/invalid name; using hostname. URL: ${url}, rawName: ${JSON.stringify(rawName)}`
+      );
     }
 
     return {
