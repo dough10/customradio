@@ -1,11 +1,12 @@
 import ScrollMinder from "./ScrollMinder.js";
 import EventManager from "../EventManager/EventManager.js";
 import StreamManager from "../EventSourceManager/EventSourceManager.js";
+
 import sleep from "./sleep.js";
 import raf from "./raf.js";
 
 function extractStatus(line) {
-  return line.match(/status:\s*(\d{3})/)?.[1] ?? null;
+  return line.match(/status:\s*(\d{3})\b/)?.[1] ?? null;
 }
 
 function createOptions(key, val) {
@@ -40,8 +41,8 @@ export default class FrontendLog {
   #maxLines;
   #logLevel;
   #selectedStatus = 0;
-  #followingBackendLogLevel = true;
-  #followIncommingLogLines = true;
+  #initialized = false;
+  #followIncomingLogLines = true;
   #destroyed = false;
 
   constructor({
@@ -56,12 +57,12 @@ export default class FrontendLog {
       throw new TypeError("container must be an HTMLElement");
     }
 
-    if (!(levelSelector instanceof HTMLElement)) {
-      throw new TypeError("levelSelector must be an HTMLElement");
+    if (!(levelSelector instanceof HTMLSelectElement)) {
+      throw new TypeError("levelSelector must be an HTMLSelectElement");
     }
 
-    if (!(syncButton instanceof HTMLElement)) {
-      throw new TypeError("syncButton must be an HTMLElement");
+    if (!(syncButton instanceof HTMLButtonElement)) {
+      throw new TypeError("syncButton must be an HTMLButtonElement");
     }
 
     if (!FrontendLog.validLevelsNumeric.has(level)) {
@@ -86,20 +87,23 @@ export default class FrontendLog {
       bottomThreshold
     });
 
-    this.#em.add(
-      levelSelector,
-      EventManager.types.change,
-      ev => {
-        this.#followingBackendLogLevel = false;
-        this.setLevel(Number(ev.target.value));
+    const listeners = [
+      {
+        el: levelSelector, 
+        type: EventManager.types.change, 
+        fn: ev => this.setLevel(Number(ev.target.value))
+      }, {
+        el: syncButton,
+        type: EventManager.types.click,
+        fn: () => this.toggleFollow()
       }
-    );
+    ];
+    
+    for (const { el, type, fn } of listeners) this.#em.add(el, type, fn);
+  }
 
-    this.#em.add(
-      syncButton,
-      EventManager.types.click,
-      () => this.toggleFollow()
-    );
+  get maxScroll() {
+    return this.#container.scrollHeight - this.#container.clientHeight;
   }
 
   #assertAlive() {
@@ -142,14 +146,18 @@ export default class FrontendLog {
     }
   }
 
-  #setIcon() {
-    this.#syncButton.disabled = this.#followIncommingLogLines;
+  #updateSyncIcon() {
+    this.#syncButton.disabled = this.#followIncomingLogLines;
   }
 
   async #keepAtBottom() {
-    if (!this.#followIncommingLogLines) return;
+    if (this.#destroyed || !this.#followIncomingLogLines) return;
+
     await raf();
-    if (this.#followIncommingLogLines) this.#container.scrollTop = this.#container.scrollHeight;
+
+    if (this.#destroyed || !this.#followIncomingLogLines) return;
+
+    this.#container.scrollTop = this.maxScroll;
   }
 
   async #logLine(line) {
@@ -158,7 +166,8 @@ export default class FrontendLog {
 
       const backendLevel = Number(threshold);
 
-      if (this.#followingBackendLogLevel && FrontendLog.validLevelsNumeric.has(backendLevel)) {
+      if (!this.#initialized && FrontendLog.validLevelsNumeric.has(backendLevel)) {
+        this.#initialized = true;
         this.setLevel(backendLevel);
       }
 
@@ -217,11 +226,12 @@ export default class FrontendLog {
     if (!FrontendLog.validLevelsNumeric.has(level)) {
       throw new RangeError('Invalid log level');
     }
-
+    
     this.#logLevel = level;
     this.#levelSelector.value = String(level);
 
     this.#applyFilters();
+    this.#keepAtBottom();
   }
 
   filterStatus(statusCode) {
@@ -235,11 +245,12 @@ export default class FrontendLog {
 
     this.#selectedStatus = statusCode;
     this.#applyFilters();
+    this.#keepAtBottom();
   }
 
   toggleFollow() {
     this.#assertAlive();
-    if (this.#followIncommingLogLines) {
+    if (this.#followIncomingLogLines) {
       this.unfollow();
     } else {
       this.follow();
@@ -248,15 +259,15 @@ export default class FrontendLog {
 
   follow() {
     this.#assertAlive();
-    this.#followIncommingLogLines = true;
-    this.#container.scrollTop = this.#container.scrollHeight;
-    this.#setIcon();
+    this.#followIncomingLogLines = true;
+    this.#container.scrollTop = this.maxScroll;
+    this.#updateSyncIcon();
   }
   
   unfollow() {
     this.#assertAlive();
-    this.#followIncommingLogLines = false;
-    this.#setIcon();
+    this.#followIncomingLogLines = false;
+    this.#updateSyncIcon();
   }
 
   destroy() {
