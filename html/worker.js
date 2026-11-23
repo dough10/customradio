@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.14.5';
+const CACHE_VERSION = '1.14.6';
 const urlsToCache = [];
 
 const bypassPaths = [
