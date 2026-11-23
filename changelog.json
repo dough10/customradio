@@ -1,5 +1,8 @@
 {
   "Current": [
+    "fix change that was blocking valid but non existant endpoint"
+  ], 
+  "1.14.4": [
     "fix bug that occured when user had no avatar",
     "Change how changelog string is created",
     "Minor backend changes"
