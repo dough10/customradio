@@ -28,7 +28,7 @@ const sensitivePaths = [
   'config',
   'amplifyrc',
   'docker',
-  'compose',
+  'docker-compose',
   'credentials',
   'secrets',
   'serviceaccount',
