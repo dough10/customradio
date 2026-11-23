@@ -23,6 +23,10 @@ function fixEncoding(input) {
  * Core fix: reinterpret Latin-1 bytes as UTF-8
  */
 function tryLatin1ToUtf8(str) {
+  if (!/^[\u0000-\u00FF]*$/.test(str)) {
+    return str;
+  }
+
   try {
     return Buffer.from(str, 'latin1').toString('utf8');
   } catch {
