@@ -1,5 +1,5 @@
 import EventManager from "../../EventManager/EventManager.js";
-import selectors from "../../selectors.js";
+import ScrollMinder from "../../utils/ScrollMinder.js";
 
 const MOBILE_THRESHOLD = 450;
 
@@ -10,7 +10,7 @@ const MOBILE_THRESHOLD = 450;
  */
 export default class CollapsingHeader {
   /** @private @type {Number} Maximum amount to shrink the header by (in px) */
-  _shrinkHeaderBy = 64;
+  #shrinkHeaderBy = 64;
 
   /**
    * @private
@@ -18,58 +18,70 @@ export default class CollapsingHeader {
    * Controls how fast the header collapses.
    * (scrollTop / factor = shrink amount in px)
    */
-  _factor = 5;
+  #factor = 5;
 
   /**
    * @private
    * @type {Number}
    * ammount of header that needs to be hidden before info button begins to fade in
    */
-  _mobileInfoFadeDelay = 32;
+  #mobileInfoFadeDelay = 32;
 
   /**
    * @private
    * @type {Number}
    * extra dappener for header collapse when on mobile
    */
-  _mobileMultiplier = 1.5;
+  #mobileMultiplier = 1.5;
 
   /**
    * @private
    * @type {Number}
    * dappening factor for info button transition
    */
-  _infoTranslateFactor = 1.5; // the 1.5 seems to land the info button center of the collapsed header
+  #infoTranslateFactor = 1.5; // the 1.5 seems to land the info button center of the collapsed header
 
   /**
    * @private
    * @type {EventManager}
    * Event manager for handling events
    */
-  _em = new EventManager();
+  #em = new EventManager();
 
-  constructor() {
-    /** @type {HTMLElement|null} Header element */
-    this.$header = document.querySelector(selectors.header);
+  #minder;
 
-    /** @type {HTMLElement|null} Input container element */
-    this.$input = document.querySelector(selectors.formGroup);
-    
-    /** @type {HTMLElement|null} Main content wrapper */
-    this.$main = document.querySelector(selectors.main);
+  constructor({header, input, main, info, login}) {
+    if (!(header instanceof HTMLElement)) {
+      throw new TypeError("header must be an HTMLElement");
+    }
+
+    if (!(main instanceof HTMLElement)) {
+      throw new TypeError("main must be an HTMLElement");
+    }
+
+    if (input && !(input instanceof HTMLElement)) { // actually a form group not individual input element
+      throw new TypeError("input must be an HTMLElement");
+    }
+
+    if (info && !(info instanceof HTMLButtonElement)) {
+      throw new TypeError("info must be an HTMLButtonElement");
+    }
+
+    if (!(login instanceof HTMLButtonElement)) {
+      throw new TypeError("login must be an HTMLButtonElement");
+    }
+
+    this.$header = header;
+    this.$input = input;
+    this.$main = main;
+    this.$loginButton = login;
+    this.$infoButton = info;
     
     /** recalculate header on window resize */
-    this._em.add(window, EventManager.types.resize, this._onResize.bind(this));
-  }
-  
-  /** @type {HTMLElement|null} Info button element */
-  get infoButton() {
-    return document.querySelector(selectors.infoButton);
-  }
-  
-  /** @type {HTMLElement|null} login button element */
-  get loginButton() {
-    return document.querySelector(selectors.userMenuButton);
+    this.#em.add(window, EventManager.types.resize, () => this.#onResize());
+    this.#minder = new ScrollMinder(main, {
+      onScroll: (_, pos) => this.#scroll(pos)
+    });
   }
   
   /** @type {Boolean} mobile device */
@@ -82,8 +94,8 @@ export default class CollapsingHeader {
    * @function
    * recalculates header transition effects on window resize
    */
-  _onResize() {
-    this.scroll(this.$main?.scrollTop || 0);
+  #onResize() {
+    this.#scroll(this.$main?.scrollTop || 0);
   }
 
   /**
@@ -92,7 +104,8 @@ export default class CollapsingHeader {
    * remove resize event listener
    */
   destroy() {
-    this._em.removeAll();
+    this.#em.removeAll();
+    this.#minder.destroy();
   }
 
   /**
@@ -104,12 +117,12 @@ export default class CollapsingHeader {
    * @param {number} scrollTop - Current vertical scroll position.
    * @returns {{ transform: number, opacity: number }} Object containing calculated values.
    */
-  _calculateAnimation(scrollTop) {
-    const factor = this._isMobile ? this._factor * this._mobileMultiplier : this._factor;
-    const transform = Math.min(scrollTop / factor, this._shrinkHeaderBy);
+  #calculateAnimation(scrollTop) {
+    const factor = this._isMobile ? this.#factor * this.#mobileMultiplier : this.#factor;
+    const transform = Math.min(scrollTop / factor, this.#shrinkHeaderBy);
     return {
       transform,
-      opacity: transform / this._shrinkHeaderBy
+      opacity: transform / this.#shrinkHeaderBy
     };
   }
 
@@ -122,8 +135,8 @@ export default class CollapsingHeader {
    * 
    * @returns {Number}
    */
-  _mobileOpacity(transform) {
-    const adjustedOpacity = (transform - this._mobileInfoFadeDelay) / (this._shrinkHeaderBy - this._mobileInfoFadeDelay);
+  #mobileOpacity(transform) {
+    const adjustedOpacity = (transform - this.#mobileInfoFadeDelay) / (this.#shrinkHeaderBy - this.#mobileInfoFadeDelay);
     return Math.max(0, Math.min(1, adjustedOpacity));
   }
 
@@ -133,28 +146,28 @@ export default class CollapsingHeader {
    * @param {Number} transform 
    * @param {Number} opacity
    */
-  _animate(transform, opacity) {
+  #animate(transform, opacity) {
     if (this.$input) this.$input.style.opacity = (1 - opacity).toFixed(2);
     if (this.$header) this.$header.style.transform = `translateY(-${transform}px)`;
     if (this.$main) this.$main.style.transform = `translateY(-${transform}px)`;
     
     [
-      this.loginButton,
-      this.infoButton
+      this.$loginButton,
+      this.$infoButton
     ].filter(button => button !== null).forEach(button => {
-      if (button) button.style.transform = `translateY(${(transform / this._infoTranslateFactor).toFixed(2)}px)`;
+      if (button) button.style.transform = `translateY(${(transform / this.#infoTranslateFactor).toFixed(2)}px)`;
     });
 
     if (this._isMobile) {
-      const infoOpacity = this._mobileOpacity(transform);
-      if (this.infoButton) {
-        this.infoButton.style.opacity = infoOpacity.toFixed(2);
-        this.infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
+      const infoOpacity = this.#mobileOpacity(transform);
+      if (this.$infoButton) {
+        this.$infoButton.style.opacity = infoOpacity.toFixed(2);
+        this.$infoButton.style.display = infoOpacity < 0.02 ? 'none' : 'flex';
       }
     } else {
-      if (this.infoButton) {
-        this.infoButton.style.opacity = '1';
-        this.infoButton.style.display = 'flex';
+      if (this.$infoButton) {
+        this.$infoButton.style.opacity = '1';
+        this.$infoButton.style.display = 'flex';
       }
     }
   }
@@ -169,9 +182,9 @@ export default class CollapsingHeader {
    * @param {number} scrollTop - The current scroll offset from the top.
    * @returns {void}
    */
-  scroll(scrollTop) {
+  #scroll(scrollTop) {
     if (!this.$main) return;
-    const { transform, opacity } = this._calculateAnimation(scrollTop);
-    requestAnimationFrame(_ => this._animate(transform, opacity));
+    const { transform, opacity } = this.#calculateAnimation(scrollTop);
+    requestAnimationFrame(_ => this.#animate(transform, opacity));
   }
 }
