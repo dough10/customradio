@@ -1,4 +1,4 @@
-const UPDATE_UI_TIMEOUT = 12000;
+const UPDATE_UI_TIMEOUT = 15_000;
 const MAX_HISTORY = 500;
 const DEFAULT_LOG_LEVEL = 1;
 const MAX_LOG_LINES = 1000;
@@ -8,35 +8,24 @@ import EventManager from './CustomRadioApp/EventManager/EventManager.js';
 import CollapsingHeader from './CustomRadioApp/UIManager/CollapsingHeader/CollapsingHeader.js';
 import RequestsChart from './CustomRadioApp/Charts/RequestsChart.js';
 import TimeoutManager from './CustomRadioApp/utils/TimeoutManager.js';
-import StreamManager from './CustomRadioApp/EventSourceManager/EventSourceManager.js';
-import ConfirmationDialog from './CustomRadioApp/UIManager/dialogs/ConfirmationDialog.js';
 import FrontendLog from './CustomRadioApp/utils/FrondEndLog.js';
-import ScrollMinder from './CustomRadioApp/utils/ScrollMinder.js';
+import UpdateUIManager from './CustomRadioApp/utils/UpdateUIManager.js';
 
 import userMenu from './CustomRadioApp/UIManager/menu/menu.js';
 
-import msToHhMmSs from '../../src/util/msToHhMmSs.js';
 import raf from './CustomRadioApp/utils/raf.js';
 import { qs, qsAll } from './CustomRadioApp/utils/querySelectors.js';
 import { updateTexts } from './CustomRadioApp/utils/updateTexts.js';
+import formatNumber from './CustomRadioApp/utils/formatNumber.js';
 
 const em = new EventManager();
 const timeouts = new TimeoutManager();
-const history = [];
 
 let requestsController;
-let timeInterval;
 let header;
-let streams;
 let requestsChart;
 let logz;
-let minder;
-
-
-function formatNumber(num) {
-  num = Number(num);
-  return num >= 1000 ? num.toLocaleString("en-US") : num;
-}
+let updateUI;
 
 function structureKey(title, count) {
   const $key = document.createElement('span');
@@ -169,57 +158,6 @@ async function displayRequestHistory({
   requestsChart.update(times, counts, interval);
 }
 
-function nextScheduledUpdate() {
-  const now = new Date();
-
-  // Next Sunday at midnight
-  const nextSunday = new Date(now);
-  const daysUntilNextSunday = (7 - now.getDay()) % 7;
-
-  nextSunday.setDate(now.getDate() + daysUntilNextSunday);
-  nextSunday.setHours(0, 0, 0, 0);
-
-  // If it's already Sunday at midnight (i.e. that time has passed),
-  // move to next Sunday.
-  if (nextSunday <= now) {
-    nextSunday.setDate(nextSunday.getDate() + 7);
-  }
-
-  // First of the month at noon
-  const firstOfMonth = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    1,
-    12,
-    0,
-    0,
-    0
-  );
-
-  // If this month's update has already happened, use next month
-  if (firstOfMonth <= now) {
-    firstOfMonth.setMonth(firstOfMonth.getMonth() + 1);
-  }
-
-  // Return whichever happens first
-  const nextUpdate = nextSunday < firstOfMonth
-    ? nextSunday
-    : firstOfMonth;
-
-  const date = nextUpdate.toLocaleString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
-  return {
-    date,
-    str: msToHhMmSs(nextUpdate.getTime() - now.getTime())
-  };
-}
-
 function validateRequestHistory(data) {
   if (!data || typeof data !== 'object') {
     throw new Error('Invalid history response');
@@ -266,7 +204,8 @@ async function selectorChanged(ev) {
   }
 }
 
-function addListeners() {
+function loadUserMenu() {
+  userMenu.loadUser(window.user);
   const listeners = [
     {
       el: qs('#hours'),
@@ -276,10 +215,6 @@ function addListeners() {
       el: qs('#login'),
       type: EventManager.types.click,
       fn: () => userMenu.open()
-    }, {
-      el: qs('#stop'),
-      type: EventManager.types.click,
-      fn: () => new ConfirmationDialog('Stop scan?', requestStop)
     }
   ];
 
@@ -290,259 +225,25 @@ function addListeners() {
   });
 }
 
-async function updateProgBar(percent) {
-  const $progBar = qs('#progress>.bar');
-  if (!$progBar) return;
-  await raf();
-  $progBar.style.transform = `translateX(-${100 - percent}%)`;
-  $progBar.title = `${percent}% Completed`;
-}
-
-function hideUIwhenNoUpdate($updatesCard) {
-  $updatesCard.style.display = 'none';
-  timeouts.set('progress-reset', () => updateProgBar(0), 1000);
-  const stopButton = qs('#stop');
-  if (stopButton) stopButton.disabled = false;
-}
-
-function taskComplete(start, end) {
-  const { date, str } = nextScheduledUpdate();
-  updateTexts([
-    {
-      el: '#updateDuration',
-      str: msToHhMmSs(end.time - start.time)
-    }, {
-      el: '#lastCompleted',
-      str: new Date(end.time).toLocaleString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }, {
-      el: '#online',
-      str: formatNumber(end.online)
-    }, {
-      el: '#nextUpdate',
-      str: date
-    }, {
-      el: '#nextTime',
-      str
-    }, {
-      el: '#total',
-      str: formatNumber(end.total)
-    }
-  ]);
-}
-
-function updateMemoryValues(rss, heapTotal, heapUsed, external, arrayBuffers, batch, time) {
-  history.push({
-    rss,
-    heapTotal,
-    heapUsed,
-    external,
-    arrayBuffers,
-    batch,
-    time
-  });
-  if (history.length > MAX_HISTORY) {
-    history.shift();
-  }
-  updateTexts([
-    {
-      el: '#heap',
-      str: `${formatNumber(heapUsed)} MB`
-    }, {
-      el: '#RSS',
-      str: `${formatNumber(rss)} MB`
-    }
-  ]);
-}
-
-function updateValues(percent, type, changed, remaining, runTime, approxCompletion, approxCompletionTime, processed, total, stationsPerSecond) {
-  const rawPercent = Number(percent);
-  const percVal = Number.isFinite(rawPercent) ? Math.max(0, Math.min(100, rawPercent)) : 0;
-
-  updateProgBar(percVal);
-  updateTexts([
-    {
-      el: '#updateHeader',
-      str: (type === 'update') ? 'UPDATING' : 'SCRAPING'
-    }, {
-      el: '#percent',
-      str: `${percVal}%`
-    }, {
-      el: '#changed',
-      str: formatNumber(changed)
-    }, {
-      el: '#remaining',
-      str: formatNumber(remaining)
-    }, {
-      el: '#runTime',
-      str: runTime
-    }, {
-      el: '#AC',
-      str: approxCompletion
-    }, {
-      el: '#ACT',
-      str: approxCompletionTime
-    }, {
-      el: '#counts',
-      str: `${formatNumber(processed)} / ${formatNumber(total)}`
-    }, {
-      el: '#SPS',
-      str: formatNumber(stationsPerSecond)
-    }
-  ]);
-}
-
-function extendUITimeout() {
-  const $updatesCard = qs('#updates');
-  if (!$updatesCard) return;
-  $updatesCard.style.display = 'flex';
-  timeouts.extend('updates', () => {
-    hideUIwhenNoUpdate($updatesCard);
-  }, UPDATE_UI_TIMEOUT);
-}
-
-function userChange({
-  total_users,
-  users_last_30_days,
-  total_user_stations,
-  user_stations_last_30_days
-}) {
-  updateTexts([
-    {
-      el: '#totalUsers',
-      str: formatNumber(total_users)
-    }, {
-      el: '#usersIn30',
-      str: formatNumber(users_last_30_days)
-    }, {
-      el: '#userStationsCount',
-      str: formatNumber(total_user_stations)
-    }, {
-      el: '#userStationsIn30',
-      str: formatNumber(user_stations_last_30_days)
-    }
-  ]);
-}
-
-function updateTaskProgress(ev) {
-  try {
-    const {
-      processed,
-      total,
-      remaining,
-      runTime,
-      changed,
-      approxCompletion,
-      approxCompletionTime,
-      percent,
-      start,
-      end,
-      rss,
-      heapTotal,
-      heapUsed,
-      external,
-      arrayBuffers,
-      time,
-      type,
-      stationsPerSecond,
-      uptime,
-      batch,
-      userStats
-    } = JSON.parse(ev.data);
-
-    if (userStats != null) userChange(userStats);
-
-    if (heapUsed != null && rss != null) {
-      updateMemoryValues(
-        rss,
-        heapTotal,
-        heapUsed,
-        external,
-        arrayBuffers,
-        batch,
-        time
-      );
-    }
-
-    if (percent != null) {
-      extendUITimeout();
-      updateValues(
-        percent,
-        type,
-        changed,
-        remaining,
-        runTime,
-        approxCompletion,
-        approxCompletionTime,
-        processed,
-        total,
-        stationsPerSecond
-      );
-    }
-
-    if (uptime != null) {
-      updateTexts([{
-        el: '#uptime',
-        str: uptime
-      }]);
-    }
-
-    if (start != null && end != null) {
-      taskComplete(start, end);
-    }
-  } catch (e) {
-    console.error('Failed to process progress event', e);
-  }
-}
-
-function progressStatus() {
-  streams.connect('progress', '/progress', {
-    onMessage: updateTaskProgress,
-
-    onError: (ev, state) => {
-      if (state === EventSource.CLOSED) {
-        new Toast('Progress stream permanently closed');
-      }
-    }
-  });
-}
-
-async function requestStop() {
-  try {
-    const res = await fetch('/stop');
-    if (!res.ok) throw new Error('API failure');
-    const { message, stopping } = await res.json();
-    new Toast(message);
-    if (stopping) qs('#stop').disabled = true;
-  } catch (err) {
-    new Toast('Stop failed');
-    console.error('stop failed:', err);
-  }
-}
-
-function keepTimeUpdated() {
-  const { date, str } = nextScheduledUpdate();
-  updateTexts([{
-    el: '#nextUpdate',
-    str: date
-  }, {
-    el: '#nextTime',
-    str
-  }
-  ]);
-}
-
 function loaded() {
   document.title = `Dashboard ${location.host}`;
-
-  header = new CollapsingHeader();
-  streams = new StreamManager();
-  requestsChart = new RequestsChart(qs('#requests'));
+  
+  header = new CollapsingHeader({
+    header: qs('body>header'),
+    main: qs('main'),
+    login: qs('#login')
+  });
+ 
+  loadUserMenu();
+  
+  updateUI = new UpdateUIManager({
+    updateCard: qs('#updates'),
+    progBar: qs('#progress>.bar'),
+    stopButton: qs('#stop'),
+    uiTimeout: UPDATE_UI_TIMEOUT,
+    maxHistory: MAX_HISTORY
+  });
+  
   logz = new FrontendLog({
     container: qs('#log'),
     level: DEFAULT_LOG_LEVEL,
@@ -550,36 +251,24 @@ function loaded() {
     levelSelector: qs('#level'),
     maxLines: MAX_LOG_LINES
   });
-  minder = new ScrollMinder(qs('main'), { 
-    onScroll: (_, pos) => header.scroll(pos)
-  });
-
-  addListeners();
-
-  userMenu.loadUser(window.user);
+  
+  requestsChart = new RequestsChart(qs('#requests'));
   displayRequestHistory(window.requests);
-  const { start, end } = window.lastUpdate;
-  taskComplete(start, end);
-  timeInterval = setInterval(keepTimeUpdated, 1000);
 
-  logz.start();
-  progressStatus();
 }
 
 function dispose() {
+  updateUI.destroy();
   em.removeAll();
-  streams.closeAll();
   requestsController?.abort();
   timeouts.clearAll();
   header.destroy();
-  minder.destroy();
   logz.destroy();
   requestsChart.destroy();
-  clearInterval(timeInterval);
 }
 
 window.addEventListener('load', loaded, { once: true });
 window.addEventListener('pagehide', dispose, { once: true });
 
 window.filterStatus = s => logz.filterStatus(s);
-window.showHistory = () => console.log(history);
+window.showHistory = () => console.log(updateUI.history);
