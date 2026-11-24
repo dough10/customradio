@@ -15,6 +15,7 @@ import selectors from '../selectors.js';
 import showActiveAlerts from '../Alerts/alertHelpers.js';
 
 import userMenu from './menu/menu.js';
+import { qs, qsAll } from '../utils/querySelectors.js';
 
 
 /**
@@ -26,16 +27,22 @@ export default class UIManager {
     this._selectors = s || selectors;
     this._player = new AudioPlayer();
     this._em = new EventManager();
-    this._header = new CollapsingHeader();
+    this._header = new CollapsingHeader({
+      header: qs(selectors.header),
+      main: qs(selectors.main),
+      input: qs(selectors.formGroup),
+      login: qs(selectors.userMenuButton),
+      info: qs(selectors.infoButton)
+    });
 
-    this.$toTop = document.querySelector(this._selectors.toTop);
-    this.$filter = document.querySelector(this._selectors.filter);
-    this.$downloadButton = document.querySelector(this._selectors.downloadButton);
-    this.$stationCount = document.querySelector(this._selectors.stationCount);
-    this.$resetButton = document.querySelector(this._selectors.resetButton);
-    this.$userMenuButton = document.querySelector(this._selectors.userMenuButton);
-    this.$main = document.querySelector(this._selectors.main);
-    this.$toggleSelected = document.querySelector(this._selectors.toggleSelected);
+    this.$toTop = qs(this._selectors.toTop);
+    this.$filter = qs(this._selectors.filter);
+    this.$downloadButton = qs(this._selectors.downloadButton);
+    this.$stationCount = qs(this._selectors.stationCount);
+    this.$resetButton = qs(this._selectors.resetButton);
+    this.$userMenuButton = qs(this._selectors.userMenuButton);
+    this.$main = qs(this._selectors.main);
+    this.$toggleSelected = qs(this._selectors.toggleSelected);
 
     const required = [
       this.$toTop,
@@ -110,7 +117,7 @@ export default class UIManager {
       if (el) this._em.add(el, event, handler);
     }
 
-    document.querySelectorAll('.menu-button').forEach(btn => {
+    qsAll('.menu-button').forEach(btn => {
       this._em.add(btn, EventManager.types.click, _ => userMenu.close());
     });
   }
@@ -219,7 +226,7 @@ export default class UIManager {
    * @return {void}
    */
   onScroll(scrollTop) {
-    this._header.scroll(scrollTop);
+    // this._header.scroll(scrollTop);
     const closeToTop = scrollTop < (window.innerHeight * 0.2);
     closeToTop ? this.$toTop.classList.add('hidden') : this.$toTop.classList.remove('hidden');
   }
@@ -252,7 +259,7 @@ export default class UIManager {
    * @returns {Array<String>} List of normalized genre values
    */
   currentGenres() {
-    const parent = document.querySelector(this._selectors.genres);
+    const parent = qs(this._selectors.genres);
     if (!parent) {
       console.error('Genres parent element is missing.');
       return [];
@@ -272,7 +279,7 @@ export default class UIManager {
    */
   async loadGenres(genres) {
     const options = genres.map(createOption);
-    document.querySelector(this._selectors.genres).replaceChildren(...options);
+    qs(this._selectors.genres).replaceChildren(...options);
   }
 
   /**
@@ -320,7 +327,7 @@ export default class UIManager {
    * @return {void}
    */
   loadingEnd() {
-    const loadingEl = document.querySelector(this._selectors.loading);
+    const loadingEl = qs(this._selectors.loading);
     if (loadingEl) loadingEl.remove();
     this.$stationCount.parentElement.style.removeProperty('display');
   }
@@ -334,10 +341,10 @@ export default class UIManager {
    * @return {void}
    */
   toggleSelectedVisibility() {
-    const selected = document.querySelectorAll(this._selectors.selectedStation);
+    const selected = qsAll(this._selectors.selectedStation);
     if (!selected.length) return;
     this.$main.classList.toggle('hide-selected');
-    const inWindow = document.querySelectorAll(this._selectors.stations).length;
+    const inWindow = qsAll(this._selectors.stations).length;
     if (inWindow <= this._lzldr.pullCount * 2 && this._lzldr) {
       this._lzldr.load();
     }
