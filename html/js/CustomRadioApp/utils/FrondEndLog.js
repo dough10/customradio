@@ -100,6 +100,8 @@ export default class FrontendLog {
     ];
     
     for (const { el, type, fn } of listeners) this.#em.add(el, type, fn);
+
+    this.#start();
   }
 
   get maxScroll() {
@@ -203,7 +205,7 @@ export default class FrontendLog {
     }
   }
 
-  start() {
+  #start() {
     this.#assertAlive();
     this.#streams.connect('logs', '/logs', {
       onMessage: ev => this.#logLine(ev.data),
