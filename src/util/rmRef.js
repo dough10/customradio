@@ -4,7 +4,8 @@ const trashParams = [
   't302',
   'fromyp',
   'listening-from-radio-garden',
-  'time'
+  'time',
+  'aggregator'
 ];
 
 /**
