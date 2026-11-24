@@ -1,11 +1,11 @@
 const { logger } = require('../services.js');
 
-const pack = require("../../package.json");
+const pack = require('../../package.json');
 const { EnvHttpProxyAgent } = require('undici');
 
-const isValidURL = require("./isValidURL.js");
-const fixEncoding = require("./fixEncoding.js");
-const usedTypes = require("./usedTypes.js");
+const isValidURL = require('./isValidURL.js');
+const fixEncoding = require('./fixEncoding.js');
+const usedTypes = require('./usedTypes.js');
 const rmRef = require('./rmRef.js');
 
 /**
@@ -15,15 +15,15 @@ const rmRef = require('./rmRef.js');
  * @default
  */
 const unhelpfulNames = [
-  "stream",
-  ".",
-  ":",
-  "-",
-  "no name",
-  "radio",
-  "online radio",
-  "n/a",
-  "this is my server name"
+  'stream',
+  '.',
+  ':',
+  '-',
+  'no name',
+  'radio',
+  'online radio',
+  'n/a',
+  'this is my server name'
 ];
 
 const unhelpfulRegex = /^\d{1,2}$/;
@@ -34,7 +34,7 @@ const unhelpfulRegex = /^\d{1,2}$/;
  * @constant {string[]} defaultPorts
  * @default
  */
-const defaultPorts = [":80/", ":443/"];
+const defaultPorts = [':80/', ':443/'];
 
 /**
  * Clean the URL by removing default ports and trailing question marks.
@@ -44,11 +44,11 @@ const defaultPorts = [":80/", ":443/"];
  * @returns {string} The cleaned URL.
  */
 function cleanURL(url) {
-  if (url.endsWith("?")) {
+  if (url.endsWith('?')) {
     url = url.slice(0, -1);
   }
   defaultPorts.forEach((port) => {
-    url = url.replace(port, "/");
+    url = url.replace(port, '/');
   });
   return rmRef(url);
 }
@@ -99,13 +99,13 @@ async function streamTest(url, timeout = 10_000) {
 
   try {
     response = await fetch(url, {
-      method: "GET",
-      redirect: "manual",
+      method: 'GET',
+      redirect: 'manual',
       headers: {
-        "User-Agent": `radiotxt.site/${pack.version}`,
-        "Accept": "audio/*, */*;q=0.9",
-        "Icy-MetaData": "1",
-        "Range": "bytes=0-"
+        'User-Agent': `radiotxt.site/${pack.version}`,
+        'Accept': 'audio/*, */*;q=0.9',
+        'Icy-MetaData': '1',
+        'Range': 'bytes=0-'
       },
       signal,
       dispatcher
@@ -120,11 +120,11 @@ async function streamTest(url, timeout = 10_000) {
       response.status < 400
     ) {
       const location =
-        response.headers.get("location");
+        response.headers.get('location');
 
       return {
         ok: false,
-        error: "redirect",
+        error: 'redirect',
         status: response.status,
         redirect: location || null,
         url
@@ -141,26 +141,28 @@ async function streamTest(url, timeout = 10_000) {
     const headers = response.headers;
 
     let name;
-    const rawName = headers.get("icy-name") || headers.get("x-audiocast-name") || "";
+    const rawName = headers.get('icy-name') || headers.get('x-audiocast-name') || '';
 
     const description =
-      headers.get("icy-description") || "";
+      headers.get('icy-description') || '';
 
-    const icyGenre =
-      headers.get("icy-genre") ||
-      headers.get("x-audiocast-genre") ||
-      "Unknown";
+    let icyGenre =
+      headers.get('icy-genre') ||
+      headers.get('x-audiocast-genre') ||
+      'Unknown';
+
+    if (icyGenre.toLocaleLowerCase() === 'null') icyGenre = 'unknown';
 
     const content =
-      headers.get("content-type");
+      headers.get('content-type');
 
     const icyurl =
-      headers.get("icy-url") || "";
+      headers.get('icy-url') || '';
 
     const finalUrl = response.url || url;
 
     let bitrate = parseInt(
-      headers.get("icy-br"),
+      headers.get('icy-br'),
       10
     );
 
@@ -177,13 +179,13 @@ async function streamTest(url, timeout = 10_000) {
 
     const normalizedContent =
       content
-        ?.split(";")[0]
+        ?.split(';')[0]
         .trim()
         .toLowerCase();
 
     if (!normalizedContent) {
       return returnError(
-        "missing_content_type",
+        'missing_content_type',
         response.status
       );
     }
@@ -199,7 +201,7 @@ async function streamTest(url, timeout = 10_000) {
 
     if (!response.body) {
       return returnError(
-        "no_response_body",
+        'no_response_body',
         response.status
       );
     }
@@ -207,12 +209,12 @@ async function streamTest(url, timeout = 10_000) {
     const fixedName = fixEncoding(rawName);
 
     const cleanName =
-      typeof fixedName === "string"
+      typeof fixedName === 'string'
         ? fixedName.trim()
-        : "";
+        : '';
 
     const invalidName = !cleanName ||
-      ["null", "undefined", ...unhelpfulNames].includes(cleanName.toLowerCase()) ||
+      ['null', 'undefined', ...unhelpfulNames].includes(cleanName.toLowerCase()) ||
       unhelpfulRegex.test(cleanName);
 
     if (invalidName) {
@@ -241,41 +243,41 @@ async function streamTest(url, timeout = 10_000) {
       icyGenre,
       content,
       bitrate,
-      error: "",
+      error: '',
       status: response.status
     };
 
   } catch (error) {
     if (
-      error?.name === "TimeoutError" ||
-      error?.name === "AbortError"
+      error?.name === 'TimeoutError' ||
+      error?.name === 'AbortError'
     ) {
       return returnError(
-        "timeout",
+        'timeout',
         500
       );
     }
 
     if (
-      error?.cause?.code === "ENOTFOUND"
+      error?.cause?.code === 'ENOTFOUND'
     ) {
       return returnError(
-        "dns_failure",
+        'dns_failure',
         500
       );
     }
 
     if (
-      error?.cause?.code === "ECONNREFUSED"
+      error?.cause?.code === 'ECONNREFUSED'
     ) {
       return returnError(
-        "connection_refused",
+        'connection_refused',
         500
       );
     }
 
     return returnError(
-      error?.message || "fetch_failed",
+      error?.message || 'fetch_failed',
       500
     );
 
@@ -337,7 +339,7 @@ async function streamTest(url, timeout = 10_000) {
 module.exports = async (url, timeout = 10_000) => {
   if (
     !url ||
-    typeof url !== "string" ||
+    typeof url !== 'string' ||
     !isValidURL(url)
   ) {
     return {
@@ -353,9 +355,9 @@ module.exports = async (url, timeout = 10_000) => {
    *
    * If HTTPS fails, fall back to the original HTTP URL.
    */
-  if (url.startsWith("http://")) {
+  if (url.startsWith('http://')) {
     const httpsUrl =
-      url.replace(/^http:\/\//i, "https://");
+      url.replace(/^http:\/\//i, 'https://');
 
     const httpsResult =
       await streamTest(
