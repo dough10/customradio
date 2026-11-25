@@ -37,8 +37,9 @@ function loadUserMenu() {
     fn: () => userMenu.close()
   }));
 
-  for (const { el, type, fn } of [...listeners, ...menuButtons]) 
-    em.add(el, type, fn) < 0 ? console.error(`Failed adding listener for: ${el.id || el.className}`) : null;
+  for (const { el, type, fn } of [...listeners, ...menuButtons]) {
+    if (em.add(el, type, fn) < 0) throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
+  }
 }
 
 function loaded() {

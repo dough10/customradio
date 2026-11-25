@@ -78,7 +78,10 @@ export default class CollapsingHeader {
     this.$infoButton = info;
     
     /** recalculate header on window resize */
-    this.#em.add(window, EventManager.types.resize, () => this.#onResize());
+    if (this.#em.add(window, EventManager.types.resize, () => this.#onResize()) < 0) {
+      throw new Error(`Failed adding resize listener`);
+    }
+    
     this.#minder = new ScrollMinder(main, {
       onScroll: (_, pos) => this.#scroll(pos)
     });

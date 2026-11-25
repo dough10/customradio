@@ -113,14 +113,14 @@ function validateRequestHistory(data) {
 export default class RequestLog {
   #em = new EventManager();
   
-  #chartjs;
+  #chart;
   #requestsController;
 
   constructor({
     canvas,
     select
   }) {
-    this.#chartjs = new RequestsChart(canvas);
+    this.#chart = new RequestsChart(canvas);
     const listeners = [
       {
         el: select,
@@ -128,8 +128,10 @@ export default class RequestLog {
         fn: ev => this.#selectorChanged(ev)
       }
     ];
-    for (const { el, type, fn } of listeners) 
-      this.#em.add(el, type, fn) < 0 ? console.error(`Failed adding listener for: ${el.id || el.className}`) : null;
+
+    for (const { el, type, fn } of listeners) {
+      if (this.#em.add(el, type, fn) < 0) throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
+    }
 
     try {
       this.#displayRequestHistory(window.requests);
@@ -183,7 +185,7 @@ export default class RequestLog {
     await raf();
     qs('#analytics').append($wrapper);
 
-    this.#chartjs.update(times, counts, interval);
+    this.#chart.update(times, counts, interval);
   }
 
   async #selectorChanged(ev) {
@@ -213,6 +215,6 @@ export default class RequestLog {
   }
 
   destroy() {
-    this.#chartjs.destroy();
+    this.#chart.destroy();
   }
 }
