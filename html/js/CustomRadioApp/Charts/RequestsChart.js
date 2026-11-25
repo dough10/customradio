@@ -39,7 +39,7 @@ export default class RequestsChart {
     this.#chart.data.datasets[0].data = counts;
     this.#chart.data.datasets[0].label = label;
 
-    this.#chart.update('none');
+    this.#chart.update();
   }
 
   #create(times, counts, label) {
