@@ -99,7 +99,8 @@ export default class FrontendLog {
       }
     ];
     
-    for (const { el, type, fn } of listeners) this.#em.add(el, type, fn);
+    for (const { el, type, fn } of listeners) 
+      this.#em.add(el, type, fn) < 0 ? console.error(`Failed adding listener for: ${el.id || el.className}`) : null;
 
     this.#start();
   }
@@ -153,8 +154,6 @@ export default class FrontendLog {
   }
 
   async #keepAtBottom() {
-    if (this.#destroyed || !this.#followIncomingLogLines) return;
-
     await raf();
 
     if (this.#destroyed || !this.#followIncomingLogLines) return;
