@@ -61,12 +61,13 @@ function nextScheduledUpdate() {
 }
 
 export default class UpdateUIManager {
-  #timeouts;
-  #streams;
+  #timeouts = new TimeoutManager();
+  #streams = new StreamManager();
+  #em = new EventManager();
+
   #updateCard;
   #progBar;
   #stopButton;
-  #em;
   
   #uiTimeout;
 
@@ -100,10 +101,6 @@ export default class UpdateUIManager {
     if (!Number.isInteger(maxHistory) || maxHistory < 1) {
       throw new TypeError("maxHistory must be a positive integer");
     }
-
-    this.#timeouts = new TimeoutManager();
-    this.#streams = new StreamManager();
-    this.#em = new EventManager();
 
     this.#progBar = progBar;
     this.#stopButton = stopButton;
@@ -385,7 +382,8 @@ export default class UpdateUIManager {
       }
     ];
 
-    for (const { el, type, fn } of listeners) this.#em.add(el, type, fn);
+    for (const { el, type, fn } of listeners) 
+      this.#em.add(el, type, fn) < 0 ? console.error(`Failed adding listener for: ${el.id || el.className}`) : null;
 
     this.#interval = setInterval(() => this.#keepTimeUpdated(), 1000);
     
