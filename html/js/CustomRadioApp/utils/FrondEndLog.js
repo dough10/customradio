@@ -100,7 +100,8 @@ export default class FrontendLog {
     ];
     
     for (const { el, type, fn } of listeners) {
-      if (this.#em.add(el, type, fn) < 0) throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
+      if (this.#em.add(el, type, fn) < 0) 
+        throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
     }
 
     this.#start();
