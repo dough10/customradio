@@ -7,23 +7,24 @@ import selectors from '../../selectors.js';
 import raf from '../../utils/raf.js';
 import sleep from '../../utils/sleep.js';
 import txtDownloadUrl from '../../utils/txtDownloadUrl.js';
+import { qs } from '../../utils/querySelectors.js';
 
 const em = new EventManager();
 
-const $userMenuButton = document.querySelector(selectors.userMenuButton);
+const $userMenuButton = qs(selectors.userMenuButton);
 
-const $userMenu = document.querySelector(selectors.userMenu);
+const $userMenu = qs(selectors.userMenu);
 
-const $loginButton = document.querySelector(selectors.login);
-const $logoutButton = document.querySelector(selectors.logout);
-const $signupButton = document.querySelector(selectors.signup);
-const $addAlertBtn = document.querySelector(selectors.addAlertBtn);
-const $dupButton = document.querySelector(selectors.dupButton);
-const $updateButton = document.querySelector(selectors.updateButton);
-const $scrape = document.querySelector(selectors.scrape);
+const $loginButton = qs(selectors.login);
+const $logoutButton = qs(selectors.logout);
+const $signupButton = qs(selectors.signup);
+const $addAlertBtn = qs(selectors.addAlertBtn);
+const $dupButton = qs(selectors.dupButton);
+const $updateButton = qs(selectors.updateButton);
+const $scrape = qs(selectors.scrape);
 
-const $sharelink = document.querySelector(selectors.sharelink);
-const $dashboardLink = document.querySelector(selectors.dashboard);
+const $sharelink = qs(selectors.sharelink);
+const $dashboardLink = qs(selectors.dashboard);
 
 const required = [
   $userMenu,
@@ -82,7 +83,7 @@ for (const { el, handler } of buttons) {
  * @returns {void}
  */
 async function open(ev) {
-  if (document.querySelector('.backdrop')) return;
+  if (qs('.backdrop')) return;
   const $backdrop = document.createElement('div');
   $backdrop.classList.add('backdrop');
   em.add($backdrop, EventManager.types.click, _ => close(), null, NAMESPACE.backdropClick);
@@ -107,7 +108,7 @@ async function open(ev) {
  * @returns {void}
  */
 async function close() {
-  const $bd = document.querySelector('.backdrop');
+  const $bd = qs('.backdrop');
   if (!$bd) return;
   let timeoutID = null;
   const cleanup = () => {
@@ -192,13 +193,13 @@ function loadUser(user) {
   const small = userImage(user, 24);
   const big = userImage(user, 70);
 
-  if (big) document.querySelector(selectors.userAvatar).replaceChildren(big);
+  if (big) qs(selectors.userAvatar).replaceChildren(big);
   if (small) $userMenuButton.replaceChildren(small);
 
-  document.querySelector(selectors.firstname).textContent = user.firstName;
-  document.querySelector(selectors.lastname).textContent = user.lastName;
+  qs(selectors.firstname).textContent = user.firstName;
+  qs(selectors.lastname).textContent = user.lastName;
 
-  const input = document.querySelector(selectors.shareInput);
+  const input = qs(selectors.shareInput);
   if (input) input.value = txtDownloadUrl();
 }
 
