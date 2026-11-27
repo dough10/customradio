@@ -130,7 +130,8 @@ export default class RequestLog {
     ];
 
     for (const { el, type, fn } of listeners) {
-      if (this.#em.add(el, type, fn) < 0) throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
+      if (this.#em.add(el, type, fn) < 0) 
+        throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
     }
 
     try {
@@ -158,6 +159,7 @@ export default class RequestLog {
     const fourxx = totalRequests - non4xxRequests;
 
     this.#reset();
+    
     await updateTexts([
       {
         el: '#reqTotal',
@@ -173,7 +175,7 @@ export default class RequestLog {
         str: `${formatNumber(averageResponseTime)} ms`
       }
     ]);
-
+    
     const $wrapper = document.createElement('div');
     $wrapper.classList.add('stats');
     $wrapper.append(
@@ -182,10 +184,8 @@ export default class RequestLog {
       rightCol(operatingSystems, statusCodes, totalRequests)
     );
 
-    await raf();
-    qs('#analytics').append($wrapper);
-
     this.#chart.update(times, counts, interval);
+    qs('#analytics').append($wrapper);
   }
 
   async #selectorChanged(ev) {
