@@ -38,7 +38,8 @@ function loadUserMenu() {
   }));
 
   for (const { el, type, fn } of [...listeners, ...menuButtons]) {
-    if (em.add(el, type, fn) < 0) throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
+    if (em.add(el, type, fn) < 0) 
+      throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
   }
 }
 
