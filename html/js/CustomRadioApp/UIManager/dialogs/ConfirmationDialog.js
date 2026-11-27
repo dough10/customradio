@@ -64,13 +64,26 @@ class ConfirmationDialog extends DialogBase {
       this.close();
     };
 
-    this.em.add(yes, EventManager.types.click, _ => {
-      if (typeof onConfirm === 'function') onConfirm();
-      cleanup();
-    });
+    const listeners = [
+      {
+        el: yes,
+        type: EventManager.types.click,
+        fn: _ => {
+          if (typeof onConfirm === 'function') onConfirm();
+          cleanup();
+        }
+      }, {
+        el: no,
+        type: EventManager.types.click,
+        fn: cleanup
+      }
+    ];
 
-    this.em.add(no, EventManager.types.click, cleanup);
-
+    for (const { el, type, fn } of listeners) {
+      if (this.em.add(el, type, fn) < 0) 
+        throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
+    }
+    
     raf().then(_ => this.open());
   }
 }
