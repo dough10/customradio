@@ -157,8 +157,8 @@ export default class CollapsingHeader {
     [
       this.$loginButton,
       this.$infoButton
-    ].filter(button => button !== null).forEach(button => {
-      if (button) button.style.transform = `translateY(${(transform / this.#infoTranslateFactor).toFixed(2)}px)`;
+    ].filter(Boolean).forEach(button => {
+      button.style.transform = `translateY(${(transform / this.#infoTranslateFactor).toFixed(2)}px)`;
     });
 
     if (this._isMobile) {
