@@ -1,3 +1,4 @@
+
 const { logger } = require('../services.js');
 
 const pack = require('../../package.json');
@@ -8,13 +9,13 @@ const fixEncoding = require('./fixEncoding.js');
 const usedTypes = require('./usedTypes.js');
 const rmRef = require('./rmRef.js');
 
-/**
- * An array of unhelpful stream names to ignore.
- *
- * @constant {string[]} unhelpfulNames
- * @default
- */
+// -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+
 const unhelpfulNames = [
+  'null',
+  '(null)',
   'stream',
   '.',
   ':',
@@ -28,314 +29,420 @@ const unhelpfulNames = [
 
 const unhelpfulRegex = /^\d{1,2}$/;
 
-/**
- * An array containing default port numbers used in network protocols.
- *
- * @constant {string[]} defaultPorts
- * @default
- */
 const defaultPorts = [':80/', ':443/'];
+
+const requestHeaders = {
+  'User-Agent': `radiotxt.site/${pack.version}`,
+  'Accept': 'audio/*, */*;q=0.9',
+  'Icy-MetaData': '1',
+  'Range': 'bytes=0-'
+};
+
+// -----------------------------------------------------------------------------
+// URL helpers
+// -----------------------------------------------------------------------------
 
 /**
  * Clean the URL by removing default ports and trailing question marks.
  *
- * @param {string} url - The URL to clean.
- *
- * @returns {string} The cleaned URL.
+ * @param {string} url
+ * @returns {string}
  */
 function cleanURL(url) {
   if (url.endsWith('?')) {
     url = url.slice(0, -1);
   }
+
   defaultPorts.forEach((port) => {
     url = url.replace(port, '/');
   });
+
   return rmRef(url);
 }
 
+// -----------------------------------------------------------------------------
+// Error helpers
+// -----------------------------------------------------------------------------
+
 /**
- * 
- * @param {String} message 
- * @param {Boolean} ok 
- * @param {Number} status 
- * 
+ * Create a standardized error response.
+ *
+ * @param {string} message
+ * @param {number} status
  * @returns {Object}
  */
 function returnError(message, status) {
   return {
     ok: false,
     error: message,
-    status,
+    status
   };
 }
 
 /**
- * Tests if the provided URL is an audio stream and retrieves related information.
+ * Convert fetch errors into the existing error response format.
  *
- * This function sends a GET request to the given URL to check if it is a live audio stream
- * by inspecting the response headers. It checks for audio-related headers and parses them,
- * returning an object with stream details if the URL points to a valid audio stream.
+ * @param {Error} error
+ * @returns {Object}
+ */
+function handleFetchError(error) {
+  if (
+    error?.name === 'TimeoutError' ||
+    error?.name === 'AbortError'
+  ) {
+    return returnError('timeout', 500);
+  }
+
+  if (error?.cause?.code === 'ENOTFOUND') {
+    return returnError('dns_failure', 500);
+  }
+
+  if (error?.cause?.code === 'ECONNREFUSED') {
+    return returnError('connection_refused', 500);
+  }
+
+  return returnError(
+    error?.message || 'fetch_failed',
+    500
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Request helpers
+// -----------------------------------------------------------------------------
+
+/**
+ * Create an HTTP proxy dispatcher.
  *
- * @param {string} url - The URL to be tested for streaming.
+ * @returns {EnvHttpProxyAgent}
+ */
+function createDispatcher() {
+  return new EnvHttpProxyAgent({
+    connections: 1
+  });
+}
+
+/**
+ * Execute the stream request.
  *
- * @returns {Promise<Object|boolean>} Returns a promise that resolves to an object containing
- * stream information (if the URL is an audio stream) or `false` if it is not an audio stream
- * or if an error occurs.
- * @returns {Object} - The returned object contains:
- *   @property {string} url - The URL that was tested.
- *   @property {string} [name='Unknown'] - The name of the stream, or 'Unknown' if not available.
- *   @property {boolean} isLive - Indicates if the stream is live (i.e., responds with status 200).
- *   @property {string} [icyGenre='Unknown'] - The genre of the stream, or 'Unknown' if not available.
- *   @property {string} content - The content type of the stream (e.g., 'audio/mp3').
- *   @property {number} [bitrate=0] - The bitrate of the stream, or 'Unknown' if not available.
+ * @param {string} url
+ * @param {AbortSignal} signal
+ * @param {EnvHttpProxyAgent} dispatcher
+ * @returns {Promise<Response>}
+ */
+function fetchStream(url, signal, dispatcher) {
+  return fetch(url, {
+    method: 'GET',
+    redirect: 'manual',
+    headers: requestHeaders,
+    signal,
+    dispatcher
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Response helpers
+// -----------------------------------------------------------------------------
+
+/**
+ * Handle HTTP redirects without following them.
  *
- * @throws {Error} Throws an error if the HTTP request fails or if there is an issue with the URL.
+ * @param {Response} response
+ * @param {string} url
+ * @returns {Object|null}
+ */
+function handleRedirect(response, url) {
+  if (
+    response.status < 300 ||
+    response.status >= 400
+  ) {
+    return null;
+  }
+
+  return {
+    ok: false,
+    error: 'redirect',
+    status: response.status,
+    redirect: response.headers.get('location') || null,
+    url
+  };
+}
+
+/**
+ * Validate the HTTP response status.
+ *
+ * @param {Response} response
+ * @returns {Object|null}
+ */
+function validateResponse(response) {
+  if (!response.ok) {
+    return returnError(
+      `http_${response.status}`,
+      response.status
+    );
+  }
+
+  if (!response.body) {
+    return returnError(
+      'no_response_body',
+      response.status
+    );
+  }
+
+  return null;
+}
+
+/**
+ * Validate the response content type.
+ *
+ * @param {Response} response
+ * @returns {Object|null}
+ */
+function validateContentType(response) {
+  const content = response.headers.get('content-type');
+
+  const normalizedContent = content
+    ?.split(';')[0]
+    .trim()
+    .toLowerCase();
+
+  if (!normalizedContent) {
+    return returnError(
+      'missing_content_type',
+      response.status
+    );
+  }
+
+  if (!usedTypes.includes(normalizedContent)) {
+    return returnError(
+      `invalid content-type: ${content}`,
+      response.status
+    );
+  }
+
+  return null;
+}
+
+// -----------------------------------------------------------------------------
+// Metadata helpers
+// -----------------------------------------------------------------------------
+
+/**
+ * Extract and validate the stream bitrate.
+ *
+ * @param {Headers} headers
+ * @returns {number}
+ */
+function getBitrate(headers) {
+  let bitrate = parseInt(
+    headers.get('icy-br'),
+    10
+  );
+
+  if (!Number.isFinite(bitrate)) {
+    bitrate = 0;
+  }
+
+  if (
+    bitrate > 0 &&
+    (bitrate < 8 || bitrate > 512)
+  ) {
+    bitrate = 0;
+  }
+
+  return bitrate;
+}
+
+/**
+ * Extract and normalize the stream genre.
+ *
+ * @param {Headers} headers
+ * @returns {string}
+ */
+function getGenre(headers) {
+  let icyGenre =
+    headers.get('icy-genre') ||
+    headers.get('x-audiocast-genre') ||
+    'Unknown';
+
+  if (['null', '(null)'].includes(icyGenre.toLocaleLowerCase())) {
+    icyGenre = 'unknown';
+  }
+
+  return icyGenre;
+}
+
+/**
+ * Resolve a usable stream name.
+ *
+ * @param {string} rawName
+ * @param {string} finalUrl
+ * @returns {string}
+ */
+function getStreamName(rawName, finalUrl) {
+  const fixedName = fixEncoding(rawName);
+
+  const cleanName =
+    typeof fixedName === 'string'
+      ? fixedName.trim()
+      : '';
+
+  const invalidName =
+    !cleanName ||
+    ['null', 'undefined', ...unhelpfulNames]
+      .includes(cleanName.toLowerCase()) ||
+    unhelpfulRegex.test(cleanName);
+
+  let name;
+
+  if (invalidName) {
+    try {
+      name = new URL(finalUrl).hostname;
+    } catch {
+      name = finalUrl;
+    }
+  } else {
+    name = cleanName;
+  }
+
+  if (!name || name === 'null') {
+    logger.warn(
+      `Stream missing/invalid name; using hostname. URL: ${finalUrl}, rawName: ${JSON.stringify(rawName)}`
+    );
+  }
+
+  return name;
+}
+
+/**
+ * Extract stream metadata from the response.
+ *
+ * @param {Response} response
+ * @param {string} originalUrl
+ * @returns {Object}
+ */
+function getStreamMetadata(response, originalUrl) {
+  const headers = response.headers;
+
+  const rawName =
+    headers.get('icy-name') ||
+    headers.get('x-audiocast-name') ||
+    '';
+
+  const description =
+    headers.get('icy-description') || '';
+
+  const content =
+    headers.get('content-type');
+
+  const icyurl =
+    headers.get('icy-url') || '';
+
+  const finalUrl = response.url || originalUrl;
+
+  return {
+    ok: true,
+    url: finalUrl,
+    name: getStreamName(rawName, finalUrl),
+    description: fixEncoding(description),
+    icyurl,
+    isLive: true,
+    icyGenre: getGenre(headers),
+    content,
+    bitrate: getBitrate(headers),
+    error: '',
+    status: response.status
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Cleanup
+// -----------------------------------------------------------------------------
+
+/**
+ * Cancel the response body and close the dispatcher.
+ *
+ * @param {Response|null} response
+ * @param {EnvHttpProxyAgent} dispatcher
+ */
+async function cleanupRequest(response, dispatcher) {
+  /*
+   * The headers are enough to classify the response;
+   * cancel the body without buffering audio data.
+   */
+  if (response?.body) {
+    try {
+      await response.body.cancel();
+    } catch {
+      // Response may already be closed/aborted.
+    }
+  }
+
+  await dispatcher.close();
+}
+
+// -----------------------------------------------------------------------------
+// Stream test
+// -----------------------------------------------------------------------------
+
+/**
+ * Test whether a URL is an audio stream.
+ *
+ * @param {string} url
+ * @param {number} timeout
+ * @returns {Promise<Object>}
  */
 async function streamTest(url, timeout = 10_000) {
   const signal = AbortSignal.timeout(timeout);
-  const dispatcher = new EnvHttpProxyAgent({ connections: 1 });
+  const dispatcher = createDispatcher();
 
   let response = null;
 
   try {
-    response = await fetch(url, {
-      method: 'GET',
-      redirect: 'manual',
-      headers: {
-        'User-Agent': `radiotxt.site/${pack.version}`,
-        'Accept': 'audio/*, */*;q=0.9',
-        'Icy-MetaData': '1',
-        'Range': 'bytes=0-'
-      },
+    response = await fetchStream(
+      url,
       signal,
       dispatcher
-    });
-
-    /*
-     * Do not allow fetch/Undici to automatically follow
-     * redirects. We can deal with them explicitly.
-     */
-    if (
-      response.status >= 300 &&
-      response.status < 400
-    ) {
-      const location =
-        response.headers.get('location');
-
-      return {
-        ok: false,
-        error: 'redirect',
-        status: response.status,
-        redirect: location || null,
-        url
-      };
-    }
-
-    if (!response.ok) {
-      return returnError(
-        `http_${response.status}`,
-        response.status
-      );
-    }
-
-    const headers = response.headers;
-
-    let name;
-    const rawName = headers.get('icy-name') || headers.get('x-audiocast-name') || '';
-
-    const description =
-      headers.get('icy-description') || '';
-
-    let icyGenre =
-      headers.get('icy-genre') ||
-      headers.get('x-audiocast-genre') ||
-      'Unknown';
-
-    if (icyGenre.toLocaleLowerCase() === 'null') icyGenre = 'unknown';
-
-    const content =
-      headers.get('content-type');
-
-    const icyurl =
-      headers.get('icy-url') || '';
-
-    const finalUrl = response.url || url;
-
-    let bitrate = parseInt(
-      headers.get('icy-br'),
-      10
     );
 
-    if (!Number.isFinite(bitrate)) {
-      bitrate = 0;
+    const redirectResult = handleRedirect(
+      response,
+      url
+    );
+
+    if (redirectResult) {
+      return redirectResult;
     }
 
-    if (
-      bitrate > 0 &&
-      (bitrate < 8 || bitrate > 512)
-    ) {
-      bitrate = 0;
+    const responseError = validateResponse(response);
+
+    if (responseError) {
+      return responseError;
     }
 
-    const normalizedContent =
-      content
-        ?.split(';')[0]
-        .trim()
-        .toLowerCase();
+    const contentError = validateContentType(response);
 
-    if (!normalizedContent) {
-      return returnError(
-        'missing_content_type',
-        response.status
-      );
+    if (contentError) {
+      return contentError;
     }
 
-    if (
-      !usedTypes.includes(normalizedContent)
-    ) {
-      return returnError(
-        `invalid content-type: ${content}`,
-        response.status
-      );
-    }
-
-    if (!response.body) {
-      return returnError(
-        'no_response_body',
-        response.status
-      );
-    }
-
-    const fixedName = fixEncoding(rawName);
-
-    const cleanName =
-      typeof fixedName === 'string'
-        ? fixedName.trim()
-        : '';
-
-    const invalidName = !cleanName ||
-      ['null', 'undefined', ...unhelpfulNames].includes(cleanName.toLowerCase()) ||
-      unhelpfulRegex.test(cleanName);
-
-    if (invalidName) {
-      try {
-        name = new URL(finalUrl).hostname;
-      } catch {
-        name = finalUrl || url;
-      }
-    } else {
-      name = cleanName;
-    }
-
-    if (!name || name === 'null') {
-      logger.warn(
-        `Stream missing/invalid name; using hostname. URL: ${url}, rawName: ${JSON.stringify(rawName)}`
-      );
-    }
-
-    return {
-      ok: true,
-      url: finalUrl,
-      name,
-      description: fixEncoding(description),
-      icyurl,
-      isLive: true,
-      icyGenre,
-      content,
-      bitrate,
-      error: '',
-      status: response.status
-    };
+    return getStreamMetadata(response, url);
 
   } catch (error) {
-    if (
-      error?.name === 'TimeoutError' ||
-      error?.name === 'AbortError'
-    ) {
-      return returnError(
-        'timeout',
-        500
-      );
-    }
-
-    if (
-      error?.cause?.code === 'ENOTFOUND'
-    ) {
-      return returnError(
-        'dns_failure',
-        500
-      );
-    }
-
-    if (
-      error?.cause?.code === 'ECONNREFUSED'
-    ) {
-      return returnError(
-        'connection_refused',
-        500
-      );
-    }
-
-    return returnError(
-      error?.message || 'fetch_failed',
-      500
-    );
+    return handleFetchError(error);
 
   } finally {
-    /*
-     * The headers are enough to classify the response;
-     * cancel the body without buffering audio data.
-     */
-    if (response?.body) {
-      try {
-        await response.body.cancel();
-      } catch {
-        // Response may already be closed/aborted.
-      }
-    }
-
-    await dispatcher.close();
-
+    await cleanupRequest(
+      response,
+      dispatcher
+    );
   }
 }
 
-/**
- * Checks if the provided URL is a live stream and retrieves its metadata.
- *
- * This function attempts to send a HEAD request to the URL (or its HTTPS equivalent) to determine if the stream is live.
- * It extracts metadata such as the stream's name, genre, bitrate, and content type from the response headers.
- * If the request fails or the URL does not point to a live stream, it returns `false`.
- *
- * @async
- * @function
- *
- * @param {string} url - The URL of the stream to check.
- *
- * @returns {Promise<Object|boolean>} A promise that resolves to an object containing the stream's metadata if live,
- * or `false` if the stream is not live or if an error occurs. The object has the following properties:
- *   - {string} url - The URL of the stream.
- *   - {boolean} isLive - Whether the stream is currently live.
- *   - {string} [name] - The name of the stream (if available).
- *   - {string} [icyGenre] - The genre of the stream (if available).
- *   - {string} [bitrate] - The bitrate of the stream (if available).
- *   - {string} [content] - The content type of the stream (if available).
- *
- * @throws {Error} Throws an error if the request fails or if there are issues processing the URL.
- *
- * @example
- *
- * isLiveStream('http://example.com/stream')
- *   .then(data => {
- *     if (data) {
- *       console.logger.info('Stream is live:', data);
- *     } else {
- *       console.logger.info('Stream is not live or an error occurred');
- *     }
- *   })
- *   .catch(err => {
- *     console.error('Error checking stream:', err);
- *   });
- */
+// -----------------------------------------------------------------------------
+// Export
+// -----------------------------------------------------------------------------
+
 module.exports = async (url, timeout = 10_000) => {
   if (
     !url ||
@@ -359,43 +466,29 @@ module.exports = async (url, timeout = 10_000) => {
     const httpsUrl =
       url.replace(/^http:\/\//i, 'https://');
 
-    const httpsResult =
-      await streamTest(
-        httpsUrl,
-        timeout
-      );
+    const httpsResult = await streamTest(
+      httpsUrl,
+      timeout
+    );
 
     if (httpsResult?.ok) {
       return httpsResult;
     }
 
-    /*
-     * HTTPS failed, so try the original HTTP URL.
-     */
-    const httpResult =
-      await streamTest(
-        url,
-        timeout
-      );
+    const httpResult = await streamTest(
+      url,
+      timeout
+    );
 
     if (httpResult?.ok) {
       return httpResult;
     }
 
-    /*
-     * Preserve the HTTPS error if both attempts failed,
-     * unless the HTTP attempt produced a more useful
-     * result.
-     */
     return {
       ...httpResult,
       httpsError: httpsResult?.error
     };
   }
 
-  return streamTest(
-    url,
-    timeout
-  );
+  return streamTest(url, timeout);
 };
-
