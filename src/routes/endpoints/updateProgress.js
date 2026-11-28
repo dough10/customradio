@@ -43,21 +43,26 @@ module.exports = (req, res) => {
   res.flushHeaders();
 
   sendUptime()
-
-  const ut = setInterval(sendUptime, 1000);
-  const ud = setInterval(_ => sendUserData(userData.stats()), 3_600_000);
   userData.on('user:change', sendUserData);
 
+  const intervals = [
+    {
+      fn: sendUptime,
+      timer: 1000
+    }, {
+      fn: () => sendUserData(userData.stats()),
+      timer: 3_600_000
+    }
+  ].map(({ fn, timer }) => setInterval(fn, timer));
+
   const events = Object.values(EVENTS);
-
-
   for (const ev of events) {
     updater.on(ev, sendUpdate);
     scraper.on(ev, sendScrape);
   }
 
   req.on('close', () => {
-    [ut,ud].forEach(clearInterval);
+    intervals.forEach(clearInterval);
     userData.off('user:change', sendUserData);
     for (const ev of events) {
       updater.off(ev, sendUpdate);
