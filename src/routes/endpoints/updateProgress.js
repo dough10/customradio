@@ -50,7 +50,7 @@ module.exports = (req, res) => {
       fn: sendUptime,
       timer: 1000
     }, {
-      fn: () => sendUserData(userData.stats()),
+      fn: async () => sendUserData(await userData.stats()),
       timer: 3_600_000
     }
   ].map(({ fn, timer }) => setInterval(fn, timer));
