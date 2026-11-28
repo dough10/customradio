@@ -31,6 +31,10 @@ module.exports = (req, res) => {
     type: 'scrape'
   });
 
+  const sendUserData = userStats => send({
+    userStats
+  });
+
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -41,10 +45,11 @@ module.exports = (req, res) => {
   sendUptime()
 
   const ut = setInterval(sendUptime, 1000);
+  const ud = setInterval(sendUserData, 3_600_000);
+  userData.on('user:change', sendUserData);
 
   const events = Object.values(EVENTS);
 
-  userData.on('user:change', updated => send({ userStats: updated }));
 
   for (const ev of events) {
     updater.on(ev, sendUpdate);
@@ -52,7 +57,8 @@ module.exports = (req, res) => {
   }
 
   req.on('close', () => {
-    clearInterval(ut);
+    [ut,ud].forEach(clearInterval);
+    userData.off('user:change', sendUserData);
     for (const ev of events) {
       updater.off(ev, sendUpdate);
       scraper.off(ev, sendScrape);
