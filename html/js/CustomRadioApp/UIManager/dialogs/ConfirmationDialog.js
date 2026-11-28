@@ -31,6 +31,9 @@ function createDialog(textBody) {
 
 class ConfirmationDialog extends DialogBase {
   constructor(text, onConfirm) {
+    if (typeof text !== 'string') throw new TypeError('"text" must be a string');
+    if (typeof onConfirm !== 'function') throw new TypeError('"onConfirm" must be a function');
+
     const { dialog, yes, no } = createDialog(text);
 
     document.body.append(dialog);
@@ -69,7 +72,7 @@ class ConfirmationDialog extends DialogBase {
         el: yes,
         type: EventManager.types.click,
         fn: _ => {
-          if (typeof onConfirm === 'function') onConfirm();
+          onConfirm();
           cleanup();
         }
       }, {
@@ -83,7 +86,7 @@ class ConfirmationDialog extends DialogBase {
       if (this.em.add(el, type, fn) < 0) 
         throw new Error(`Failed adding ${type} listener for: ${el.id || el.className}`);
     }
-    
+
     raf().then(_ => this.open());
   }
 }
