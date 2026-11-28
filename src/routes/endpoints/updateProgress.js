@@ -45,7 +45,7 @@ module.exports = (req, res) => {
   sendUptime()
 
   const ut = setInterval(sendUptime, 1000);
-  const ud = setInterval(sendUserData, 3_600_000);
+  const ud = setInterval(_ => sendUserData(userData.stats()), 3_600_000);
   userData.on('user:change', sendUserData);
 
   const events = Object.values(EVENTS);
